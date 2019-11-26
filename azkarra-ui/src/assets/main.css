@@ -1,0 +1,179 @@
+/*
+ * Copyright 2019 StreamThoughts.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#app {
+  font-family: 'Roboto', sans-serif;
+}
+
+#header {
+  margin-bottom:56px;
+}
+
+[role="main"] {
+  padding-top: 112px;
+}
+
+body {
+ background-color: #F8F9FA!important;
+}
+
+.icon {
+  color: #fff;
+  float: left;
+  position: relative;
+  top: 8px;
+  font-size: 1em;
+  padding-left: 13px;
+  padding-right: 10px;
+}
+
+.bg-dark {
+ background-color: #343A40!important;
+}
+
+.bordered {
+  border: 1px solid #9f9fa5!important;
+}
+
+.navbar {
+  border-bottom:1px solid black;
+}
+
+.smooth-slide-enter-active,
+.smooth-slide-leave-active {
+  transition-duration: 0.8s;
+  transition-property: height, opacity, transform;
+  transition-timing-function: cubic-bezier(0.55, 0, 0.1, 1);
+  overflow: hidden;
+}
+
+.smooth-slide-enter {
+  opacity: 0;
+  transform: translate(2em, 0);
+}
+
+.smooth-slide-leave-active {
+  opacity: 0;
+  transform: translate(-1.8em, 0);
+}
+
+.main-container {
+  display:flex;
+  flex-wrap:no-wrap;
+  flex-direction:row;
+  justify-content: flex-start;
+  width:100%;
+  position: absolute;
+  padding: 15px 0px 0 0;
+}
+
+.main-sidebar {
+  position: relative;
+  z-index: 100;
+  padding: 68px 0 0;
+  min-height: calc(100vh - 68px);
+  width: 124px;
+}
+
+.main-content {
+  position: relative;
+  width:100%;
+}
+
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 80px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+  .sidebar-sticky {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+.main-sidebar .nav-link {
+  width:100%;
+  font-weight: 500;
+  color: #F8F9FA;
+  text-align: center;
+}
+
+.main-sidebar .nav-link .nav-label {
+  font-size:0.7em;
+  margin-top: 6px;
+  text-align: center;
+  white-space: normal;
+  text-transform: uppercase;
+}
+
+
+.main-sidebar .nav-link.active {
+  color: #F8F9FA;
+}
+
+.main-sidebar .nav-link .icon {
+  float:none;
+  font-size: 1.2em;
+}
+
+.main-sidebar .nav-link.router-link-active {
+  background-color: #F8F9FA;
+  color: #343A40!important;
+}
+
+.main-sidebar .nav-link.router-link-active .icon {
+   color: #343A40!important;
+}
+
+.main-sidebar .navbar-nav .nav-item {
+  margin: 2px;
+  font-size: 0.8em;
+}
+
+.box-shadow {
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, .05);
+}
+
+.text-no-data {
+  font-size: 0.9em;
+  color: #495057;
+  font-style: italic;
+}
+
+
+.list-inline.left-border .list-inline-item:not(:last-child) {
+  border-right: 1px solid #9f9fa5;
+}
+
+.list-inline .list-inline-item {
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.list-group-no-border .list-group-item {
+  border: 0;
+  border-radius: 0;
+}
+
+.action-btn-right {
+ float: right;
+}

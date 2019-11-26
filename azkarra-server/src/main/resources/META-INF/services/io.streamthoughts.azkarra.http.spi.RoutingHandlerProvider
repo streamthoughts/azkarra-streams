@@ -1,0 +1,9 @@
+io.streamthoughts.azkarra.http.routes.WebUIHttpRoutes
+io.streamthoughts.azkarra.http.routes.ApiVersionRoutes
+io.streamthoughts.azkarra.http.routes.ApiStreamsRoutes
+io.streamthoughts.azkarra.http.routes.ApiApplicationsRoutes
+io.streamthoughts.azkarra.http.routes.ApiTopologyRoutes
+io.streamthoughts.azkarra.http.routes.ApiEnvironmentRoutes
+io.streamthoughts.azkarra.http.routes.ApiContextRoutes
+io.streamthoughts.azkarra.http.routes.ApiInfoRoutes
+io.streamthoughts.azkarra.http.routes.ApiHealthRoutes

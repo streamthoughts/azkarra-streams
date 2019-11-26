@@ -1,0 +1,45 @@
+---
+layout: default
+title: Home
+nav_order: 1
+---
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/streamthoughts/blob/master/LICENSE)
+
+![Logo of Azkarra Streams](/assets/images/azkarra-logo-small.png)
+
+This documentation is for **Azkarra Streams** version {{ site.current_version }}.
+
+Azkarra Streams is a lightweight java framework which makes easy to develop and deploy multiple Kafka Streams applications (Azkarra is Basque words meaning *"Fast"*) 
+
+_**[Kafka Streams](https://kafka.apache.org/documentation/streams/)** is a client library for building applications and microservices, where the input and output data are stored in Kafka clusters. 
+It combines the simplicity of writing and deploying standard Java and Scala applications on the client side  with the benefits of Kafka's server-side cluster technology (source: [Apache documentation](https://kafka.apache.org/documentation/streams/))._
+
+
+[Get started Now](getting_started){: .btn .btn-green .fs-4 }
+[View it on GitHub](//github.com/streamthoughts/){: .btn .fs-4 }
+
+## Features
+
+* Create stand-alone Kafka Streams applications.
+* Easy externalization of Topology and Kafka Streams configurations (using Typesafe Config).
+* Embedded http server (Undertow).
+* Embedded WebUI for topologies visualization.
+* Provide production-ready features such as metrics, health checks, dead-letter-queues.
+* Encryption and Authentication with SSL or Basic Auth.
+
+## Contributions
+
+Any feedback, bug reports and PRs are greatly appreciated!
+
+- Source Code: [https://github.com/streamthoughts/azkarra-streams](https://github.com/streamthoughts/azkarra-streams)
+- Issue Tracker: [https://github.com/streamthoughts/azkarra-streams/issues](https://github.com/streamthoughts/azkarra-streams/issues)
+
+## Licence
+
+Copyright 2019 StreamThoughts.
+
+Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License
