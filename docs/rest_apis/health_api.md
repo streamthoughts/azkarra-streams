@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Info"
+title: "Health"
 parent: "REST API Reference"
 nav_order: 7
 ---
