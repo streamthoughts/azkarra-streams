@@ -121,6 +121,8 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      */
     private State state;
 
+    private boolean waitForTopicToBeCreated;
+
     private Conf configuration;
 
     private List<KafkaStreams.StateListener> stateListeners = new LinkedList<>();
@@ -151,15 +153,16 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      *
      * @param envName the environment name to be used.
      */
-    private DefaultStreamsExecutionEnvironment(final Conf configuration,
+    private DefaultStreamsExecutionEnvironment(final Conf config,
                                                final String envName) {
-        Objects.requireNonNull(configuration, "configuration cannot be null");
+        Objects.requireNonNull(config, "config cannot be null");
         Objects.requireNonNull(envName, "envName cannot be null");
-        this.configuration = configuration;
+        this.configuration = config;
         this.streams = new HashMap<>();
         this.topologyFactory = new TopologyFactory(this);
         this.topologies = new LinkedList<>();
         this.name = envName;
+        this.waitForTopicToBeCreated = config.getOptionalBoolean(ENABLE_WAIT_FOR_TOPICS_CONFIG).orElse(false);
         setState(State.CREATED);
     }
 
@@ -248,6 +251,15 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      * {@inheritDoc}
      */
     @Override
+    public StreamsExecutionEnvironment setWaitForTopicsToBeCreated(boolean waitForTopicToBeCreated) {
+        this.waitForTopicToBeCreated = waitForTopicToBeCreated;
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ApplicationId addTopology(final Supplier<TopologyProvider> provider) {
         return addTopology(provider, new InternalExecuted());
     }
@@ -315,7 +327,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     }
 
     private void start(final KafkaStreamsContainer streams) {
-        streams.start(STREAMS_EXECUTOR);
+        streams.start(STREAMS_EXECUTOR, waitForTopicToBeCreated);
     }
 
     /**

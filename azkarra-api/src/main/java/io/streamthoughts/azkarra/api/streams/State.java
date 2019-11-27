@@ -30,6 +30,8 @@ public enum State {
 
     CREATED,
 
+    WAITING_FOR_TOPICS,
+
     REBALANCING,
 
     RUNNING,

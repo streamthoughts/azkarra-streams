@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.time;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -51,4 +52,6 @@ public interface Time {
      * Returns the current value of the running JVM's high-resolution time source, in nanoseconds.
      */
     long nanoseconds();
+
+    void sleep(final Duration duration);
 }

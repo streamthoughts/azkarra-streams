@@ -18,12 +18,15 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
+import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
+import io.streamthoughts.azkarra.api.streams.admin.AdminClientUtils;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
@@ -31,6 +34,7 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -44,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,11 +58,20 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class KafkaStreamsContainer {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsContainer.class);
+
+    private static final String INTERNAL_REPARTITIONING_TOPIC_SUFFIX = "-repartition";
+
+    /**
+     * Pattern for identifying internal topics created for repartitioning purpose.
+     */
+    private static final Pattern INTERNAL_REPARTITIONING_NAME_PATTERN = Pattern.compile(".*-[0-9]{10}-repartition$");
 
     private final KafkaStreamsFactory streamsFactory;
 
@@ -94,8 +108,9 @@ public class KafkaStreamsContainer {
     KafkaStreamsContainer(final TopologyMetadata topologyMetadata,
                           final Conf streamsConfig,
                           final KafkaStreamsFactory streamsFactory) {
-        Objects.requireNonNull(streamsFactory, "streamsSupplier cannot be null");
-        this.state = new TimestampedValue<>(State.NOT_CREATED);
+        Objects.requireNonNull(streamsConfig, "streamsConfig cannot be null");
+        Objects.requireNonNull(streamsFactory, "streamsFactory cannot be null");
+        setState(State.NOT_CREATED);
         this.streamsFactory = streamsFactory;
         this.topologyMetadata = topologyMetadata;
         this.conf = streamsConfig;
@@ -106,19 +121,67 @@ public class KafkaStreamsContainer {
      * Asynchronously start the underlying {@link KafkaStreams} instance.
      *
      * @param executor the {@link Executor} instance to be used for starting the streams.
+     * @param waitForTopicsToBeCreated should wait for source topics to be created before starting.
      *
      * @return  the future {@link org.apache.kafka.streams.KafkaStreams.State} of the streams.
      */
-    public synchronized Future<KafkaStreams.State> start(final Executor executor) {
+    public synchronized Future<KafkaStreams.State> start(final Executor executor,
+                                                         final boolean waitForTopicsToBeCreated) {
         this.executor = executor;
         started = Time.SYSTEM.milliseconds();
         kafkaStreams = streamsFactory.make(this);
         return CompletableFuture.supplyAsync(() -> {
+            if (waitForTopicsToBeCreated) {
+                // Kafka Streams fails if one of the source topic is missing (error: INCOMPLETE_SOURCE_TOPIC_METADATA);
+                Set<String> sourceTopics = getSourceTopics(topologyMetadata.topology());
+                if (!sourceTopics.isEmpty()) {
+                    setState(State.WAITING_FOR_TOPICS);
+                    try (final AdminClient client = AdminClientUtils.newAdminClient(conf)) {
+                        LOG.info("Waiting for source topic(s) to be created: {}", sourceTopics);
+                        AdminClientUtils.waitForTopicToExist(client, sourceTopics);
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        // ignore and attempts to start anyway;
+                    }
+                }
+            }
             // start() may block during a undefined period of time if the topology has defined GlobalKTables.
             // https://issues.apache.org/jira/browse/KAFKA-7380
             kafkaStreams.start();
             return kafkaStreams.state();
         }, executor);
+    }
+
+    private void setState(final State state) {
+        this.state = new TimestampedValue<>(state);
+    }
+
+    @VisibleForTesting
+    Set<String> getSourceTopics(final TopologyDescription topology) {
+        final Set<String> userTopics = new HashSet<>();
+        topology.globalStores().forEach(s -> {
+            userTopics.addAll(s.source().topicSet());
+        });
+        topology.subtopologies().forEach(sub ->
+            sub.nodes().forEach(n -> {
+                if (n instanceof TopologyDescription.Source) {
+                    Set<String> topics = ((TopologyDescription.Source) n).topicSet();
+                    userTopics.addAll(
+                        topics.stream()
+                            .filter(Predicate.not(this::isInternalTopics))
+                            .collect(Collectors.toSet())
+                    );
+                }
+            })
+        );
+
+        return userTopics;
+    }
+
+    private boolean isInternalTopics(final String topic) {
+        return topic.startsWith(applicationId())
+                || INTERNAL_REPARTITIONING_NAME_PATTERN.matcher(topic).matches()
+                || topic.endsWith(INTERNAL_REPARTITIONING_TOPIC_SUFFIX);
     }
 
     /**
@@ -248,7 +311,9 @@ public class KafkaStreamsContainer {
     }
 
     private void restartNow() {
-        CompletableFuture<KafkaStreams.State> f = (CompletableFuture<KafkaStreams.State>) start(executor);
+        CompletableFuture<KafkaStreams.State> f = (CompletableFuture<KafkaStreams.State>) start(
+            executor,
+            false);
         f.handle((state, throwable) -> {
             if (throwable != null) {
                 LOG.error("Unexpected error happens while restarting streams", throwable);
@@ -311,7 +376,8 @@ public class KafkaStreamsContainer {
     }
 
     boolean isNotRunning() {
-        return state().value() == State.NOT_RUNNING;
+        final State state = state().value();
+        return !(state == State.RUNNING || state == State.REBALANCING);
     }
 
     void stateChanges(final long now,

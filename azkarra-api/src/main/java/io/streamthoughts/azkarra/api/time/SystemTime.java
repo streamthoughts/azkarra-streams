@@ -18,6 +18,8 @@
  */
 package io.streamthoughts.azkarra.api.time;
 
+import java.time.Duration;
+
 public class SystemTime implements Time {
 
     /**
@@ -34,5 +36,12 @@ public class SystemTime implements Time {
     @Override
     public long nanoseconds() {
         return System.nanoTime();
+    }
+
+    public void sleep(final Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException ignore) {
+        }
     }
 }
