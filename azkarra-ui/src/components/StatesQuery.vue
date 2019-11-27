@@ -176,7 +176,7 @@
                         </div>
                     </div>
                 </div>
-                <button v-on:click="executeQuery()" class="btn btn-primary">Execute</button>
+                <button v-on:click.prevent="execute()" class="btn btn-primary">Execute</button>
             </form>
         </div>
     </div>
@@ -239,14 +239,14 @@ export default {
   },
   methods: {
     fetchLocalActiveStreams() {
-      var that = this;
+      let that = this;
       azkarra.fetchLocalActiveStreamsList().then(function(data){
         that.applications = data
       })
     },
 
     fetchApplicationMetadata() {
-      var that = this;
+      let that = this;
       azkarra.fetchApplicationMetadata({id: this.query.application }).then(function(data){
         let storeNames = new Set();
         data.forEach(server => {
@@ -257,8 +257,8 @@ export default {
       });
     },
 
-    executeQuery() {
-      var that = this;
+    execute() {
+      let that = this;
       let query = {
         params : this.query.params,
         type: this.query.type.typeValue,
