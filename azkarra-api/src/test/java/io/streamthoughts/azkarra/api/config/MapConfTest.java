@@ -23,8 +23,10 @@ import io.streamthoughts.azkarra.api.errors.MissingConfException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapConfTest {
@@ -192,4 +194,17 @@ public class MapConfTest {
         Assertions.assertTrue(conf.getSubConf("field").getSubConf("bar").getSubConf("bar").hasPath("bar"));
     }
 
+    @Test
+    public void shouldSupportTypeConversion() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("list", "one,two, three, four");
+        map.put("int", "1234");
+        map.put("bool", "true");
+        MapConf conf = new MapConf(map);
+
+        List<String> list = conf.getStringList("list");;
+        Assertions.assertTrue(Arrays.asList("one","two", "three", "four").containsAll(list));
+        Assertions.assertEquals(1234, conf.getInt("int"));
+        Assertions.assertTrue(conf.getBoolean("bool"));
+    }
 }

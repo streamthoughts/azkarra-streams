@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.config;
 import io.streamthoughts.azkarra.api.errors.InvalidConfException;
 import io.streamthoughts.azkarra.api.errors.MissingConfException;
 import io.streamthoughts.azkarra.api.monad.Tuple;
+import io.streamthoughts.azkarra.api.util.TypeConverter;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -93,39 +94,69 @@ public class MapConf extends AbstractConf {
      */
     @Override
     public String getString(final String path) {
-        return findForPathOrThrow(path, Conf::getString);
+        final Object o = findForPathOrThrow(path, Conf::getString);
+        try {
+            return TypeConverter.getString(o);
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidConfException(
+                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> String");
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public long getLong(final String key) {
-        return findForPathOrThrow(key, Conf::getLong);
+    public long getLong(final String path) {
+        final Object o = findForPathOrThrow(path, Conf::getLong);
+        try {
+            return TypeConverter.getLong(o);
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidConfException(
+                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> Long");
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int getInt(final String key) {
-        return findForPathOrThrow(key, Conf::getInt);
+    public int getInt(final String path) {
+        final Object o = findForPathOrThrow(path, Conf::getInt);
+        try {
+            return TypeConverter.getInt(o);
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidConfException(
+                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> Integer");
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean getBoolean(final String key) {
-        return findForPathOrThrow(key, Conf::getBoolean);
+    public boolean getBoolean(final String path) {
+        final Object o = findForPathOrThrow(path, Conf::getBoolean);
+        try {
+            return TypeConverter.getBool(o);
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidConfException(
+                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> Boolean");
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public double getDouble(final String key) {
-        return findForPathOrThrow(key, Conf::getDouble);
+    public double getDouble(final String path) {
+        final Object o = findForPathOrThrow(path, Conf::getDouble);
+        try {
+            return TypeConverter.getDouble(o);
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidConfException(
+                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> Double");
+        }
     }
 
     /**
@@ -133,18 +164,24 @@ public class MapConf extends AbstractConf {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public List<String> getStringList(final String key) {
-        return findForPathOrThrow(key, Conf::getStringList);
+    public List<String> getStringList(final String path) {
+        Object o = findForPathOrThrow(path, Conf::getStringList);
+        try {
+            return (List<String>) TypeConverter.getList(o);
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidConfException(
+                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> List");
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Conf getSubConf(final String key) {
-        Conf conf = findForPathOrThrow(key, Conf::getSubConf);
-        if (fallback != null && fallback.hasPath(key)) {
-            conf = conf.withFallback(fallback.getSubConf(key));
+    public Conf getSubConf(final String path) {
+        Conf conf = (Conf) findForPathOrThrow(path, Conf::getSubConf);
+        if (fallback != null && fallback.hasPath(path)) {
+            conf = conf.withFallback(fallback.getSubConf(path));
         }
         return conf;
     }
@@ -154,8 +191,8 @@ public class MapConf extends AbstractConf {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public List<Conf> getSubConfList(final String key) {
-        return findForPathOrThrow(key, Conf::getSubConfList);
+    public List<Conf> getSubConfList(final String path) {
+        return (List<Conf>) findForPathOrThrow(path, Conf::getSubConfList);
     }
 
     /**
@@ -219,20 +256,19 @@ public class MapConf extends AbstractConf {
         return parameters.containsKey(key);
     }
 
-    private <T> T findForPathOrThrow(final String key, final BiFunction<Conf, String, T> getter) {
-        final T result = findForPathOrGetNull(key, getter);
+    private Object findForPathOrThrow(final String key, final BiFunction<Conf, String, Object> getter) {
+        final Object result = findForPathOrGetNull(key, getter);
         if (result == null) {
             throw new MissingConfException(key);
         }
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T findForPathOrGetNull(final String path, final BiFunction<Conf, String, T> getter) {
+    private Object findForPathOrGetNull(final String path, final BiFunction<Conf, String, Object> getter) {
         final String[] composed = splitPath(path);
         final String key = composed[0];
 
-        T result = null;
+        Object result = null;
         if (hasKey(key)) {
             if (composed.length > 1) {
                 final String nextPath = composed[1];
@@ -242,7 +278,7 @@ public class MapConf extends AbstractConf {
                     result = getter.apply(subConf, nextPath);
                 }
             } else {
-                result = (T) parameters.get(key);
+                result = parameters.get(key);
             }
         }
         // check if next key exist before invoking getter - otherwise this can throw MissingException.
@@ -284,7 +320,6 @@ public class MapConf extends AbstractConf {
         return new MapConf(merged, false);
     }
 
-    @SuppressWarnings("unchecked")
     private static Object merge(final Object o1, final Object o2) {
         try {
             final Set<? extends Map.Entry<String, ?>> e1 = ((MapConf) o1).unwrap().entrySet();
