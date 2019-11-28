@@ -121,7 +121,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      */
     private State state;
 
-    private boolean waitForTopicToBeCreated;
+    private boolean waitForTopicToBeCreated = false;
 
     private Conf configuration;
 
@@ -162,7 +162,6 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         this.topologyFactory = new TopologyFactory(this);
         this.topologies = new LinkedList<>();
         this.name = envName;
-        this.waitForTopicToBeCreated = config.getOptionalBoolean(ENABLE_WAIT_FOR_TOPICS_CONFIG).orElse(false);
         setState(State.CREATED);
     }
 
@@ -327,7 +326,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     }
 
     private void start(final KafkaStreamsContainer streams) {
-        streams.start(STREAMS_EXECUTOR, waitForTopicToBeCreated);
+        streams.start(STREAMS_EXECUTOR, isWaitForTopicToBeCreated());
     }
 
     /**
@@ -480,11 +479,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
 
         private TopologyContainer buildTopology(final Supplier<TopologyProvider> supplier,
                                                 final Executed executed) {
-            Conf defaultConf = configuration;
-            if (context != null) {
-                // The environment must automatically inherit from context configuration.
-                defaultConf = defaultConf.withFallback(context.getConfiguration());
-            }
+            Conf defaultConf = getContextAwareConfig();
             return topologyFactory.make(supplier.get(), defaultConf, executed);
         }
 
@@ -496,5 +491,19 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             maySetStreamsExecutionEnvironmentAware(builder);
             return builder.buildApplicationId(container.getMetadata());
         }
+    }
+
+    private Conf getContextAwareConfig() {
+        Conf conf = configuration;
+        // The environment must automatically inherit from context configuration.
+        if (context != null) {
+            conf = conf.withFallback(context.getConfiguration());
+        }
+        return conf;
+    }
+
+    private boolean isWaitForTopicToBeCreated() {
+        return waitForTopicToBeCreated ||
+                getContextAwareConfig().getOptionalBoolean(ENABLE_WAIT_FOR_TOPICS_CONFIG).orElse(false);
     }
 }
