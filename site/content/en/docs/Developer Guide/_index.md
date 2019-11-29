@@ -1,0 +1,12 @@
+---
+date: 2019-11-29
+title: "Developer Guide"
+linkTitle: "Developer Guide"
+weight: 4
+description: >
+  Learn about the concepts and the functionalities of the Azkarra Streams Framework.
+---
+
+The Developer Guide section helps you learn about the functionalities of the Azkarra Streams Framework and the concepts Azkarra uses to execute your Kafka Streams instance, and helps you obtain a deeper understanding of how Azkarra Streams works.
+
+

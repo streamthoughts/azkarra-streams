@@ -56,11 +56,30 @@ jobs:
       - run:
           name: Generate and publish API documentation
           command: ./generate-deploy-apidocs.sh
+
+  build-site:
+    docker:
+      - image: circleci/node:latest
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: Build and Deploy Site
+          command: ./build-deploy-site.sh
+
 workflows:
   version: 2
   ci_build:
     jobs:
       - build
       - update-apidocs:
+          requires:
+            - build
+      - build-site:
+          filters:
+            branches:
+              only: master
           requires:
             - build

@@ -7,7 +7,7 @@ if [[ ${last_commit} == *[update_api_docs]* ]]; then
 
   git config --global user.email circleci@circleci
   git config --global user.name CircleCI
-  mvn javadoc:aggregate@copy-project-javadoc && git add docs/apidocs
+  mvn javadoc:aggregate@copy-project-javadoc && git add site/apidocs
   git commit -m "docs(gh-pages): generate apidocs [skip ci]"
   git push
   exit $?

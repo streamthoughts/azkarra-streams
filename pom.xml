@@ -159,8 +159,8 @@
                         </goals>
                         <phase>none</phase>
                         <configuration>
-                            <outputDirectory>${project.basedir}/docs/apidocs/</outputDirectory>
-                            <reportOutputDirectory>${project.basedir}/docs/apidocs/</reportOutputDirectory>
+                            <outputDirectory>${project.basedir}/site/static/apidocs/</outputDirectory>
+                            <reportOutputDirectory>${project.basedir}/site/static/apidocs/</reportOutputDirectory>
                             <destDir>${project.version}</destDir>
                         </configuration>
                     </execution>

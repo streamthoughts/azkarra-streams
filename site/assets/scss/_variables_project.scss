@@ -1,0 +1,124 @@
+/*
+
+Add styles or override variables from the theme here.
+
+*/
+$dark: #343A40 !default;
+$blue: #72A1E5 !default;
+$orange: #BA5A31 !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #eee !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ccc !default;
+$gray-500: #adb5bd !default;
+$gray-600: #888 !default;
+$gray-700: #495057 !default;
+$gray-800: #333 !default;
+$gray-900: #222 !default;
+$black: #000 !default;
+
+$dark: #343A40 !default;
+$black: #000 !default;
+$white: #fff !default;
+$gray: #6C757D !default;
+$gray-light: #F8F9FA !default;
+
+$az-dark: #2880c1;
+$az-light: #26b793;
+
+$primary: #343A40;
+$secondary: #26b793;
+
+// Navigation bar
+$navbar-dark-color: $az-dark;
+$navbar-dark-hover-color: $az-light !default;
+$navbar-dark-active-color: $primary !default;
+$navbar-dark-disabled-color: rgba($white, 0.25) !default;
+.td-navbar {
+    background: $white !important;
+    border-bottom: 1px solid $az-light;
+
+    a.navbar-brand {
+        color: $gray-900 !important;
+    }
+    span.text-uppercase {
+        text-transform: none !important;
+    }
+}
+
+// Inline images (e.g Azkarra Logo)
+div.card.rounded {
+    border: none;
+}
+
+// Welcome to minikube! box
+.td-box--white:nth-child(1) {
+
+    // News
+    ul {
+        margin-top: 1rem;
+        list-style: none;
+        color: $gray-700;
+        padding-left: 0;
+    }
+}
+
+// Highlights
+.td-box--1 {
+    background-color: $az-dark !important;
+
+    // Increase from 1.25 for improved readability
+    .h4 {
+        line-height: 1.6 !important;
+    }
+
+    // Control the presentation of the screenshot
+    .p-2 {
+        padding: 0 !important;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .card {
+        border-radius: 0 !important;
+        border: 2px solid $az-dark !important;
+    }
+    .card-img-top {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+    .td-arrow-down::before {
+        border-color: $az-dark transparent transparent transparent !important;
+    }
+
+    .text-center {
+        text-align: left !important;
+    }
+}
+
+// Features box
+.td-box--white {
+    // Center-aligned bullets look bad.
+    .text-center ul {
+        text-align: left;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 20em;
+    }
+    div.mb-5:nth-child(3) ul {
+        max-width: 20em;
+    }
+}
+
+footer.bg-dark {
+    background-color: #000 !important;
+    padding-top: 1rem !important;
+    min-height: 4rem !important;
+    div.py-2 { 
+        padding-top: 0 !important;
+    }
+}
+
+.td-box .row {
+    justify-content: space-around !important;
+}

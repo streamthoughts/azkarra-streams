@@ -130,5 +130,7 @@ crashlytics-build.properties
 # Created by .ignore support plugin (hsz.mobi)
 #
 #
-*/docs
+azkarra-*/docs
 azkarra-server/src/main/resources/io/
+*/node_modules
+site/resources
