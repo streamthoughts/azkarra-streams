@@ -1,0 +1,48 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Azkarra Streams – News About Azkarra Streams</title>
+    <link>https://streamthoughts.github.io/azkarra-streams/blog/news/</link>
+    <description>Recent content in News About Azkarra Streams on Azkarra Streams</description>
+    <generator>Hugo -- gohugo.io</generator>
+    
+	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/blog/news/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>Blog: Introducing Azkarra Streams</title>
+      <link>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/</link>
+      <pubDate>Wed, 27 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/</guid>
+      <description>
+        
+        
+        &lt;p&gt;&lt;strong&gt;Today, we are excited to announce Azkarra Streams&lt;/strong&gt;, a new open-source micro Java framework that let you focus on writing Kafka Streams topologies code, not boilerplate code necessary for executing them.&lt;/p&gt;
+
+
+
+
+
+
+
+&lt;div class=&#34;card rounded p-2 td-post-card mb-4 mt-4&#34; style=&#34;max-width: 510px&#34;&gt;
+	&lt;img class=&#34;card-img-top&#34; src=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/logo_hu78b51037b0115fe6011de71f157cde98_14594_500x200_fill_catmullrom_smart1_2.png&#34; width=&#34;500&#34; height=&#34;200&#34;&gt;
+	
+	&lt;div class=&#34;card-body px-0 pt-2 pb-0&#34;&gt;
+		&lt;p class=&#34;card-text&#34;&gt;
+&lt;small class=&#34;text-muted&#34;&gt;&lt;br/&gt;Photo: Azkarra Streams Logo&lt;/small&gt;&lt;/p&gt;
+	&lt;/div&gt;
+	
+&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;The complete blog post can found here :&lt;/strong&gt; &lt;a href=&#34;https://medium.com/streamthoughts/introducing-azkarra-streams-the-first-micro-framework-for-apache-kafka-streams-e13605f3a3a6&#34;&gt;introducing-azkarra-streams-the-first-micro-framework-for-apache-kafka-streams&lt;/a&gt;&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

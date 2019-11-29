@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/concepts/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/overview/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/configuration/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/getting-started/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/examples/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/dependency-injection/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/error-management/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/rocksdb/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/security/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/contribution-guidelines/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/blog/news/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/blog/releases/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/application/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/api-docs/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/environment/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/health/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/info/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/streams/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/topology/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/versions/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/21/release-v0.3/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/index.json</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/community/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/blog/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/search/</loc>
+    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+  </url>
+  
+</urlset>

@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="generator" content="Hugo 0.60.1" />
+
+<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+
+<link rel="alternate" type="application/rss&#43;xml" href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/concepts/index.xml">
+
+
+<link rel="shortcut icon" href="/favicons/favicon.ico" >
+<link rel="apple-touch-icon" href="/azkarra-streams/favicons/apple-touch-icon-180x180.png" sizes="180x180">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-36x36.png" sizes="36x36">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-48x48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-72x72.png" sizes="72x72">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-144x144.png" sizes="144x144">
+<link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-192x192.png" sizes="192x192">
+
+<title>Concepts | Azkarra Streams</title><meta property="og:title" content="Concepts" />
+<meta property="og:description" content="Azkarra Concepts
+" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/concepts/" />
+<meta property="og:updated_time" content="2019-11-29T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta itemprop="name" content="Concepts">
+<meta itemprop="description" content="Azkarra Concepts
+"><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Concepts"/>
+<meta name="twitter:description" content="Azkarra Concepts
+"/>
+
+
+
+
+
+
+
+<link rel="preload" href="/azkarra-streams/scss/main.min.eb35c59d26b2726dbff5294574c8af6e1fbd9a799eeaf9901e153420e696aeb3.css" as="style">
+<link href="/azkarra-streams/scss/main.min.eb35c59d26b2726dbff5294574c8af6e1fbd9a799eeaf9901e153420e696aeb3.css" rel="stylesheet" integrity="">
+
+
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+
+    <title>Concepts | Azkarra Streams</title>
+  </head>
+  <body class="td-section">
+    <header>
+      
+<nav class="js-navbar-scroll navbar navbar-expand navbar-dark flex-column flex-md-row td-navbar">
+        <a class="navbar-brand" href="/azkarra-streams/">
+		<span class="navbar-logo"></span><span class="text-uppercase font-weight-bold">Azkarra Streams</span>
+	</a>
+	<div class="td-navbar-nav-scroll ml-md-auto" id="main_navbar">
+		<ul class="navbar-nav mt-2 mt-lg-0">
+			
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				
+				
+				<a class="nav-link active" href="/azkarra-streams/docs/" ><span class="active">Documentation</span></a>
+			</li>
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				
+				
+				<a class="nav-link" href="/azkarra-streams/blog/" ><span>News</span></a>
+			</li>
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				
+				
+				<a class="nav-link" href="/azkarra-streams/community/" ><span>Community</span></a>
+			</li>
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				<a class="nav-link" href="https://github.com/streamthoughts/azkarra-streams" target="_blank" ><span>GitHub</span></a>
+			</li>
+			
+			
+			
+		</ul>
+	</div>
+	<div class="navbar-nav d-none d-lg-block"></div>
+</nav>
+
+    </header>
+    <div class="container-fluid td-outer">
+      <div class="td-main">
+        <div class="row flex-xl-nowrap">
+          <div class="col-12 col-md-3 col-xl-2 td-sidebar d-print-none">
+            
+
+
+
+
+<div id="td-sidebar-menu" class="td-sidebar__inner">
+  
+  <form class="td-sidebar__search d-flex align-items-center">
+    
+    <button class="btn btn-link td-sidebar__toggle d-md-none p-0 ml-3 fas fa-bars" type="button" data-toggle="collapse" data-target="#td-section-nav" aria-controls="td-docs-nav" aria-expanded="false" aria-label="Toggle section navigation">
+    </button>
+  </form>
+  
+  <nav class="collapse td-sidebar-nav pt-2 pl-4" id="td-section-nav">
+    
+    
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/" class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">Documentation</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="azkarra-streams-docs">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/overview/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Overview</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-overview">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/getting-started/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Getting Started</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-getting-started">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/examples/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Examples</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-examples">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/" class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">Developer Guide</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="azkarra-streams-docs-developer-guide">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/concepts/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">Concepts</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="azkarra-streams-docs-developer-guide-concepts">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/configuration/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Configuration</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-configuration">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/dependency-injection/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Dependency Injection</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-dependency-injection">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/error-management/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Error Management</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-error-management">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/rocksdb/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">RocksDB</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-rocksdb">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/security/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Security</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-security">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/reference/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Reference</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-reference">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/reference/api-docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams API Docs</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-reference-api-docs">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/reference/rest-apis/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams REST Interface</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-reference-rest-apis">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-docs-reference-rest-apis-application" href="/azkarra-streams/docs/reference/rest-apis/application/">Applications</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-docs-reference-rest-apis-environment" href="/azkarra-streams/docs/reference/rest-apis/environment/">Environment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-docs-reference-rest-apis-health" href="/azkarra-streams/docs/reference/rest-apis/health/">Health</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-docs-reference-rest-apis-info" href="/azkarra-streams/docs/reference/rest-apis/info/">Info</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-docs-reference-rest-apis-streams" href="/azkarra-streams/docs/reference/rest-apis/streams/">Streams</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-docs-reference-rest-apis-topology" href="/azkarra-streams/docs/reference/rest-apis/topology/">Topologies</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-docs-reference-rest-apis-versions" href="/azkarra-streams/docs/reference/rest-apis/versions/">Version</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/contribution-guidelines/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Contribution Guidelines</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-contribution-guidelines">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+  </nav>
+</div>
+
+
+
+
+          </div>
+          <div class="d-none d-xl-block col-xl-2 td-toc d-print-none">
+            
+
+
+
+
+<div class="td-page-meta ml-2 pb-1 pt-2 mb-0">
+
+
+
+
+
+<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/docs/Developer%20Guide/Concepts/_index.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=Concepts" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
+
+
+<a href="https://github.com/streamthoughts/azkarra-streams/issues/new" target="_blank"><i class="fas fa-tasks fa-fw"></i> Create project issue</a>
+
+</div>
+
+
+
+
+
+
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#topology">Topology</a></li>
+    <li><a href="#component">Component</a></li>
+    <li><a href="#streamsexecutionenvironment">StreamsExecutionEnvironment</a></li>
+    <li><a href="#azkarracontext">AzkarraContext</a></li>
+    <li><a href="#azkarraapplication">AzkarraApplication</a></li>
+  </ul>
+</nav>
+
+
+
+          </div>
+          <main class="col-12 col-md-9 col-xl-8 pl-md-5" role="main">
+            <nav aria-label="breadcrumb" class="d-none d-md-block d-print-none">
+	<ol class="breadcrumb spb-1">
+		
+
+
+
+
+
+
+
+
+
+
+<li class="breadcrumb-item" >
+	<a href="https://streamthoughts.github.io/azkarra-streams/docs/">Documentation</a>
+</li>
+
+
+
+
+<li class="breadcrumb-item" >
+	<a href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/">Developer Guide</a>
+</li>
+
+
+
+
+<li class="breadcrumb-item active" aria-current="page">
+	<a href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/concepts/">Concepts</a>
+</li>
+
+	</ol>
+</nav	>
+
+            
+<div class="td-content">
+	<h1>Concepts</h1>
+	<div class="lead">Azkarra Concepts</div>
+	<p>This section describes the main concepts Azkarra uses to execute a Kafka Streams instance.</p>
+<h2 id="topology">Topology</h2>
+<p>The concept of <code>Topology</code> is not specific to Azkarra but is fundamental in the implementation of a Kafka Streams application. A Topology is an object that is part of the public Kafka Streams API and allows you to define all the operations (i.e stateless or stateful) to be performed on one or more Kafka topics.</p>
+<p>In Azkarra Sterams, a <code>Topology</code> object must be define and provided through the an implementation of the <code>TopologyProvider</code> interface.</p>
+<p>Here is a simple example :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">WordCountTopology</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">TopologyProvider</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+
+        <span style="color:#5c35cc;font-weight:bold">@Override</span>
+        <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">get</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+            <span style="color:#000">StreamsBuilder</span> <span style="color:#000">builder</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">StreamsBuilder</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#000">KStream</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">textLines</span> <span style="color:#ce5c00;font-weight:bold">=</span> 
+                          <span style="color:#000">builder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">stream</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+            <span style="color:#000">textLines</span>
+                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">flatMapValues</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span>
+                    <span style="color:#000">Arrays</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">asList</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">toLowerCase</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">split</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;\\W+&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+                <span style="color:#ce5c00;font-weight:bold">)</span>
+                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">groupBy</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">key</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">)</span>
+                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">count</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">Materialized</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;WordCount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">toStream</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
+                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">to</span><span style="color:#ce5c00;font-weight:bold">(</span>
+                   <span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span>
+                   <span style="color:#000">Produced</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">Serdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">String</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Serdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">Long</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+                <span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">builder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#ce5c00;font-weight:bold">}</span>
+
+        <span style="color:#5c35cc;font-weight:bold">@Override</span>
+        <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">String</span> <span style="color:#000">version</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+            <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#4e9a06">&#34;1.0&#34;</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#ce5c00;font-weight:bold">}</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><p>One of the particularities in Azkarra, is that the <code>TopologyProvider</code> interface enforces you to provide a non-null topology version.
+Usually, you will return the version of your project (e.g : 1.0, 1.2-SNAPSHOT, etc).
+Azkarra uses this version to generate a meaningful config <code>application.id</code> for your streams instance if no one is provided at runtime.</p>
+<h2 id="component">Component</h2>
+<p>In Azkarra, any object that form your streams application (e.g: <code>TopologyProviders</code>) and are registered to and managed by an <code>AzkarraContext</code> instance is called a <strong>component</strong>.</p>
+<p>More generally, a component is an object that is instantiated, assembled, and configured by a <code>AzkarraContext</code> instance.</p>
+<p>The concepts of component enables the implementation of the <a href="./dependency-injection">dependency injection</a> pattern in Azkarra.</p>
+<h2 id="streamsexecutionenvironment">StreamsExecutionEnvironment</h2>
+<p>Azkarra uses the concept of <code>StreamExecutionEnvironment</code> to safely execute your <code>Topologies</code>. Indeed, your are not anymore responsible to create and start a new <code>KafkaStreams</code> instance by yourself. This is done by the <code>StreamExecutionEnvironment</code>.</p>
+<p>A <code>StreamExecutionEnvironment</code> is responsible for creating, configuring and starting a new <code>KafkaStreams</code> instance for each <code>Topology</code> you provide.</p>
+<p>Here is a simple example to execute the topology we illustrated in the previous section.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#8f5902;font-style:italic">// (1) define your Kafka Streams configuration.
+</span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000">Map</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Object</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">props</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">HashMap</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> 
+<span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">put</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">BOOTSTRAP_SERVERS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;localhost:9092&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+<span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">put</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">DEFAULT_KEY_SERDE_CLASS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Serdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">String</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getClass</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+<span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">put</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">DEFAULT_VALUE_SERDE_CLASS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Serdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">String</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getClass</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+<span style="color:#8f5902;font-style:italic">// (2) create a new execution environment.
+</span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000">StreamsExecutionEnvironment</span> <span style="color:#000">env</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">DefaultStreamsExecutionEnvironment</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">Conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> 
+
+<span style="color:#8f5902;font-style:italic">// (3) register the topology to run.
+</span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopology</span><span style="color:#ce5c00;font-weight:bold">:</span><span style="color:#ce5c00;font-weight:bold">:</span><span style="color:#204a87;font-weight:bold">new</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Executed</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;wordcount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+<span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">start</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> <span style="color:#8f5902;font-style:italic">// (4) start the KafkaStreams instance.
+</span></code></pre></div><p>A <code>StreamExecutionEnvironment</code> instance can manage multiple <code>KafkaStreams</code> instances and you can also create multiple environments.</p>
+<p>An environment allows you to define common configuration properties, listeners and behaviours to apply on a group of Kafka Streams instances</p>
+<p>Moreover, an Azkarra application is not limited to a single environment. For example, if during the development phase you need to quickly test a Kafka Streams application on different Kafka clusters, you can create one <code>StreamsExecutionEnvironment</code>for each target Kafka Cluster.</p>
+<p>In the code example above, you can notice that we name the topology to be executed. In the same way, we can also name an environment.</p>
+<pre><code>DefaultStreamsExecutionEnvironment.create(Conf.with(&quot;streams&quot;, props), &quot;dev&quot;);
+</code></pre><p>Azkarra uses these information to generate the <code>application.id</code> property to set for the Kafka Streams application. In our case, the generated id will be <code>dev-wordcount-1.0</code>.</p>
+<h2 id="azkarracontext">AzkarraContext</h2>
+<p>A <code>AzkarraContext</code> object is responsible for configuring and running one ore more <code>StreamsExecutionEnvironment</code>.
+In addition, the <code>AzkarraContext</code> allow you to quickly configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.</p>
+<p>A context can be created as follows :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">DefaultAzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addExecutionEnvironment</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setRegisterShutdownHook</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">start</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><p>By default, an AzkarraContext will always create a default StreamsExecutionEnvironment named <strong>__default</strong>. This allow you to register the <code>TopologyProvider</code> directly at the context level.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Executed</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;wordcount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+</code></pre></div><p>Registering a <code>TopoloyProvider</code> at the context level has some advantages. Indeed, this allows you to use the Java annotations provided by the Azkarra framework (e.g @TopologyInfo, @DefaultStreamsConfig). See <a href="/docs/configuration">Configuration</a> for more information.</p>
+<h2 id="azkarraapplication">AzkarraApplication</h2>
+<p>The <code>AzkarraApplication</code> is the top-level concept which is used to bootstrap an Azkarra Streams application.</p>
+<p>Its main responsibility is to initialize an AzkarraContext using a user-defined configuration which describe the <code>StreamsExecutionEnvironment</code>s and the streams applications to be executed.</p>
+<p>The AzkarraApplication is also responsible for deploying an embedded HTTP server (if enable) which exposes the REST endpoints that can be used to manage registered topologies and to run streams instances.</p>
+
+        <div class="section-index">
+    
+    
+    
+    
+    <hr class="panel-line">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    
+</div>
+
+	
+	
+	<div class="text-muted mt-5 pt-3 border-top">Last modified November 29, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/c57f3a4caf14e537ebca5da0dff2e1436eab054b">refactor(gh-page): wip add new doc website (c57f3a4)</a>
+</div>
+</div>
+
+          </main>
+        </div>
+      </div>
+      
+<footer class="bg-dark py-5 row d-print-none">
+  <div class="container-fluid mx-sm-5">
+    <div class="row">
+      <div class="col-6 col-sm-4 text-xs-center order-sm-2">
+        
+        
+        
+      </div>
+      <div class="col-6 col-sm-4 text-right text-xs-center order-sm-3">
+        
+        
+        
+<ul class="list-inline mb-0">
+  
+  <li class="list-inline-item mx-2 h3" data-toggle="tooltip" data-placement="top" title="GitHub" aria-label="GitHub">
+    <a class="text-white" target="_blank" href="https://github.com/streamthoughts/azkarra-streams">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+</ul>
+
+        
+        
+      </div>
+      <div class="col-12 col-sm-4 text-center py-2 order-sm-2">
+        <small class="text-white">&copy; 2019 The Azkarra Streams Authors All Rights Reserved</small>
+        
+	
+		
+	
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    </div>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+
+
+
+
+
+<script src="/azkarra-streams/js/main.min.48a9f24e75ae2c1706eac3ea0ce8b7c365d2572ac29462904507edb3672b9e52.js" integrity="sha256-SKnyTnWuLBcG6sPqDOi3w2XSVyrClGKQRQfts2crnlI=" crossorigin="anonymous"></script>
+
+
+
+  </body>
+</html>

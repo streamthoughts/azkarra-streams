@@ -1,7 +1,0 @@
-remote_theme: pmarsceill/just-the-docs
-aux_links:
-  "Azkarra Streams on GitHub":
-    - "//github.com/streamthoughts/azkarra-streams"
-heading_anchors: true
-footer_content: "Copyright &copy; 2019 StreamThoughts. Distributed by an <a href=\"https://github.com/streamthoughts/azkarra-streams/blob/master/LICENSE\">Apache License 2.0</a>"
-current_version: 0.3
