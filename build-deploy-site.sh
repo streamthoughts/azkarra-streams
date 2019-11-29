@@ -8,6 +8,10 @@ HUGO_VERSION=0.60.1
 HUGO_DIST_DIR=/tmp/hugo/v${HUGO_VERSION}
 HUGO_RELEASE=https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_Linux-64bit.tar.gz
 
+# backup Git user info
+GIT_USER_NAME=$(git config user.name)
+GIT_USER_EMAIL=$(git config user.email)
+
 
 build_and_deploy(){
   echo "Buildind Hugo site"
@@ -30,6 +34,9 @@ build_and_deploy(){
   else
     echo "Hugo build failed"
   fi
+  # reset git config
+  git config --global user.email $GIT_USER_EMAIL
+  git config --global user.name $GIT_USER_NAME
   exit $?
 }
 
