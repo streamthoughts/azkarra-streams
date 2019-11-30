@@ -101,6 +101,18 @@ public class ServerConfBuilder {
     }
 
     /**
+     * Sets if the basic authentication must be silent. The server will respond with a
+     * 403 Forbidden HTTP response status code instead of a 401 Unauthorized (default is {@code false}).
+     *
+     * @param silent       is basic authentication must be silent.
+     * @return  {@code this}.
+     */
+    public ServerConfBuilder setBasicSilentAuthentication(final boolean silent) {
+        configs.put(SecurityConfig.REST_AUTHENTICATION_BASIC_SILENT_CONFIG, silent);
+        return this;
+    }
+
+    /**
      * Sets the authentication roles.
      *
      * @param roles         the authentication roles.
