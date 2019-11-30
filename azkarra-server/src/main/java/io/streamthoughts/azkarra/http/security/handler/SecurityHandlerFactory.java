@@ -75,7 +75,8 @@ public class SecurityHandlerFactory {
             switch (mechanism) {
                 case BASIC_AUTH:
                     final String realm = securityConfig.getAuthenticationRealm();
-                    authenticationMechanism = new BasicAuthenticationMechanism(realm);
+                    final boolean silent = securityConfig.isBasicAuthenticationSilent();
+                    authenticationMechanism = new BasicAuthenticationMechanism(realm, "BASIC", silent);
                     authenticator = new BasicAuthenticator(realm);
                     UsersIdentityManager idm = getUserIdentityManagerOrNull(securityConfig);
                     if (idm != null)

@@ -30,10 +30,11 @@ import java.util.Objects;
 
 public class SecurityConfig {
 
-    public static final String REST_AUTHENTICATION_MECHANISM_CONFIG = "rest.authentication.mechanism";
-    public static final String REST_AUTHENTICATION_REALM_CONFIG     = "rest.authentication.realm";
-    public static final String REST_AUTHENTICATION_ROLES_CONFIG     = "rest.authentication.roles";
-    public static final String REST_AUTHENTICATION_USERS_CONFIG     = "rest.authentication.users";
+    public static final String REST_AUTHENTICATION_MECHANISM_CONFIG     = "rest.authentication.mechanism";
+    public static final String REST_AUTHENTICATION_REALM_CONFIG         = "rest.authentication.realm";
+    public static final String REST_AUTHENTICATION_ROLES_CONFIG         = "rest.authentication.roles";
+    public static final String REST_AUTHENTICATION_USERS_CONFIG         = "rest.authentication.users";
+    public static final String REST_AUTHENTICATION_BASIC_SILENT_CONFIG  = "rest.authentication.basic.silent";
 
     public static final String HTTP_AUTH_PRINCIPAL_BUILDER_CLASS_CONFIG = "principal.builder.class";
     public static final String HTTP_AUTHORIZATION_MANAGER_CLASS_CONFIG  = "authorization.manager.class";
@@ -74,6 +75,10 @@ public class SecurityConfig {
 
     public boolean isHostnameVerificationIgnored() {
         return conf.getOptionalBoolean(SSL_IGNORE_HOSTNAME_VERIFICATION).orElse(false);
+    }
+
+    public boolean isBasicAuthenticationSilent() {
+        return conf.getOptionalBoolean(REST_AUTHENTICATION_BASIC_SILENT_CONFIG).orElse(false);
     }
 
     public String getAuthenticationMechanism() {
@@ -122,7 +127,6 @@ public class SecurityConfig {
 
     public String getAuthenticationRoles() {
         return conf.getString(REST_AUTHENTICATION_ROLES_CONFIG);
-
     }
 
     public String getAuthenticationRestricted() {
