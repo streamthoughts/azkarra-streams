@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.http;
 
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
+import io.streamthoughts.azkarra.http.security.auth.UsersIdentityManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -108,6 +109,11 @@ public class ServerConfBuilder {
      */
     public ServerConfBuilder setAuthenticationRestricted(final String roles) {
         configs.put(SecurityConfig.HTTP_RESTRICTED_ROLES_CONFIG, roles);
+        return this;
+    }
+
+    public ServerConfBuilder setUserIdentityManager(final Class<? extends UsersIdentityManager> cls) {
+        configs.put(SecurityConfig.HTTP_AUTH_USER_IDENTITY_MANAGER_CLASS_CONFIG, cls.getName());
         return this;
     }
 
