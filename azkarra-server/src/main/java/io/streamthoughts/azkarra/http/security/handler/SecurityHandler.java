@@ -23,7 +23,6 @@ import io.streamthoughts.azkarra.http.security.authorizer.AuthorizationHandler;
 import io.streamthoughts.azkarra.http.security.authorizer.AuthorizationManager;
 import io.undertow.security.api.AuthenticationMechanism;
 import io.undertow.security.api.AuthenticationMode;
-import io.undertow.security.handlers.AuthenticationCallHandler;
 import io.undertow.security.handlers.AuthenticationConstraintHandler;
 import io.undertow.security.handlers.AuthenticationMechanismsHandler;
 import io.undertow.security.handlers.SecurityInitialHandler;
@@ -69,7 +68,7 @@ public class SecurityHandler implements HttpHandler {
 
     private HttpHandler buildSecurityChain(final HttpHandler next) {
         HttpHandler handler = new AuthorizationHandler(next, authorizationManager);
-        handler = new AuthenticationCallHandler(handler);
+        handler = new XMLHttpRequestAwareAuthCallHandler(handler);
         handler = new AuthenticationContextHandler(securityMechanism, handler);
         handler = new AuthenticationConstraintHandler(handler);
         final List<AuthenticationMechanism> mechanisms = Collections.singletonList(authenticationMechanism);

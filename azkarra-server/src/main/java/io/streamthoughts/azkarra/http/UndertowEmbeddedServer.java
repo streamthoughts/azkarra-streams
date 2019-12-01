@@ -27,9 +27,9 @@ import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
 import io.streamthoughts.azkarra.api.server.ServerInfo;
-import io.streamthoughts.azkarra.http.data.ErrorMessage;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultHandler;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultResponseListener;
+import io.streamthoughts.azkarra.http.handler.HeadlessHttpHandler;
 import io.streamthoughts.azkarra.http.query.HttpRemoteQueryBuilder;
 import io.streamthoughts.azkarra.http.security.SSLContextFactory;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
@@ -44,16 +44,11 @@ import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
-import io.undertow.util.HttpString;
-import io.undertow.util.Methods;
-import io.undertow.util.StatusCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.Options;
 import org.xnio.SslClientAuthMode;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.ServiceLoader;
 
 public class UndertowEmbeddedServer implements EmbeddedHttpServer {
@@ -135,7 +130,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
                 .exceptionHandler(routing)
                 .addExceptionHandler(Throwable.class, new ExceptionDefaultHandler());
 
-        handler = new DefaultResponseHandler(handler, securityConfig.isHeadless());
+        handler = new DefaultResponseHandler(new HeadlessHttpHandler(securityConfig.isHeadless(), handler));
 
         if (securityConfig.isRestAuthenticationEnable()) {
             handler = addSecurityHttpHandler(sb, securityConfig, handler);
@@ -206,18 +201,14 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
     private static final class DefaultResponseHandler implements HttpHandler {
 
         private final HttpHandler handler;
-        private final boolean headless;
 
         /**
          * Creates a new {@link DefaultResponseHandler} instance.
          *
          * @param handler   the {@link HttpHandler} instance.
-         * @param headless  is headless mode enable.
          */
-        DefaultResponseHandler(final HttpHandler handler,
-                               final boolean headless) {
+        DefaultResponseHandler(final HttpHandler handler) {
             this.handler = handler;
-            this.headless = headless;
         }
 
         /**
@@ -227,28 +218,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         public void handleRequest(final HttpServerExchange exchange) throws Exception {
 
             exchange.addDefaultResponseListener(new ExceptionDefaultResponseListener());
-
-            final HttpString method = exchange.getRequestMethod();
-            final String path = exchange.getRelativePath();
-            if (headless && isOperationRestricted(path, method) && isNotQueryStore(path, method)) {
-                ErrorMessage error = new ErrorMessage(
-                    StatusCodes.FORBIDDEN,
-                    "Server is running in headless mode - interactive use of the Azkarra is disabled.",
-                    path
-                );
-                ExchangeHelper.sendJsonResponseWithCode(exchange, error, StatusCodes.FORBIDDEN);
-                return;
-            }
             handler.handleRequest(exchange);
-        }
-
-        private boolean isOperationRestricted(final String path, final HttpString method) {
-            List<HttpString> notAllowed = Arrays.asList(Methods.PUT, Methods.POST, Methods.DELETE);
-            return path.startsWith("/api/") && notAllowed.contains(method);
-        }
-
-        private boolean isNotQueryStore(final String path, final HttpString method) {
-            return !(method.equals(Methods.POST) && path.contains("/stores/"));
         }
     }
 }

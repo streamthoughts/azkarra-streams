@@ -63,9 +63,9 @@ public class SimpleAuthorizationManager implements AuthorizationManager, Configu
 
     private List<String> splitRoles(final String authenticationRoles) {
         return Arrays
-                .stream(authenticationRoles.split(","))
-                .map(String::trim)
-                .collect(Collectors.toList());
+            .stream(authenticationRoles.split(","))
+            .map(String::trim)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -76,7 +76,7 @@ public class SimpleAuthorizationManager implements AuthorizationManager, Configu
         if (authorizeAll || hasRole(roles, context)) {
             HttpResource resource = context.resource();
             return hasRole(restricted, context) && isWriteAccess(resource) ?
-                    AuthorizationResult.DENIED : AuthorizationResult.ALLOWED;
+                AuthorizationResult.DENIED : AuthorizationResult.ALLOWED;
         } else {
             return AuthorizationResult.DENIED;
         }

@@ -33,7 +33,7 @@ import io.undertow.server.handlers.BlockingHandler;
  */
 public class ApiApplicationsRoutes implements RoutingHandlerProvider {
 
-    private static final String APPLICATIONS_PREFIX_PATH = APIVersions.PATH_V1 + "applications/";
+    private static final String APPLICATIONS_PREFIX_PATH = APIVersions.PATH_V1 + "/applications/";
 
     /**
      * Creates a new {@link ApiApplicationsRoutes} instance.

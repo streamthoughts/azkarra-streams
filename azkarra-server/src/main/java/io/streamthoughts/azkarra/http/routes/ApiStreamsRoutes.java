@@ -40,25 +40,25 @@ import io.undertow.server.handlers.BlockingHandler;
 public class ApiStreamsRoutes implements RoutingHandlerProvider {
 
     private static final String PATH_STREAMS
-            = "streams";
+            = "/streams";
     private static final String PATH_STREAMS_ID
-            = "streams/{id}";
+            = "/streams/{id}";
     private static final String PATH_STREAMS_STATUS
-            = "streams/{id}/status";
+            = "/streams/{id}/status";
     private static final String PATH_STREAMS_CONFIG
-            = "streams/{id}/config";
+            = "/streams/{id}/config";
     private static final String PATH_STREAMS_METRICS
-            = "streams/{id}/metrics";
+            = "/streams/{id}/metrics";
     private static final String PATH_STREAMS_METRICS_GROUP
-            = "streams/{id}/metrics/group/{group}";
+            = "/streams/{id}/metrics/group/{group}";
     private static final String PATH_STREAMS_METRICS_GROUP_METRIC
-            = "streams/{id}/metrics/group/{group}/metric/{metric}";
+            = "/streams/{id}/metrics/group/{group}/metric/{metric}";
     private static final String PATH_STREAMS_METRICS_GROUP_METRIC_VALUE
-            = "streams/{id}/metrics/group/{group}/metric/{metric}/value";
+            = "/streams/{id}/metrics/group/{group}/metric/{metric}/value";
     private static final String PATH_STREAMS_RESTART
-            = "streams/{id}/restart";
+            = "/streams/{id}/restart";
     private static final String PATH_STREAMS_STOP
-            = "streams/{id}/stop";
+            = "/streams/{id}/stop";
 
     /**
      * Creates a new {@link ApiStreamsRoutes} instance.

@@ -29,7 +29,7 @@ import io.undertow.server.handlers.BlockingHandler;
 
 public class ApiEnvironmentRoutes implements RoutingHandlerProvider {
 
-    public static final String PATH = APIVersions.PATH_V1 + "environments";
+    public static final String PATH = APIVersions.PATH_V1 + "/environments";
 
     /**
      * {@inheritDoc}
