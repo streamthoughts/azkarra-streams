@@ -22,7 +22,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">
           <a class="navbar-brand" href="#">
              <img height="62px" alt="azkarra-streams-logo" src="static/azkarra-logo-reverse-small.png"/>
-             Dashboard
+             Dashboard <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
            </a>
         </a>
         <ul class="navbar-nav text-light px-3">
@@ -70,11 +70,11 @@
         </nav>
         <main role="main" class="main-content">
           <div class="container-fluid">
-            <template v-for="error in errors" :key="error.index">
+            <template v-for="error in errors" :key="error.id">
               <transition name="smooth-slide" mode="out-in">
                   <div class="row">
                     <div class="col alert alert-warning">
-                      <a v-on:click="removeAlert(alert)" href="#"
+                      <a v-on:click="removeError(error)" href="#"
                           class="close"
                           data-dismiss="alert"
                           aria-label="close">&times;</a>
@@ -89,24 +89,90 @@
           </transition>
         </main>
       </div>
+      <div class="login-modal">
+      <vue-modal v-if="openAuthModal">
+        <template v-slot:header>
+           <h3>Authentication</h3>
+        </template>
+        <template v-slot:body>
+          <form>
+            <div class="form-row justify-content-md-center">
+              <div class="col-md-8 mb-3">
+                <div class="alert alert-danger" role="alert" v-if="isAuthAttempted">Invalid username/password</div>
+                <div class="input-group mb-2 mr-sm-2">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text"><i class="fa fa-user"></i></div>
+                  </div>
+                  <input v-model="auth.username"
+                         type="text" class="form-control" id="user" placeholder="username">
+                </div>
+              </div>
+            </div>
+            <div class="form-row justify-content-md-center">
+              <div class="col-md-8 mb-3">
+                <div class="input-group mb-2 mr-sm-2">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text"><i class="fa fa-lock"></i></div>
+                  </div>
+                  <input v-model="auth.password"
+                         type="password" class="form-control" id="password" placeholder="password">
+                </div>
+              </div>
+            </div>
+          </form>
+        </template>
+        <template v-slot:footer>
+          <button class="btn btn-dark" v-on:click="authenticate">Login</button>
+        </template>
+      </vue-modal>
+      </div>
     </div>
 </template>
 
 <script>
 
 import azkarra from './services/azkarra-api.js'
+import VueModal from './components/VueModal.vue'
+
+var errorsCount = 0;
 
 export default {
+  components: {
+    'vue-modal': VueModal,
+  },
   name: 'app',
   data() {
     return {
       version: {},
       errors: [],
       timers: [],
+      openAuthModal: false,
+      auth: {},
+      isAuthAttempted: false,
+      api: { },
     }
   },
   created () {
-    this.load();
+    let that = this;
+    azkarra.axios().interceptors.response.use(
+      function (response) {
+        return response;
+      },
+      function (error) {
+        let status = error.response.status
+        // auth modal should not be opened if server is in headless mode.
+        if ( (status == 403 || status == 401) && !that.isHeadless()) {
+          that.openAuthModal = true
+        } else {
+          let errorMessage = (error.response.data == '')
+            ? { error_code: error.response.status, message : error.message }
+            : error.response.data
+          that.pushError(errorMessage);
+        }
+        return Promise.reject(error.response);
+      }
+    );
+    that.load();
   },
   watch: {
     '$route': 'removeErrors'
@@ -117,35 +183,56 @@ export default {
     });
   },
   methods: {
+
+    isHeadless() {
+      return this.api.headless || false;
+    },
+
+    authenticate() {
+      let that = this;
+      azkarra.setClientAuth(this.auth);
+
+      // trigger request to check authentication
+      azkarra.getApi().then(function(d) {
+        that.openAuthModal = false
+        that.load();
+        if (that.$route.path !== "/") {
+          that.$router.push({ path: '/' });
+        }
+      }, function(error) {
+        that.isAuthAttempted = true;
+      });
+    },
+
     load() {
       let that = this;
-      azkarra.axios().interceptors.response.use(function (response) {
-          return response;
-        }, function (error) {
-          let alert = (error.response.data == '')
-            ? { error_code: error.response.status, message : error.message }
-            : error.response.data
-
-          let index = that.errors.length;
-          alert.index = index;
-          that.errors.push(alert);
-          if (length > 3) {
-            that.errors.shift();
-          }
-          let timer = setInterval(that.removeError, 8000, alert);
-          that.timers.push(timer);
-          return Promise.reject(error.response);
-      });
       azkarra.getVersion().then(function(data){ that.version = data });
+      azkarra.getApi().then(function(data) { that.api = data });
+    },
+
+    pushError(error) {
+      let that = this;
+      let timer = setInterval(that.removeError, 8000, error);
+      error.timer = timer;
+      error.id = errorsCount++;
+      error.index = that.errors.length;
+      that.errors.push(error);
+      that.timers.push(timer);
+      if (that.errors.length > 3) {
+        that.removeError(that.errors[0]);
+      }
     },
 
     removeError(error) {
+     console.log(error);
      this.errors.splice(error.index, 1);
+     this.errors.forEach(function(err, index) { err.index = index });
+     clearInterval(error.timer);
     },
 
     removeErrors() {
-      this.errors = [];
       this.timers.forEach(timer => { clearInterval(timer) });
+      this.errors = [];
     }
   }
 }
@@ -156,5 +243,9 @@ export default {
     z-index: 1000;
     opacity: 0.95;
     transition: opacity .4s ease;
+  }
+
+  span.navbar-api-info {
+    font-size : 0.8em;
   }
 </style>

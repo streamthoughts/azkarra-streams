@@ -27,7 +27,7 @@ import io.undertow.server.RoutingHandler;
 
 public class ApiContextRoutes implements RoutingHandlerProvider {
 
-    public static final String PATH = APIVersions.PATH_V1 + "context";
+    public static final String PATH = APIVersions.PATH_V1 + "/context";
 
     /**
      * {@inheritDoc}

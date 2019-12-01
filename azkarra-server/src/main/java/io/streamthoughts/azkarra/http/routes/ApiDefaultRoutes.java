@@ -19,30 +19,44 @@
 package io.streamthoughts.azkarra.http.routes;
 
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
+import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.http.APIVersions;
-import io.streamthoughts.azkarra.http.handler.TopologyListHandler;
+import io.streamthoughts.azkarra.http.ExchangeHelper;
+import io.streamthoughts.azkarra.http.security.SecurityConfig;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
 
-/**
- * This class defines all routes for API '/topologies'.
- */
-public class ApiTopologyRoutes implements RoutingHandlerProvider {
+import java.util.Collections;
+
+public class ApiDefaultRoutes implements RoutingHandlerProvider, Configurable {
+
+    private boolean isHeadless;
 
     /**
-     * Creates a new {@link ApiTopologyRoutes} instance.
+     * {@inheritDoc}
      */
-    public ApiTopologyRoutes() {
+    @Override
+    public RoutingHandler handler(final AzkarraStreamsService service) {
+        return Handlers.routing()
+            .get(APIVersions.PATH_V1, new HttpHandler() {
+                @Override
+                public void handleRequest(HttpServerExchange exchange) {
+                    ExchangeHelper.sendJsonResponse(
+                        exchange,
+                        Collections.singletonMap("headless", isHeadless));
+                }
+            });
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public RoutingHandler handler(final AzkarraStreamsService service){
-
-        return Handlers.routing()
-            .get(APIVersions.PATH_V1 + "/topologies", new TopologyListHandler(service));
+    public void configure(final Conf configuration) {
+        isHeadless = new SecurityConfig(configuration).isHeadless();
     }
 }

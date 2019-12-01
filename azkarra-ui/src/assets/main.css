@@ -177,3 +177,20 @@ body {
 .action-btn-right {
  float: right;
 }
+
+/**
+Login Modal
+**/
+.login-modal .modal-header {
+  display:block!important;
+  text-align:center!important;
+}
+
+.login-modal .modal-footer {
+  display:block!important;
+  text-align:center!important;
+}
+
+.login-modal .modal-container {
+  width: 40%;
+}

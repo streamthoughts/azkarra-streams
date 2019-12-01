@@ -19,43 +19,61 @@
 import axios from 'axios'
 import moment from 'moment'
 
-const apiBasePath = '/api/v1/'
+const apiBasePath = '/api/v1'
 
 class AzkarraApi {
+
     constructor(client) {
       this.client = client;
+      this.client.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     }
 
     axios() {
-        return this.client;
+      return this.client;
+    }
+
+    setClientAuth(auth) {
+      this.client.defaults.auth = auth;
+    }
+
+    getApi() {
+      return this.client.get(apiBasePath)
+      .then(function (response) {
+        return response.data
+      })
     }
 
     getVersion() {
-      return axios.get("/version").then(function (response) {
+      return this.client.get("/version")
+      .then(function (response) {
         return response.data
       })
     }
 
     getHealth() {
-      return axios.get("/health").then(function (response) {
+      return this.client.get("/health")
+      .then(function (response) {
         return response.data
       })
     }
 
     getInfo() {
-      return axios.get("/info").then(function (response) {
+      return this.client.get("/info")
+      .then(function (response) {
         return response.data
       })
     }
 
     fetchStreamsTopologyById(instance) {
-      return axios.get(apiBasePath + "applications/" + instance.id + "/topology").then(function (response) {
+      return this.client.get(apiBasePath + "/applications/" + instance.id + "/topology")
+      .then(function (response) {
         return response.data
       })
     }
 
     getActiveStreamsById(instance) {
-     return axios.get(apiBasePath + "streams/" + instance.id).then(function (response) {
+     return this.client.get(apiBasePath + "/streams/" + instance.id)
+     .then(function (response) {
          var data = response.data
          data.state.since = moment(data.state.since, "YYYY-MM-DD[T]HH:mm:ss.SSS").fromNow();
          return data;
@@ -63,26 +81,27 @@ class AzkarraApi {
     }
 
     createLocalStreams(data) {
-      return axios.post(apiBasePath + "streams", data).then(function (response) {
+      return this.client.post(apiBasePath + "/streams", data)
+      .then(function (response) {
         return response.data
       })
     }
 
     deleteLocalStreamsById(instance) {
-      return axios.delete(apiBasePath + "streams/" + instance.id);
+      return this.client.delete(apiBasePath + "/streams/" + instance.id);
     }
 
-
     restartLocalStreamsById(instance) {
-     return axios.post(apiBasePath + "streams/" + instance.id + "/restart");
+     return this.client.post(apiBasePath + "/streams/" + instance.id + "/restart");
     }
 
     stopLocalStreamsById(instance, cleanup) {
-     return axios.post(apiBasePath + "streams/" + instance.id + "/stop", {cleanup : cleanup});
+     return this.client.post(apiBasePath + "/streams/" + instance.id + "/stop", {cleanup : cleanup});
     }
 
     fetchStreamsMetricsById(instance) {
-     return axios.get(apiBasePath + "streams/" + instance.id + "/metrics").then(function (response) {
+     return this.client.get(apiBasePath + "/streams/" + instance.id + "/metrics")
+     .then(function (response) {
          var data = response.data
          var results = []
          data.forEach((group) => {
@@ -103,7 +122,7 @@ class AzkarraApi {
 
     fetchLocalActiveStreamsList() {
       var that = this
-        return axios.get(apiBasePath + 'streams')
+        return this.client.get(apiBasePath + '/streams')
           .then(function (response) {
             return response.data;
            })
@@ -111,7 +130,7 @@ class AzkarraApi {
 
     fetchLocalActiveStreamsConfig(instance) {
      var that = this
-     return axios.get(apiBasePath + 'streams/' + instance.id + "/config")
+     return this.client.get(apiBasePath + '/streams/' + instance.id + "/config")
        .then(function (response) {
             return response.data;
        })
@@ -119,7 +138,7 @@ class AzkarraApi {
 
     fetchLocalActiveStreamsStatusConfig(instance) {
      var that = this
-     return axios.get(apiBasePath + 'streams/' + instance.id + "/status")
+     return this.client.get(apiBasePath + '/streams/' + instance.id + "/status")
        .then(function (response) {
             return response.data;
        })
@@ -127,7 +146,7 @@ class AzkarraApi {
 
     fetchApplicationMetadata(instance) {
      var that = this
-     return axios.get(apiBasePath + 'applications/' + instance.id)
+     return this.client.get(apiBasePath + '/applications/' + instance.id)
        .then(function (response) {
             return response.data;
        })
@@ -135,12 +154,12 @@ class AzkarraApi {
 
     fetchLocalActiveStreams() {
      var that = this
-     return axios.get(apiBasePath + 'streams')
+     return this.client.get(apiBasePath + '/streams')
        .then(function (response) {
          var streams = []
          response.data.forEach( (id) => {
            that.getActiveStreamsById( {id: id} )
-           axios.get(apiBasePath + "streams/" + id).then(function (response) {
+           axios.get(apiBasePath + '/streams/' + id).then(function (response) {
              var data = response.data;
              data.configLoaded = false;
              data.config = [];
@@ -156,29 +175,28 @@ class AzkarraApi {
 
     fetchContext() {
      var that = this
-     return axios.get(apiBasePath + 'context')
+     return this.client.get(apiBasePath + '/context')
        .then(function (response) {
          return response.data;
        })
     }
 
-
     fetchEnvironments() {
      var that = this
-     return axios.get(apiBasePath + 'environments')
+     return this.client.get(apiBasePath + '/environments')
        .then(function (response) {
          return response.data;
        })
     }
 
     createEnvironment(data) {
-     return axios.post(apiBasePath + 'environments', data);
+     return this.client.post(apiBasePath + '/environments', data);
     }
 
 
     fetchAvailableTopologies() {
      var that = this
-     return axios.get(apiBasePath + 'topologies')
+     return this.client.get(apiBasePath + '/topologies')
        .then(function (response) {
          return response.data;
        })
@@ -186,9 +204,9 @@ class AzkarraApi {
 
     sendQueryStateStore(query) {
       var that = this
-      let url = apiBasePath + 'applications/' + query.application + "/stores/" + query.store;
+      let url = apiBasePath + '/applications/' + query.application + "/stores/" + query.store;
       let data = {set_options: query.options, type: query.type, query : { [query.operation] : query.params } };
-      return axios.post(url, data)
+      return this.client.post(url, data)
         .then(function (response) {
           return response.data;
       })
