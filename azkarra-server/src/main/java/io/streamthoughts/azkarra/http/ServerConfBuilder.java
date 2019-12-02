@@ -30,8 +30,9 @@ import java.util.Map;
  */
 public class ServerConfBuilder {
 
-    private static final String HTTP_PORT_CONFIG                    = "port";
-    private static final String HTTP_LISTENER_LISTER_CONFIG         = "listener";
+    public static final String HTTP_PORT_CONFIG                    = "port";
+    public static final String HTTP_LISTENER_LISTER_CONFIG         = "listener";
+    public static final String HTTP_ENABLE_UI                      = "enable.ui";
 
     private final Map<String, Object> configs;
 
@@ -65,6 +66,17 @@ public class ServerConfBuilder {
      */
     public ServerConfBuilder setListener(final String listener) {
         configs.put(HTTP_LISTENER_LISTER_CONFIG, listener);
+        return this;
+    }
+
+    /**
+     * Sets if the Web UI must be enable.
+     *
+     * @param enable    {@code true} to enable the Web UI, {@code false} otherwise.
+     * @return  {@code this}.
+     */
+    public ServerConfBuilder enableUI(final boolean enable) {
+        configs.put(HTTP_ENABLE_UI, enable);
         return this;
     }
 

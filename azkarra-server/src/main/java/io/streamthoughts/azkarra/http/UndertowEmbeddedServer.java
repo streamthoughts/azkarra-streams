@@ -31,6 +31,7 @@ import io.streamthoughts.azkarra.http.error.ExceptionDefaultHandler;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultResponseListener;
 import io.streamthoughts.azkarra.http.handler.HeadlessHttpHandler;
 import io.streamthoughts.azkarra.http.query.HttpRemoteQueryBuilder;
+import io.streamthoughts.azkarra.http.routes.WebUIHttpRoutes;
 import io.streamthoughts.azkarra.http.security.SSLContextFactory;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
@@ -55,9 +56,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(UndertowEmbeddedServer.class);
 
-    private static final String HTTP_PORT_CONFIG                    = "port";
     private static final int HTTP_PORT_DEFAULT                      = 8080;
-    private static final String HTTP_LISTENER_LISTER_CONFIG         = "listener";
     private static final String HTTP_LISTENER_DEFAULT               = "localhost";
 
     private final AzkarraContext context;
@@ -95,8 +94,8 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         final SecurityConfig securityConfig = new SecurityConfig(config);
 
         serverInfo = new ServerInfo(
-            config.getOptionalString(HTTP_LISTENER_LISTER_CONFIG).orElse(HTTP_LISTENER_DEFAULT),
-            config.getOptionalInt(HTTP_PORT_CONFIG).orElse(HTTP_PORT_DEFAULT)
+            config.getOptionalString(ServerConfBuilder.HTTP_LISTENER_LISTER_CONFIG).orElse(HTTP_LISTENER_DEFAULT),
+            config.getOptionalInt(ServerConfBuilder.HTTP_PORT_CONFIG).orElse(HTTP_PORT_DEFAULT)
         );
 
         HttpRemoteQueryBuilder httpRemoteQueryBuilder = new HttpRemoteQueryBuilder()
@@ -109,7 +108,6 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
             final SSLContextFactory sslContextFactory = new SSLContextFactory(securityConfig);
             httpRemoteQueryBuilder.setSSLContextFactory(sslContextFactory);
             httpRemoteQueryBuilder.setIgnoreHostnameVerification(securityConfig.isHostnameVerificationIgnored());
-
             sb.addHttpsListener(serverInfo.getPort(), serverInfo.getHost(), sslContextFactory.getSSLContext());
         } else {
             sb.addHttpListener(serverInfo.getPort(), serverInfo.getHost());
@@ -122,8 +120,15 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         service = new LocalAzkarraStreamsService(context, httpRemoteQueryBuilder.build());
         context.addComponent(ComponentFactory.singletonOf(service));
 
+        // Register all routing http-handlers using server loader.
         if (enableServiceLoader) {
-            loadRoutingHandlersFromServiceProviders();
+            ServiceLoader<RoutingHandlerProvider> serviceLoader = ServiceLoader.load(RoutingHandlerProvider.class);
+            serviceLoader.forEach(this::addRoutingHandler);
+        }
+
+        // Enable Web UI.
+        if (isWebUIEnable()) {
+            addRoutingHandler(new WebUIHttpRoutes());
         }
 
         HttpHandler handler = Handlers
@@ -137,6 +142,11 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         }
 
         server = sb.setHandler(handler).build();
+    }
+
+    private boolean isWebUIEnable() {
+        // by default Web UI should always be enable.
+        return config.getOptionalBoolean(ServerConfBuilder.HTTP_ENABLE_UI).orElse(true);
     }
 
     private HttpHandler addSecurityHttpHandler(final Undertow.Builder builder,
@@ -157,19 +167,12 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     @VisibleForTesting
     void addRoutingHandler(final RoutingHandlerProvider provider) {
+        Configurable.mayConfigure(provider, config);
         if (provider instanceof AzkarraContextAware) {
             ((AzkarraContextAware) provider).setAzkarraContext(context);
         }
+        LOG.info("Loading HTTP routes from provided class '{}'", provider.getClass().getName());
         routing.addAll(provider.handler(service));
-    }
-
-    private void loadRoutingHandlersFromServiceProviders() {
-        ServiceLoader<RoutingHandlerProvider> serviceLoader = ServiceLoader.load(RoutingHandlerProvider.class);
-        for (RoutingHandlerProvider provider : serviceLoader) {
-            Configurable.mayConfigure(provider, config);
-            addRoutingHandler(provider);
-            LOG.info("Loading HTTP routes from provided class '{}'", provider.getClass().getName());
-        }
     }
 
     /**
