@@ -1,5 +1,5 @@
 ---
-date: 2019-11-29
+date: 2019-12-02
 title: "Getting Started"
 linkTitle: "Getting Started"
 weight: 2
@@ -25,7 +25,7 @@ First, run this following command :
 ```bash
 $> mvn archetype:generate -DarchetypeGroupId=io.streamthoughts \
 -DarchetypeArtifactId=azkarra-quickstart-java \
--DarchetypeVersion={{ site.current_version }} \
+-DarchetypeVersion=0.4 \
 -DgroupId=azkarra.streams \
 -DartifactId=azkarra-getting-started \
 -Dversion=1.0-SNAPSHOT \
@@ -63,7 +63,7 @@ The `pom.xml` already contains the Azkarra Streams and Kafka Streams dependencie
     <dependency>
         <groupId>io.streamthoughts</groupId>
         <artifactId>azkarra-streams</artifactId>
-        <version>{{ site.current_version }}</version>
+        <version>0.4</version>
     </dependency>
 </dependencies>
 ```
@@ -489,7 +489,7 @@ $> docker exec -it azkarra-cp-broker /usr/bin/kafka-topics \
 As a last step, we will package and run the Maven project :
 
 ```bash
-$> mvn clean package && java -jar target/azkarra-quickstart-java-{{ site.current_version }}.jar
+$> mvn clean package && java -jar target/azkarra-quickstart-java-0.4.jar
 ```
 
 Let's produce some input messages to Kafka topic `streams-plaintext-input` : 

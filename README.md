@@ -3,7 +3,7 @@
 
 ![Logo of Azkarra Streams](images/azkarra-logo-small.png)
 
-Azkarra Streams is a lightweight Java framework which makes easy to develop and operate Kafka Streams applications (Azkarra is Basque words for *"Fast"*) 
+Azkarra Streams is a lightweight Java framework which makes easy to develop and operate Kafka Streams applications (Azkarra is Basque word for *"Fast"*) 
 
 _**[Kafka Streams](https://kafka.apache.org/documentation/streams/)** is a client library for building applications and microservices, where the input and output data are stored in Kafka clusters. 
 It combines the simplicity of writing and deploying standard Java and Scala applications on the client side  with the benefits of Kafka's server-side cluster technology (source: [Apache documentation](https://kafka.apache.org/documentation/streams/))._
@@ -16,6 +16,18 @@ It combines the simplicity of writing and deploying standard Java and Scala appl
 * Provide production-ready features such as metrics, health checks, dead-letter-queues.
 * Encryption and Authentication with SSL or Basic Auth.
 
+## Quickstart 
+
+Azkarra is available in Maven Central. You can add Azkarra Streams to the dependency of the pom.xml of your project.
+
+```xml
+    <dependency>
+      <groupId>io.streamthoughts</groupId>
+      <artifactId>azkarra-streams</artifactId>
+      <version>0.4</version>
+    </dependency>
+```
+    
 ## Documentation
 
 If you want to read more about using **Azkarra Streams**, the documentation can be found on [GitHub Page](https://streamthoughts.github.io/azkarra-streams/)
