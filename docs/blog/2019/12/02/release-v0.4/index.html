@@ -20,23 +20,35 @@
 <link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-144x144.png" sizes="144x144">
 <link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-192x192.png" sizes="192x192">
 
-<title>Introducing Azkarra Streams | Azkarra Streams</title><meta property="og:title" content="Introducing Azkarra Streams" />
-<meta property="og:description" content="The first micro-framework for Apache Kafka Streams" />
+<title>Release v0.4 | Azkarra Streams</title><meta property="og:title" content="Release v0.4" />
+<meta property="og:description" content="Azkarra Streams v0.4 is now available!
+Below is a summary of the issues addressed in the 0.4 release of Azkarra Streams.
+Streams New Feature
+ [AZKARRA-5] - Add new option enable.wait.for.topics to wait for source topics to be created before starting Kafka Streams instance.  API Improvement
+ [AZKARRA-3] - MapConf should support type conversion. This fixes a ClassCastException that was thrown when arguments were passed to the application (e.g &ndash;azkarra." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/" />
-<meta property="article:published_time" content="2019-11-27T00:00:00+00:00" />
-<meta property="article:modified_time" content="2019-11-29T15:27:51+01:00" /><meta property="og:site_name" content="Azkarra Streams" />
-<meta itemprop="name" content="Introducing Azkarra Streams">
-<meta itemprop="description" content="The first micro-framework for Apache Kafka Streams">
-<meta itemprop="datePublished" content="2019-11-27T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2019-11-29T15:27:51&#43;01:00" />
-<meta itemprop="wordCount" content="44">
+<meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/blog/2019/12/02/release-v0.4/" />
+<meta property="article:published_time" content="2019-12-02T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-12-02T19:06:36+01:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta itemprop="name" content="Release v0.4">
+<meta itemprop="description" content="Azkarra Streams v0.4 is now available!
+Below is a summary of the issues addressed in the 0.4 release of Azkarra Streams.
+Streams New Feature
+ [AZKARRA-5] - Add new option enable.wait.for.topics to wait for source topics to be created before starting Kafka Streams instance.  API Improvement
+ [AZKARRA-3] - MapConf should support type conversion. This fixes a ClassCastException that was thrown when arguments were passed to the application (e.g &ndash;azkarra.">
+<meta itemprop="datePublished" content="2019-12-02T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-12-02T19:06:36&#43;01:00" />
+<meta itemprop="wordCount" content="140">
 
 
 
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Introducing Azkarra Streams"/>
-<meta name="twitter:description" content="The first micro-framework for Apache Kafka Streams"/>
+<meta name="twitter:title" content="Release v0.4"/>
+<meta name="twitter:description" content="Azkarra Streams v0.4 is now available!
+Below is a summary of the issues addressed in the 0.4 release of Azkarra Streams.
+Streams New Feature
+ [AZKARRA-5] - Add new option enable.wait.for.topics to wait for source topics to be created before starting Kafka Streams instance.  API Improvement
+ [AZKARRA-3] - MapConf should support type conversion. This fixes a ClassCastException that was thrown when arguments were passed to the application (e.g &ndash;azkarra."/>
 
 
 
@@ -54,7 +66,7 @@
   crossorigin="anonymous"></script>
 
 
-    <title>Introducing Azkarra Streams | Azkarra Streams</title>
+    <title>Release v0.4 | Azkarra Streams</title>
   </head>
   <body class="td-page td-blog">
     <header>
@@ -158,17 +170,17 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/blog/news/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">News</a>
+    <a  href="/azkarra-streams/blog/news/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">News</a>
   </li>
   <ul>
-    <li class="collapse show" id="azkarra-streams-blog-news">
+    <li class="collapse " id="azkarra-streams-blog-news">
       
       
       
       
       
       
-      <a class="td-sidebar-link td-sidebar-link__page  active" id="m-azkarra-streams-blog-2019-11-27-introducing-azkarra-streams" href="/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/">Introducing Azkarra Streams</a>
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-blog-2019-11-27-introducing-azkarra-streams" href="/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/">Introducing Azkarra Streams</a>
       
       
     </li>
@@ -187,17 +199,17 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/blog/releases/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Releases</a>
+    <a  href="/azkarra-streams/blog/releases/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">Releases</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-blog-releases">
+    <li class="collapse show" id="azkarra-streams-blog-releases">
       
       
       
       
       
       
-      <a class="td-sidebar-link td-sidebar-link__page " id="m-azkarra-streams-blog-2019-12-02-release-v0-4" href="/azkarra-streams/blog/2019/12/02/release-v0.4/">Release Notes - Azkarra Streams - Version 0.4</a>
+      <a class="td-sidebar-link td-sidebar-link__page  active" id="m-azkarra-streams-blog-2019-12-02-release-v0-4" href="/azkarra-streams/blog/2019/12/02/release-v0.4/">Release Notes - Azkarra Streams - Version 0.4</a>
       
       
       
@@ -235,8 +247,8 @@
 
 
 
-<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/blog/news/introducing-azkarra/index.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
-<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=Introducing%20Azkarra%20Streams" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/blog/releases/release-v0.4.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=Release%20v0.4" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
 
 
 <a href="https://github.com/streamthoughts/azkarra-streams/issues/new" target="_blank"><i class="fas fa-tasks fa-fw"></i> Create project issue</a>
@@ -248,45 +260,70 @@
 
 
 
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#streams">Streams</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="#ui">UI</a></li>
+    <li><a href="#security">Security</a></li>
+  </ul>
+</nav>
+
 
 
           </div>
           <main class="col-12 col-md-9 col-xl-8 pl-md-5 pr-md-4" role="main">
-            <a class="btn btn-lg -bg-orange td-rss-button d-none d-lg-block" href="https://streamthoughts.github.io/azkarra-streams/blog/news/index.xml" target="_blank">
+            <a class="btn btn-lg -bg-orange td-rss-button d-none d-lg-block" href="https://streamthoughts.github.io/azkarra-streams/blog/releases/index.xml" target="_blank">
               RSS <i class="fa fa-rss ml-2 "></i>
             </a>
             
 <div class="td-content">
-	<h1>Introducing Azkarra Streams</h1>
-	<div class="lead">The first micro-framework for Apache Kafka Streams</div>
+	<h1>Release v0.4</h1>
+	
 	<div class="td-byline mb-4">
-		By <b>Florian Hussonnois (<a href="https://twitter.com/fhussonnois">@fhussonnois</a>)</b> |
-		<time datetime="2019-11-27" class="text-muted">Wednesday, November 27, 2019</time>
+		
+		<time datetime="2019-12-02" class="text-muted">Monday, December 02, 2019</time>
 	</div>
-	<p><strong>Today, we are excited to announce Azkarra Streams</strong>, a new open-source micro Java framework that let you focus on writing Kafka Streams topologies code, not boilerplate code necessary for executing them.</p>
-
-
-
-
-
-
-
-<div class="card rounded p-2 td-post-card mb-4 mt-4" style="max-width: 510px">
-	<img class="card-img-top" src="/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/logo_hu78b51037b0115fe6011de71f157cde98_14594_500x200_fill_catmullrom_smart1_2.png" width="500" height="200">
-	
-	<div class="card-body px-0 pt-2 pb-0">
-		<p class="card-text">
-<small class="text-muted"><br/>Photo: Azkarra Streams Logo</small></p>
-	</div>
-	
-</div>
-<p><strong>The complete blog post can found here :</strong> <a href="https://medium.com/streamthoughts/introducing-azkarra-streams-the-first-micro-framework-for-apache-kafka-streams-e13605f3a3a6">introducing-azkarra-streams-the-first-micro-framework-for-apache-kafka-streams</a></p>
+	<p><strong>Azkarra Streams v0.4 is now available!</strong></p>
+<p>Below is a summary of the issues addressed in the 0.4 release of Azkarra Streams.</p>
+<h2 id="streams">Streams</h2>
+<p><strong>New Feature</strong></p>
+<ul>
+<li>[<a href="https://github.com/streamthoughts/azkarra-streams/issues/5">AZKARRA-5</a>] - Add new option <code>enable.wait.for.topics</code> to wait for source topics to be created before starting Kafka Streams instance.</li>
+</ul>
+<h2 id="api">API</h2>
+<p><strong>Improvement</strong></p>
+<ul>
+<li>[<a href="https://github.com/streamthoughts/azkarra-streams/issues/3">AZKARRA-3</a>] - MapConf should support type conversion. This fixes a ClassCastException that was thrown when arguments were passed to the application (e.g &ndash;azkarra.server.port 8082).</li>
+</ul>
+<h2 id="ui">UI</h2>
+<p><strong>New Feature</strong></p>
+<ul>
+<li>[<a href="https://github.com/streamthoughts/azkarra-streams/issues/11">AZKARRA-11</a>] - Add new option <code>server.enable.ui</code> for disable/enable Web UI.</li>
+</ul>
+<p><strong>Improvement</strong></p>
+<ul>
+<li>[<a href="https://github.com/streamthoughts/azkarra-streams/issues/9">AZKARRA-9</a>] - Prevent browser from opening auth popup when Basic authentication is configured.</li>
+</ul>
+<p><strong>Bug</strong></p>
+<ul>
+<li>[Javascript] - Prevent the HTML form used to query state stores from being submitted.</li>
+</ul>
+<h2 id="security">Security</h2>
+<p><strong>New Feature</strong></p>
+<ul>
+<li>[<a href="https://github.com/streamthoughts/azkarra-streams/issues/7">AZKARRA-7</a>] - Add new option <code>rest.authentication.basic.silent</code> to enable silent basic authentication (default false).</li>
+</ul>
+<p><strong>Improvement</strong></p>
+<ul>
+<li>[<a href="https://github.com/streamthoughts/azkarra-streams/issues/1">AZKARRA-1</a>] - Obfuscate sensitive configuration (i.e password) returned in JSON HTTP response.</li>
+</ul>
 
 	
 
 	<ul class="list-unstyled d-flex justify-content-between align-items-center mb-0 pt-5">
   <li>
-    <a  class="btn btn-primary  disabled"><span class="mr-1">←</span> Previous</a>
+    <a href="/azkarra-streams/blog/2019/11/21/release-v0.3/" class="btn btn-primary "><span class="mr-1">←</span> Previous</a>
   </li>
     <a  class="btn btn-primary  disabled">Next <span class="ml-1">→</span></a>
   </li>

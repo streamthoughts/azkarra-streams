@@ -13,6 +13,53 @@
     
     
     <item>
+      <title>Blog: Release v0.4</title>
+      <link>https://streamthoughts.github.io/azkarra-streams/blog/2019/12/02/release-v0.4/</link>
+      <pubDate>Mon, 02 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2019/12/02/release-v0.4/</guid>
+      <description>
+        
+        
+        &lt;p&gt;&lt;strong&gt;Azkarra Streams v0.4 is now available!&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Below is a summary of the issues addressed in the 0.4 release of Azkarra Streams.&lt;/p&gt;
+&lt;h2 id=&#34;streams&#34;&gt;Streams&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;New Feature&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/5&#34;&gt;AZKARRA-5&lt;/a&gt;] - Add new option &lt;code&gt;enable.wait.for.topics&lt;/code&gt; to wait for source topics to be created before starting Kafka Streams instance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;api&#34;&gt;API&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Improvement&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/3&#34;&gt;AZKARRA-3&lt;/a&gt;] - MapConf should support type conversion. This fixes a ClassCastException that was thrown when arguments were passed to the application (e.g &amp;ndash;azkarra.server.port 8082).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;ui&#34;&gt;UI&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;New Feature&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/11&#34;&gt;AZKARRA-11&lt;/a&gt;] - Add new option &lt;code&gt;server.enable.ui&lt;/code&gt; for disable/enable Web UI.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Improvement&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/9&#34;&gt;AZKARRA-9&lt;/a&gt;] - Prevent browser from opening auth popup when Basic authentication is configured.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Bug&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[Javascript] - Prevent the HTML form used to query state stores from being submitted.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;security&#34;&gt;Security&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;New Feature&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/7&#34;&gt;AZKARRA-7&lt;/a&gt;] - Add new option &lt;code&gt;rest.authentication.basic.silent&lt;/code&gt; to enable silent basic authentication (default false).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Improvement&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/1&#34;&gt;AZKARRA-1&lt;/a&gt;] - Obfuscate sensitive configuration (i.e password) returned in JSON HTTP response.&lt;/li&gt;
+&lt;/ul&gt;
+
+      </description>
+    </item>
+    
+    <item>
       <title>Blog: Introducing Azkarra Streams</title>
       <link>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/27/introducing-azkarra-streams/</link>
       <pubDate>Wed, 27 Nov 2019 00:00:00 +0000</pubDate>
