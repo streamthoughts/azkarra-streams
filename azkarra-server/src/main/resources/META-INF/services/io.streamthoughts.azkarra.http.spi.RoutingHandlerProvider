@@ -1,4 +1,3 @@
-io.streamthoughts.azkarra.http.routes.WebUIHttpRoutes
 io.streamthoughts.azkarra.http.routes.ApiDefaultRoutes
 io.streamthoughts.azkarra.http.routes.ApiVersionRoutes
 io.streamthoughts.azkarra.http.routes.ApiStreamsRoutes
