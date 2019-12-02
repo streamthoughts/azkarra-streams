@@ -29,6 +29,7 @@
     <properties>
         <undertow.version>2.0.26.Final</undertow.version>
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>
+        <rest.assured.version>4.1.2</rest.assured.version>
     </properties>
 
     <artifactId>azkarra-server</artifactId>
@@ -170,15 +171,20 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>4.1.2</version>
+            <version>${rest.assured.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>json-path</artifactId>
-            <version>4.1.2</version>
+            <version>${rest.assured.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
         </dependency>
         <!-- END dependencies for testing-->
     </dependencies>
