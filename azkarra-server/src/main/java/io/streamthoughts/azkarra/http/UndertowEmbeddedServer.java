@@ -135,11 +135,15 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
                 .exceptionHandler(routing)
                 .addExceptionHandler(Throwable.class, new ExceptionDefaultHandler());
 
-        handler = new DefaultResponseHandler(new HeadlessHttpHandler(securityConfig.isHeadless(), handler));
+        handler = new HeadlessHttpHandler(securityConfig.isHeadless(), handler);
 
         if (securityConfig.isRestAuthenticationEnable()) {
             handler = addSecurityHttpHandler(sb, securityConfig, handler);
         }
+
+        // DefaultResponseHandler must always be the first handler in the chain.
+        // DO NOT define any more HttpHandlers after the line below.
+        handler = new DefaultResponseHandler(handler);
 
         server = sb.setHandler(handler).build();
     }
