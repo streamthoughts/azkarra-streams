@@ -22,16 +22,16 @@
 <link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-192x192.png" sizes="192x192">
 
 <title>Dependency Injection | Azkarra Streams</title><meta property="og:title" content="Dependency Injection" />
-<meta property="og:description" content="How to use dependency injection pattern in Azkarra Streams ?
+<meta property="og:description" content="How to use the dependency injection pattern in Azkarra Streams ?
 " />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/dependency-injection/" />
 <meta property="og:updated_time" content="2019-11-29T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Dependency Injection">
-<meta itemprop="description" content="How to use dependency injection pattern in Azkarra Streams ?
+<meta itemprop="description" content="How to use the dependency injection pattern in Azkarra Streams ?
 "><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Dependency Injection"/>
-<meta name="twitter:description" content="How to use dependency injection pattern in Azkarra Streams ?
+<meta name="twitter:description" content="How to use the dependency injection pattern in Azkarra Streams ?
 "/>
 
 
@@ -594,7 +594,7 @@
             
 <div class="td-content">
 	<h1>Dependency Injection</h1>
-	<div class="lead">How to use dependency injection pattern in Azkarra Streams ?</div>
+	<div class="lead">How to use the dependency injection pattern in Azkarra Streams ?</div>
 	<p>The dependency injection pattern is a common practice in software
 development to get code that is modular and testable.</p>
 <p>Azkarra does not implement any advanced dependency injection mechanism.
@@ -612,7 +612,7 @@ either programmatically, or by external or annotated configuration.</p>
 <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 </code></pre></div><p>The only requirement, when using this method, is that the registered component class
 must defined a no-arg constructor to be later instantiated.</p>
-<p>In addition, when a component is added to the context is registered for the given class type and all its super types.</p>
+<p>In addition, when a component is added to the context is registered for the given class type and all its supertypes.</p>
 <p>Later, we can retrieve an instance of a registered component through the method <code>AzkarraContext#getComponentForType</code>.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">ServiceA</span> <span style="color:#000">instance</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getComponentForType</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 </code></pre></div><p>The returned object can be a new instance or an instance shared across the application (i.e a singleton).</p>
@@ -621,7 +621,7 @@ to be automatically registered.</p>
 <p>The <code>@Singleton</code> annotation can also be used for declaring a component shared across the application.</p>
 <h2 id="versioned">Versioned</h2>
 <p>A component can be attached to a version by implementing the <code>Versioned</code> interface.
-This is the case, for example, for the  the <code>TopologyProvider</code> interface.</p>
+This is the case, for example, for the <code>TopologyProvider</code> interface.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">interface</span> <span style="color:#000">Versioned</span> <span style="color:#ce5c00;font-weight:bold">{</span>
     <span style="color:#000">String</span> <span style="color:#000">version</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#ce5c00;font-weight:bold">}</span>
@@ -662,7 +662,7 @@ This is the case, for example, for the  the <code>TopologyProvider</code> interf
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">var</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
 <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">ServiceAFactory</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 </code></pre></div><h2 id="componentmodule">ComponentModule</h2>
-<p>When building component with dependencies you can extend the <code>ComponentModule</code> class which under the hood implement
+<p>When building a component with dependencies you can extend the <code>ComponentModule</code> class which under the hood implement
 the following interfaces : <code>ComponentFactory</code>, <code>ComponentRegistryAware</code> and <code>Configurable</code>.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">CustomTopologyProviderModule</span> <span style="color:#204a87;font-weight:bold">extends</span> <span style="color:#000">ComponentModule</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">CustomTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#ce5c00;font-weight:bold">{</span>
     <span style="color:#5c35cc;font-weight:bold">@Override</span>
@@ -731,7 +731,7 @@ the following interfaces : <code>ComponentFactory</code>, <code>ComponentRegistr
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified November 29, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/c57f3a4caf14e537ebca5da0dff2e1436eab054b">refactor(gh-page): wip add new doc website (c57f3a4)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified December 5, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/639ab9230567a27fe856f18982de0f4491acd320">docs(site): add documentation about security, fix some typos. (639ab92)</a>
 </div>
 </div>
 

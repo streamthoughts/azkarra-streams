@@ -599,7 +599,7 @@
 	<p>This section describes the main concepts Azkarra uses to execute a Kafka Streams instance.</p>
 <h2 id="topology">Topology</h2>
 <p>The concept of <code>Topology</code> is not specific to Azkarra but is fundamental in the implementation of a Kafka Streams application. A Topology is an object that is part of the public Kafka Streams API and allows you to define all the operations (i.e stateless or stateful) to be performed on one or more Kafka topics.</p>
-<p>In Azkarra Sterams, a <code>Topology</code> object must be define and provided through the an implementation of the <code>TopologyProvider</code> interface.</p>
+<p>In Azkarra Sterams, a <code>Topology</code> object must be defined and provided through the implementation of the <code>TopologyProvider</code> interface.</p>
 <p>Here is a simple example :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">WordCountTopology</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">TopologyProvider</span> <span style="color:#ce5c00;font-weight:bold">{</span>
 
@@ -632,11 +632,11 @@
 Usually, you will return the version of your project (e.g : 1.0, 1.2-SNAPSHOT, etc).
 Azkarra uses this version to generate a meaningful config <code>application.id</code> for your streams instance if no one is provided at runtime.</p>
 <h2 id="component">Component</h2>
-<p>In Azkarra, any object that form your streams application (e.g: <code>TopologyProviders</code>) and are registered to and managed by an <code>AzkarraContext</code> instance is called a <strong>component</strong>.</p>
-<p>More generally, a component is an object that is instantiated, assembled, and configured by a <code>AzkarraContext</code> instance.</p>
-<p>The concepts of component enables the implementation of the <a href="./dependency-injection">dependency injection</a> pattern in Azkarra.</p>
+<p>In Azkarra, any object that forms your streams application (e.g: <code>TopologyProviders</code>) and is registered to and managed by an <code>AzkarraContext</code> instance is called a <strong>component</strong>.</p>
+<p>More generally, a component is an object that is instantiated, assembled, and configured by a  <code>AzkarraContext</code> instance.</p>
+<p>The concepts of component enable the implementation of the <a href="./dependency-injection">dependency injection</a> pattern in Azkarra.</p>
 <h2 id="streamsexecutionenvironment">StreamsExecutionEnvironment</h2>
-<p>Azkarra uses the concept of <code>StreamExecutionEnvironment</code> to safely execute your <code>Topologies</code>. Indeed, your are not anymore responsible to create and start a new <code>KafkaStreams</code> instance by yourself. This is done by the <code>StreamExecutionEnvironment</code>.</p>
+<p>Azkarra uses the concept of <code>StreamExecutionEnvironment</code> to safely execute your <code>Topologies</code>. Indeed, you are not anymore responsible to create and start a new <code>KafkaStreams</code> instance by yourself. This is done by the <code>StreamExecutionEnvironment</code>.</p>
 <p>A <code>StreamExecutionEnvironment</code> is responsible for creating, configuring and starting a new <code>KafkaStreams</code> instance for each <code>Topology</code> you provide.</p>
 <p>Here is a simple example to execute the topology we illustrated in the previous section.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#8f5902;font-style:italic">// (1) define your Kafka Streams configuration.
@@ -653,25 +653,25 @@ Azkarra uses this version to generate a meaningful config <code>application.id</
 
 <span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">start</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> <span style="color:#8f5902;font-style:italic">// (4) start the KafkaStreams instance.
 </span></code></pre></div><p>A <code>StreamExecutionEnvironment</code> instance can manage multiple <code>KafkaStreams</code> instances and you can also create multiple environments.</p>
-<p>An environment allows you to define common configuration properties, listeners and behaviours to apply on a group of Kafka Streams instances</p>
-<p>Moreover, an Azkarra application is not limited to a single environment. For example, if during the development phase you need to quickly test a Kafka Streams application on different Kafka clusters, you can create one <code>StreamsExecutionEnvironment</code>for each target Kafka Cluster.</p>
+<p>An environment allows you to define common configuration properties, listeners and behaviors to apply on a group of Kafka Streams instances</p>
+<p>Moreover, an Azkarra application is not limited to a single environment. For example, if during the development phase you need to quickly test a Kafka Streams application on different Kafka clusters, you can create one <code>StreamsExecutionEnvironment</code> for each target Kafka Cluster.</p>
 <p>In the code example above, you can notice that we name the topology to be executed. In the same way, we can also name an environment.</p>
 <pre><code>DefaultStreamsExecutionEnvironment.create(Conf.with(&quot;streams&quot;, props), &quot;dev&quot;);
-</code></pre><p>Azkarra uses these information to generate the <code>application.id</code> property to set for the Kafka Streams application. In our case, the generated id will be <code>dev-wordcount-1.0</code>.</p>
+</code></pre><p>Azkarra uses this information to generate the <code>application.id</code> property to set for the Kafka Streams application. In our case, the generated id will be <code>dev-wordcount-1.0</code>.</p>
 <h2 id="azkarracontext">AzkarraContext</h2>
 <p>A <code>AzkarraContext</code> object is responsible for configuring and running one ore more <code>StreamsExecutionEnvironment</code>.
-In addition, the <code>AzkarraContext</code> allow you to quickly configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.</p>
+In addition, the <code>AzkarraContext</code> allows you to quickly configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.</p>
 <p>A context can be created as follows :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">DefaultAzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span>
     <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addExecutionEnvironment</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">)</span>
     <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setRegisterShutdownHook</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">)</span>
     <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">start</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><p>By default, an AzkarraContext will always create a default StreamsExecutionEnvironment named <strong>__default</strong>. This allow you to register the <code>TopologyProvider</code> directly at the context level.</p>
+</code></pre></div><p>By default, an AzkarraContext will always create a default StreamsExecutionEnvironment named <strong>__default</strong>. This allows you to register the <code>TopologyProvider</code> directly at the context level.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Executed</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;wordcount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
 </code></pre></div><p>Registering a <code>TopoloyProvider</code> at the context level has some advantages. Indeed, this allows you to use the Java annotations provided by the Azkarra framework (e.g @TopologyInfo, @DefaultStreamsConfig). See <a href="/docs/configuration">Configuration</a> for more information.</p>
 <h2 id="azkarraapplication">AzkarraApplication</h2>
-<p>The <code>AzkarraApplication</code> is the top-level concept which is used to bootstrap an Azkarra Streams application.</p>
-<p>Its main responsibility is to initialize an AzkarraContext using a user-defined configuration which describe the <code>StreamsExecutionEnvironment</code>s and the streams applications to be executed.</p>
+<p>The <code>AzkarraApplication</code> is the top-level concept that is used to bootstrap an Azkarra Streams application.</p>
+<p>Its main responsibility is to initialize an AzkarraContext using a user-defined configuration which describes the <code>StreamsExecutionEnvironment</code>s and the streams applications to be executed.</p>
 <p>The AzkarraApplication is also responsible for deploying an embedded HTTP server (if enable) which exposes the REST endpoints that can be used to manage registered topologies and to run streams instances.</p>
 
         <div class="section-index">
@@ -730,7 +730,7 @@ In addition, the <code>AzkarraContext</code> allow you to quickly configure a Ja
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified November 29, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/c57f3a4caf14e537ebca5da0dff2e1436eab054b">refactor(gh-page): wip add new doc website (c57f3a4)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified December 5, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/639ab9230567a27fe856f18982de0f4491acd320">docs(site): add documentation about security, fix some typos. (639ab92)</a>
 </div>
 </div>
 

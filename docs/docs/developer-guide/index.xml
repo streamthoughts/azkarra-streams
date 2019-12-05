@@ -26,7 +26,7 @@
         &lt;p&gt;This section describes the main concepts Azkarra uses to execute a Kafka Streams instance.&lt;/p&gt;
 &lt;h2 id=&#34;topology&#34;&gt;Topology&lt;/h2&gt;
 &lt;p&gt;The concept of &lt;code&gt;Topology&lt;/code&gt; is not specific to Azkarra but is fundamental in the implementation of a Kafka Streams application. A Topology is an object that is part of the public Kafka Streams API and allows you to define all the operations (i.e stateless or stateful) to be performed on one or more Kafka topics.&lt;/p&gt;
-&lt;p&gt;In Azkarra Sterams, a &lt;code&gt;Topology&lt;/code&gt; object must be define and provided through the an implementation of the &lt;code&gt;TopologyProvider&lt;/code&gt; interface.&lt;/p&gt;
+&lt;p&gt;In Azkarra Sterams, a &lt;code&gt;Topology&lt;/code&gt; object must be defined and provided through the implementation of the &lt;code&gt;TopologyProvider&lt;/code&gt; interface.&lt;/p&gt;
 &lt;p&gt;Here is a simple example :&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;WordCountTopology&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;implements&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;TopologyProvider&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
 
@@ -59,11 +59,11 @@
 Usually, you will return the version of your project (e.g : 1.0, 1.2-SNAPSHOT, etc).
 Azkarra uses this version to generate a meaningful config &lt;code&gt;application.id&lt;/code&gt; for your streams instance if no one is provided at runtime.&lt;/p&gt;
 &lt;h2 id=&#34;component&#34;&gt;Component&lt;/h2&gt;
-&lt;p&gt;In Azkarra, any object that form your streams application (e.g: &lt;code&gt;TopologyProviders&lt;/code&gt;) and are registered to and managed by an &lt;code&gt;AzkarraContext&lt;/code&gt; instance is called a &lt;strong&gt;component&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;More generally, a component is an object that is instantiated, assembled, and configured by a &lt;code&gt;AzkarraContext&lt;/code&gt; instance.&lt;/p&gt;
-&lt;p&gt;The concepts of component enables the implementation of the &lt;a href=&#34;./dependency-injection&#34;&gt;dependency injection&lt;/a&gt; pattern in Azkarra.&lt;/p&gt;
+&lt;p&gt;In Azkarra, any object that forms your streams application (e.g: &lt;code&gt;TopologyProviders&lt;/code&gt;) and is registered to and managed by an &lt;code&gt;AzkarraContext&lt;/code&gt; instance is called a &lt;strong&gt;component&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;More generally, a component is an object that is instantiated, assembled, and configured by a  &lt;code&gt;AzkarraContext&lt;/code&gt; instance.&lt;/p&gt;
+&lt;p&gt;The concepts of component enable the implementation of the &lt;a href=&#34;./dependency-injection&#34;&gt;dependency injection&lt;/a&gt; pattern in Azkarra.&lt;/p&gt;
 &lt;h2 id=&#34;streamsexecutionenvironment&#34;&gt;StreamsExecutionEnvironment&lt;/h2&gt;
-&lt;p&gt;Azkarra uses the concept of &lt;code&gt;StreamExecutionEnvironment&lt;/code&gt; to safely execute your &lt;code&gt;Topologies&lt;/code&gt;. Indeed, your are not anymore responsible to create and start a new &lt;code&gt;KafkaStreams&lt;/code&gt; instance by yourself. This is done by the &lt;code&gt;StreamExecutionEnvironment&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Azkarra uses the concept of &lt;code&gt;StreamExecutionEnvironment&lt;/code&gt; to safely execute your &lt;code&gt;Topologies&lt;/code&gt;. Indeed, you are not anymore responsible to create and start a new &lt;code&gt;KafkaStreams&lt;/code&gt; instance by yourself. This is done by the &lt;code&gt;StreamExecutionEnvironment&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;A &lt;code&gt;StreamExecutionEnvironment&lt;/code&gt; is responsible for creating, configuring and starting a new &lt;code&gt;KafkaStreams&lt;/code&gt; instance for each &lt;code&gt;Topology&lt;/code&gt; you provide.&lt;/p&gt;
 &lt;p&gt;Here is a simple example to execute the topology we illustrated in the previous section.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#8f5902;font-style:italic&#34;&gt;// (1) define your Kafka Streams configuration.
@@ -80,25 +80,25 @@ Azkarra uses this version to generate a meaningful config &lt;code&gt;applicatio
 
 &lt;span style=&#34;color:#000&#34;&gt;env&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color:#8f5902;font-style:italic&#34;&gt;// (4) start the KafkaStreams instance.
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;A &lt;code&gt;StreamExecutionEnvironment&lt;/code&gt; instance can manage multiple &lt;code&gt;KafkaStreams&lt;/code&gt; instances and you can also create multiple environments.&lt;/p&gt;
-&lt;p&gt;An environment allows you to define common configuration properties, listeners and behaviours to apply on a group of Kafka Streams instances&lt;/p&gt;
-&lt;p&gt;Moreover, an Azkarra application is not limited to a single environment. For example, if during the development phase you need to quickly test a Kafka Streams application on different Kafka clusters, you can create one &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt;for each target Kafka Cluster.&lt;/p&gt;
+&lt;p&gt;An environment allows you to define common configuration properties, listeners and behaviors to apply on a group of Kafka Streams instances&lt;/p&gt;
+&lt;p&gt;Moreover, an Azkarra application is not limited to a single environment. For example, if during the development phase you need to quickly test a Kafka Streams application on different Kafka clusters, you can create one &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt; for each target Kafka Cluster.&lt;/p&gt;
 &lt;p&gt;In the code example above, you can notice that we name the topology to be executed. In the same way, we can also name an environment.&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;DefaultStreamsExecutionEnvironment.create(Conf.with(&amp;quot;streams&amp;quot;, props), &amp;quot;dev&amp;quot;);
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Azkarra uses these information to generate the &lt;code&gt;application.id&lt;/code&gt; property to set for the Kafka Streams application. In our case, the generated id will be &lt;code&gt;dev-wordcount-1.0&lt;/code&gt;.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Azkarra uses this information to generate the &lt;code&gt;application.id&lt;/code&gt; property to set for the Kafka Streams application. In our case, the generated id will be &lt;code&gt;dev-wordcount-1.0&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id=&#34;azkarracontext&#34;&gt;AzkarraContext&lt;/h2&gt;
 &lt;p&gt;A &lt;code&gt;AzkarraContext&lt;/code&gt; object is responsible for configuring and running one ore more &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt;.
-In addition, the &lt;code&gt;AzkarraContext&lt;/code&gt; allow you to quickly configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.&lt;/p&gt;
+In addition, the &lt;code&gt;AzkarraContext&lt;/code&gt; allows you to quickly configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.&lt;/p&gt;
 &lt;p&gt;A context can be created as follows :&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;DefaultAzkarraContext&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;create&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;config&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
     &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;addExecutionEnvironment&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;env&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
     &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;setRegisterShutdownHook&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
     &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;By default, an AzkarraContext will always create a default StreamsExecutionEnvironment named &lt;strong&gt;__default&lt;/strong&gt;. This allow you to register the &lt;code&gt;TopologyProvider&lt;/code&gt; directly at the context level.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;By default, an AzkarraContext will always create a default StreamsExecutionEnvironment named &lt;strong&gt;__default&lt;/strong&gt;. This allows you to register the &lt;code&gt;TopologyProvider&lt;/code&gt; directly at the context level.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;addTopology&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;WordCountTopologyProvider&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Executed&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;as&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;wordcount&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Registering a &lt;code&gt;TopoloyProvider&lt;/code&gt; at the context level has some advantages. Indeed, this allows you to use the Java annotations provided by the Azkarra framework (e.g @TopologyInfo, @DefaultStreamsConfig). See &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/docs/configuration&#34;&gt;Configuration&lt;/a&gt; for more information.&lt;/p&gt;
 &lt;h2 id=&#34;azkarraapplication&#34;&gt;AzkarraApplication&lt;/h2&gt;
-&lt;p&gt;The &lt;code&gt;AzkarraApplication&lt;/code&gt; is the top-level concept which is used to bootstrap an Azkarra Streams application.&lt;/p&gt;
-&lt;p&gt;Its main responsibility is to initialize an AzkarraContext using a user-defined configuration which describe the &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt;s and the streams applications to be executed.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;AzkarraApplication&lt;/code&gt; is the top-level concept that is used to bootstrap an Azkarra Streams application.&lt;/p&gt;
+&lt;p&gt;Its main responsibility is to initialize an AzkarraContext using a user-defined configuration which describes the &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt;s and the streams applications to be executed.&lt;/p&gt;
 &lt;p&gt;The AzkarraApplication is also responsible for deploying an embedded HTTP server (if enable) which exposes the REST endpoints that can be used to manage registered topologies and to run streams instances.&lt;/p&gt;
 
       </description>
@@ -364,7 +364,7 @@ either programmatically, or by external or annotated configuration.&lt;/p&gt;
 &lt;span style=&#34;color:#000&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;addComponent&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;ServiceA&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The only requirement, when using this method, is that the registered component class
 must defined a no-arg constructor to be later instantiated.&lt;/p&gt;
-&lt;p&gt;In addition, when a component is added to the context is registered for the given class type and all its super types.&lt;/p&gt;
+&lt;p&gt;In addition, when a component is added to the context is registered for the given class type and all its supertypes.&lt;/p&gt;
 &lt;p&gt;Later, we can retrieve an instance of a registered component through the method &lt;code&gt;AzkarraContext#getComponentForType&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;ServiceA&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;instance&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;getComponentForType&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;ServiceA&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The returned object can be a new instance or an instance shared across the application (i.e a singleton).&lt;/p&gt;
@@ -373,7 +373,7 @@ to be automatically registered.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;@Singleton&lt;/code&gt; annotation can also be used for declaring a component shared across the application.&lt;/p&gt;
 &lt;h2 id=&#34;versioned&#34;&gt;Versioned&lt;/h2&gt;
 &lt;p&gt;A component can be attached to a version by implementing the &lt;code&gt;Versioned&lt;/code&gt; interface.
-This is the case, for example, for the  the &lt;code&gt;TopologyProvider&lt;/code&gt; interface.&lt;/p&gt;
+This is the case, for example, for the &lt;code&gt;TopologyProvider&lt;/code&gt; interface.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;interface&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Versioned&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
     &lt;span style=&#34;color:#000&#34;&gt;String&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;version&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;
@@ -414,7 +414,7 @@ This is the case, for example, for the  the &lt;code&gt;TopologyProvider&lt;/cod
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;context&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;AzkarraContext&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;create&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
 &lt;span style=&#34;color:#000&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;addComponent&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;ServiceAFactory&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;componentmodule&#34;&gt;ComponentModule&lt;/h2&gt;
-&lt;p&gt;When building component with dependencies you can extend the &lt;code&gt;ComponentModule&lt;/code&gt; class which under the hood implement
+&lt;p&gt;When building a component with dependencies you can extend the &lt;code&gt;ComponentModule&lt;/code&gt; class which under the hood implement
 the following interfaces : &lt;code&gt;ComponentFactory&lt;/code&gt;, &lt;code&gt;ComponentRegistryAware&lt;/code&gt; and &lt;code&gt;Configurable&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;CustomTopologyProviderModule&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;extends&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;ComponentModule&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;CustomTopologyProvider&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
     &lt;span style=&#34;color:#5c35cc;font-weight:bold&#34;&gt;@Override&lt;/span&gt;
@@ -540,7 +540,209 @@ Depending of the throughput of your application, you may want to tune internal R
       <description>
         
         
-        
+        &lt;h2 id=&#34;why-azkarra-needs-to-be-secured&#34;&gt;Why Azkarra needs to be secured?&lt;/h2&gt;
+
+
+&lt;div class=&#34;alert alert-info&#34; role=&#34;alert&#34;&gt;
+
+Security is one of the most important concerns (if not the most important) when it comes to deploying an application in production.
+&lt;/div&gt;
+
+&lt;p&gt;Azkarra allows you to access information about the running Kafka Streams instances (metrics, configuration, states, etc) via the REST APIs.
+Some non-critical data, accessible through these HTTP endpoints, may provide information about your application considered to be private.
+For example, it could be the Kafka topics that are consumed or used internally by your application.&lt;/p&gt;
+&lt;p&gt;In addition, the state stores of your streams application can be queried. Depending on your business nature,
+you may want to protect some sensitive data returned by the application.&lt;/p&gt;
+&lt;p&gt;Finally, the REST APIs enable you to perform some operations like stopping and restarting a Kafka Streams instance.
+While some of these operations can be useful during development or for some production scenarios, it can be also necessary to not allow them.&lt;/p&gt;
+&lt;p&gt;Azkarra is composed of three standard components for security :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Encryption on the wire&lt;/strong&gt;: This allows data transmitted between an Azkarra application and a client application or between two Azkarra applications (i.e when using interactive queries) to be encrypted over the network.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Authentication&lt;/strong&gt;: This allows client applications or an Azkarra application, accessing the REST APIs, to authenticate to the Azkarra application.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Authorization&lt;/strong&gt;: This allows you to allow or deny your client applications to perform some operations or to access specific REST resources.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;headless-mode&#34;&gt;Headless Mode&lt;/h2&gt;
+&lt;p&gt;Azkarra has a headless mode that can be used to restrict REST APIs usage.&lt;/p&gt;
+&lt;p&gt;When the headless mode is enabled, Azkarra returns a 401 Unauthorized HTTP response for POST, PUT and DELETE requests.&lt;/p&gt;
+&lt;p&gt;The only exception to this rule is that you can still query the state stores of your application.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Property&lt;/th&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;azkarra.server.headless&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;boolean&lt;/td&gt;
+&lt;td&gt;Enable Server Headless mode&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;disable-web-ui&#34;&gt;Disable Web UI&lt;/h2&gt;
+&lt;p&gt;As of Azkarra 0.4, you can also disable the Web UI by using the server configuration :&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Property&lt;/th&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;azkarra.server.enable.ui&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;boolean&lt;/td&gt;
+&lt;td&gt;Enable Web UI&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;encryption-using-tls-or-ssl&#34;&gt;Encryption using TLS (or SSL)&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;azkarra.server.ssl.enable=true
+azkarra.server.ssl.keystore.location=&amp;quot;/path/to/server.ks.pkcs12&amp;quot;
+azkarra.server.ssl.keystore.type=&amp;quot;PKCS12&amp;quot;
+azkarra.server.ssl.keystore=&amp;quot;password&amp;quot;
+
+azkarra.server.ssl.key.password=&amp;quot;password&amp;quot;
+azkarra.server.ssl.truststore.location=&amp;quot;/path/to/server.ts.pkcs12&amp;quot;
+azkarra.server.ssl.truststore.type=&amp;quot;PKCS12&amp;quot;
+azkarra.server.ssl.truststore=&amp;quot;password&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;SSL hostname verification can be disable using the configuration :&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;azkarra.server.ssl.ignore.hostname.verification=true
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This can be useful if, for example, you are using a self-signed certificate during the development phase.&lt;/p&gt;
+&lt;h2 id=&#34;authentication&#34;&gt;Authentication&lt;/h2&gt;
+&lt;h3 id=&#34;http-basic-auth&#34;&gt;HTTP Basic Auth&lt;/h3&gt;
+&lt;p&gt;You can configure HTTP Basic Auth to secure access to the Azkarra REST APIs (and Web UI).
+Usually, this is the simplest mechanism to implement.&lt;/p&gt;
+&lt;p&gt;1 ) Configure your Azkarra application with the following properties :&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;azkarra.server.rest.authentication.mechanism=&amp;quot;BASIC_AUTH&amp;quot;
+azkarra.server.rest.authentication.realm=&amp;quot;AzkarraServer&amp;quot;
+azkarra.server.rest.authentication.roles=&amp;quot;admin, alice&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;2 ) Then add the users. Azkarra supports two approaches for doing that :&lt;/p&gt;
+&lt;h4 id=&#34;jaas-configuration&#34;&gt;JAAS Configuration&lt;/h4&gt;
+&lt;p&gt;Azkarra supports the Java Authentication and Authorization Service (&lt;a href=&#34;https://docs.oracle.com/javase/8/docs/technotes/guides/security/jaas/JAASRefGuide.html&#34;&gt;JAAS&lt;/a&gt;) and provides a &lt;code&gt;PropertiesFileLoginModule&lt;/code&gt;
+for loading users from a properties file.&lt;/p&gt;
+&lt;p&gt;3 ) Create a JAAS configuration file. For example &lt;code&gt;/etc/azkarra/azkarra-server-jass.conf&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;AzkarraServer {
+ io.streamthoughts.azkarra.http.security.jaas.spi.PropertiesFileLoginModule required
+   file=&amp;quot;/etc/azkarra/azkarra.password&amp;quot;
+   reloadInterval=&amp;quot;60&amp;quot;
+   reload=&amp;quot;true&amp;quot;
+   debug=&amp;quot;true&amp;quot;;
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;N.B: This is important that &lt;code&gt;azkarra.server.rest.authentication.realm&lt;/code&gt; matches the section with the JAAS file.&lt;/p&gt;
+&lt;p&gt;4 ) Create a password files. For example &lt;code&gt;/etc/azkarra/azkarra.password&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;admin:MD5:fa0deb5e70ca0c27c04b717a9c60d657,Administrator
+alice:alice-secret,Developer
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;N.B: You can passe a password as a hash MD5 (e.g : &lt;code&gt;echo -n “admin-secret” | md5sum&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;5 ) Pass the JAAS config file location as JVM parameter. For example:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;-Djava.security.auth.login.config=/path/to/azkarra-server-jaas.conf
+&lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;useridentitymanager&#34;&gt;UserIdentityManager&lt;/h4&gt;
+&lt;p&gt;The approach is to configure a &lt;code&gt;UserIdentityManager&lt;/code&gt; using the server configuration:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;azkarra.server.user.identity.manager.class
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Azkarra only provides a simple implementation named &lt;code&gt;InMemoryUserIdentityManager&lt;/code&gt;.
+This class accepts a single configuration property &lt;code&gt;rest.authentication.users&lt;/code&gt; that must contain the list of users separated by a comma.&lt;/p&gt;
+&lt;p&gt;You can implement a custom &lt;code&gt;UserIdentityManager&lt;/code&gt;, for example, to load users from an external database.&lt;/p&gt;
+&lt;p&gt;Here is a complete code example using a programmatic configuration style:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#5c35cc;font-weight:bold&#34;&gt;@AzkarraStreamsApplication&lt;/span&gt;
+&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;BasicAuthenticationExample&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
+
+  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;main&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;final&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;args&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
+
+    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;final&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Conf&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;serverConfig&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;ServerConfBuilder&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;newBuilder&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;                   
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;setAuthenticationMethod&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;
+                &lt;span style=&#34;color:#000&#34;&gt;SecurityMechanism&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;BASIC_AUTH&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;name&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;setAuthenticationRealm&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;AzkarraServer&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;setAuthenticationRoles&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;admin, alice&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;setUserIdentityManager&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;
+                 &lt;span style=&#34;color:#000&#34;&gt;InMemoryUserIdentityManager&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;class&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;setAuthenticationUsers&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;
+                 &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;admin:admin-secret, alice:alice-secret&amp;#34;&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
+
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;AzkarraApplication&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;setConfiguration&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;AzkarraConf&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;create&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;application&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;enableHttpServer&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;serverConfig&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+            &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;run&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;args&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;N.B: Basic Authentication does not protect credentials transmitted over the network, you will typically use it in conjunction with TLS (SSL).&lt;/p&gt;
+&lt;h3 id=&#34;ssl-client-certificate-authentication&#34;&gt;SSL Client Certificate Authentication&lt;/h3&gt;
+&lt;p&gt;Azkarra also supports authentication using client certification (also called SSL Two-Way Authentication). This allows Azkarra to verify the identity of the client by requesting the client to issue a trusted certificate (i.e: a certificate signed by a certificate authority).&lt;/p&gt;
+&lt;p&gt;If you want to enable Client Certificate authentication, configure your application with the following property :&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;azkarra.server.rest.authentication.mechanism=&amp;quot;CLIENT_CERT_AUTH&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;authorization&#34;&gt;Authorization&lt;/h2&gt;
+&lt;p&gt;Azkarra implements a very simple and pluggable authorization mechanism via
+the interface &lt;code&gt;AuthorizationManager&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In Azkarra, a user is ALLOW or DENY to perform an &lt;strong&gt;operation&lt;/strong&gt; (&lt;code&gt;GET&lt;/code&gt;, &lt;code&gt;POST&lt;/code&gt;, &lt;code&gt;PUT&lt;/code&gt;, etc) on a &lt;strong&gt;resource&lt;/strong&gt; (e.g: /streams/:id).&lt;/p&gt;
+&lt;p&gt;You can configure the authorization manager using the server property :&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Property&lt;/th&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;azkarra.server.authorization.manager.class&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;string&lt;/td&gt;
+&lt;td&gt;The fully qualified name of the class implementing  &lt;code&gt;AuthorizationManager&lt;/code&gt; to be used to authorize an authenticated user.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;By default, Azkarra provides a simple authorization manager implementation so-called &lt;code&gt;SimpleAuthorizationManager&lt;/code&gt;.
+This class can be configured using the following properties :&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Property&lt;/th&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;azkarra.server.rest.authentication.roles&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;string&lt;/td&gt;
+&lt;td&gt;The list of users or roles to authorize separated by a comma (default: &lt;code&gt;*&lt;/code&gt;).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;azkarra.server.auth.restricted.roles&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;string&lt;/td&gt;
+&lt;td&gt;The list of users or roles to restrict access&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;N.B: You can use a wildcard(*) to authorize all authenticated users.&lt;/p&gt;
+&lt;p&gt;A restricted user will only be allowed to perform GET HTTP requests.&lt;/p&gt;
+&lt;h3 id=&#34;azkarraprincipalbuilder&#34;&gt;AzkarraPrincipalBuilder&lt;/h3&gt;
+&lt;p&gt;The principal used to authorize a user depends on the mechanism used for authentication.
+For example, the principal attached to a user authenticated using SSL Client is built from the X509Certificate subject (e.g: &lt;code&gt;CN=localhost,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;For customizing the principal name, you can configure an &lt;code&gt;AzkarraPrincipalBuilder&lt;/code&gt; using the server configuration :&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Property&lt;/th&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;azkarra.server.principal.builder.class&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;string&lt;/td&gt;
+&lt;td&gt;The fully qualified name of the class implementing &lt;code&gt;AzkarraPrincipalBuilder&lt;/code&gt;.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
       </description>
     </item>
     
