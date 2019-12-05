@@ -24,6 +24,11 @@ import java.net.InetAddress;
 
 public interface AuthenticationContext {
 
+    /**
+     * Gets the security mechanism used to authenticate the current user.
+     *
+     * @return  the {@link SecurityMechanism}.
+     */
     SecurityMechanism getSecurityMechanism();
 
     /**

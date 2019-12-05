@@ -92,16 +92,12 @@ public class SecurityHandlerFactory {
                     throw new AzkarraException("Unknown security mechanism : " + mechanism);
             }
 
-            AzkarraIdentityManager idm = new AzkarraIdentityManager(authenticator);
-            AzkarraPrincipalBuilder principalBuilder = getPrincipalBuilderOrNull(securityConfig);
-            if (principalBuilder != null)
-                idm.setAzkarraPrincipalBuilder(principalBuilder);
-
             return new SecurityHandler(
-                idm,
+                new AzkarraIdentityManager(authenticator),
                 getAuthorizationManager(securityConfig),
                 authenticationMechanism,
                 mechanism,
+                getPrincipalBuilderOrNull(securityConfig),
                 handler,
                 Collections.singletonList(Pattern.compile("^/api/.*"))
             );

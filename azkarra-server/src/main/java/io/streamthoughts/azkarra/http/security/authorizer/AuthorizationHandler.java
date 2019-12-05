@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.http.security.SecurityMechanism;
 import io.streamthoughts.azkarra.http.security.UnauthorizedAccessException;
 import io.streamthoughts.azkarra.http.security.auth.AuthenticationContext;
 import io.streamthoughts.azkarra.http.security.auth.AuthenticationContextHolder;
+import io.streamthoughts.azkarra.http.security.auth.AzkarraPrincipalBuilder;
 import io.streamthoughts.azkarra.http.security.auth.GrantedAuthority;
 import io.streamthoughts.azkarra.http.security.auth.UserDetails;
 import io.undertow.server.HttpHandler;
@@ -39,17 +40,23 @@ public class AuthorizationHandler implements HttpHandler {
 
     private final AuthorizationManager authorizationManager;
 
+    private final AzkarraPrincipalBuilder principalBuilder;
+
     /**
      * Creates a new {@link AuthorizationHandler} instance.
      *
      * @param next                  the {@link HttpHandler} to forward authorized request.
      * @param authorizationManager  the {@link AuthorizationManager} instance.
+     * @param principalBuilder      the {@link AzkarraPrincipalBuilder} instance (may be {@code null}).
      */
-    public AuthorizationHandler(final HttpHandler next, final AuthorizationManager authorizationManager) {
+    public AuthorizationHandler(final HttpHandler next,
+                                final AuthorizationManager authorizationManager,
+                                final AzkarraPrincipalBuilder principalBuilder) {
         Objects.requireNonNull(authorizationManager, "authorizationManager cannot be null");
         Objects.requireNonNull(next, "next cannot be null");
         this.next = next;
         this.authorizationManager = authorizationManager;
+        this.principalBuilder = principalBuilder;
     }
 
     /**
@@ -65,9 +72,12 @@ public class AuthorizationHandler implements HttpHandler {
         final AuthenticationContext context = AuthenticationContextHolder.getAuthenticationContext();
 
         final AuthorizationContext authContext = new AuthorizationContext() {
+
             @Override
             public Principal principal() {
-                return context.getAuthentication().getPrincipal();
+                return principalBuilder != null ?
+                    principalBuilder.buildPrincipal(context) :
+                    context.getAuthentication().getPrincipal();
             }
 
             @Override
@@ -94,6 +104,7 @@ public class AuthorizationHandler implements HttpHandler {
                 return httpResource;
             }
         };
+
         AuthorizationResult result = authorizationManager.authenticate(authContext);
         if (result == AuthorizationResult.ALLOWED) {
             next.handleRequest(exchange);

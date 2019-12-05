@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.http;
 
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
+import io.streamthoughts.azkarra.http.security.auth.AzkarraPrincipalBuilder;
 import io.streamthoughts.azkarra.http.security.auth.UsersIdentityManager;
 
 import java.util.HashMap;
@@ -136,8 +137,25 @@ public class ServerConfBuilder {
         return this;
     }
 
+    /**
+     * Sets the {@link UsersIdentityManager} used to get information about user to authenticate.
+     *
+     * @param cls   the {@link UsersIdentityManager} class.
+     * @return  {@code this}.
+     */
     public ServerConfBuilder setUserIdentityManager(final Class<? extends UsersIdentityManager> cls) {
         configs.put(SecurityConfig.HTTP_AUTH_USER_IDENTITY_MANAGER_CLASS_CONFIG, cls.getName());
+        return this;
+    }
+
+    /**
+     * Sets the {@link AzkarraPrincipalBuilder} used to build the principal for an authenticated user.
+     *
+     * @param cls   the {@link AzkarraPrincipalBuilder} class.
+     * @return  {@code this}.
+     */
+    public ServerConfBuilder setPrincipalBuilder(final Class<? extends AzkarraPrincipalBuilder> cls) {
+        configs.put(SecurityConfig.HTTP_AUTH_PRINCIPAL_BUILDER_CLASS_CONFIG, cls.getName());
         return this;
     }
 

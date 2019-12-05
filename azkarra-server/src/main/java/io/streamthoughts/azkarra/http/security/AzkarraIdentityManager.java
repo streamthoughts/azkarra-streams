@@ -22,7 +22,6 @@ import io.streamthoughts.azkarra.http.security.auth.Authentication;
 import io.streamthoughts.azkarra.http.security.auth.AuthenticationContext;
 import io.streamthoughts.azkarra.http.security.auth.AuthenticationContextHolder;
 import io.streamthoughts.azkarra.http.security.auth.Authenticator;
-import io.streamthoughts.azkarra.http.security.auth.AzkarraPrincipalBuilder;
 import io.streamthoughts.azkarra.http.security.auth.BasicUserPrincipal;
 import io.streamthoughts.azkarra.http.security.auth.Credentials;
 import io.streamthoughts.azkarra.http.security.auth.PlainPasswordCredentials;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
-import java.util.Objects;
 
 /**
  * BasicMapIdentityManager.
@@ -48,8 +46,6 @@ public class AzkarraIdentityManager implements IdentityManager {
 
     private final Authenticator authenticator;
 
-    private AzkarraPrincipalBuilder principalBuilder;
-
     /**
      * Creates a new {@link AzkarraIdentityManager} instance.
      *
@@ -57,11 +53,6 @@ public class AzkarraIdentityManager implements IdentityManager {
      */
     public AzkarraIdentityManager(final Authenticator authenticator) {
         this.authenticator = authenticator;
-    }
-
-    public void setAzkarraPrincipalBuilder(final AzkarraPrincipalBuilder principalBuilder) {
-        Objects.requireNonNull(principalBuilder, "principalBuilder cannot be null");
-        this.principalBuilder = principalBuilder;
     }
 
     /**
@@ -92,14 +83,8 @@ public class AzkarraIdentityManager implements IdentityManager {
 
         final AuthenticationContext context = AuthenticationContextHolder.getAuthenticationContext();
 
-        Principal principal = null;
-        if (principalBuilder != null) {
-            principal = principalBuilder.buildPrincipal(context);
-        }
-
         if (isPasswordCredential(credential)) {
-            if (principal == null)
-                principal = new BasicUserPrincipal(id);
+            final Principal principal = new BasicUserPrincipal(id);
             char[] password = ((PasswordCredential) credential).getPassword();
             final Credentials credentials = new PlainPasswordCredentials(String.valueOf(password));
 
@@ -108,9 +93,7 @@ public class AzkarraIdentityManager implements IdentityManager {
 
         if (isX509CertificateCredential(credential)) {
             X509Certificate certificate = ((X509CertificateCredential) credential).getCertificate();
-            if (principal == null)
-                principal = certificate.getSubjectX500Principal();
-
+            final Principal principal = certificate.getSubjectX500Principal();
             final Credentials credentials = new X509CertificateCredentials(certificate);
 
             return authenticate(context, principal, credentials);

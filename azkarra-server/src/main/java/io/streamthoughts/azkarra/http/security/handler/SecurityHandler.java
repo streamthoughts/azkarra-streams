@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.http.security.handler;
 
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
+import io.streamthoughts.azkarra.http.security.auth.AzkarraPrincipalBuilder;
 import io.streamthoughts.azkarra.http.security.authorizer.AuthorizationHandler;
 import io.streamthoughts.azkarra.http.security.authorizer.AuthorizationManager;
 import io.undertow.security.api.AuthenticationMechanism;
@@ -35,7 +36,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * AbstractAuthenticationHandler.
+ * SecurityHandler.
  */
 public class SecurityHandler implements HttpHandler {
 
@@ -48,6 +49,8 @@ public class SecurityHandler implements HttpHandler {
     private final SecurityMechanism securityMechanism;
     private AuthorizationManager authorizationManager;
 
+    private AzkarraPrincipalBuilder principalBuilder;
+
     /**
      * Creates a new {@link SecurityHandler} instance.
      */
@@ -55,6 +58,7 @@ public class SecurityHandler implements HttpHandler {
                     final AuthorizationManager authorizationManager,
                     final AuthenticationMechanism authenticationMechanism,
                     final SecurityMechanism securityMechanism,
+                    final AzkarraPrincipalBuilder principalBuilder,
                     final HttpHandler next,
                     final List<Pattern> authenticatedRegexMatchers) {
         this.idm = idm;
@@ -63,11 +67,12 @@ public class SecurityHandler implements HttpHandler {
         this.authenticationMechanism = authenticationMechanism;
         this.securityMechanism = securityMechanism;
         this.authenticatedRegexMatchers = authenticatedRegexMatchers;
+        this.principalBuilder = principalBuilder;
         this.securityHandler = buildSecurityChain(next);
     }
 
     private HttpHandler buildSecurityChain(final HttpHandler next) {
-        HttpHandler handler = new AuthorizationHandler(next, authorizationManager);
+        HttpHandler handler = new AuthorizationHandler(next, authorizationManager, principalBuilder);
         handler = new XMLHttpRequestAwareAuthCallHandler(handler);
         handler = new AuthenticationContextHandler(securityMechanism, handler);
         handler = new AuthenticationConstraintHandler(handler);
