@@ -4,7 +4,7 @@ title: "Dependency Injection"
 linkTitle: "Dependency Injection"
 weight: 4
 description: >
-  How to use dependency injection pattern in Azkarra Streams ?
+  How to use the dependency injection pattern in Azkarra Streams ?
 ---
 
 The dependency injection pattern is a common practice in software 
@@ -34,7 +34,7 @@ context.addComponent(ServiceA.class);
 The only requirement, when using this method, is that the registered component class
  must defined a no-arg constructor to be later instantiated.
  
-In addition, when a component is added to the context is registered for the given class type and all its super types.
+In addition, when a component is added to the context is registered for the given class type and all its supertypes.
 
 Later, we can retrieve an instance of a registered component through the method `AzkarraContext#getComponentForType`.
 
@@ -52,7 +52,7 @@ The `@Singleton` annotation can also be used for declaring a component shared ac
 ## Versioned
 
 A component can be attached to a version by implementing the `Versioned` interface.
-This is the case, for example, for the  the `TopologyProvider` interface.
+This is the case, for example, for the `TopologyProvider` interface.
 
 ```java
 public interface Versioned {
@@ -117,7 +117,7 @@ context.addComponent(new ServiceAFactory());
 
 ## ComponentModule
 
-When building component with dependencies you can extend the `ComponentModule` class which under the hood implement 
+When building a component with dependencies you can extend the `ComponentModule` class which under the hood implement 
 the following interfaces : `ComponentFactory`, `ComponentRegistryAware` and `Configurable`.
 
 ```java

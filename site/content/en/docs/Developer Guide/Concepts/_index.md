@@ -13,7 +13,7 @@ This section describes the main concepts Azkarra uses to execute a Kafka Streams
 
 The concept of `Topology` is not specific to Azkarra but is fundamental in the implementation of a Kafka Streams application. A Topology is an object that is part of the public Kafka Streams API and allows you to define all the operations (i.e stateless or stateful) to be performed on one or more Kafka topics.
 
-In Azkarra Sterams, a `Topology` object must be define and provided through the an implementation of the `TopologyProvider` interface.
+In Azkarra Sterams, a `Topology` object must be defined and provided through the implementation of the `TopologyProvider` interface.
 
 
 Here is a simple example : 
@@ -56,16 +56,16 @@ Azkarra uses this version to generate a meaningful config `application.id` for y
 
 ## Component
 
-In Azkarra, any object that form your streams application (e.g: `TopologyProviders`) and are registered to and managed by an `AzkarraContext` instance is called a **component**.  
+In Azkarra, any object that forms your streams application (e.g: `TopologyProviders`) and is registered to and managed by an `AzkarraContext` instance is called a **component**.  
 
-More generally, a component is an object that is instantiated, assembled, and configured by a `AzkarraContext` instance.
+More generally, a component is an object that is instantiated, assembled, and configured by a  `AzkarraContext` instance.
 
-The concepts of component enables the implementation of the [dependency injection](./dependency-injection) pattern in Azkarra.
+The concepts of component enable the implementation of the [dependency injection](./dependency-injection) pattern in Azkarra.
 
 
 ## StreamsExecutionEnvironment
 
-Azkarra uses the concept of `StreamExecutionEnvironment` to safely execute your `Topologies`. Indeed, your are not anymore responsible to create and start a new `KafkaStreams` instance by yourself. This is done by the `StreamExecutionEnvironment`.
+Azkarra uses the concept of `StreamExecutionEnvironment` to safely execute your `Topologies`. Indeed, you are not anymore responsible to create and start a new `KafkaStreams` instance by yourself. This is done by the `StreamExecutionEnvironment`.
 
 A `StreamExecutionEnvironment` is responsible for creating, configuring and starting a new `KafkaStreams` instance for each `Topology` you provide.
 
@@ -89,9 +89,9 @@ env.start(); // (4) start the KafkaStreams instance.
 
 A `StreamExecutionEnvironment` instance can manage multiple `KafkaStreams` instances and you can also create multiple environments.
 
-An environment allows you to define common configuration properties, listeners and behaviours to apply on a group of Kafka Streams instances
+An environment allows you to define common configuration properties, listeners and behaviors to apply on a group of Kafka Streams instances
 
-Moreover, an Azkarra application is not limited to a single environment. For example, if during the development phase you need to quickly test a Kafka Streams application on different Kafka clusters, you can create one `StreamsExecutionEnvironment`for each target Kafka Cluster.
+Moreover, an Azkarra application is not limited to a single environment. For example, if during the development phase you need to quickly test a Kafka Streams application on different Kafka clusters, you can create one `StreamsExecutionEnvironment` for each target Kafka Cluster.
 
 In the code example above, you can notice that we name the topology to be executed. In the same way, we can also name an environment.
 
@@ -99,12 +99,12 @@ In the code example above, you can notice that we name the topology to be execut
 DefaultStreamsExecutionEnvironment.create(Conf.with("streams", props), "dev");
 ```
 
-Azkarra uses these information to generate the `application.id` property to set for the Kafka Streams application. In our case, the generated id will be `dev-wordcount-1.0`.
+Azkarra uses this information to generate the `application.id` property to set for the Kafka Streams application. In our case, the generated id will be `dev-wordcount-1.0`.
 
 ## AzkarraContext
 
 A `AzkarraContext` object is responsible for configuring and running one ore more `StreamsExecutionEnvironment`. 
-In addition, the `AzkarraContext` allow you to quickly configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.
+In addition, the `AzkarraContext` allows you to quickly configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.
 
 
 A context can be created as follows : 
@@ -116,7 +116,7 @@ DefaultAzkarraContext.create(config)
     .start();
 ```
 
- By default, an AzkarraContext will always create a default StreamsExecutionEnvironment named **__default**. This allow you to register the `TopologyProvider` directly at the context level.
+ By default, an AzkarraContext will always create a default StreamsExecutionEnvironment named **__default**. This allows you to register the `TopologyProvider` directly at the context level.
 
 ```java
 context.addTopology(WordCountTopologyProvider.class, Executed.as("wordcount"))
@@ -127,8 +127,8 @@ Registering a `TopoloyProvider` at the context level has some advantages. Indeed
 
 ## AzkarraApplication
 
-The `AzkarraApplication` is the top-level concept which is used to bootstrap an Azkarra Streams application.
+The `AzkarraApplication` is the top-level concept that is used to bootstrap an Azkarra Streams application.
 
-Its main responsibility is to initialize an AzkarraContext using a user-defined configuration which describe the `StreamsExecutionEnvironment`s and the streams applications to be executed.
+Its main responsibility is to initialize an AzkarraContext using a user-defined configuration which describes the `StreamsExecutionEnvironment`s and the streams applications to be executed.
 
 The AzkarraApplication is also responsible for deploying an embedded HTTP server (if enable) which exposes the REST endpoints that can be used to manage registered topologies and to run streams instances.
