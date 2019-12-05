@@ -476,18 +476,15 @@ public class DefaultAzkarraContext implements AzkarraContext {
                 "The context is either already started or already stopped, cannot re-start");
         }
         initializeDefaultEnvironment();
-        listeners.forEach(listener -> {
-            try {
-                listener.onContextStart(this);
-            } catch (Exception e) {
-                LOG.error("Unexpected error while invoking listener '{}#onContextStart' : ",
-                    listener.getClass().getName(),
-                    e);
-            }
-        });
-        registerShutdownHook();
-        environments().forEach(StreamsExecutionEnvironment::start);
-        setState(State.STARTED);
+        try {
+            listeners.forEach(listeners -> listeners.onContextStart(this));
+            registerShutdownHook();
+            environments().forEach(StreamsExecutionEnvironment::start);
+            setState(State.STARTED);
+        } catch (Exception e) {
+            LOG.error("Unexpected error happens while starting AzkarraContext", e);
+            stop(); // stop properly to close potentially open resources.
+        }
     }
 
     /**
@@ -499,12 +496,14 @@ public class DefaultAzkarraContext implements AzkarraContext {
             try {
                 listener.onContextStop(this);
             } catch (Exception e) {
-                LOG.error("Unexpected error while invoking listener '{}#onContextStop' : ",
+                LOG.error("Unexpected error happens while invoking listener '{}#onContextStop' : ",
                     listener.getClass().getName(),
                     e);
             }
         });
-        environments().forEach(env -> env.stop(cleanUp));
+        if (state == State.STARTED) {
+            environments().forEach(env -> env.stop(cleanUp));
+        }
     }
 
     /**
