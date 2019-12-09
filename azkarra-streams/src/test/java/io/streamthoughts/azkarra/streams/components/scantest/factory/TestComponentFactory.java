@@ -19,11 +19,11 @@
 package io.streamthoughts.azkarra.streams.components.scantest.factory;
 
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
-import io.streamthoughts.azkarra.streams.components.ClasspathComponentScannerTest;
+import io.streamthoughts.azkarra.streams.components.ComponentScannerTest;
 
 /**
  * Class used for testing purpose.
- * @see ClasspathComponentScannerTest
+ * @see ComponentScannerTest
  */
 public class TestComponentFactory implements ComponentFactory<TestComponentFactory.DummyComponent> {
     @Override

@@ -40,6 +40,7 @@ import io.streamthoughts.azkarra.runtime.components.DefaultComponentRegistry;
 import io.streamthoughts.azkarra.runtime.components.DefaultProviderClassReader;
 import io.streamthoughts.azkarra.runtime.components.TopologyDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.util.ShutdownHook;
 import org.apache.kafka.streams.Topology;
@@ -345,6 +346,10 @@ public class DefaultAzkarraContext implements AzkarraContext {
             if (description != null) {
                 completedExecuted = completedExecuted.withDescription(description);
             }
+
+            completedExecuted = completedExecuted.withInterceptor(
+                () -> new ClassloadingIsolationInterceptor(descriptor.getClassLoader())
+            );
 
             return env.addTopology(
                 new ContextTopologySupplier(type, version, env, completedExecuted),

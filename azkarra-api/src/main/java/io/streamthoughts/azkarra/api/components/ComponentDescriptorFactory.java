@@ -28,10 +28,11 @@ public interface ComponentDescriptorFactory<T> {
     /**
      * Makes a new {@link ComponentDescriptor} instance.
      *
-     * @param type      the component class.
-     * @param version   the provider version.
+     * @param type          the component class.
+     * @param version       the provider version.
+     * @param classLoader   the {@link ClassLoader} from which the component is loaded.
      *
      * @return          a new instance of {@link ComponentDescriptor}.
      */
-    ComponentDescriptor<T> make(final Class<? extends T> type, final String version);
+    ComponentDescriptor<T> make(final Class<? extends T> type, final String version, final ClassLoader classLoader);
 }

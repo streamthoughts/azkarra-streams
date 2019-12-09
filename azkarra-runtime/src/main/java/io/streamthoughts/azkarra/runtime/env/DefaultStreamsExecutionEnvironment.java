@@ -39,7 +39,7 @@ import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
-import io.streamthoughts.azkarra.runtime.streams.WaitForSourceTopicsInterceptor;
+import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.streams.topology.TopologyFactory;
 import org.apache.kafka.streams.KafkaStreams;

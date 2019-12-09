@@ -19,11 +19,11 @@
 package io.streamthoughts.azkarra.streams.components.scantest.test;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
-import io.streamthoughts.azkarra.streams.components.ClasspathComponentScannerTest;
+import io.streamthoughts.azkarra.streams.components.ComponentScannerTest;
 
 /**
  * Class used for testing purpose.
- * @see ClasspathComponentScannerTest
+ * @see ComponentScannerTest
  */
 @Component
 public class TestAnnotatedComponent {

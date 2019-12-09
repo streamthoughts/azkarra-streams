@@ -16,8 +16,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.runtime.streams;
+package io.streamthoughts.azkarra.runtime.interceptors;
 
+import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.junit.jupiter.api.Assertions;

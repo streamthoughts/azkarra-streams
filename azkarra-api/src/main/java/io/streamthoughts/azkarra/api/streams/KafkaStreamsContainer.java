@@ -126,7 +126,7 @@ public class KafkaStreamsContainer {
         this.executor = executor;
         started = Time.SYSTEM.milliseconds();
         kafkaStreams = streamsFactory.make(this);
-
+        setState(State.CREATED);
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
         // https://issues.apache.org/jira/browse/KAFKA-7380
         return CompletableFuture.supplyAsync(() -> {

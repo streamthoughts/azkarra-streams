@@ -34,7 +34,7 @@ import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.streams.autoconfigure.AutoConfigure;
 import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
 import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
-import io.streamthoughts.azkarra.streams.components.ClasspathComponentScanner;
+import io.streamthoughts.azkarra.streams.components.ComponentScanner;
 import io.streamthoughts.azkarra.streams.config.HttpServerConf;
 import io.streamthoughts.azkarra.streams.config.internal.InternalHttpServerConf;
 import io.streamthoughts.azkarra.streams.context.AzkarraContextLoader;
@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
@@ -77,6 +78,7 @@ public class AzkarraApplication {
     private static final Logger LOG = LoggerFactory.getLogger(AzkarraApplication.class);
 
     private static final String HTTP_SERVER_CONFIG = "azkarra.server";
+    private static final String COMPONENT_PATHS_CONFIG = "azkarra.component.paths";
 
     public static AzkarraContext run() {
         return run(new Class<?>[0], new String[0]);
@@ -280,9 +282,12 @@ public class AzkarraApplication {
         }
 
         if (enableComponentScan) {
-            ClasspathComponentScanner scanner = new ClasspathComponentScanner(
+            ComponentScanner scanner = new ComponentScanner(
                 context.getComponentClassReader(),
                 context.getComponentRegistry());
+
+            final Optional<String> componentPaths = configuration.getOptionalString(COMPONENT_PATHS_CONFIG);
+            componentPaths.ifPresent(scanner::scan);
 
             for (Class source : sources) {
                 scanner.scan(source.getPackage());
@@ -302,7 +307,7 @@ public class AzkarraApplication {
         if (autoStart.isEnable()) {
             StreamsExecutionEnvironment target = context.getEnvironmentForNameOrCreate(autoStart.targetEnvironment());
             context.topologyProviders().forEach(desc ->
-                context.addTopology(desc.type(), target.name(), new InternalExecuted())
+                context.addTopology(desc.className(), desc.version(), target.name(), new InternalExecuted())
             );
         }
 

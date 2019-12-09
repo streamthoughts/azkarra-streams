@@ -44,6 +44,14 @@ public class ClassUtils {
         }
     }
 
+    public static ClassLoader compareAndSwapLoaders(final ClassLoader classLoader) {
+        final ClassLoader current = Thread.currentThread().getContextClassLoader();
+        if (!current.equals(classLoader)) {
+            Thread.currentThread().setContextClassLoader(classLoader);
+        }
+        return current;
+    }
+
     public static ClassLoader getClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null)

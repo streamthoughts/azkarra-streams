@@ -38,11 +38,19 @@ public class TopologyDescriptorFactory implements ComponentDescriptorFactory<Top
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public ComponentDescriptor<TopologyProvider> make(final Class<? extends TopologyProvider> type,
-                                                      final String version) {
+                                                      final String version,
+                                                      final ClassLoader classLoader) {
         final String description = getDescriptionFromAnnotation(type);
         final Conf streamsConfigs = getStreamsConfigsFromAnnotation(type);
-        TopologyDescriptor descriptor = new TopologyDescriptor<>(version, type, description, streamsConfigs);
+        final TopologyDescriptor descriptor = new TopologyDescriptor<>(
+            version,
+            type,
+            classLoader,
+            description,
+            streamsConfigs
+        );
         descriptor.addAliases(getAliasesFromAnnotation(type));
         return descriptor;
     }

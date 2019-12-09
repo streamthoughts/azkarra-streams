@@ -18,10 +18,10 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
-import io.streamthoughts.azkarra.api.components.ComponentFactory;
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.ComponentAliasesGenerator;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.ComponentFactory;
+import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.ComponentRegistryAware;
 import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.components.NoUniqueComponentException;
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,7 +54,8 @@ public class DefaultComponentRegistry implements ComponentRegistry {
 
     private final Map<Class<?>, List<GettableComponent<?>>> components;
 
-    private final Map<String, Class<?>> componentAliases;
+    // Multiple classes with the same FQCN can be loaded using different ClassLoader.
+    private final Map<String, List<Class<?>>> componentAliases;
 
     private ComponentAliasesGenerator aliasesGenerator;
 
@@ -94,13 +96,21 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         if (!isRegistered(alias)) {
             return Optional.empty();
         }
-        Class<T> cls = resolveTypeForAlias(alias);
-        List<GettableComponent<T>> matched = getAllComponentForType(cls);
+        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias);
+
         Optional<GettableComponent<T>> latest = matched.stream()
                 .sorted()
                 .findFirst();
 
         return latest.map(GettableComponent::descriptor);
+    }
+
+    private <T> List<GettableComponent<T>> resolveComponentsForClassOrAlias(final String classOrAlias) {
+        final Class<T>[] classes = resolveTypesForClassOrAlias(classOrAlias);
+        return Arrays
+            .stream(classes)
+            .flatMap(clazz -> resolveAllComponentsForType(clazz).stream())
+            .collect(Collectors.toList());
     }
 
     /**
@@ -111,8 +121,10 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         if (!isRegistered(alias)) {
             throw new NoSuchComponentException("No component registered for class or alias '" + alias + "'.");
         }
-        final Class<T> type = resolveTypeForAlias(alias);
-        return findAllDescriptorsByType(type);
+        final Class<T>[] classes = resolveTypesForClassOrAlias(alias);
+        return Arrays.stream(classes)
+          .flatMap(clazz -> findAllDescriptorsByType(clazz).stream())
+          .collect(Collectors.toList());
     }
 
     /**
@@ -145,18 +157,9 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getLatestComponent(final Class<T> type, final Conf conf) {
-        List<GettableComponent<T>> matched = getAllComponentForType(type);
-
-        Optional<GettableComponent<T>> latest = matched.stream()
-                .sorted()
-                .findFirst();
-        if (latest.isPresent()) {
-            GettableComponent<T> gettable = latest.get();
-            return gettable.make(conf);
-        }
-
-        throw new NoSuchComponentException("No component registered for class '" + type.getName() + "'");
+        return resolveLatestComponent((Class<T>[])new Class<?>[]{type}, conf);
     }
 
     /**
@@ -167,8 +170,7 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         if (!isRegistered(classOrAlias)) {
             throw new NoSuchComponentException("No component registered for class or alias '" + classOrAlias + "'.");
         }
-        final Class<T> cls = resolveTypeForAlias(classOrAlias);
-        return getLatestComponent(cls, conf);
+        return resolveLatestComponent(resolveTypesForClassOrAlias(classOrAlias), conf);
     }
 
     /**
@@ -181,9 +183,8 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         if (!isRegistered(alias)) {
             throw new NoSuchComponentException("No component registered for class or alias '" + alias + "'.");
         }
-        final Class<T> type = resolveTypeForAlias(alias);
-        List<GettableComponent<T>> matched = getAllComponentForType(type);
 
+        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias);
         final Optional<GettableComponent<T>> component = matched.stream()
                 .filter(gettable -> gettable.descriptor().isVersioned())
                 .filter(gettable -> gettable.descriptor().version().equals(version))
@@ -193,16 +194,6 @@ public class DefaultComponentRegistry implements ComponentRegistry {
             return  component.get().make(conf);
         }
         throw new NoSuchComponentException("No component for version '" + version + "'.");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf) {
-        Objects.requireNonNull(type, "type cannot be null");
-        List<GettableComponent<T>> matched = getAllComponentForType(type);
-        return matched.stream().map(gettable -> gettable.make(conf)).collect(Collectors.toList());
     }
 
     /**
@@ -221,12 +212,22 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getAllComponents(final String alias, final Conf conf) {
-        if (!isRegistered(alias)) {
+    public <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf) {
+        Objects.requireNonNull(type, "type cannot be null");
+        List<GettableComponent<T>> components = resolveAllComponentsForType(type);
+        return components.stream().map(gettable -> gettable.make(conf)).collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<T> getAllComponents(final String classOrAlias, final Conf conf) {
+        if (!isRegistered(classOrAlias)) {
             return Collections.emptyList();
         }
-        final Class<T> cls = resolveTypeForAlias(alias);
-        return getAllComponents(cls, conf);
+        List<GettableComponent<T>> components = resolveComponentsForClassOrAlias(classOrAlias);
+        return components.stream().map(gettable -> gettable.make(conf)).collect(Collectors.toList());
     }
 
     /**
@@ -242,7 +243,10 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      */
     @Override
     public <T> void registerComponent(final ComponentDescriptor<T> descriptor, final ComponentFactory<T> factory) {
-        LOG.info("Registering descriptor for type '{}'", descriptor.className());
+        LOG.info(
+            "Registering component descriptor for: type='{}', version='{}'",
+            descriptor.className(),
+            descriptor.version());
 
         GettableComponent<T> gettable = new GettableComponent<>(descriptor, factory);
         registerAliasesFor(descriptor);
@@ -256,19 +260,33 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         }
     }
 
+    private <T> T resolveLatestComponent(final Class<T>[] classes, final Conf conf) {
+        final List<GettableComponent<T>> matched = Arrays
+                .stream(classes)
+                .flatMap( clazz -> resolveAllComponentsForType(clazz).stream())
+                .collect(Collectors.toList());
+
+        Optional<GettableComponent<T>> latest = matched.stream()
+                .sorted()
+                .findFirst();
+        if (latest.isPresent()) {
+            GettableComponent<T> gettable = latest.get();
+            return gettable.make(conf);
+        }
+        throw new NoSuchComponentException("No component registered for class '" + classes[0].getName() + "'");
+    }
+
     @SuppressWarnings("unchecked")
-    private <T> List<GettableComponent<T>> getAllComponentForType(final Class<T> cls) {
-        return this.components.getOrDefault(cls, Collections.emptyList())
+    private <T> List<GettableComponent<T>> resolveAllComponentsForType(final Class<T> cls) {
+        return components.getOrDefault(cls, Collections.emptyList())
             .stream()
             .map(o -> (GettableComponent<T>)o) // do cast
             .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> Class<T> resolveTypeForAlias(final String alias) {
-        return (Class<T>) componentAliases.get(alias);
+    private <T> Class<T>[] resolveTypesForClassOrAlias(final String classOrAlias) {
+        return componentAliases.get(classOrAlias).toArray((Class<T>[])new Class<?>[0]);
     }
-
 
     /**
      * {@inheritDoc}
@@ -284,8 +302,12 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         if (!isRegistered(classOrAlias)) {
             return Optional.empty();
         }
-        Class<T> cls = resolveTypeForAlias(classOrAlias);
-        return findSingleDescriptorAndFactoryForType(cls);
+        final Class<T>[] classes = resolveTypesForClassOrAlias(classOrAlias);
+        if (classes.length > 1) {
+            throw new NoUniqueComponentException("Expected single matching component for " +
+                "class '" + classes[0].getName() + "' but found " + classes.length);
+        }
+        return findSingleDescriptorAndFactoryForType(classes[0]);
     }
 
     @SuppressWarnings("unchecked")
@@ -303,15 +325,22 @@ public class DefaultComponentRegistry implements ComponentRegistry {
     }
 
     private void registerAliasesFor(final ComponentDescriptor descriptor) {
+
+        final List<String> aliases = new LinkedList<>();
+        aliases.add(descriptor.className());
+
         if (aliasesGenerator != null) {
-            Set<String> aliases = aliasesGenerator.getAliasesFor(descriptor, allDescriptors());
+            Set<String> computed = aliasesGenerator.getAliasesFor(descriptor, allDescriptors());
             if (!aliases.isEmpty()) {
-                LOG.info("Registered aliases '{}' for component {}.", aliases, descriptor.className());
-                descriptor.addAliases(aliases);
-                aliases.forEach(alias -> componentAliases.put(alias, descriptor.type()));
+                LOG.info("Registered aliases '{}' for component {}.", computed, descriptor.className());
+                descriptor.addAliases(computed);
+                aliases.addAll(computed);
             }
         }
-        componentAliases.put(descriptor.className(), descriptor.type());
+        aliases.forEach(alias -> {
+            List<Class<?>> types = componentAliases.computeIfAbsent(alias, key -> new LinkedList<>());
+            types.add(descriptor.type());
+        });
     }
 
     private Collection<ComponentDescriptor> allDescriptors() {
@@ -362,21 +391,28 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         }
 
         synchronized T make(final Conf conf) {
+
             if (factory.isSingleton() && !instances.isEmpty()) {
                 return instances.get(0);
             }
 
-            Configurable.mayConfigure(factory, conf);
+            final ClassLoader descriptorClassLoader = descriptor.getClassLoader();
+            final ClassLoader classLoader = ClassUtils.compareAndSwapLoaders(descriptorClassLoader);
+            try {
+                Configurable.mayConfigure(factory, conf);
 
-            T instance = factory.make();
+                T instance = factory.make();
 
-            if (descriptor.isCloseable() || factory.isSingleton()) {
-                instances.add(instance);
+                if (descriptor.isCloseable() || factory.isSingleton()) {
+                    instances.add(instance);
+                }
+
+                Configurable.mayConfigure(instance, conf);
+
+                return instance;
+            } finally {
+                ClassUtils.compareAndSwapLoaders(classLoader);
             }
-
-            Configurable.mayConfigure(instance, conf);
-
-            return instance;
         }
 
         /**

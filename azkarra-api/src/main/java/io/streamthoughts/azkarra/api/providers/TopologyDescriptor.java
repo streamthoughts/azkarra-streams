@@ -38,12 +38,30 @@ public final class TopologyDescriptor<T extends TopologyProvider> extends Compon
      *
      * @param cls         the topology provider class.
      * @param version     the topology version.
+     *
      * @param description the topology description.
      */
     public TopologyDescriptor(final String version,
                               final Class<T> cls,
                               final String description) {
-        this(version, cls, description, Conf.empty());
+        this(version, cls, cls.getClassLoader(), description, Conf.empty());
+    }
+
+
+    /**
+     * Creates a new {@link TopologyDescriptor} instance.
+     *
+     * @param cls         the topology provider class.
+     * @param version     the topology version.
+     * @param classLoader the {@link ClassLoader} from which the component is loaded.
+     *
+     * @param description the topology description.
+     */
+    public TopologyDescriptor(final String version,
+                              final Class<T> cls,
+                              final ClassLoader classLoader,
+                              final String description) {
+        this(version, cls, classLoader, description, Conf.empty());
     }
 
     /**
@@ -51,14 +69,16 @@ public final class TopologyDescriptor<T extends TopologyProvider> extends Compon
      *
      * @param cls           the topology provider class.
      * @param version       the topology version.
+     * @param classLoader   the {@link ClassLoader} from which the component is loaded.
      * @param description   the topology description.
      * @param streamConfigs the streams configuration.
      */
     public TopologyDescriptor(final String version,
                               final Class<T> cls,
+                              final ClassLoader classLoader,
                               final String description,
                               final Conf streamConfigs) {
-        super(cls, version);
+        super(cls, classLoader, version);
         this.description = description;
         this.streamConfigs = streamConfigs;
     }

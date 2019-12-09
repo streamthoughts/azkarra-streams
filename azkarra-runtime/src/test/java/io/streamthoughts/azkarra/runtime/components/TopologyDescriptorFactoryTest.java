@@ -36,7 +36,7 @@ public class TopologyDescriptorFactoryTest {
     @Test
     public void should() {
         final TopologyDescriptorFactory factory = new TopologyDescriptorFactory();
-        ComponentDescriptor<TopologyProvider> descriptor = factory.make(TestTopologyProvider.class, "1.0");
+        ComponentDescriptor<TopologyProvider> descriptor = factory.make(TestTopologyProvider.class, "1.0", TestTopologyProvider.class.getClassLoader());
 
         assertTrue(descriptor.isVersioned());
         assertEquals("1.0", descriptor.version());

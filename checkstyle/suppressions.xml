@@ -1,8 +1,4 @@
 <?xml version="1.0"?>
-<!DOCTYPE suppressions PUBLIC
-        "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
-        "https://checkstyle.org/dtds/suppressions_1_0.dtd">
-<suppressions>
 <!--
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -21,11 +17,15 @@
  * limitations under the License.
  */
  -->
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
+        "https://checkstyle.org/dtds/suppressions_1_0.dtd">
+<suppressions>
     <suppress checks="Header" files="azkarra-version.properties"/>
     <suppress checks="Header" files="version.properties"/>
     <suppress checks="Header" files="log4j.properties"/>
     <suppress checks="Header" files="log4j2.properties"/>
     <suppress checks="Header" files="logback.properties"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.http.UndertowEmbeddedServer"/>
-
+    <suppress checks="LineLength" files="io.streamthoughts.azkarra.streams.components.ComponentResolver"/>
 </suppressions>

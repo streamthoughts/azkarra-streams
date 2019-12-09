@@ -314,6 +314,13 @@
                 <version>1.10.19</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.3</version>
+                <scope>test</scope>
+            </dependency>
             <!-- END dependencies for testing -->
         </dependencies>
     </dependencyManagement>

@@ -154,8 +154,8 @@ public interface AzkarraContext {
      *                      otherwise {@code null}..
      */
     ApplicationId addTopology(final Class<? extends TopologyProvider> type,
-                               final String environment,
-                               final Executed executed);
+                              final String environment,
+                              final Executed executed);
 
     /**
      * Adds a topology to a specified environment.

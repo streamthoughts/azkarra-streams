@@ -63,6 +63,19 @@ public interface ComponentClassReader {
     /**
      * Registers the {@link Provider} class using the specified {@link ComponentRegistry}.
      *
+     * @param componentClass the component class to be read and register.
+     * @param registry       the {@link ComponentRegistry} instance to be used.
+     * @param classLoader    the {@link ClassLoader} instance used to load the component.
+     * @param <T>            the component-type.
+     * @throws              {@link AzkarraException} if the specified class cannot be read.
+     */
+    <T>  void registerComponent(final Class<T> componentClass,
+                                final ComponentRegistry registry,
+                                final ClassLoader classLoader);
+
+    /**
+     * Registers the {@link Provider} class using the specified {@link ComponentRegistry}.
+     *
      * @param componentFactory  the {@link ComponentFactory} instance to be used.
      * @param registry          the {@link ComponentRegistry} instance to be used.
      * @param <T>               the component-type.
@@ -70,4 +83,17 @@ public interface ComponentClassReader {
      */
     <T> void registerComponent(final ComponentFactory<T> componentFactory,
                                final ComponentRegistry registry);
+
+    /**
+     * Registers the {@link Provider} class using the specified {@link ComponentRegistry}.
+     *
+     * @param componentFactory  the {@link ComponentFactory} instance to be used.
+     * @param registry          the {@link ComponentRegistry} instance to be used.
+     * @param classLoader       the {@link ClassLoader} instance used to load the component.
+     * @param <T>               the component-type.
+     * @throws                  {@link AzkarraException} if the specified class cannot be read.
+     */
+    <T> void registerComponent(final ComponentFactory<T> componentFactory,
+                               final ComponentRegistry registry,
+                               final ClassLoader classLoader);
 }

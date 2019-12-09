@@ -44,29 +44,49 @@ public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>
 
     private final Set<String> aliases;
 
+    private final ClassLoader classLoader;
+
     /**
      * Creates a new {@link ComponentDescriptor} instance.
      *
      * @param type   the component class.
      */
     public ComponentDescriptor(final Class<T> type) {
-        this(type, null);
+        this(type, type.getClassLoader(), null);
     }
 
     /**
      * Creates a new {@link ComponentDescriptor} instance.
      *
-     * @param type      the component class (cannot be{@code null}).
-     * @param version   the component version (may be {@code null}).
+     * @param type        the component class (cannot be{@code null}).
+     * @param version     the component version (may be {@code null}).
      */
     public ComponentDescriptor(final Class<T> type,
+                               final String version) {
+        this(type, type.getClassLoader(), version);
+    }
+
+    /**
+     * Creates a new {@link ComponentDescriptor} instance.
+     *
+     * @param type        the component class (cannot be{@code null}).
+     * @param classLoader the {@link ClassLoader} from which the component is loaded.
+     * @param version     the component version (may be {@code null}).
+     */
+    public ComponentDescriptor(final Class<T> type,
+                               final ClassLoader classLoader,
                                final String version) {
         Objects.requireNonNull(type, "type can't be null");
         this.name = type.getName();
         this.version = version;
         this.comparableVersion = version != null ? Version.parse(version) : null;
         this.type = type;
+        this.classLoader = classLoader;
         this.aliases = new TreeSet<>();
+    }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
     }
 
     /**
@@ -140,5 +160,19 @@ public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>
         if (!this.isVersioned()) return 1;
         else if (!that.isVersioned()) return -1;
         else return this.comparableVersion.compareTo(that.comparableVersion);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "ComponentDescriptor{" +
+                "name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                ", comparableVersion=" + comparableVersion +
+                ", type=" + type +
+                ", aliases=" + aliases +
+                '}';
     }
 }

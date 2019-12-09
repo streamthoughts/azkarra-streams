@@ -19,13 +19,13 @@
 package io.streamthoughts.azkarra.runtime.components;
 
 import io.streamthoughts.azkarra.api.annotations.Singleton;
+import io.streamthoughts.azkarra.api.components.ComponentClassReader;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorFactory;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
+import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.Versioned;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-import io.streamthoughts.azkarra.api.components.ComponentRegistry;
-import io.streamthoughts.azkarra.api.components.ComponentClassReader;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,12 +80,31 @@ public class DefaultProviderClassReader implements ComponentClassReader {
      * {@inheritDoc}
      */
     @Override
-    public <T> void registerComponent(final Class<T> type, final ComponentRegistry registry) {
-        Objects.requireNonNull(type, "type cannot be null");
+    public <T> void registerComponent(final Class<T> componentClass, final ComponentRegistry registry) {
+        registerComponent(componentClass, registry, componentClass.getClassLoader());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> void registerComponent(final Class<T> componentClass,
+                                      final ComponentRegistry registry,
+                                      final ClassLoader classLoader) {
+        Objects.requireNonNull(componentClass, "componentClass cannot be null");
         Objects.requireNonNull(registry, "registry cannot be registry");
 
-        boolean isSingleton = ClassUtils.isSuperTypesAnnotatedWith(type, Singleton.class);
-        registerComponent(new BasicComponentFactory<>(type, isSingleton), registry);
+        boolean isSingleton = ClassUtils.isSuperTypesAnnotatedWith(componentClass, Singleton.class);
+        registerComponent(new BasicComponentFactory<>(componentClass, isSingleton), registry, classLoader);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> void registerComponent(final ComponentFactory<T> factory,
+                                      final ComponentRegistry registry) {
+        registerComponent(factory, registry, factory.getClass().getClassLoader());
     }
 
     /**
@@ -94,7 +113,8 @@ public class DefaultProviderClassReader implements ComponentClassReader {
     @Override
     @SuppressWarnings("unchecked")
     public <T> void registerComponent(final ComponentFactory<T> factory,
-                                      final ComponentRegistry registry) {
+                                      final ComponentRegistry registry,
+                                      final ClassLoader classLoader) {
         Objects.requireNonNull(factory, "factory cannot be null");
         Objects.requireNonNull(registry, "registry cannot be registry");
 
@@ -105,11 +125,11 @@ public class DefaultProviderClassReader implements ComponentClassReader {
 
             ComponentDescriptor<T> descriptor;
 
-            final String version = getVersionFor(type);
+            final String version = getVersionFor(type, classLoader);
             if (descriptorFactory != null) {
-                descriptor = descriptorFactory.make(type, version);
+                descriptor = descriptorFactory.make(type, version, classLoader);
             } else {
-                descriptor = new ComponentDescriptor<>(type, version);
+                descriptor = new ComponentDescriptor<>(type, classLoader, version);
             }
             registry.registerComponent(descriptor, factory);
         } else {
@@ -135,7 +155,13 @@ public class DefaultProviderClassReader implements ComponentClassReader {
     }
 
     @SuppressWarnings("unchecked")
-    private static String getVersionFor(final Class<?> cls) {
-        return Versioned.class.isAssignableFrom(cls) ? ClassUtils.newInstance((Class<Versioned>)cls).version() : null;
+    private static String getVersionFor(final Class<?> cls, final ClassLoader classLoader) {
+        ClassLoader saveLoader = ClassUtils.compareAndSwapLoaders(classLoader);
+        try {
+            return Versioned.class.isAssignableFrom(cls) ?
+                ClassUtils.newInstance((Class<Versioned>) cls).version() : null;
+        } finally {
+            ClassUtils.compareAndSwapLoaders(saveLoader);
+        }
     }
 }
