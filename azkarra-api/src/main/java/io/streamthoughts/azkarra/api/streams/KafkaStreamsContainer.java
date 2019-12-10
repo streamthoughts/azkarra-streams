@@ -18,15 +18,15 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
-import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
+import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.streams.admin.AdminClientUtils;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
-import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,20 +58,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class KafkaStreamsContainer {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamsContainer.class);
-
-    private static final String INTERNAL_REPARTITIONING_TOPIC_SUFFIX = "-repartition";
-
-    /**
-     * Pattern for identifying internal topics created for repartitioning purpose.
-     */
-    private static final Pattern INTERNAL_REPARTITIONING_NAME_PATTERN = Pattern.compile(".*-[0-9]{10}-repartition$");
 
     private final KafkaStreamsFactory streamsFactory;
 
@@ -92,6 +83,8 @@ public class KafkaStreamsContainer {
     private final String applicationServer;
 
     private final LinkedBlockingQueue<StateChangeWatcher> stateChangeWatchers = new LinkedBlockingQueue<>();
+
+    private final Collection<StreamsLifeCycleInterceptor> interceptors;
 
     /**
      * The {@link Executor} which is used for starting the internal streams in a non-blocking way.
@@ -115,73 +108,42 @@ public class KafkaStreamsContainer {
         this.topologyMetadata = topologyMetadata;
         this.conf = streamsConfig;
         this.applicationServer = conf.getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG).orElse(null);
+        this.interceptors = new LinkedList<>();
+    }
+
+    public void addLifeCycleInterceptors(final StreamsLifeCycleInterceptor interceptor) {
+        interceptors.add(interceptor);
     }
 
     /**
      * Asynchronously start the underlying {@link KafkaStreams} instance.
      *
      * @param executor the {@link Executor} instance to be used for starting the streams.
-     * @param waitForTopicsToBeCreated should wait for source topics to be created before starting.
      *
      * @return  the future {@link org.apache.kafka.streams.KafkaStreams.State} of the streams.
      */
-    public synchronized Future<KafkaStreams.State> start(final Executor executor,
-                                                         final boolean waitForTopicsToBeCreated) {
+    public synchronized Future<KafkaStreams.State> start(final Executor executor) {
         this.executor = executor;
         started = Time.SYSTEM.milliseconds();
         kafkaStreams = streamsFactory.make(this);
+
+        // start() may block during a undefined period of time if the topology has defined GlobalKTables.
+        // https://issues.apache.org/jira/browse/KAFKA-7380
         return CompletableFuture.supplyAsync(() -> {
-            if (waitForTopicsToBeCreated) {
-                // Kafka Streams fails if one of the source topic is missing (error: INCOMPLETE_SOURCE_TOPIC_METADATA);
-                Set<String> sourceTopics = getSourceTopics(topologyMetadata.topology());
-                if (!sourceTopics.isEmpty()) {
-                    setState(State.WAITING_FOR_TOPICS);
-                    try (final AdminClient client = AdminClientUtils.newAdminClient(conf)) {
-                        LOG.info("Waiting for source topic(s) to be created: {}", sourceTopics);
-                        AdminClientUtils.waitForTopicToExist(client, sourceTopics);
-                    } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        // ignore and attempts to start anyway;
-                    }
-                }
-            }
-            // start() may block during a undefined period of time if the topology has defined GlobalKTables.
-            // https://issues.apache.org/jira/browse/KAFKA-7380
-            kafkaStreams.start();
+            LOG.info("Starting Kafka Streams instance for application.id: {}", applicationId());
+            StreamsLifeCycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
+                interceptors.iterator(),
+                (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifeCycleContext(), chain),
+                () -> kafkaStreams.start()
+            );
+            streamsLifeCycle.execute();
             return kafkaStreams.state();
-        }, executor);
+
+         }, executor);
     }
 
     private void setState(final State state) {
         this.state = new TimestampedValue<>(state);
-    }
-
-    @VisibleForTesting
-    Set<String> getSourceTopics(final TopologyDescription topology) {
-        final Set<String> userTopics = new HashSet<>();
-        topology.globalStores().forEach(s -> {
-            userTopics.addAll(s.source().topicSet());
-        });
-        topology.subtopologies().forEach(sub ->
-            sub.nodes().forEach(n -> {
-                if (n instanceof TopologyDescription.Source) {
-                    Set<String> topics = ((TopologyDescription.Source) n).topicSet();
-                    userTopics.addAll(
-                        topics.stream()
-                            .filter(Predicate.not(this::isInternalTopics))
-                            .collect(Collectors.toSet())
-                    );
-                }
-            })
-        );
-
-        return userTopics;
-    }
-
-    private boolean isInternalTopics(final String topic) {
-        return topic.startsWith(applicationId())
-                || INTERNAL_REPARTITIONING_NAME_PATTERN.matcher(topic).matches()
-                || topic.endsWith(INTERNAL_REPARTITIONING_TOPIC_SUFFIX);
     }
 
     /**
@@ -283,10 +245,17 @@ public class KafkaStreamsContainer {
      * @param cleanUp flag to clean up the local streams states.
      */
     public void close(final boolean cleanUp) {
-        kafkaStreams.close();
-        if (cleanUp) {
-            kafkaStreams.cleanUp();
-        }
+        StreamsLifeCycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
+            interceptors.iterator(),
+            (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifeCycleContext(), chain),
+            () -> {
+                kafkaStreams.close();
+                if (cleanUp) {
+                    kafkaStreams.cleanUp();
+                }
+            }
+        );
+        streamsLifeCycle.execute();
     }
 
     public void restart() {
@@ -311,9 +280,7 @@ public class KafkaStreamsContainer {
     }
 
     private void restartNow() {
-        CompletableFuture<KafkaStreams.State> f = (CompletableFuture<KafkaStreams.State>) start(
-            executor,
-            false);
+        CompletableFuture<KafkaStreams.State> f = (CompletableFuture<KafkaStreams.State>) start(executor);
         f.handle((state, throwable) -> {
             if (throwable != null) {
                 LOG.error("Unexpected error happens while restarting streams", throwable);
@@ -440,5 +407,48 @@ public class KafkaStreamsContainer {
         boolean accept(final KafkaStreams.State state);
 
         void apply();
+    }
+
+    public class InternalStreamsLifeCycleContext implements StreamsLifeCycleContext {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getApplicationId() {
+            return applicationId();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public TopologyDescription getTopology() {
+            return topologyMetadata.topology();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Conf getStreamConfig() {
+            return topologyMetadata.streamsConfig();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public State getState() {
+            return state().value();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void setState(final State state) {
+            KafkaStreamsContainer.this.setState(state);
+        }
     }
 }

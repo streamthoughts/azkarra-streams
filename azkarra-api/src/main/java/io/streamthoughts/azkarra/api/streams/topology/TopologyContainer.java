@@ -19,10 +19,6 @@
 package io.streamthoughts.azkarra.api.streams.topology;
 
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 
 
@@ -103,25 +99,5 @@ public class TopologyContainer {
 
     public TopologyMetadata getMetadata() {
         return metadata;
-    }
-
-    /**
-     * Builds a new {@link KafkaStreams} for this {@link Topology}.
-     *
-     * @param applicationId           the application id to be used.
-     * @param defaultStreamsConfig    the default streamsConfig to be used.
-     *
-     * @return                        a new {@link Tuple} instance of a streams {@link Conf}
-     *                                instance and a {@link KafkaStreams} instance.
-     */
-    public Tuple<Conf, KafkaStreams> buildKafkaStreams(final ApplicationId applicationId,
-                                                       final Conf defaultStreamsConfig) {
-
-        Conf streamsConfig = Conf
-                .with(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString())
-                .withFallback(metadata.streamsConfig())
-                .withFallback(defaultStreamsConfig);
-
-        return new Tuple<>(streamsConfig, new KafkaStreams(topology, streamsConfig.getConfAsProperties()));
     }
 }

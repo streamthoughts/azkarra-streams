@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
+import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateRestoreListener;
@@ -44,6 +45,7 @@ public class KafkaStreamContainerBuilder {
     private List<StateRestoreListener> restoreListeners = Collections.emptyList();
     private List<KafkaStreams.StateListener> stateListeners = Collections.emptyList();
     private List<Thread.UncaughtExceptionHandler> exceptionHandlers = Collections.emptyList();
+    private List<StreamsLifeCycleInterceptor> interceptors = Collections.emptyList();
 
     /**
      * Creates a new {@link KafkaStreamContainerBuilder} instance.
@@ -70,6 +72,11 @@ public class KafkaStreamContainerBuilder {
 
     public KafkaStreamContainerBuilder withRestoreListeners(final List<StateRestoreListener> listeners) {
         this.restoreListeners = listeners;
+        return this;
+    }
+
+    public KafkaStreamContainerBuilder withInterceptors(final List<StreamsLifeCycleInterceptor> interceptors) {
+        this.interceptors = interceptors;
         return this;
     }
 
@@ -106,12 +113,14 @@ public class KafkaStreamContainerBuilder {
             .withFallback(streamsConfig)
             .withFallback(rocksDBConf);
 
-
-        return new KafkaStreamsContainer(
+        final KafkaStreamsContainer container = new KafkaStreamsContainer(
             topologyContainer.getMetadata(),
             streamsConfig,
             new InternalKafkaStreamsFactory(topologyContainer.getTopology())
         );
+
+        interceptors.forEach(container::addLifeCycleInterceptors);
+        return container;
     }
 
     private class InternalKafkaStreamsFactory implements KafkaStreamsFactory {

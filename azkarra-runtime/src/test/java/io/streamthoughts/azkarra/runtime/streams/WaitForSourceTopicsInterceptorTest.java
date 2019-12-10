@@ -16,37 +16,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.runtime.streams;
 
-import io.streamthoughts.azkarra.api.config.Conf;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-public class KafkaStreamsContainerTest {
+class WaitForSourceTopicsInterceptorTest {
 
     @Test
     public void testSourceTopicsLookup() {
-        Conf streamsConfig = Conf.with(StreamsConfig.APPLICATION_ID_CONFIG, "test-app");
-        KafkaStreamsContainer container = new KafkaStreamsContainer(null, streamsConfig, container1 -> null);
+        WaitForSourceTopicsInterceptor interceptor = new WaitForSourceTopicsInterceptor();
 
         StreamsBuilder builder = new StreamsBuilder();
 
         builder.stream("input-topic")
-               .groupBy((k, v) -> v)
-               .count()
-               .toStream()
-               .to("output-topic");
+                .groupBy((k, v) -> v)
+                .count()
+                .toStream()
+                .to("output-topic");
 
         Topology topology = builder.build();
-        Set<String> userTopics = container.getSourceTopics(topology.describe());
+        Set<String> userTopics = interceptor.getSourceTopics("test-app", topology.describe());
         System.out.println(userTopics);
         Assertions.assertNotNull(userTopics);
         Assertions.assertEquals(1, userTopics.size());
         Assertions.assertTrue(userTopics.contains("input-topic"));
     }
+
 }

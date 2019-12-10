@@ -21,7 +21,10 @@ package io.streamthoughts.azkarra.api;
 import io.streamthoughts.azkarra.api.config.Conf;
 import org.apache.kafka.streams.Topology;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Executed class is used to describe a {@link Topology} instance to be executed.
@@ -31,6 +34,7 @@ public class Executed {
     protected final String name;
     protected final String description;
     protected final Conf config;
+    protected final List<Supplier<StreamsLifeCycleInterceptor>> interceptors;
 
     /**
      * Static helper that can be used to creates a new {@link Executed} instance
@@ -41,7 +45,7 @@ public class Executed {
      * @return a new {@link StreamsExecutionEnvironment} instance.
      */
     public static Executed as(final String name) {
-        return new Executed(name, null, null );
+        return new Executed(name, null, null, new LinkedList<>());
     }
 
     /**
@@ -54,7 +58,7 @@ public class Executed {
      * @return a new {@link StreamsExecutionEnvironment} instance.
      */
     public static Executed as(final String name, final String description) {
-        return new Executed(name, description, null);
+        return new Executed(name, description, null, new LinkedList<>());
     }
 
     /**
@@ -66,14 +70,14 @@ public class Executed {
      * @return a new {@link StreamsExecutionEnvironment} instance.
      */
     public static Executed with(final Conf conf) {
-        return new Executed(null, null, conf);
+        return new Executed(null, null, conf, new LinkedList<>());
     }
 
     /**
      * Creates a new {@link Executed} instance.
      */
     protected Executed() {
-        this(null, null, null);
+        this(null, null, null, new LinkedList<>());
     }
 
     /**
@@ -86,10 +90,12 @@ public class Executed {
      */
     private Executed(final String name,
                      final String description,
-                     final Conf config) {
+                     final Conf config,
+                     final List<Supplier<StreamsLifeCycleInterceptor>> interceptors) {
         this.name = name;
         this.description = description;
         this.config = config;
+        this.interceptors = interceptors;
     }
 
 
@@ -97,34 +103,78 @@ public class Executed {
         this(
             executed.name,
             executed.description,
-            executed.config
+            executed.config,
+            executed.interceptors
         );
     }
 
+    /**
+     * Returns a new {@link Executed} with the specified name.
+     *
+     * @param name  the name of the streams topology.
+     *
+     * @return  a new {@link Executed}.
+     */
     public Executed withName(final String name) {
         Objects.requireNonNull(name, "name cannot be null");
         return new Executed(
             name,
             description,
-            config
+            config,
+            interceptors
         );
     }
 
+    /**
+     * Returns a new {@link Executed} with the specified description.
+     *
+     * @param description  the description of the streams topology.
+     *
+     * @return  a new {@link Executed}.
+     */
     public Executed withDescription(final String description) {
         Objects.requireNonNull(description, "description cannot be null");
         return new Executed(
             name,
             description,
-            config
+            config,
+            interceptors
         );
     }
 
+    /**
+     * Returns a new {@link Executed} with the specified config.
+     *
+     * @param config  the config of the streams topology.
+     *
+     * @return  a new {@link Executed}.
+     */
     public Executed withConfig(final Conf config) {
         Objects.requireNonNull(config, "config cannot be null");
         return new Executed(
             name,
             description,
-            config
+            config,
+            interceptors
+        );
+    }
+
+    /**
+     * Returns a new {@link Executed} with the specified interceptor.
+     *
+     * @param interceptor  the interceptor to add to the streams topology.
+     *
+     * @return  a new {@link Executed}.
+     */
+    public Executed withInterceptor(final Supplier<StreamsLifeCycleInterceptor> interceptor) {
+        Objects.requireNonNull(config, "config cannot be null");
+        LinkedList<Supplier<StreamsLifeCycleInterceptor>> interceptors = new LinkedList<>(this.interceptors);
+        interceptors.add(interceptor);
+        return new Executed(
+                name,
+                description,
+                config,
+                interceptors
         );
     }
 }

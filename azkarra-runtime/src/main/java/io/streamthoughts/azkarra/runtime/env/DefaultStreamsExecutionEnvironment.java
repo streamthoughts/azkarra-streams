@@ -24,8 +24,10 @@ import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
+import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
 import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.config.RocksDBConfig;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
@@ -37,6 +39,7 @@ import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
+import io.streamthoughts.azkarra.runtime.streams.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.streams.topology.TopologyFactory;
 import org.apache.kafka.streams.KafkaStreams;
@@ -272,7 +275,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         topologies.add(supplier);
         if (state == State.STARTED) {
             Tuple<ApplicationId, TopologyContainer> t = supplier.get();
-            start(buildStreamsInstance(t.left(), t.right()));
+            start(buildStreamsInstance(t.left(), t.right(), supplier.executed()));
             return t.left();
         }
         return null;
@@ -292,28 +295,49 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         setState(State.STARTED);
     }
 
-
-    private void buildAllStreamsInstances() {
-        for (final Supplier<Tuple<ApplicationId, TopologyContainer>> supplier : topologies) {
-            Tuple<ApplicationId, TopologyContainer> t = supplier.get();
-            buildStreamsInstance(t.left(), t.right());
-        }
-    }
-
     public void setState(State started) {
         state = started;
     }
 
+    private void buildAllStreamsInstances() {
+        topologies.forEach(supplier -> {
+            Tuple<ApplicationId, TopologyContainer> t = supplier.get();
+            buildStreamsInstance(t.left(), t.right(), supplier.executed());
+        });
+    }
+
     private KafkaStreamsContainer buildStreamsInstance(final ApplicationId id,
-                                                       final TopologyContainer topology) {
+                                                       final TopologyContainer topology,
+                                                       final InternalExecuted executed) {
+        LOG.info("Building new streams instance with name='{}', version='{}', id='{}'.",
+            topology.getMetadata().name(),
+            topology.getMetadata().version(),
+            id);
+
         checkStreamsIsAlreadyRunningFor(id);
+
+        final List<StreamsLifeCycleInterceptor> interceptors = new LinkedList<>();
+
+        executed.interceptors().forEach(supplier -> {
+            final StreamsLifeCycleInterceptor interceptor = supplier.get();
+            Configurable.mayConfigure(interceptor, getContextAwareConfig());
+            interceptors.add(interceptor);
+        });
+
+        if (isWaitForTopicToBeCreated())
+            interceptors.add(new WaitForSourceTopicsInterceptor());
+
+        interceptors.forEach(i -> LOG.info("Adding streams interceptor: {}", i.getClass().getSimpleName()));
+
         final KafkaStreamsContainer container = KafkaStreamContainerBuilder.newBuilder()
             .withApplicationId(id)
             .withTopologyContainer(topology)
             .withStateListeners(stateListeners)
             .withRestoreListeners(restoreListeners)
             .withUncaughtExceptionHandler(Collections.singletonList((t, e) -> stop(id, false)))
+            .withInterceptors(interceptors)
             .build();
+
         streams.put(id, container);
         return container;
     }
@@ -326,7 +350,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     }
 
     private void start(final KafkaStreamsContainer streams) {
-        streams.start(STREAMS_EXECUTOR, isWaitForTopicToBeCreated());
+        streams.start(STREAMS_EXECUTOR);
     }
 
     /**
@@ -467,6 +491,10 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             TopologyContainer container = buildTopology(supplier, executed);
             this.id = buildApplicationId(container);
             return Tuple.of(buildApplicationId(container), container);
+        }
+
+        public InternalExecuted executed() {
+            return executed;
         }
 
         public ApplicationId applicationId() {
