@@ -76,6 +76,27 @@ public class AzkarraConf extends AbstractConf {
         return new AzkarraConf(ConfigFactory.load(resourceBasename));
     }
 
+    /**
+     * Static helper that can be used to creates a new {@link AzkarraConf} instance
+     * using the specified resource base name.
+     *
+     * <p>
+     * This method loads the following (first-listed are higher priority):
+     * <ul>
+     *     <li>system properties</li>
+     *     <li>application.conf (all resources on classpath with this name)</li>
+     *     <li>application.json (all resources on classpath with this name)</li>
+     *     <li>application.properties (all resources on classpath with this name)</li>
+     *     <li>reference.conf (all resources on classpath with this name)</li>
+     * </ul>
+     * </p>
+     *
+     * @return a new {@link AzkarraConf} instance.
+     */
+    public static AzkarraConf create() {
+        return new AzkarraConf(ConfigFactory.load());
+    }
+
     private final Config config;
 
     /**
@@ -83,7 +104,7 @@ public class AzkarraConf extends AbstractConf {
      *
      * @param config  the {@link Config} instance to used as default configuration.
      */
-    private AzkarraConf(final Config config) {
+    protected AzkarraConf(final Config config) {
         this.config = config;
     }
 
