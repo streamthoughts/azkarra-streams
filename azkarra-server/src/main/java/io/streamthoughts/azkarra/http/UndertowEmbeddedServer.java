@@ -95,7 +95,8 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
         serverInfo = new ServerInfo(
             config.getOptionalString(ServerConfBuilder.HTTP_LISTENER_LISTER_CONFIG).orElse(HTTP_LISTENER_DEFAULT),
-            config.getOptionalInt(ServerConfBuilder.HTTP_PORT_CONFIG).orElse(HTTP_PORT_DEFAULT)
+            config.getOptionalInt(ServerConfBuilder.HTTP_PORT_CONFIG).orElse(HTTP_PORT_DEFAULT),
+            securityConfig.isSslEnable()
         );
 
         HttpRemoteQueryBuilder httpRemoteQueryBuilder = new HttpRemoteQueryBuilder()

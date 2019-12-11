@@ -358,6 +358,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      */
     @Override
     public void stop(final boolean cleanUp) {
+        LOG.info("Stopping streams environment '{}'", name);
         checkIsStarted();
         try {
             for (final ApplicationId id : streams.keySet()) {

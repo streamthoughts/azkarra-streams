@@ -37,9 +37,7 @@ public class DefaultApplicationIdBuilderTest {
 
     private DefaultApplicationIdBuilder builderWithUserEnv;
     private DefaultApplicationIdBuilder builderWithInternalEnv;
-
-
-
+    
     @BeforeEach
     public void setUp() {
         builderWithUserEnv = new DefaultApplicationIdBuilder();

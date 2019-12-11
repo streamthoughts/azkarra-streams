@@ -497,6 +497,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public void stop(boolean cleanUp) {
+        LOG.info("Stopping Azkarra context");
         listeners.forEach(listener -> {
             try {
                 listener.onContextStop(this);

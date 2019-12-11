@@ -24,6 +24,7 @@ public class ServerInfo {
 
     private final String host;
     private final int port;
+    private final boolean sslEnable;
 
     /**
      * Creates a new {@link ServerInfo} instance.
@@ -32,8 +33,19 @@ public class ServerInfo {
      * @param port  the server port.
      */
     public ServerInfo(final String host, final int port) {
+        this(host, port, false);
+    }
+
+    /**
+     * Creates a new {@link ServerInfo} instance.
+     *
+     * @param host  the server host.
+     * @param port  the server port.
+     */
+    public ServerInfo(final String host, final int port, boolean sslEnable) {
         this.host = host;
         this.port = port;
+        this.sslEnable = sslEnable;
     }
 
     public String getHost() {
@@ -69,9 +81,6 @@ public class ServerInfo {
      */
     @Override
     public String toString() {
-        return "ServerInfo{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
-                '}';
+        return (sslEnable ? "https" : "http") + "://" + host + ":" + port;
     }
 }
