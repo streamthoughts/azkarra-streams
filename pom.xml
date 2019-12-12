@@ -35,9 +35,9 @@
         <module>azkarra-server</module>
         <module>azkarra-archetype</module>
         <module>azkarra-commons</module>
+        <module>azkarra-worker</module>
         <module>azkarra-examples</module>
     </modules>
-
 
     <name>Azkarra Streams</name>
 
@@ -84,7 +84,8 @@
 
     <properties>
         <kafka.streams.version>2.3.0</kafka.streams.version>
-        <log4j.version>1.7.28</log4j.version>
+        <slf4j.version>1.7.28</slf4j.version>
+        <log4j.version>2.12.1</log4j.version>
         <junit.version>4.12</junit.version>
         <jackson.version>2.10.0</jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -275,7 +276,25 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.28</version>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
             </dependency>
             <!-- END dependencies for logging -->
 
