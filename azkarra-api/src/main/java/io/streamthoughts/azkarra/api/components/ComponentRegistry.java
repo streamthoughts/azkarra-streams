@@ -63,6 +63,18 @@ public interface ComponentRegistry extends Closeable {
     /**
      * Finds a {@link ComponentDescriptor} for the specified class or alias.
      *
+     * @param alias    the fully qualified class name or an alias of the component.
+     * @param version  the version of the component.
+     * @param <T>      the component type.
+     *
+     * @return         the optional {@link ComponentDescriptor} instance.
+     */
+    <T> Optional<ComponentDescriptor<T>> findLatestDescriptorByAliasAndVersion(final String alias,
+                                                                               final String version);
+
+    /**
+     * Finds a {@link ComponentDescriptor} for the specified class or alias.
+     *
      * @param alias  the fully qualified class name or an alias of the component.
      * @param <T>    the component type.
      *

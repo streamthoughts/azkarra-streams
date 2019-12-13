@@ -327,7 +327,10 @@ public class DefaultAzkarraContext implements AzkarraContext {
                                                                     final Executed executed) {
         final StreamsExecutionEnvironment env = environments.get(environmentName);
 
-        Optional<ComponentDescriptor<TopologyProvider>> opt = registry.findLatestDescriptorByAlias(type);
+        Optional<ComponentDescriptor<TopologyProvider>> opt = version == null ?
+            registry.findLatestDescriptorByAlias(type) :
+            registry.findLatestDescriptorByAliasAndVersion(type, version);
+
         if (opt.isPresent()) {
             final TopologyDescriptor descriptor = (TopologyDescriptor) opt.get();
             InternalExecuted partial = new InternalExecuted(executed);

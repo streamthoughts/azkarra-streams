@@ -269,13 +269,9 @@ public class AzkarraApplication {
         AutoConfigure autoConfigure = new AutoConfigure();
         autoConfigure.load(this);
 
-
         if (args.length > 0) {
             configuration = new ArgsConf(args).withFallback(configuration);
         }
-
-        // Initializing context from the application configuration.
-        AzkarraContextLoader.load(context, configuration);
 
         if (registerShutdownHook) {
             context.setRegisterShutdownHook(true);
@@ -283,8 +279,8 @@ public class AzkarraApplication {
 
         if (enableComponentScan) {
             ComponentScanner scanner = new ComponentScanner(
-                context.getComponentClassReader(),
-                context.getComponentRegistry());
+                    context.getComponentClassReader(),
+                    context.getComponentRegistry());
 
             final Optional<String> componentPaths = configuration.getOptionalString(COMPONENT_PATHS_CONFIG);
             componentPaths.ifPresent(scanner::scan);
@@ -293,6 +289,9 @@ public class AzkarraApplication {
                 scanner.scan(source.getPackage());
             }
         }
+
+        // Initializing context from the application configuration.
+        AzkarraContextLoader.load(context, configuration);
 
         if (enableHttpServer) {
             List<EmbeddedHttpServer> result = loadEmbeddedHttpServerImplementations();

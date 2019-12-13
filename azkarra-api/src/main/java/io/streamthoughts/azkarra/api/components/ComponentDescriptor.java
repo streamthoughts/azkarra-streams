@@ -149,7 +149,7 @@ public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>
      * @return  {@code true } if closeable, otherwise {@code false}.
      */
     public boolean isCloseable() {
-        return Closeable.class.isAssignableFrom(type);
+        return AutoCloseable.class.isAssignableFrom(type);
     }
 
     /**

@@ -105,12 +105,14 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         return latest.map(GettableComponent::descriptor);
     }
 
-    private <T> List<GettableComponent<T>> resolveComponentsForClassOrAlias(final String classOrAlias) {
-        final Class<T>[] classes = resolveTypesForClassOrAlias(classOrAlias);
-        return Arrays
-            .stream(classes)
-            .flatMap(clazz -> resolveAllComponentsForType(clazz).stream())
-            .collect(Collectors.toList());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Optional<ComponentDescriptor<T>> findLatestDescriptorByAliasAndVersion(final String alias,
+                                                                                      final String version) {
+        final Optional<GettableComponent<T>> component = resolveComponentForAliasAndVersion(alias, version);
+        return component.map(GettableComponent::descriptor);
     }
 
     /**
@@ -184,14 +186,10 @@ public class DefaultComponentRegistry implements ComponentRegistry {
             throw new NoSuchComponentException("No component registered for class or alias '" + alias + "'.");
         }
 
-        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias);
-        final Optional<GettableComponent<T>> component = matched.stream()
-                .filter(gettable -> gettable.descriptor().isVersioned())
-                .filter(gettable -> gettable.descriptor().version().equals(version))
-                .findFirst();
+        final Optional<GettableComponent<T>> component = resolveComponentForAliasAndVersion(alias, version);
 
         if (component.isPresent()) {
-            return  component.get().make(conf);
+            return component.get().make(conf);
         }
         throw new NoSuchComponentException("No component for version '" + version + "'.");
     }
@@ -260,11 +258,28 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         }
     }
 
+    private <T> List<GettableComponent<T>> resolveComponentsForClassOrAlias(final String classOrAlias) {
+        final Class<T>[] classes = resolveTypesForClassOrAlias(classOrAlias);
+        return Arrays
+            .stream(classes)
+            .flatMap(clazz -> resolveAllComponentsForType(clazz).stream())
+            .collect(Collectors.toList());
+    }
+
+    private <T> Optional<GettableComponent<T>> resolveComponentForAliasAndVersion(final String alias,
+                                                                                  final String version) {
+        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias);
+        return matched.stream()
+            .filter(gettable -> gettable.descriptor().isVersioned())
+            .filter(gettable -> gettable.descriptor().version().equals(version))
+            .findFirst();
+    }
+
     private <T> T resolveLatestComponent(final Class<T>[] classes, final Conf conf) {
         final List<GettableComponent<T>> matched = Arrays
-                .stream(classes)
-                .flatMap( clazz -> resolveAllComponentsForType(clazz).stream())
-                .collect(Collectors.toList());
+            .stream(classes)
+            .flatMap( clazz -> resolveAllComponentsForType(clazz).stream())
+            .collect(Collectors.toList());
 
         Optional<GettableComponent<T>> latest = matched.stream()
                 .sorted()

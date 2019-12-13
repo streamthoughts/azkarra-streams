@@ -78,7 +78,7 @@ public class ApplicationConfig {
     }
 
     /**
-     * Gets all registered providers class name.
+     * Gets all registered components class name.
      *
      * @return a set of string class name.
      */

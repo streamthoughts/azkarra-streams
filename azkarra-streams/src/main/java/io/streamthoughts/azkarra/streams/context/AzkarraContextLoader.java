@@ -29,6 +29,7 @@ import io.streamthoughts.azkarra.streams.context.internal.TopologyConfig;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Class which can be used for initializing an {@link AzkarraContext} instance from a specified {@link Conf} instance.
@@ -108,7 +109,8 @@ public class AzkarraContextLoader {
             executed = topology.config().map(executed::withConfig).orElse(executed);
             executed = topology.description().map(executed::withDescription).orElse(executed);
 
-            context.addTopology(topology.type(), env.name(), executed);
+            Optional<String> version = topology.version();
+            context.addTopology(topology.type(), version.orElse(null), env.name(), executed);
         }
     }
 }
