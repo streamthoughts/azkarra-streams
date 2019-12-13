@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,8 +108,9 @@ public class ComponentResolverTest {
         final ExternalComponent expected2 = newComponent(componentJar2, componentJar2);
 
         final List<ExternalComponent> components = resolver.resolves();
-
+        components.sort(Comparator.comparing(o -> o.location().toString()));
         assertEquals(2, components.size());
+
         assertEquals(expected1, components.get(0));
         assertEquals(expected2, components.get(1));
     }
@@ -125,10 +127,10 @@ public class ComponentResolverTest {
         final ExternalComponent expected2 = newComponent(componentArchive2, componentArchive2);
 
         final List<ExternalComponent> components = resolver.resolves();
-
+        components.sort(Comparator.comparing(o -> o.location().toString()));
         assertEquals(2, components.size());
-        assertEquals(expected2, components.get(0));
-        assertEquals(expected1, components.get(1));
+        assertEquals(expected1, components.get(0));
+        assertEquals(expected2, components.get(1));
     }
 
     private ExternalComponent newComponent(final Path location, final Path...resources) throws MalformedURLException {
