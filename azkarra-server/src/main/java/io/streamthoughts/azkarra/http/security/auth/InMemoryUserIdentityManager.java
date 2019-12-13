@@ -20,7 +20,10 @@ package io.streamthoughts.azkarra.http.security.auth;
 
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
+import io.streamthoughts.azkarra.http.security.SecurityConfException;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,7 +31,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Simple {@link UsersIdentityManager} implementation backed by a in-memory hash Map.
+ */
 public class InMemoryUserIdentityManager implements UsersIdentityManager, Configurable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryUserIdentityManager.class);
 
     private final Map<String, UserDetails> users;
 
@@ -73,14 +81,25 @@ public class InMemoryUserIdentityManager implements UsersIdentityManager, Config
      */
     @Override
     public void configure(final Conf configuration) {
+        LOG.debug("Configuring user identities from props: '{}'", SecurityConfig.REST_AUTHENTICATION_USERS_CONFIG);
         SecurityConfig securityConfig = new SecurityConfig(configuration);
-        String users = securityConfig.getAuthenticationUsers();
-
-        Arrays.stream(users.split(","))
-          .forEach(user -> {
-              String[] upwd = user.split(":");
-              PasswordCredentials password = PasswordCredentials.get(upwd[1]);
-              addUsers(new UserDetails(upwd[0], password));
-          });
+        final String[] users = securityConfig.getAuthenticationUsers().split(",");
+        Arrays.stream(users)
+            .map(String::trim)
+            .forEach(user -> {
+                String[] upwd = user.split(":", 2);
+                if (upwd.length < 2) {
+                    throw new SecurityConfException(
+                        "Invalid config for '"
+                        + SecurityConfig.REST_AUTHENTICATION_USERS_CONFIG
+                        + "', Expecting <user>:<password>."
+                    );
+                }
+                addUsers(new UserDetails(upwd[0], PasswordCredentials.get(upwd[1])));
+                LOG.debug("Add user credentials for '{}'", upwd[0]);
+        });
+        if (users.length == 0) {
+            LOG.debug("No user configured");
+        }
     }
 }
