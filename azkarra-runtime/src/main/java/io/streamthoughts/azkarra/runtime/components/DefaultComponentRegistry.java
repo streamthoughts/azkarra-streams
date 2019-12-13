@@ -111,6 +111,9 @@ public class DefaultComponentRegistry implements ComponentRegistry {
     @Override
     public <T> Optional<ComponentDescriptor<T>> findLatestDescriptorByAliasAndVersion(final String alias,
                                                                                       final String version) {
+        if (!isRegistered(alias)) {
+            return Optional.empty();
+        }
         final Optional<GettableComponent<T>> component = resolveComponentForAliasAndVersion(alias, version);
         return component.map(GettableComponent::descriptor);
     }

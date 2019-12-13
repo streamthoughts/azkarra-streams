@@ -359,8 +359,11 @@ public class DefaultAzkarraContext implements AzkarraContext {
                 completedExecuted);
 
         } else {
-            throw new AzkarraContextException("Cannot find any topology provider for given type '" + type + "'" +
-                ", alias or class is invalid");
+            final String loggedVersion = version != null ? version : "latest";
+            throw new AzkarraContextException(
+               "Failed to register topology to environment '" + environmentName + "'." +
+                " Cannot find any topology provider for type='" + type + "', version='" + loggedVersion +" '."
+            );
         }
     }
 
