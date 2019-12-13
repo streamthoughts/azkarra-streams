@@ -43,6 +43,6 @@ build-images:
 	--build-arg azkarraCommit=${GIT_COMMIT} \
 	--build-arg azkarraBranch=${GIT_BRANCH} \
 	-t ${REPOSITORY}/${IMAGE}:latest . || exit 1 ;
-	docker tag ${REPOSITORY}/${IMAGE}:latest ${REPOSITORY}/azkarra-streams:${AZKARRA_VERSION} || exit 1 ;
+	docker tag ${REPOSITORY}/${IMAGE}:latest ${REPOSITORY}/${IMAGE}:${AZKARRA_VERSION} || exit 1 ;
 
 clean: clean-containers clean-images clean-build
