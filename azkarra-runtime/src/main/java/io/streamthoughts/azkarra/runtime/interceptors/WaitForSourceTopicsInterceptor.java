@@ -21,19 +21,19 @@ package io.streamthoughts.azkarra.runtime.interceptors;
 import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
 import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
-import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.admin.AdminClientUtils;
+import io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils;
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.streams.TopologyDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.getSourceTopics;
 
 /**
  * This {@link StreamsLifeCycleInterceptor} waits for source topics to be created
@@ -45,12 +45,23 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifeCycleIntercept
 
     private static final Logger LOG = LoggerFactory.getLogger(WaitForSourceTopicsInterceptor.class);
 
-    private static final String INTERNAL_REPARTITIONING_TOPIC_SUFFIX = "-repartition";
+    private final AdminClient adminClient;
 
     /**
-     * Pattern for identifying internal topics created for repartitioning purpose.
+     * Creates a new {@link WaitForSourceTopicsInterceptor} instance.
      */
-    private static final Pattern INTERNAL_REPARTITIONING_NAME_PATTERN = Pattern.compile(".*-[0-9]{10}-repartition$");
+    public WaitForSourceTopicsInterceptor() {
+        this(null);
+    }
+
+    /**
+     * Creates a new {@link WaitForSourceTopicsInterceptor} instance.
+     *
+     * @param adminClient   the {@link AdminClient} to be used.
+     */
+    public WaitForSourceTopicsInterceptor(final AdminClient adminClient) {
+        this.adminClient = adminClient;
+    }
 
     /**
      * {@inheritDoc}
@@ -58,45 +69,36 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifeCycleIntercept
     @Override
     public void onStart(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
         if (context.getState() == State.CREATED) {
-            final Set<String> sourceTopics = getSourceTopics(context.getApplicationId(), context.getTopology());
+
+            final Set<String> sourceTopics = getSourceTopics(context.getTopology())
+                .stream()
+                .filter(Predicate.not(TopologyUtils::isInternalTopic))
+                .collect(Collectors.toSet());
+
             if (!sourceTopics.isEmpty()) {
                 context.setState(State.WAITING_FOR_TOPICS);
-                try (final AdminClient client = AdminClientUtils.newAdminClient(context.getStreamConfig())) {
+                apply(context, client -> {
                     LOG.info("Waiting for source topic(s) to be created: {}", sourceTopics);
-                    AdminClientUtils.waitForTopicToExist(client, sourceTopics);
-                } catch (final InterruptedException e) {
+                    try {
+                        AdminClientUtils.waitForTopicToExist(client, sourceTopics);
+                    } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                     // ignore and attempts to start anyway;
-                }
+                    }
+                });
             }
         }
         chain.execute();
     }
 
-    @VisibleForTesting
-    Set<String> getSourceTopics(final String applicationId, final TopologyDescription topology) {
-        final Set<String> userTopics = new HashSet<>();
-        topology.globalStores().forEach(s -> {
-            userTopics.addAll(s.source().topicSet());
-        });
-        topology.subtopologies().forEach(sub ->
-            sub.nodes().forEach(n -> {
-                if (n instanceof TopologyDescription.Source) {
-                    Set<String> topics = ((TopologyDescription.Source) n).topicSet();
-                    userTopics.addAll(
-                        topics.stream()
-                            .filter(Predicate.not(topic -> isInternalTopics(applicationId, topic)))
-                            .collect(Collectors.toSet())
-                    );
-                }
-            })
-        );
-        return userTopics;
-    }
-
-    private static boolean isInternalTopics(final String applicationId, final String topic) {
-        return topic.startsWith(applicationId)
-                || INTERNAL_REPARTITIONING_NAME_PATTERN.matcher(topic).matches()
-                || topic.endsWith(INTERNAL_REPARTITIONING_TOPIC_SUFFIX);
+    private void apply(final StreamsLifeCycleContext context, final Consumer<AdminClient> consumer) {
+        // use a one-shot AdminClient if no one is provided.
+        if (adminClient == null) {
+            try (final AdminClient client = AdminClientUtils.newAdminClient(context.getStreamConfig())) {
+                consumer.accept(client);
+            }
+        } else {
+            consumer.accept(adminClient);
+        }
     }
 }

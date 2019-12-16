@@ -23,14 +23,19 @@ import io.streamthoughts.azkarra.api.time.SystemTime;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.ListTopicsResult;
+import org.apache.kafka.clients.admin.TopicListing;
+import org.apache.kafka.common.KafkaFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -80,6 +85,19 @@ public class AdminClientUtils {
             LOG.debug("Waiting for topic(s) to be created: {}", missingTopics);
             SystemTime.SYSTEM.sleep(Duration.ofSeconds(1));
         }
+    }
+
+    public static CompletableFuture<Collection<TopicListing>> listTopics(final AdminClient client) {
+        Objects.requireNonNull(client, "client cannot be null");
+
+        KafkaFuture<Collection<TopicListing>> listings = client.listTopics().listings();
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return listings.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private static Set<String> checkTopicsMissing(final AdminClient client, final Set<String> topicsToVerify)

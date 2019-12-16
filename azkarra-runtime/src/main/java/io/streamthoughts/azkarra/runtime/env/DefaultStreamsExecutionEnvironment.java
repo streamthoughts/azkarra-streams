@@ -39,7 +39,6 @@ import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
-import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.streams.topology.TopologyFactory;
 import org.apache.kafka.streams.KafkaStreams;
@@ -253,15 +252,6 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      * {@inheritDoc}
      */
     @Override
-    public StreamsExecutionEnvironment setWaitForTopicsToBeCreated(boolean waitForTopicToBeCreated) {
-        this.waitForTopicToBeCreated = waitForTopicToBeCreated;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public ApplicationId addTopology(final Supplier<TopologyProvider> provider) {
         return addTopology(provider, new InternalExecuted());
     }
@@ -323,9 +313,6 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             Configurable.mayConfigure(interceptor, getContextAwareConfig());
             interceptors.add(interceptor);
         });
-
-        if (isWaitForTopicToBeCreated())
-            interceptors.add(new WaitForSourceTopicsInterceptor());
 
         interceptors.forEach(i -> LOG.info("Adding streams interceptor: {}", i.getClass().getSimpleName()));
 
@@ -529,10 +516,5 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             conf = conf.withFallback(context.getConfiguration());
         }
         return conf;
-    }
-
-    private boolean isWaitForTopicToBeCreated() {
-        return waitForTopicToBeCreated ||
-                getContextAwareConfig().getOptionalBoolean(ENABLE_WAIT_FOR_TOPICS_CONFIG).orElse(false);
     }
 }

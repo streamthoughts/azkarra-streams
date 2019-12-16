@@ -35,8 +35,6 @@ import java.util.function.Supplier;
  */
 public interface StreamsExecutionEnvironment {
 
-    String ENABLE_WAIT_FOR_TOPICS_CONFIG = "enable.wait.for.topics";
-
     /**
      * Gets the name of this {@link StreamsExecutionEnvironment}.
      *
@@ -115,15 +113,6 @@ public interface StreamsExecutionEnvironment {
      * @return          this {@link StreamsExecutionEnvironment} instance.
      */
     StreamsExecutionEnvironment setApplicationIdBuilder(final Supplier<ApplicationIdBuilder> supplier);
-
-    /**
-     * Sets if the streams instances should wait for topics source to be created before starting.
-     * If some source topics are missing at startup, a streams instance fails.
-     *
-     * @param waitForTopicToBeCreated   should wait for topics to be created.
-     * @return                          this {@link StreamsExecutionEnvironment} instance.
-     */
-    StreamsExecutionEnvironment setWaitForTopicsToBeCreated(final boolean waitForTopicToBeCreated);
 
     /**
      * Adds streamsConfig that will be used in fallback if not present in defined environment streamsConfig.

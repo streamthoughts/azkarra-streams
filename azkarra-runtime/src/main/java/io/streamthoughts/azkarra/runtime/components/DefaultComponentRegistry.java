@@ -80,6 +80,15 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      * {@inheritDoc}
      */
     @Override
+    public boolean isRegistered(final Class<?> type) {
+        Objects.requireNonNull(type, "type cannot be null");
+        return componentAliases.containsKey(type.getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @SuppressWarnings("unchedked")
     public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias) {
         Objects.requireNonNull(alias, "alias cannot be null");

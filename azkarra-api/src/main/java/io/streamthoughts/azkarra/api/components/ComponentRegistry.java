@@ -34,9 +34,17 @@ public interface ComponentRegistry extends Closeable {
      * Checks whether the specified components class or alias is already registered.
      *
      * @param alias  the fully qualified class name or an alias of the component.
-     * @return              {@code true} if a provider exist, {code false} otherwise.
+     * @return       {@code true} if a provider exist, {code false} otherwise.
      */
     boolean isRegistered(final String alias);
+
+    /**
+     * Checks whether a components is already registered for the specified class.
+     *
+     * @param type  the component type.
+     * @return      {@code true} if a provider exist, {code false} otherwise.
+     */
+    boolean isRegistered(final Class<?> type);
 
     /**
      * Finds a {@link ComponentDescriptor} for the specified class or alias.

@@ -27,5 +27,6 @@
     <suppress checks="Header" files="log4j2.properties"/>
     <suppress checks="Header" files="logback.properties"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.http.UndertowEmbeddedServer"/>
+    <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.streams.components.ComponentResolver"/>
 </suppressions>
