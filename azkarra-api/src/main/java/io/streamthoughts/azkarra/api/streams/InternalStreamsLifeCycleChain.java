@@ -40,7 +40,7 @@ public class InternalStreamsLifeCycleChain implements StreamsLifeCycleChain {
      * @param callback      the {@link Callback} to invoke on each interceptor.
      * @param runnable      the {@link Runnable} to execute at the end of the chain.
      */
-    InternalStreamsLifeCycleChain(
+    public InternalStreamsLifeCycleChain(
             final Iterator<StreamsLifeCycleInterceptor> interceptors,
             final Callback callback,
             final Runnable runnable) {

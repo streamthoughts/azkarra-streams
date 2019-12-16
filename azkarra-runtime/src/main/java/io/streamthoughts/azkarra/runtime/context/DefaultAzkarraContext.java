@@ -24,6 +24,7 @@ import io.streamthoughts.azkarra.api.AzkarraContextListener;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
 import io.streamthoughts.azkarra.api.components.ComponentClassReader;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
@@ -41,6 +42,7 @@ import io.streamthoughts.azkarra.runtime.components.DefaultProviderClassReader;
 import io.streamthoughts.azkarra.runtime.components.TopologyDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
+import io.streamthoughts.azkarra.runtime.interceptors.CompositeStreamsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.util.ShutdownHook;
 import org.apache.kafka.streams.Topology;
@@ -342,7 +344,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
             final String description = partial.descriptionOrElseGet(descriptor.description());
 
             // Gets user-defined configuration and fallback on descriptor streams config.
-            Conf streamsConfig = partial.config().withFallback(Conf.with("streams", descriptor.streamsConfigs()));
+            final Conf streamsConfig = partial.config().withFallback(
+                Conf.with("streams", descriptor.streamsConfigs())
+            );
 
             Executed completedExecuted = Executed.as(name).withConfig(streamsConfig);
 
@@ -350,9 +354,22 @@ public class DefaultAzkarraContext implements AzkarraContext {
                 completedExecuted = completedExecuted.withDescription(description);
             }
 
+            // Register StreamsLifeCycleInterceptor for class-loading isolation.
             completedExecuted = completedExecuted.withInterceptor(
                 () -> new ClassloadingIsolationInterceptor(descriptor.getClassLoader())
             );
+
+            // Register all user-defined StreamsLifeCycleInterceptors.
+            final Conf config = streamsConfig.withFallback(configuration);
+            completedExecuted = completedExecuted.withInterceptor(() ->
+                new CompositeStreamsInterceptor(
+                    registry.getAllComponents(StreamsLifeCycleInterceptor.class, config)
+                )
+            );
+
+            final String loggedVersion = version != null ? version : "latest";
+            LOG.info("Registered new topology to environment '" + environmentName + "' " +
+                    " for type='" + type + "', version='" + loggedVersion +" '.");
 
             return env.addTopology(
                 new ContextTopologySupplier(type, version, env, completedExecuted),
