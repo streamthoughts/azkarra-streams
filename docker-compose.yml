@@ -42,4 +42,11 @@ services:
     environment:
       AZKARRA_CONTEXT_STREAMS_BOOTSTRAP_SERVERS: broker:29092
       AZKARRA_CONTEXT_STREAMS_STATE_DIR: /var/lib/kafka-streams/
+      AZKARRA_CONTEXT_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # /!\ Use this property with care and don't enable for production.
+      AZKARRA_CONTEXT_AUTO_DELETE_TOPICS_ENABLE: "true"
+      AZKARRA_CONTEXT_ENABLE_WAIT_FOR_TOPICS: "true"
       AZKARRA_COMPONENT_PATHS: /usr/share/azkarra-components
+    volumes:
+      - /tmp/azkarra/components:/usr/share/azkarra-components
+      #- /tmp/azkarra/etc/azkarra.conf:/etc/azkarra/azkarra.conf
