@@ -21,8 +21,8 @@
       <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">
           <a class="navbar-brand" href="#">
-             <img height="62px" alt="azkarra-streams-logo" src="static/azkarra-logo-reverse-small.png"/>
-             Dashboard <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
+             <img height="62px" alt="azkarra-streams-logo" src="static/azkarra-streams-logo-light.svg"/>
+             <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
            </a>
         </a>
         <ul class="navbar-nav text-light px-3">

@@ -1,7 +1,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/streamthoughts/blob/master/LICENSE)
 [![CircleCI](https://circleci.com/gh/streamthoughts/azkarra-streams.svg?style=svg&circle-token=dc27c1e59cfd3f4445d6cd234156773aae6e7013)](https://circleci.com/gh/streamthoughts/azkarra-streams)
 
-![Logo of Azkarra Streams](images/azkarra-logo-small.png)
+![Logo of Azkarra Streams](images/azkarra-streams-logo.png)
 
 Azkarra Streams is a lightweight Java framework which makes easy to develop and operate Kafka Streams applications (Azkarra is Basque word for *"Fast"*) 
 
