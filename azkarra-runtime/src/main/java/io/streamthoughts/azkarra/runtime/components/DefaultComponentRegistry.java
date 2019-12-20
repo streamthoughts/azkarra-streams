@@ -23,8 +23,10 @@ import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.ComponentRegistryAware;
+import io.streamthoughts.azkarra.api.components.GettableComponent;
 import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.components.NoUniqueComponentException;
+import io.streamthoughts.azkarra.api.components.Scoped;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
@@ -89,10 +91,18 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      * {@inheritDoc}
      */
     @Override
+    public boolean isRegistered(final Class<?> type, final Scoped scoped) {
+        return !resolveAllComponentsForType(type, scoped).isEmpty();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @SuppressWarnings("unchedked")
     public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias) {
         Objects.requireNonNull(alias, "alias cannot be null");
-        Optional<GettableComponent<T>> opt = findSingleDescriptorAndFactoryForType(alias);
+        Optional<GettableComponent<T>> opt = findComponentForType(alias, null);
         return opt.map(GettableComponent::descriptor);
     }
 
@@ -105,7 +115,7 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         if (!isRegistered(alias)) {
             return Optional.empty();
         }
-        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias);
+        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias, null);
 
         Optional<GettableComponent<T>> latest = matched.stream()
                 .sorted()
@@ -123,7 +133,11 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         if (!isRegistered(alias)) {
             return Optional.empty();
         }
-        final Optional<GettableComponent<T>> component = resolveComponentForAliasAndVersion(alias, version);
+        final Optional<GettableComponent<T>> component = resolveComponentForAliasAndVersion(
+            alias,
+            version,
+            null
+        );
         return component.map(GettableComponent::descriptor);
     }
 
@@ -133,7 +147,7 @@ public class DefaultComponentRegistry implements ComponentRegistry {
     @Override
     public <T> Collection<ComponentDescriptor<T>> findAllDescriptorByAlias(final String alias) {
         if (!isRegistered(alias)) {
-            throw new NoSuchComponentException("No component registered for class or alias '" + alias + "'.");
+            throw new NoSuchComponentException("No component registered for type '" + alias + "'");
         }
         final Class<T>[] classes = resolveTypesForClassOrAlias(alias);
         return Arrays.stream(classes)
@@ -158,13 +172,28 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      * {@inheritDoc}
      */
     @Override
-    public <T> T getComponent(final Class<T> type, final Conf conf) {
+    public <T> T getComponent(final Class<T> type, final Conf conf, final Scoped scoped) {
         Objects.requireNonNull(type, "type cannot be null");
-        Optional<GettableComponent<T>> df = findSingleDescriptorAndFactoryForType(type);
+
+        Optional<GettableComponent<T>> df = findComponentForType(type, scoped);
         if (df.isPresent()) {
-            return df.get().make(conf);
+            return df.get().get(conf);
         }
-        throw new NoSuchComponentException("No component registered for class '" + type.getName() + "'");
+
+        throw noSuchComponentException(type.getName(), null, scoped);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> GettableComponent<T> getComponent(final Class<T> type, final Scoped scoped) {
+        Objects.requireNonNull(type, "type cannot be null");
+        Optional<GettableComponent<T>> df = findComponentForType(type, scoped);
+        if (df.isPresent()) {
+            return df.get();
+        }
+        throw noSuchComponentException(type.getName(), null, scoped);
     }
 
     /**
@@ -172,19 +201,16 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getLatestComponent(final Class<T> type, final Conf conf) {
-        return resolveLatestComponent((Class<T>[])new Class<?>[]{type}, conf);
+    public <T> T getLatestComponent(final Class<T> type, final Conf conf, final Scoped scoped) {
+        return resolveLatestComponent((Class<T>[])new Class<?>[]{type}, conf, scoped);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public <T> T getLatestComponent(final String classOrAlias, final Conf conf) {
+    public <T> T getLatestComponent(final String classOrAlias, final Conf conf, final Scoped scoped) {
         if (!isRegistered(classOrAlias)) {
-            throw new NoSuchComponentException("No component registered for class or alias '" + classOrAlias + "'.");
+            throw new NoSuchComponentException("No component registered for type '" + classOrAlias + "'");
         }
-        return resolveLatestComponent(resolveTypesForClassOrAlias(classOrAlias), conf);
+        return resolveLatestComponent(resolveTypesForClassOrAlias(classOrAlias), conf, scoped);
     }
 
     /**
@@ -193,51 +219,82 @@ public class DefaultComponentRegistry implements ComponentRegistry {
     @Override
     public <T> T getVersionedComponent(final String alias,
                                        final String version,
-                                       final Conf conf) {
+                                       final Conf conf,
+                                       final Scoped scoped) {
         if (!isRegistered(alias)) {
-            throw new NoSuchComponentException("No component registered for class or alias '" + alias + "'.");
+            throw new NoSuchComponentException("No component registered for type '" + alias + "'");
         }
 
-        final Optional<GettableComponent<T>> component = resolveComponentForAliasAndVersion(alias, version);
+        final Optional<GettableComponent<T>> component = resolveComponentForAliasAndVersion(alias, version, scoped);
 
         if (component.isPresent()) {
-            return component.get().make(conf);
+            return component.get().get(conf);
         }
-        throw new NoSuchComponentException("No component for version '" + version + "'.");
+        throw noSuchComponentException(alias, version, scoped);
+    }
+
+    private NoSuchComponentException noSuchComponentException(final String alias,
+                                                              final String version,
+                                                              final Scoped scoped) {
+        if (scoped != null && version != null)
+            return new NoSuchComponentException(
+                "No component registered for type '" + alias + "', version '"
+                        + version + "' and scope '" + scoped + "'");
+
+        if (version != null)
+            return new NoSuchComponentException(
+                "No component registered for type '" + alias + "', version '" + version + "'");
+
+        if (scoped != null)
+            return new NoSuchComponentException(
+                "No component registered for type '" + alias + "', scoped '" + scoped + "'");
+
+        return new NoSuchComponentException(
+                "No component registered for type '" + alias + "'");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> T getComponent(final String alias, final Conf conf) {
-        Optional<GettableComponent<T>> matched = findSingleDescriptorAndFactoryForType(alias);
+    public <T> T getComponent(final String alias, final Conf conf, final Scoped scoped) {
+        Optional<GettableComponent<T>> matched = findComponentForType(alias, scoped);
         if (matched.isPresent()) {
-            return matched.get().make(conf);
+            return matched.get().get(conf);
         }
-        throw new NoSuchComponentException("No component registered for class or alias '" + alias + "'.");
+
+        throw noSuchComponentException(alias, null, scoped);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf) {
+    public <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf, final Scoped scoped) {
         Objects.requireNonNull(type, "type cannot be null");
-        List<GettableComponent<T>> components = resolveAllComponentsForType(type);
-        return components.stream().map(gettable -> gettable.make(conf)).collect(Collectors.toList());
+        List<GettableComponent<T>> components = resolveAllComponentsForType(type, scoped);
+        return components.stream().map(gettable -> gettable.get(conf)).collect(Collectors.toList());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getAllComponents(final String classOrAlias, final Conf conf) {
+    public <T> Collection<GettableComponent<T>> getAllComponents(Class<T> type, Scoped scoped) {
+        Objects.requireNonNull(type, "type cannot be null");
+        return resolveAllComponentsForType(type, scoped);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<T> getAllComponents(final String classOrAlias, final Conf conf, final Scoped scoped) {
         if (!isRegistered(classOrAlias)) {
             return Collections.emptyList();
         }
-        List<GettableComponent<T>> components = resolveComponentsForClassOrAlias(classOrAlias);
-        return components.stream().map(gettable -> gettable.make(conf)).collect(Collectors.toList());
+        List<GettableComponent<T>> components = resolveComponentsForClassOrAlias(classOrAlias, scoped);
+        return components.stream().map(gettable -> gettable.get(conf)).collect(Collectors.toList());
     }
 
     /**
@@ -258,7 +315,7 @@ public class DefaultComponentRegistry implements ComponentRegistry {
             descriptor.className(),
             descriptor.version());
 
-        GettableComponent<T> gettable = new GettableComponent<>(descriptor, factory);
+        InternalGettableComponent<T> gettable = new InternalGettableComponent<>(descriptor, factory);
         registerAliasesFor(descriptor);
 
         ClassUtils
@@ -270,27 +327,29 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         }
     }
 
-    private <T> List<GettableComponent<T>> resolveComponentsForClassOrAlias(final String classOrAlias) {
+    private <T> List<GettableComponent<T>> resolveComponentsForClassOrAlias(final String classOrAlias,
+                                                                            final Scoped scoped) {
         final Class<T>[] classes = resolveTypesForClassOrAlias(classOrAlias);
         return Arrays
             .stream(classes)
-            .flatMap(clazz -> resolveAllComponentsForType(clazz).stream())
+            .flatMap(clazz -> resolveAllComponentsForType(clazz, scoped).stream())
             .collect(Collectors.toList());
     }
 
     private <T> Optional<GettableComponent<T>> resolveComponentForAliasAndVersion(final String alias,
-                                                                                  final String version) {
-        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias);
+                                                                                  final String version,
+                                                                                  final Scoped scoped) {
+        final List<GettableComponent<T>> matched = resolveComponentsForClassOrAlias(alias, scoped);
         return matched.stream()
             .filter(gettable -> gettable.descriptor().isVersioned())
             .filter(gettable -> gettable.descriptor().version().equals(version))
             .findFirst();
     }
 
-    private <T> T resolveLatestComponent(final Class<T>[] classes, final Conf conf) {
+    private <T> T resolveLatestComponent(final Class<T>[] classes, final Conf conf, final Scoped scoped) {
         final List<GettableComponent<T>> matched = Arrays
             .stream(classes)
-            .flatMap( clazz -> resolveAllComponentsForType(clazz).stream())
+            .flatMap( clazz -> resolveAllComponentsForType(clazz, scoped).stream())
             .collect(Collectors.toList());
 
         Optional<GettableComponent<T>> latest = matched.stream()
@@ -298,17 +357,24 @@ public class DefaultComponentRegistry implements ComponentRegistry {
                 .findFirst();
         if (latest.isPresent()) {
             GettableComponent<T> gettable = latest.get();
-            return gettable.make(conf);
+            return gettable.get(conf);
         }
-        throw new NoSuchComponentException("No component registered for class '" + classes[0].getName() + "'");
+        throw noSuchComponentException(classes[0].getName(), null, scoped);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> List<GettableComponent<T>> resolveAllComponentsForType(final Class<T> cls) {
-        return components.getOrDefault(cls, Collections.emptyList())
-            .stream()
-            .map(o -> (GettableComponent<T>)o) // do cast
-            .collect(Collectors.toList());
+    private <T> List<GettableComponent<T>> resolveAllComponentsForType(final Class<T> cls, final Scoped scoped) {
+        List<GettableComponent<T>> components = this.components.getOrDefault(cls, Collections.emptyList())
+                .stream()
+                .map(o -> (GettableComponent<T>) o) // do cast
+                .collect(Collectors.toList());
+        if (scoped == null) {
+           return components;
+        }
+
+        return components.stream()
+                .filter(g -> g.descriptor().hasScope(scoped))
+                .collect(Collectors.toList());
     }
 
     private <T> Class<T>[] resolveTypesForClassOrAlias(final String classOrAlias) {
@@ -325,25 +391,38 @@ public class DefaultComponentRegistry implements ComponentRegistry {
         return this;
     }
 
-    private  <T> Optional<GettableComponent<T>> findSingleDescriptorAndFactoryForType(final String classOrAlias) {
-        if (!isRegistered(classOrAlias)) {
+    private  <T> Optional<GettableComponent<T>> findComponentForType(final String type,
+                                                                     final Scoped scoped) {
+        if (!isRegistered(type)) {
             return Optional.empty();
         }
-        final Class<T>[] classes = resolveTypesForClassOrAlias(classOrAlias);
+        final Class<T>[] classes = resolveTypesForClassOrAlias(type);
         if (classes.length > 1) {
             throw new NoUniqueComponentException("Expected single matching component for " +
                 "class '" + classes[0].getName() + "' but found " + classes.length);
         }
-        return findSingleDescriptorAndFactoryForType(classes[0]);
+        return findComponentForType(classes[0], scoped);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Optional<GettableComponent<T>> findSingleDescriptorAndFactoryForType(final Class<T> type) {
+    private <T> Optional<GettableComponent<T>> findComponentForType(final Class<T> type,
+                                                                    final Scoped scoped) {
         if (!components.containsKey(type)) {
             return Optional.empty();
         }
 
         List<GettableComponent<?>> matched = components.get(type);
+
+        if (scoped != null) {
+            matched = matched.stream()
+                .filter(gettable -> gettable.descriptor().hasScope(scoped))
+                .collect(Collectors.toList());
+        }
+
+        if (matched.isEmpty()) {
+            return Optional.empty();
+        }
+
         if (matched.size() > 1) {
             throw new NoUniqueComponentException("Expected single matching component for " +
                 "class '" + type.getName() + "' but found " + matched.size());
@@ -394,30 +473,33 @@ public class DefaultComponentRegistry implements ComponentRegistry {
      *
      * @param <T>   the component-type.
      */
-    private static class GettableComponent<T> implements Comparable<GettableComponent<T>>, Closeable {
+    private static class InternalGettableComponent<T> implements Comparable<InternalGettableComponent<T>>,
+            GettableComponent<T>,
+            Closeable {
 
-        final ComponentFactory<T> factory;
-        final ComponentDescriptor<T> descriptor;
-        final List<T> instances;
+        private static final Logger LOG = LoggerFactory.getLogger(InternalGettableComponent.class);
+
+        private final ComponentFactory<T> factory;
+        private final ComponentDescriptor<T> descriptor;
+        private final List<T> instances;
 
         /**
-         * Creates a new {@link GettableComponent} instance.
+         * Creates a new {@link InternalGettableComponent} instance.
          *
          * @param descriptor    the {@link ComponentDescriptor} instance.
          * @param factory       the {@link ComponentFactory} instance.
          */
-        GettableComponent(final ComponentDescriptor<T> descriptor,
-                          final ComponentFactory<T> factory) {
+        InternalGettableComponent(final ComponentDescriptor<T> descriptor, final ComponentFactory<T> factory) {
             this.factory = factory;
             this.descriptor = descriptor;
             this.instances = new LinkedList<>();
         }
 
-        ComponentDescriptor<T> descriptor() {
-            return descriptor;
-        }
-
-        synchronized T make(final Conf conf) {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public synchronized T get(final Conf conf) {
 
             if (factory.isSingleton() && !instances.isEmpty()) {
                 return instances.get(0);
@@ -442,6 +524,10 @@ public class DefaultComponentRegistry implements ComponentRegistry {
             }
         }
 
+        public ComponentDescriptor<T> descriptor() {
+            return descriptor;
+        }
+
         /**
          * {@inheritDoc}
          */
@@ -463,8 +549,9 @@ public class DefaultComponentRegistry implements ComponentRegistry {
          * {@inheritDoc}
          */
         @Override
-        public int compareTo(final GettableComponent<T> that) {
+        public int compareTo(final InternalGettableComponent<T> that) {
             return this.descriptor.compareTo(that.descriptor);
         }
     }
+
 }

@@ -16,12 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api;
+package io.streamthoughts.azkarra.runtime.context.internal;
 
-public interface StreamsLifeCycleChain {
+import io.streamthoughts.azkarra.api.AzkarraContext;
+import io.streamthoughts.azkarra.api.config.ConfigurableSupplier;
 
-    /**
-     * Executes the operation on the current {@link org.apache.kafka.streams.KafkaStreams} instance.
-     */
-    void execute();
+public abstract class ContextAwareComponentSupplier<T> extends ConfigurableSupplier<T> {
+
+    protected final AzkarraContext context;
+
+    public ContextAwareComponentSupplier(final AzkarraContext context) {
+        this.context = context;
+    }
 }

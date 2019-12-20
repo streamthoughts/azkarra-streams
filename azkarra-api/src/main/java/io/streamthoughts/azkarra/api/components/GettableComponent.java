@@ -16,26 +16,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.api.components;
 
 import io.streamthoughts.azkarra.api.config.Conf;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.Topology;
 
 /**
- * The interface which is used for creating new {@link KafkaStreams} instance.
+ * Class for getting a configurable component.
+ *
+ * @param <T>   the component-type.
  */
-@FunctionalInterface
-public interface KafkaStreamsFactory {
+public interface GettableComponent<T> extends AutoCloseable {
 
-    KafkaStreamsFactory DEFAULT = (topology, config) -> new KafkaStreams(topology, config.getConfAsProperties());
+    T get(final Conf conf);
 
-    /**
-     * Creates a new {@link KafkaStreams} instance for the given topology and config.
-     *
-     * @param topology          the {@link Topology} instance.
-     * @param streamsConfig     the streams configuration.
-     * @return                  the {@link KafkaStreams} instance.
-     */
-    KafkaStreams make(final Topology topology, final Conf streamsConfig);
+    ComponentDescriptor<T> descriptor();
+
+    void close();
 }

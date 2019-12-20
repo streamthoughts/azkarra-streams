@@ -16,29 +16,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api;
+package io.streamthoughts.azkarra.api.annotations;
+
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * An interface that allows to intercept a {@link org.apache.kafka.streams.KafkaStreams} instance before being
- * started or stopped.
+ * Marker interface that a class annotated with {@link Component} can used for describing its scope.
+ *
+ * @see ComponentDescriptor#SCOPE_APPLICATION
+ * @see ComponentDescriptor#SCOPE_ENVIRONMENT
+ * @see ComponentDescriptor#SCOPE_STREAMS
+ *
  */
-public interface StreamsLifeCycleInterceptor {
+@Documented
+@Inherited
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Scopes {
 
-    /**
-     * Intercepts the streams instance before being started.
-     *
-     * @param chain the {@link StreamsLifeCycleChain} instance.
-     */
-    default void onStart(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
-        chain.execute();
-    }
-
-    /**
-     * Intercepts the streams instance before being stopped.
-     *
-     * @param chain the {@link StreamsLifeCycleChain} instance.
-     */
-    default void onStop(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
-        chain.execute();
-    }
+    Scope[] value();
 }

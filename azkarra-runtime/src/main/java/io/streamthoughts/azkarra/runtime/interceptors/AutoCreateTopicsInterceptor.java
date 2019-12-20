@@ -18,9 +18,9 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.admin.AdminClientUtils;
 import io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.getUserDeclaredTopics;
 
 /**
- * This {@link StreamsLifeCycleInterceptor} create both topics source and sink
+ * This {@link StreamsLifecycleInterceptor} create both topics source and sink
  * before starting the streams instance.
  *
  * Optionally, this interceptor can also be used to automatically delete all topics used by the applications
@@ -55,7 +55,7 @@ import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.g
  *
  * This interceptor is state-full and thus a new instance must be created for each topology.
  */
-public class AutoCreateTopicsInterceptor implements StreamsLifeCycleInterceptor {
+public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoCreateTopicsInterceptor.class);
 
@@ -113,8 +113,8 @@ public class AutoCreateTopicsInterceptor implements StreamsLifeCycleInterceptor 
      * {@inheritDoc}
      */
     @Override
-    public void onStart(final StreamsLifeCycleContext context,
-                        final StreamsLifeCycleChain chain) {
+    public void onStart(final StreamsLifecycleContext context,
+                        final StreamsLifecycleChain chain) {
         if (context.getState() == State.CREATED) {
 
             final Set<String> userDeclaredTopics = getUserDeclaredTopics(context.getTopology());
@@ -141,16 +141,16 @@ public class AutoCreateTopicsInterceptor implements StreamsLifeCycleInterceptor 
      * {@inheritDoc}
      */
     @Override
-    public void onStop(final StreamsLifeCycleContext context,
-                       final StreamsLifeCycleChain chain) {
+    public void onStop(final StreamsLifecycleContext context,
+                       final StreamsLifecycleChain chain) {
         chain.execute();
         if (delete) {
             apply(this::deleteTopics, context);
         }
     }
 
-    private void apply(final BiConsumer<AdminClient, StreamsLifeCycleContext> consumer,
-                       final StreamsLifeCycleContext context) {
+    private void apply(final BiConsumer<AdminClient, StreamsLifecycleContext> consumer,
+                       final StreamsLifecycleContext context) {
         // use a one-shot AdminClient if no one is provided.
         if (adminClient == null) {
             try (final AdminClient client = AdminClientUtils.newAdminClient(context.getStreamConfig())) {
@@ -161,7 +161,7 @@ public class AutoCreateTopicsInterceptor implements StreamsLifeCycleInterceptor 
         }
     }
 
-    private void listTopics(final AdminClient client, final StreamsLifeCycleContext context) {
+    private void listTopics(final AdminClient client, final StreamsLifecycleContext context) {
         try {
             LOG.info("Listing all topics created by the streams application: {}", context.getApplicationId());
             CompletableFuture<Collection<TopicListing>> future = AdminClientUtils.listTopics(client);
@@ -182,7 +182,7 @@ public class AutoCreateTopicsInterceptor implements StreamsLifeCycleInterceptor 
         }
     }
 
-    private void deleteTopics(final AdminClient client, final StreamsLifeCycleContext context) {
+    private void deleteTopics(final AdminClient client, final StreamsLifecycleContext context) {
         try {
             if (!topicListed.get()) {
                 listTopics(client, context);
@@ -198,7 +198,7 @@ public class AutoCreateTopicsInterceptor implements StreamsLifeCycleInterceptor 
         }
     }
 
-    private void createTopics(final AdminClient client, final StreamsLifeCycleContext context) {
+    private void createTopics(final AdminClient client, final StreamsLifecycleContext context) {
         LOG.info("Creating topology topic(s): {}", getTopicNames());
         try {
             client.createTopics(newTopics).all().get();

@@ -16,15 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.runtime.streams.topology;
+package io.streamthoughts.azkarra.runtime.env.internal;
 
 import io.streamthoughts.azkarra.api.Executed;
-import io.streamthoughts.azkarra.runtime.MockTopologyProvider;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
+import io.streamthoughts.azkarra.runtime.MockTopologyProvider;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyDescription;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class TopologyFactoryTest {
+public class TopologyContainerFactoryTest {
 
     private static Topology MOCK = Mockito.mock(Topology.class);
 
@@ -41,24 +42,24 @@ public class TopologyFactoryTest {
         Mockito.when(MOCK.describe()).thenReturn(Mockito.mock(TopologyDescription.class));
     }
 
-    private final TopologyFactory factory = new TopologyFactory(DefaultStreamsExecutionEnvironment.create());
+    private final TopologyContainerFactory factory = new TopologyContainerFactory(
+        DefaultStreamsExecutionEnvironment.create(), DefaultApplicationIdBuilder::new);
 
     @Test
     public void shouldCreateTopologyContainer() {
         TopologyContainer container = factory.make(
-            new DummyTopologyProvider(),
-            Conf.empty(),
+            DummyTopologyProvider::new,
             Executed.as("dummy-topology").withDescription("user-description"));
 
-        TopologyMetadata metadata = container.getMetadata();
+        assertNotNull(container);
+        assertNotNull(container.topology());
+        assertEquals(MOCK, container.topology());
+
+        TopologyMetadata metadata = container.metadata();
         assertNotNull(metadata);
         assertEquals("dummy-topology", metadata.name());
         assertEquals("1.0", metadata.version());
         assertEquals("user-description", metadata.description());
-        assertNotNull(metadata.topology());
-
-        Topology topology = container.getTopology();
-        assertEquals(MOCK, topology);
     }
 
     @Test
@@ -68,11 +69,10 @@ public class TopologyFactoryTest {
             .withConfig(Conf.with("version", "configured-version"));
 
         TopologyContainer container = factory.make(
-            new ConfigurableTopologyProvider(),
-            Conf.empty(),
+            ConfigurableTopologyProvider::new,
             executed);
 
-        TopologyMetadata metadata = container.getMetadata();
+        TopologyMetadata metadata = container.metadata();
         assertNotNull(metadata);
         assertEquals("configured-version", metadata.version());
     }

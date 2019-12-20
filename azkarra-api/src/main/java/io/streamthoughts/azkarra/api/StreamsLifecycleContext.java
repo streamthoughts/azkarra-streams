@@ -25,7 +25,7 @@ import org.apache.kafka.streams.TopologyDescription;
 /**
  * Context about the current {@link org.apache.kafka.streams.KafkaStreams} instance.
  */
-public interface StreamsLifeCycleContext {
+public interface StreamsLifecycleContext {
 
     /**
      * Gets the application identifier of the current streams instance.

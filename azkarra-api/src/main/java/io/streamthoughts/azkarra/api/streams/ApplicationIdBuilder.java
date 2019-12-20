@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 
 /**
@@ -29,9 +30,9 @@ public interface ApplicationIdBuilder {
      * Builds the {@link org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG} for
      * the specified topology and configuration.
      *
-     * @param metadata              the {@link TopologyMetadata} instance.
+     * @param metadata  the {@link TopologyMetadata} instance.
      *
      * @return a new {@link ApplicationId} instance.
      */
-    ApplicationId buildApplicationId(final TopologyMetadata metadata);
+    ApplicationId buildApplicationId(final TopologyMetadata metadata, final Conf streamsConfig);
 }

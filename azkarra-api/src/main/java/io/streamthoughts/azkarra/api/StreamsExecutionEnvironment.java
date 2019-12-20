@@ -23,6 +23,7 @@ import io.streamthoughts.azkarra.api.config.RocksDBConfig;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.processor.StateRestoreListener;
@@ -77,6 +78,15 @@ public interface StreamsExecutionEnvironment {
     StreamsExecutionEnvironment addGlobalStateListener(final StateRestoreListener listener);
 
     /**
+     * Adds a streams interceptor hat will set to all {@link KafkaStreams} instance created
+     * in this {@link StreamsExecutionEnvironment}.
+     *
+     * @param interceptor   the {@link {@link StreamsLifecycleInterceptor}}.
+     * @return this {@link StreamsExecutionEnvironment} instance.
+     */
+    StreamsExecutionEnvironment addStreamsLifecycleInterceptor(final Supplier<StreamsLifecycleInterceptor> interceptor);
+
+    /**
      * Returns all {@link KafkaStreams} started applications.
      *
      * @return  a collection of {@link KafkaStreamsContainer} applications.
@@ -115,12 +125,30 @@ public interface StreamsExecutionEnvironment {
     StreamsExecutionEnvironment setApplicationIdBuilder(final Supplier<ApplicationIdBuilder> supplier);
 
     /**
+     * Sets if the streams instances should wait for topics source to be created before starting.
+     * If some source topics are missing at startup, a streams instance fails.
+     *
+     * @param waitForTopicToBeCreated   should wait for topics to be created.
+     * @return                          this {@link StreamsExecutionEnvironment} instance.
+     */
+    StreamsExecutionEnvironment setWaitForTopicsToBeCreated(final boolean waitForTopicToBeCreated);
+
+    /**
      * Adds streamsConfig that will be used in fallback if not present in defined environment streamsConfig.
      *
      * @param settings  the {@link Conf} instance.
      * @return this {@link StreamsExecutionEnvironment} instance.
      */
     StreamsExecutionEnvironment addFallbackConfiguration(final Conf settings);
+
+    /**
+     * Sets the {@link KafkaStreamsFactory} that will be used to provide
+     * the {@link KafkaStreams} to configure and start.
+     *
+     * @param kafkaStreamsFactory   the {@link KafkaStreamsFactory} instance.
+     * @return this {@link StreamsExecutionEnvironment} instance.
+     */
+    StreamsExecutionEnvironment setKafkaStreamsFactory(final Supplier<KafkaStreamsFactory> kafkaStreamsFactory);
 
     /**
      * Add a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment} to be started.

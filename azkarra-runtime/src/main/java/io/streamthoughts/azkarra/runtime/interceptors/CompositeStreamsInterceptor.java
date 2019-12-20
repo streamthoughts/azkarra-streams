@@ -18,33 +18,44 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.streams.InternalStreamsLifeCycleChain;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class CompositeStreamsInterceptor implements StreamsLifeCycleInterceptor {
+public class CompositeStreamsInterceptor implements StreamsLifecycleInterceptor {
 
-    final List<StreamsLifeCycleInterceptor> interceptors;
+    final List<StreamsLifecycleInterceptor> interceptors;
+
+    /**
+     * Creates a new {@link CompositeStreamsInterceptor} instance.
+     */
+    public CompositeStreamsInterceptor() {
+        this(new ArrayList<>());
+    }
 
     /**
      * Creates a new {@link CompositeStreamsInterceptor} instance.
      *
      * @param interceptors  the list of interceptors.
      */
-    public CompositeStreamsInterceptor(final Collection<StreamsLifeCycleInterceptor> interceptors) {
+    public CompositeStreamsInterceptor(final Collection<StreamsLifecycleInterceptor> interceptors) {
         this.interceptors = new ArrayList<>(interceptors);
+    }
+
+    public void addInterceptors(final Collection<StreamsLifecycleInterceptor> interceptors) {
+        this.interceptors.addAll(interceptors);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void onStart(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
+    public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
         new InternalStreamsLifeCycleChain(
             interceptors.iterator(),
             (interceptor, c) -> interceptor.onStart(context, c),
@@ -56,7 +67,7 @@ public class CompositeStreamsInterceptor implements StreamsLifeCycleInterceptor 
      * {@inheritDoc}
      */
     @Override
-    public void onStop(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
+    public void onStop(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
         new InternalStreamsLifeCycleChain(
             interceptors.iterator(),
             (interceptor, c) -> interceptor.onStop(context, c),

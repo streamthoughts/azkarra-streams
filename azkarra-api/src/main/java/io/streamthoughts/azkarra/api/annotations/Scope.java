@@ -16,26 +16,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.api.annotations;
 
-import io.streamthoughts.azkarra.api.config.Conf;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.Topology;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The interface which is used for creating new {@link KafkaStreams} instance.
+ * Marker interface that a class annotated with {@link Component} can used for describing its scope.
+ *
+ * @see ComponentDescriptor#SCOPE_APPLICATION
+ * @see ComponentDescriptor#SCOPE_ENVIRONMENT
+ * @see ComponentDescriptor#SCOPE_STREAMS
+ *
  */
-@FunctionalInterface
-public interface KafkaStreamsFactory {
+@Documented
+@Inherited
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Repeatable(Scopes.class)
+public @interface Scope {
 
-    KafkaStreamsFactory DEFAULT = (topology, config) -> new KafkaStreams(topology, config.getConfAsProperties());
+    String type();
 
-    /**
-     * Creates a new {@link KafkaStreams} instance for the given topology and config.
-     *
-     * @param topology          the {@link Topology} instance.
-     * @param streamsConfig     the streams configuration.
-     * @return                  the {@link KafkaStreams} instance.
-     */
-    KafkaStreams make(final Topology topology, final Conf streamsConfig);
+    String name() default "";
 }

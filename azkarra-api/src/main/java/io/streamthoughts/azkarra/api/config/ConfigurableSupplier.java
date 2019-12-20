@@ -16,26 +16,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.api.config;
 
-import io.streamthoughts.azkarra.api.config.Conf;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.Topology;
+import java.util.function.Supplier;
 
 /**
- * The interface which is used for creating new {@link KafkaStreams} instance.
+ * A configurable supplier.
+ *
+ * @param <T>   the type of the supply object.
  */
-@FunctionalInterface
-public interface KafkaStreamsFactory {
+public abstract class ConfigurableSupplier<T> implements Supplier<T>, Configurable {
 
-    KafkaStreamsFactory DEFAULT = (topology, config) -> new KafkaStreams(topology, config.getConfAsProperties());
+    private Conf configs;
 
     /**
-     * Creates a new {@link KafkaStreams} instance for the given topology and config.
-     *
-     * @param topology          the {@link Topology} instance.
-     * @param streamsConfig     the streams configuration.
-     * @return                  the {@link KafkaStreams} instance.
+     * {@inheritDoc}
      */
-    KafkaStreams make(final Topology topology, final Conf streamsConfig);
+    @Override
+    public void configure(final Conf configs) {
+        this.configs = configs;
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public T get() {
+        return get(configs);
+    }
+
+    public abstract T get(final Conf configs);
 }

@@ -18,9 +18,9 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.streams.InternalStreamsLifeCycleChain;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,22 +35,22 @@ public class CompositeStreamsInterceptorTest {
 
     private List<String> results;
 
-    private List<StreamsLifeCycleInterceptor> interceptors;
+    private List<StreamsLifecycleInterceptor> interceptors;
 
     @BeforeEach
     public void setUp() {
         results = new ArrayList<>();
         interceptors = new ArrayList<>();
-        interceptors.add(new StreamsLifeCycleInterceptor() {
+        interceptors.add(new StreamsLifecycleInterceptor() {
             @Override
-            public void onStart(StreamsLifeCycleContext context, StreamsLifeCycleChain chain) {
+            public void onStart(StreamsLifecycleContext context, StreamsLifecycleChain chain) {
                 results.add("A");
                 chain.execute();
             }
         });
-        interceptors.add(new StreamsLifeCycleInterceptor() {
+        interceptors.add(new StreamsLifecycleInterceptor() {
             @Override
-            public void onStart(StreamsLifeCycleContext context, StreamsLifeCycleChain chain) {
+            public void onStart(StreamsLifecycleContext context, StreamsLifecycleChain chain) {
                 results.add("B");
                 chain.execute();
             }
@@ -62,9 +62,9 @@ public class CompositeStreamsInterceptorTest {
 
         CompositeStreamsInterceptor composite = new CompositeStreamsInterceptor(interceptors);
         InternalStreamsLifeCycleChain chain = new InternalStreamsLifeCycleChain(
-            Collections.<StreamsLifeCycleInterceptor>singletonList(new StreamsLifeCycleInterceptor() {
+            Collections.<StreamsLifecycleInterceptor>singletonList(new StreamsLifecycleInterceptor() {
                 @Override
-                public void onStart(StreamsLifeCycleContext context, StreamsLifeCycleChain chain) {
+                public void onStart(StreamsLifecycleContext context, StreamsLifecycleChain chain) {
                     results.add("C");
                     chain.execute();
                 }

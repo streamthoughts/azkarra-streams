@@ -18,9 +18,9 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.admin.AdminClientUtils;
 import io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils;
@@ -36,12 +36,12 @@ import java.util.stream.Collectors;
 import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.getSourceTopics;
 
 /**
- * This {@link StreamsLifeCycleInterceptor} waits for source topics to be created
+ * This {@link StreamsLifecycleInterceptor} waits for source topics to be created
  * before starting the streams instance.
  *
  * Kafka Streams fails if one of the source topic is missing (error: INCOMPLETE_SOURCE_TOPIC_METADATA);
  */
-public class WaitForSourceTopicsInterceptor implements StreamsLifeCycleInterceptor {
+public class WaitForSourceTopicsInterceptor implements StreamsLifecycleInterceptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(WaitForSourceTopicsInterceptor.class);
 
@@ -67,7 +67,7 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifeCycleIntercept
      * {@inheritDoc}
      */
     @Override
-    public void onStart(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
+    public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
         if (context.getState() == State.CREATED) {
 
             final Set<String> sourceTopics = getSourceTopics(context.getTopology())
@@ -91,7 +91,7 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifeCycleIntercept
         chain.execute();
     }
 
-    private void apply(final StreamsLifeCycleContext context, final Consumer<AdminClient> consumer) {
+    private void apply(final StreamsLifecycleContext context, final Consumer<AdminClient> consumer) {
         // use a one-shot AdminClient if no one is provided.
         if (adminClient == null) {
             try (final AdminClient client = AdminClientUtils.newAdminClient(context.getStreamConfig())) {

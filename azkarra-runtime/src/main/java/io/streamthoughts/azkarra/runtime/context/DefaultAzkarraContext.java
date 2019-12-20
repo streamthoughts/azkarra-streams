@@ -24,33 +24,35 @@ import io.streamthoughts.azkarra.api.AzkarraContextListener;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.components.ComponentClassReader;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
+import io.streamthoughts.azkarra.api.components.ContextAwareComponentRegistry;
+import io.streamthoughts.azkarra.api.components.Scoped;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.errors.AzkarraContextException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentRegistry;
 import io.streamthoughts.azkarra.runtime.components.DefaultProviderClassReader;
 import io.streamthoughts.azkarra.runtime.components.TopologyDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.config.AzkarraContextConfig;
+import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareComponentSupplier;
+import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareKafkaStreamsFactorySupplier;
+import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareLifecycleInterceptorSupplier;
+import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySupplier;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
-import io.streamthoughts.azkarra.runtime.interceptors.CompositeStreamsInterceptor;
-import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.util.ShutdownHook;
-import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.streams.Topology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +78,8 @@ public class DefaultAzkarraContext implements AzkarraContext {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAzkarraContext.class);
 
     public static final String DEFAULT_ENV_NAME = "__default";
+
+    private static final Scoped APPLICATION_SCOPE = Scoped.application();
 
     /**
      * Static helper that can be used to creates a new {@link AzkarraContext} instance
@@ -139,6 +143,10 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
     private AzkarraContextConfig contextConfig;
 
+    private List<Supplier<StreamsLifecycleInterceptor>> globalInterceptors;
+
+    private Supplier<KafkaStreamsFactory> globalKafkaStreamsFactory;
+
     /**
      * Creates a new {@link DefaultAzkarraContext} instance.
      *
@@ -158,7 +166,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public AzkarraContext setComponentRegistry(final ComponentRegistry registry) {
         Objects.requireNonNull(registry, "registry cannot be null");
-        this.registry = registry;
+        this.registry = new ContextAwareComponentRegistry(this, registry);
         return this;
     }
 
@@ -240,23 +248,27 @@ public class DefaultAzkarraContext implements AzkarraContext {
     public AzkarraContext addExecutionEnvironment(final StreamsExecutionEnvironment env)
             throws AlreadyExistsException {
         Objects.requireNonNull(env, "env cannot be null.");
+        LOG.info("Creating new streams environment for name '{}'", env.name());
         if (!environments.containsKey(env.name())) {
-            setIfContextAwareAndGet(env);
             environments.put(env.name(), env);
             Map<String, Object> confAsMap = new TreeMap<>(env.getConfiguration().getConfAsMap());
             final String configLogs = confAsMap.entrySet()
                 .stream()
                 .map(e -> e.getKey() + " = " + e.getValue())
                 .collect(Collectors.joining("\n\t"));
-            LOG.info("Registered new streams env with name '{}' and default config :\n\t{}",
+            LOG.info("Registered new streams environment for name '{}' and default config :\n\t{}",
                 env.name(),
                 configLogs
             );
-            if (state == State.STARTED) {
-                env.start();
-            }
-            if (env.name().equals(DEFAULT_ENV_NAME)) {
+            if (env instanceof AzkarraContextAware)
+                ((AzkarraContextAware)env).setAzkarraContext(this);
+
+            if (env.name().equals(DEFAULT_ENV_NAME))
                 defaultEnvironment = env;
+
+            if (state == State.STARTED) {
+                initializeEnvironment(env);
+                env.start();
             }
         } else {
             throw new AlreadyExistsException("Environment already registered for name '" + env.name() + "'");
@@ -298,7 +310,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
                                      final String environment,
                                      final Executed executed) {
         return addTopology(type, null, environment, executed);
-
     }
 
     /**
@@ -368,53 +379,32 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
         Executed completedExecuted = Executed.as(name)
                 .withConfig(streamsConfig)
-                .withDescription(Optional.of(description).orElse(""));
+                .withDescription(Optional.ofNullable(description).orElse(""));
 
         // Register StreamsLifeCycleInterceptor for class-loading isolation.
         completedExecuted = completedExecuted.withInterceptor(
             () -> new ClassloadingIsolationInterceptor(descriptor.getClassLoader())
         );
 
-        // Register all user-defined StreamsLifeCycleInterceptors.
-        final Conf config = streamsConfig.withFallback(contextConfig.configs());
-        completedExecuted = completedExecuted.withInterceptor(() ->
-            new CompositeStreamsInterceptor(
-                registry.getAllComponents(StreamsLifeCycleInterceptor.class, config)
-            )
-        );
-
-        // Lookup AdminClient instance.
-        final AdminClient adminClient = getAdminClientOrNull();
-
-        if (contextConfig.isAutoCreateTopicsEnable()) {
-            completedExecuted = completedExecuted.withInterceptor(() -> {
-                AutoCreateTopicsInterceptor interceptor = new AutoCreateTopicsInterceptor(adminClient);
-                interceptor.setNumPartitions(contextConfig.getAutoCreateTopicsNumPartition());
-                interceptor.setReplicationFactor(contextConfig.getAutoCreateTopicsReplicationFactor());
-                interceptor.setConfigs(contextConfig.getAutoCreateTopicsConfigs());
-                interceptor.setDeleteTopicsOnStreamsClosed(contextConfig.isAutoDeleteTopicsEnable());
-                interceptor.setTopics(registry.getAllComponents(NewTopic.class, contextConfig.configs()));
-                return interceptor;
-            });
+        // Get and register all StreamsLifeCycleInterceptors for the current streams.
+        for (Supplier<StreamsLifecycleInterceptor> interceptor : getLifecycleInterceptors(Scoped.streams(name))) {
+            completedExecuted = completedExecuted.withInterceptor(interceptor);
         }
 
-        if (contextConfig.isWaitForTopicsEnable()) {
-            completedExecuted = completedExecuted.withInterceptor(() ->
-                new WaitForSourceTopicsInterceptor(adminClient)
-            );
+        // Register StreamsLifeCycleInterceptor for AUTO_CREATE_TOPICS
+        boolean autoCreateTopicsEnable = new AzkarraContextConfig(env.getConfiguration())
+                .addConfiguration(getConfiguration())
+                .isAutoCreateTopicsEnable();
+
+        if (autoCreateTopicsEnable) {
+            completedExecuted = completedExecuted.withInterceptor(new AutoCreateTopicsInterceptorSupplier(name));
         }
 
         LOG.info("Registered new topology to environment '" + env.name() + "' " +
                 " for type='" + descriptor.className() + "', version='" + descriptor.version() +" '.");
 
-        return env.addTopology(
-            new ContextTopologySupplier(descriptor, env, completedExecuted),
-            completedExecuted);
-    }
-
-    private AdminClient getAdminClientOrNull() {
-        return registry.isRegistered(AdminClient.class) ?
-                    registry.getComponent(AdminClient.class, contextConfig.configs()) : null;
+        final ContextAwareTopologySupplier supplier = new ContextAwareTopologySupplier(this, descriptor);
+        return env.addTopology(supplier, completedExecuted);
     }
 
     /**
@@ -498,9 +488,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public <T> T getComponentForType(final Class<T> cls) {
         Objects.requireNonNull(cls, "cls cannot be null");
-        T component = registry.getComponent(cls, contextConfig.configs());
-        setIfContextAwareAndGet(component);
-        return component;
+        return registry.getComponent(cls, contextConfig.configs());
     }
 
     /**
@@ -509,10 +497,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public <T> Collection<T> getAllComponentForType(final Class<T> cls) {
         Objects.requireNonNull(cls, "cls cannot be null");
-        return registry.getAllComponents(cls, contextConfig.configs())
-            .stream()
-            .map(this::setIfContextAwareAndGet)
-            .collect(Collectors.toList());
+        return registry.getAllComponents(cls, contextConfig.configs());
     }
 
     /**
@@ -540,7 +525,17 @@ public class DefaultAzkarraContext implements AzkarraContext {
         try {
             listeners.forEach(listeners -> listeners.onContextStart(this));
             registerShutdownHook();
-            environments().forEach(StreamsExecutionEnvironment::start);
+            // Resolving components for streams environments with scope 'application'.
+            globalInterceptors = getLifecycleInterceptors(APPLICATION_SCOPE);
+            globalKafkaStreamsFactory = getKafkaStreamsFactory(APPLICATION_SCOPE).orElse(null);
+
+            // Initialize and start all streams environments.
+            for (StreamsExecutionEnvironment env : environments()) {
+                initializeEnvironment(env);
+                LOG.info("Starting streams environment: {}", env.name());
+                env.start();
+            }
+
             setState(State.STARTED);
         } catch (Exception e) {
             LOG.error("Unexpected error happens while starting AzkarraContext", e);
@@ -581,6 +576,42 @@ public class DefaultAzkarraContext implements AzkarraContext {
         }
     }
 
+    private void initializeEnvironment(final StreamsExecutionEnvironment env) {
+        // Inject all streams interceptors for each environment.
+        globalInterceptors.forEach(env::addStreamsLifecycleInterceptor);
+        getLifecycleInterceptors(Scoped.env(env.name())).forEach(env::addStreamsLifecycleInterceptor);
+
+        // Inject KafkaStreams streamsFactory
+        Supplier<KafkaStreamsFactory> kafkaStreamsFactory =
+                getKafkaStreamsFactory(Scoped.env(env.name())).orElse(globalKafkaStreamsFactory);
+        if (kafkaStreamsFactory != null) {
+            env.setKafkaStreamsFactory(kafkaStreamsFactory);
+        }
+
+        boolean waitForTopicsEnable = new AzkarraContextConfig(env.getConfiguration())
+                .addConfiguration(getConfiguration())
+                .isWaitForTopicsEnable();
+
+        env.setWaitForTopicsToBeCreated(waitForTopicsEnable);
+    }
+
+    private Optional<Supplier<KafkaStreamsFactory>> getKafkaStreamsFactory(final Scoped scoped) {
+        if (registry.isRegistered(KafkaStreamsFactory.class, scoped)) {
+            return Optional.of(new ContextAwareKafkaStreamsFactorySupplier(
+                    this,
+                    registry.getComponent(KafkaStreamsFactory.class, scoped)
+            ));
+        }
+        return Optional.empty();
+    }
+
+    private List<Supplier<StreamsLifecycleInterceptor>> getLifecycleInterceptors(final Scoped scoped) {
+        return registry.getAllComponents(StreamsLifecycleInterceptor.class, scoped)
+                .stream()
+                .map(gettable -> new ContextAwareLifecycleInterceptorSupplier(this, gettable))
+                .collect(Collectors.toList());
+    }
+
     private void checkIfEnvironmentExists(final String name, final String errorMessage) {
         if (!environments.containsKey(name)) {
             throw new AzkarraContextException(errorMessage);
@@ -600,77 +631,38 @@ public class DefaultAzkarraContext implements AzkarraContext {
         }
     }
 
-    private <T> T setIfContextAwareAndGet(final T component) {
-        if (component instanceof AzkarraContextAware) {
-            ((AzkarraContextAware)component).setAzkarraContext(this);
-        }
-        return component;
-    }
+    private class AutoCreateTopicsInterceptorSupplier
+            extends ContextAwareComponentSupplier<StreamsLifecycleInterceptor> {
 
-    private class ContextTopologySupplier implements Supplier<TopologyProvider> {
+        private final Scoped scoped;
 
-        private final StreamsExecutionEnvironment environment;
-        private final TopologyDescriptor descriptor;
-        private final InternalExecuted executed;
-
-        ContextTopologySupplier(final TopologyDescriptor descriptor,
-                                final StreamsExecutionEnvironment environment,
-                                final Executed executed) {
-            this.environment = environment;
-            this.descriptor = descriptor;
-            this.executed = new InternalExecuted(executed);
+        /**
+         * Creates a new {@link AutoCreateTopicsInterceptorSupplier} instance.
+         * @param streams   the streams name.
+         */
+        AutoCreateTopicsInterceptorSupplier(final String streams) {
+            super(DefaultAzkarraContext.this);
+            this.scoped = Scoped.streams(streams);
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public TopologyProvider get() {
-            final Conf config = executed.config()
-                .withFallback(environment.getConfiguration()
-                    .withFallback(contextConfig.configs()));
+        public StreamsLifecycleInterceptor get(final Conf configs) {
+            AzkarraContextConfig contextConfig = new AzkarraContextConfig(configs);
 
-            TopologyProvider provider = registry.getVersionedComponent(
-                descriptor.className(),
-                descriptor.version(),
-                config
-            );
-            provider = setIfContextAwareAndGet(provider);
-
-            if (Configurable.isConfigurable(provider.getClass())) {
-                // provider have to be wrapped to not be configurable twice.
-                return new ContextTopologyProvider(provider);
-            }
-            return provider;
-        }
-    }
-
-    /**
-     * A delegating {@link TopologyProvider} which is not {@link io.streamthoughts.azkarra.api.config.Configurable}.
-     */
-    private static class ContextTopologyProvider implements TopologyProvider {
-
-        private final TopologyProvider delegate;
-
-        ContextTopologyProvider(final TopologyProvider delegate) {
-            Objects.requireNonNull(delegate, "delegate cannot be null");
-            this.delegate = delegate;
+            AutoCreateTopicsInterceptor interceptor = new AutoCreateTopicsInterceptor();
+            interceptor.setNumPartitions(contextConfig.getAutoCreateTopicsNumPartition());
+            interceptor.setReplicationFactor(contextConfig.getAutoCreateTopicsReplicationFactor());
+            interceptor.setConfigs(contextConfig.getAutoCreateTopicsConfigs());
+            interceptor.setDeleteTopicsOnStreamsClosed(contextConfig.isAutoDeleteTopicsEnable());
+            interceptor.setTopics(newTopics(configs));
+            return interceptor;
         }
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String version() {
-            return delegate.version();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Topology get() {
-            return delegate.get();
+        Collection<NewTopic> newTopics(final Conf configs) {
+            return registry.getAllComponents(NewTopic.class, configs, scoped);
         }
     }
 }

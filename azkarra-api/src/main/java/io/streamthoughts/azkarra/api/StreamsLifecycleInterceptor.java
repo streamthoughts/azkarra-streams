@@ -16,26 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
-
-import io.streamthoughts.azkarra.api.config.Conf;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.Topology;
+package io.streamthoughts.azkarra.api;
 
 /**
- * The interface which is used for creating new {@link KafkaStreams} instance.
+ * An interface that allows to intercept a {@link org.apache.kafka.streams.KafkaStreams} instance before being
+ * started or stopped.
  */
-@FunctionalInterface
-public interface KafkaStreamsFactory {
-
-    KafkaStreamsFactory DEFAULT = (topology, config) -> new KafkaStreams(topology, config.getConfAsProperties());
+public interface StreamsLifecycleInterceptor {
 
     /**
-     * Creates a new {@link KafkaStreams} instance for the given topology and config.
+     * Intercepts the streams instance before being started.
      *
-     * @param topology          the {@link Topology} instance.
-     * @param streamsConfig     the streams configuration.
-     * @return                  the {@link KafkaStreams} instance.
+     * @param chain the {@link StreamsLifecycleChain} instance.
      */
-    KafkaStreams make(final Topology topology, final Conf streamsConfig);
+    default void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
+        chain.execute();
+    }
+
+    /**
+     * Intercepts the streams instance before being stopped.
+     *
+     * @param chain the {@link StreamsLifecycleChain} instance.
+     */
+    default void onStop(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
+        chain.execute();
+    }
 }

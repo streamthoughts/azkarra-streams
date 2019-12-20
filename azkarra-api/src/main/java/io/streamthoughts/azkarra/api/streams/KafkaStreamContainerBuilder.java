@@ -18,7 +18,6 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateRestoreListener;
@@ -40,12 +39,11 @@ import java.util.Objects;
  */
 public class KafkaStreamContainerBuilder {
 
-    private ApplicationId applicationId;
     private TopologyContainer topologyContainer;
+    private KafkaStreamsFactory kafkaStreamsFactory;
     private List<StateRestoreListener> restoreListeners = Collections.emptyList();
     private List<KafkaStreams.StateListener> stateListeners = Collections.emptyList();
     private List<Thread.UncaughtExceptionHandler> exceptionHandlers = Collections.emptyList();
-    private List<StreamsLifeCycleInterceptor> interceptors = Collections.emptyList();
 
     /**
      * Creates a new {@link KafkaStreamContainerBuilder} instance.
@@ -60,8 +58,8 @@ public class KafkaStreamContainerBuilder {
 
     }
 
-    public KafkaStreamContainerBuilder withApplicationId(final ApplicationId applicationId) {
-        this.applicationId = applicationId;
+    public KafkaStreamContainerBuilder withKafkaStreamsFactory(final KafkaStreamsFactory kafkaStreamsFactory) {
+        this.kafkaStreamsFactory = kafkaStreamsFactory;
         return this;
     }
 
@@ -72,11 +70,6 @@ public class KafkaStreamContainerBuilder {
 
     public KafkaStreamContainerBuilder withRestoreListeners(final List<StateRestoreListener> listeners) {
         this.restoreListeners = listeners;
-        return this;
-    }
-
-    public KafkaStreamContainerBuilder withInterceptors(final List<StreamsLifeCycleInterceptor> interceptors) {
-        this.interceptors = interceptors;
         return this;
     }
 
@@ -101,41 +94,45 @@ public class KafkaStreamContainerBuilder {
         Conf rocksDBConf = Conf.empty();
 
         // Configure default RocksDB setter class if no one is already defined.
-        Conf streamsConfig = topologyContainer.getMetadata().streamsConfig();
+        Conf streamsConfig = topologyContainer.streamsConfig();
         if (!streamsConfig.hasPath(StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS_CONFIG)) {
             rocksDBConf = rocksDBConf.withFallback(
                 Conf.with(StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS_CONFIG, DefaultRocksDBConfigSetter.class.getName())
             );
         }
 
-        streamsConfig = Conf
-            .with(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString())
-            .withFallback(streamsConfig)
-            .withFallback(rocksDBConf);
+        streamsConfig = streamsConfig.withFallback(rocksDBConf);
 
-        final KafkaStreamsContainer container = new KafkaStreamsContainer(
-            topologyContainer.getMetadata(),
-            streamsConfig,
-            new InternalKafkaStreamsFactory(topologyContainer.getTopology())
-        );
+        topologyContainer.streamsConfig(streamsConfig);
 
-        interceptors.forEach(container::addLifeCycleInterceptors);
+        InternalKafkaStreamsFactory delegate = new InternalKafkaStreamsFactory(kafkaStreamsFactory);
+        final KafkaStreamsContainer container = new KafkaStreamsContainer(topologyContainer, delegate);
+        delegate.setContainer(container);
         return container;
     }
 
     private class InternalKafkaStreamsFactory implements KafkaStreamsFactory {
 
-        private final Topology topology;
+        private final KafkaStreamsFactory factory;
 
-        private InternalKafkaStreamsFactory(final Topology topology) {
-            this.topology = topology;
+        private KafkaStreamsContainer container;
+
+        /**
+         * Creates a new {@link InternalKafkaStreamsFactory} instance.
+         *
+         * @param factory  the {@link KafkaStreamsFactory} instance to delegate creation.
+         */
+        InternalKafkaStreamsFactory(final KafkaStreamsFactory factory) {
+            this.factory = Objects.requireNonNull(factory, "factory cannot be null");
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public KafkaStreams make(final KafkaStreamsContainer container) {
-            Objects.requireNonNull(container, "container cannot be null");
+        public KafkaStreams make(final Topology topology, final Conf streamsConfig) {
 
-            KafkaStreams kafkaStreams = new KafkaStreams(topology, container.streamsConfig().getConfAsProperties());
+            final KafkaStreams kafkaStreams = factory.make(topology, streamsConfig);
 
             final CompositeStateListener compositeStateListener = new CompositeStateListener(stateListeners);
             compositeStateListener.addListener((newState, oldState) -> {
@@ -155,6 +152,10 @@ public class KafkaStreamContainerBuilder {
             kafkaStreams.setGlobalStateRestoreListener(new CompositeStateRestoreListener(restoreListeners));
 
             return kafkaStreams;
+        }
+
+        private void setContainer(final KafkaStreamsContainer container) {
+            this.container = container;
         }
     }
 }

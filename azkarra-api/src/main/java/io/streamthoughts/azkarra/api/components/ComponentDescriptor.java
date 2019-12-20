@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.components;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.io.Closeable;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,6 +32,12 @@ import java.util.TreeSet;
  * @param <T>   the component-type.
  */
 public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>> {
+
+    public static final String SCOPE_APPLICATION = "application";
+
+    public static final String SCOPE_ENVIRONMENT = "env";
+
+    public static final String SCOPE_STREAMS     = "streams";
 
     private static final String UNKNOWN_VERSION = "UNKNOWN";
 
@@ -45,6 +52,9 @@ public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>
     private final Set<String> aliases;
 
     private final ClassLoader classLoader;
+
+    private final Set<Scoped> scopes;
+
 
     /**
      * Creates a new {@link ComponentDescriptor} instance.
@@ -83,6 +93,22 @@ public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>
         this.type = type;
         this.classLoader = classLoader;
         this.aliases = new TreeSet<>();
+        this.scopes = new HashSet<>();
+    }
+
+    public void addScope(final Scoped scoped) {
+        this.scopes.add(scoped);
+    }
+
+    public boolean hasScope(final Scoped scoped) {
+        if (scopes.isEmpty()) {
+            return Scoped.application().equals(scoped);
+        }
+        return scopes.contains(scoped);
+    }
+
+    public Set<Scoped> scopes() {
+        return scopes;
     }
 
     public ClassLoader getClassLoader() {

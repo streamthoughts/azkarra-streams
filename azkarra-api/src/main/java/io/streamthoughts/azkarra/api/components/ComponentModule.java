@@ -24,6 +24,11 @@ import io.streamthoughts.azkarra.api.config.Configurable;
 import java.util.Collection;
 import java.util.Objects;
 
+/**
+ * A configurable {@link ComponentFactory} which has access to the {@link ComponentRegistry}.
+ *
+ * @param <T>   the component type.
+ */
 public abstract class ComponentModule<T> implements ComponentFactory<T>, ComponentRegistryAware, Configurable {
 
     private final Class<T> type;
@@ -64,8 +69,20 @@ public abstract class ComponentModule<T> implements ComponentFactory<T>, Compone
         this.configuration = configuration;
     }
 
+    /**
+     * Gets the {@link Conf}.
+     * @return  the {@link Conf}.
+     */
     protected Conf configuration() {
         return configuration;
+    }
+
+    /**
+     * Gets the {@link ComponentRegistry}.
+     * @return  the {@link ComponentRegistry}.
+     */
+    protected ComponentRegistry registry() {
+        return registry;
     }
 
     /**
@@ -79,34 +96,96 @@ public abstract class ComponentModule<T> implements ComponentFactory<T>, Compone
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      * @throws NoSuchComponentException     if no component is registered for the given type.
      */
-    protected <C> C getComponentForType(final Class<C> type) {
+    protected <C> C getComponent(final Class<C> type) {
         return registry.getComponent(type, configuration);
     }
 
     /**
      * Gets an instance, which may be shared or independent, for the specified type.
      *
-     * @param classOrAlias  the fully qualified class name or an alias of the component.
-     * @param <C>           the component-type.
+     * @param type      the component class.
+     * @param scoped    the component scope.
+     * @param <C>       the component type.
      *
-     * @return              the instance of type {@link C}.
+     * @return          the instance of type {@link T}.
+     *
+     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
+     * @throws NoSuchComponentException     if no component is registered for the given type.
+     */
+    protected <C> C getComponent(final Class<C> type, final Scoped scoped) {
+        return registry.getComponent(type, configuration, scoped);
+    }
+
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     * If more than one component is registered for the given type, the latest version is returned.
+     *
+     * @param type     the fully qualified class name or an alias of the component.
+     * @param version  the version of the component.
+     * @param <C>      the component-type.
+     *
+     * @return       the instance of type {@link T}.
+     *
+     * @throws NoSuchComponentException     if no component is registered for the given type.
+     */
+    protected <C> C getVersionedComponent(final String type, final String version) {
+        return registry.getVersionedComponent(type, version, configuration);
+    }
+
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     * If more than one component is registered for the given type, the latest version is returned.
+     *
+     * @param type     the fully qualified class name or an alias of the component.
+     * @param version  the version of the component.
+     * @param scoped   the component scope.
+     * @param <C>      the component-type.
+     *
+     * @return       the instance of type {@link T}.
+     *
+     * @throws NoSuchComponentException     if no component is registered for the given type.
+     */
+    protected <C> C getVersionedComponent(final String type, final String version, final Scoped scoped) {
+        return registry.getVersionedComponent(type, version, configuration, scoped);
+    }
+
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * @param type    the fully qualified class name or an alias of the component.
+     * @param <C>     the component type.
+     *
+     * @return        the instance of type {@link C}.
      *
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      * @throws NoSuchComponentException     if no component is registered for the given class or alias..
      */
-    protected <C> C getComponentForClassOrAlias(final String classOrAlias) {
-        return registry.getComponent(classOrAlias, configuration);
+    protected <C> C getComponent(final String type) {
+        return registry.getComponent(type, configuration);
     }
 
     /**
      * Gets all instances, which may be shared or independent, for the specified type.
      *
      * @param type          the component class.
-     * @param <C>           the component-type.
+     * @param <C>           the component type.
      *
      * @return              the instance of type {@link C}.
      */
-    protected <C> Collection<C> getAllComponentsForType(final Class<C> type) {
+    protected <C> Collection<C> getAllComponents(final Class<C> type) {
         return registry.getAllComponents(type, configuration);
+    }
+
+    /**
+     * Gets all instances, which may be shared or independent, for the specified type and scope.
+     *
+     * @param type          the component class.
+     * @param scoped        the component scope.
+     * @param <C>           the component type.
+     *
+     * @return              the instance of type {@link C}.
+     */
+    protected <C> Collection<C> getAllComponents(final Class<C> type, final Scoped scoped) {
+        return registry.getAllComponents(type, configuration, scoped);
     }
 }

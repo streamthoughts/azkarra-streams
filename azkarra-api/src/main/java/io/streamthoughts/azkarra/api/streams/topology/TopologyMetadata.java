@@ -18,10 +18,6 @@
  */
 package io.streamthoughts.azkarra.api.streams.topology;
 
-import io.streamthoughts.azkarra.api.config.Conf;
-import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.TopologyDescription;
-
 import java.util.Objects;
 
 public class TopologyMetadata {
@@ -29,8 +25,6 @@ public class TopologyMetadata {
     private final String name;
     private final String version;
     private final String description;
-    private final TopologyDescription topology;
-    private final Conf streamsConfig;
 
     /**
      * Creates a new {@link TopologyMetadata} instance.
@@ -38,21 +32,12 @@ public class TopologyMetadata {
      * @param name              the topology name.
      * @param version           the topology version.
      * @param description       the topology description.
-     * @param topology          the {@link Topology} instance to used for
-     *                          creating a new {@link org.apache.kafka.streams.KafkaStreams}.
-     *
-     * @param streamsConfig     the {@link Conf} instance to used for
-     *                          creating a new {@link org.apache.kafka.streams.KafkaStreams}.
      */
     public TopologyMetadata(final String name,
                      final String version,
-                     final String description,
-                     final TopologyDescription topology,
-                     final Conf streamsConfig) {
+                     final String description) {
         Objects.requireNonNull(name, "name cannot be null");
-        Objects.requireNonNull(name, "version cannot be null");
-        Objects.requireNonNull(topology, "topology description cannot be null");
-        Objects.requireNonNull(streamsConfig, "streamsConfig cannot be null");
+        Objects.requireNonNull(version, "version cannot be null");
 
         if (name.isEmpty()) {
             throw new IllegalArgumentException("name cannot be empty");
@@ -61,8 +46,6 @@ public class TopologyMetadata {
         this.name = name;
         this.version = version;
         this.description = description;
-        this.topology = topology;
-        this.streamsConfig = streamsConfig;
     }
 
     public String name() {
@@ -77,14 +60,6 @@ public class TopologyMetadata {
         return description;
     }
 
-    public TopologyDescription topology() {
-        return topology;
-    }
-
-    public Conf streamsConfig() {
-        return streamsConfig;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -95,9 +70,7 @@ public class TopologyMetadata {
         TopologyMetadata metadata = (TopologyMetadata) o;
         return Objects.equals(name, metadata.name) &&
                 Objects.equals(version, metadata.version) &&
-                Objects.equals(description, metadata.description) &&
-                Objects.equals(topology, metadata.topology) &&
-                Objects.equals(streamsConfig, metadata.streamsConfig);
+                Objects.equals(description, metadata.description);
     }
 
     /**
@@ -105,7 +78,7 @@ public class TopologyMetadata {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(name, version, description, topology, streamsConfig);
+        return Objects.hash(name, version, description);
     }
 
 
@@ -118,8 +91,6 @@ public class TopologyMetadata {
                 "name='" + name + '\'' +
                 ", version='" + version + '\'' +
                 ", description='" + description + '\'' +
-                ", topology=" + topology +
-                ", streamsConfig=" + streamsConfig +
                 '}';
     }
 }

@@ -18,8 +18,8 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.State;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -62,7 +62,7 @@ public class AutoCreateTopicsInterceptorTest {
     private AutoCreateTopicsInterceptor interceptor;
 
     @Mock
-    private StreamsLifeCycleChain chain;
+    private StreamsLifecycleChain chain;
 
     @Captor
     private ArgumentCaptor<Collection<NewTopic>> captorNewTopics;
@@ -102,7 +102,7 @@ public class AutoCreateTopicsInterceptorTest {
 
     @Test
     public void shouldAutoCreateTopicsWhenStreamsStart() {
-        StreamsLifeCycleContext context = newContext();
+        StreamsLifecycleContext context = newContext();
         interceptor.onStart(context, chain);
 
         Mockito.verify(mkClient).createTopics(captorNewTopics.capture());
@@ -117,7 +117,7 @@ public class AutoCreateTopicsInterceptorTest {
 
     @Test
     public void shouldAutoCreateTopicsWhenStreamsStartGivenTopics() {
-        StreamsLifeCycleContext context = newContext();
+        StreamsLifecycleContext context = newContext();
 
         NewTopic inputTopic = new NewTopic("input-topic", 3, (short) 1);
         NewTopic outputTopic = new NewTopic("output-topic", 6, (short) 2);
@@ -134,7 +134,7 @@ public class AutoCreateTopicsInterceptorTest {
         Assertions.assertEquals(inputTopic.name(), actualInputTopic.name());
         Assertions.assertEquals(inputTopic.numPartitions(), actualInputTopic.numPartitions());
         Assertions.assertEquals(inputTopic.replicationFactor(), actualInputTopic.replicationFactor());
-        
+
         NewTopic actualOutputTopic = createdTopics.get(1);
         Assertions.assertEquals(outputTopic.name(), actualOutputTopic.name());
         Assertions.assertEquals(outputTopic.numPartitions(), actualOutputTopic.numPartitions());
@@ -143,7 +143,7 @@ public class AutoCreateTopicsInterceptorTest {
 
     @Test
     public void shouldAutoDeleteTopicsWhenStreamsStop() {
-        StreamsLifeCycleContext context = newContext();
+        StreamsLifecycleContext context = newContext();
 
         interceptor.setDeleteTopicsOnStreamsClosed(true);
         interceptor.onStop(context, chain);
@@ -155,8 +155,8 @@ public class AutoCreateTopicsInterceptorTest {
         Assertions.assertTrue(deletedTopics.contains("test-count-changelog"));
     }
 
-    private StreamsLifeCycleContext newContext() {
-        return new StreamsLifeCycleContext() {
+    private StreamsLifecycleContext newContext() {
+        return new StreamsLifecycleContext() {
             State state = State.CREATED;
 
             @Override

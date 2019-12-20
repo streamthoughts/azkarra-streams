@@ -18,14 +18,14 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 
 import java.util.Objects;
 
-public class ClassloadingIsolationInterceptor implements StreamsLifeCycleInterceptor {
+public class ClassloadingIsolationInterceptor implements StreamsLifecycleInterceptor {
 
     private final ClassLoader classLoader;
 
@@ -43,7 +43,7 @@ public class ClassloadingIsolationInterceptor implements StreamsLifeCycleInterce
      * {@inheritDoc}
      */
     @Override
-    public void onStart(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
+    public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
 
         final ClassLoader saveLoader = ClassUtils.compareAndSwapLoaders(this.classLoader);
         try {

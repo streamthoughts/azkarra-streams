@@ -19,7 +19,7 @@
 package io.streamthoughts.azkarra.runtime.streams.topology;
 
 import io.streamthoughts.azkarra.api.Executed;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 
 import java.util.List;
@@ -64,7 +64,7 @@ public class InternalExecuted extends Executed {
         return Optional.ofNullable(config).orElse(Conf.empty());
     }
 
-    public List<Supplier<StreamsLifeCycleInterceptor>> interceptors() {
+    public List<Supplier<StreamsLifecycleInterceptor>> interceptors() {
         return interceptors;
     }
 }

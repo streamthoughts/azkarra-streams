@@ -38,7 +38,7 @@ public class DefaultApplicationIdBuilder implements ApplicationIdBuilder, Stream
 
     private static final String CHAR_SEPARATOR = "-";
     private static final char[] AUTHORIZED_CHAR_SEPARATOR = {' ', '-', '_', '.'};
-    public static final String INTERNAL_ENV_NAME_PREFIX = "__";
+    private static final String INTERNAL_ENV_NAME_PREFIX = "__";
 
     private StreamsExecutionEnvironment environment;
 
@@ -54,15 +54,12 @@ public class DefaultApplicationIdBuilder implements ApplicationIdBuilder, Stream
      * {@inheritDoc}
      */
     @Override
-    public ApplicationId buildApplicationId(final TopologyMetadata metadata) {
-        Conf streamsConfig = metadata.streamsConfig();
+    public ApplicationId buildApplicationId(final TopologyMetadata metadata, final Conf streamsConfig) {
         final Optional<String> id = streamsConfig.getOptionalString(StreamsConfig.APPLICATION_ID_CONFIG);
-        return id.map(ApplicationId::new).orElseGet(() -> {
-            return new ApplicationId(normalize(build(metadata, environment)));
-        });
+        return id.map(ApplicationId::new).orElseGet(() -> new ApplicationId(normalize(build(metadata, environment))));
     }
 
-    String build(final TopologyMetadata metadata, final StreamsExecutionEnvironment environment) {
+    private String build(final TopologyMetadata metadata, final StreamsExecutionEnvironment environment) {
         StringBuilder sb = new StringBuilder();
         String name = environment.name();
         if (!name.startsWith(INTERNAL_ENV_NAME_PREFIX)) {
@@ -71,7 +68,7 @@ public class DefaultApplicationIdBuilder implements ApplicationIdBuilder, Stream
         return normalize(sb.append(metadata.name()).append(CHAR_SEPARATOR).append(metadata.version()).toString());
     }
 
-    static String normalize(final String name) {
+    private static String normalize(final String name) {
 
         StringBuilder sb = new StringBuilder();
         char[] chars = name.toCharArray();

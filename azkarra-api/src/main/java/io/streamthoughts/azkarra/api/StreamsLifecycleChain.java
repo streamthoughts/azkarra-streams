@@ -16,26 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.api;
 
-import io.streamthoughts.azkarra.api.config.Conf;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.Topology;
-
-/**
- * The interface which is used for creating new {@link KafkaStreams} instance.
- */
-@FunctionalInterface
-public interface KafkaStreamsFactory {
-
-    KafkaStreamsFactory DEFAULT = (topology, config) -> new KafkaStreams(topology, config.getConfAsProperties());
+public interface StreamsLifecycleChain {
 
     /**
-     * Creates a new {@link KafkaStreams} instance for the given topology and config.
-     *
-     * @param topology          the {@link Topology} instance.
-     * @param streamsConfig     the streams configuration.
-     * @return                  the {@link KafkaStreams} instance.
+     * Executes the operation on the current {@link org.apache.kafka.streams.KafkaStreams} instance.
      */
-    KafkaStreams make(final Topology topology, final Conf streamsConfig);
+    void execute();
 }

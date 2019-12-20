@@ -45,11 +45,9 @@ import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
-import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.streams.TopologyDescription;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -139,9 +137,7 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
     @Override
     public StreamsTopologyGraph getStreamsTopologyById(final String applicationId) {
         KafkaStreamsContainer streams = getStreamsById(applicationId);
-        final TopologyMetadata metadata = streams.topologyMetadata();
-        TopologyDescription topology = metadata.topology();
-        return StreamsTopologyGraph.build(topology);
+        return StreamsTopologyGraph.build(streams.topologyDescription());
     }
 
     /**

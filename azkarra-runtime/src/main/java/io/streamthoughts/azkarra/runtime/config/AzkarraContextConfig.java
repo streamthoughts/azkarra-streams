@@ -79,8 +79,9 @@ public class AzkarraContextConfig {
         return configs.getOptionalBoolean(WAIT_FOR_TOPICS_ENABLE_CONFIG).orElse(false);
     }
 
-    public void addConfiguration(final Conf configs) {
+    public AzkarraContextConfig addConfiguration(final Conf configs) {
         this.configs = this.configs.withFallback(configs);
+        return this;
     }
 
     public Conf configs() {

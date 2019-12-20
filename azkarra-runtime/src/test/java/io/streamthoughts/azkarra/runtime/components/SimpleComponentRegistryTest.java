@@ -48,7 +48,7 @@ public class SimpleComponentRegistryTest {
             NoSuchComponentException.class,
             () -> registry.getComponent(TestB.class, Conf.empty()));
         assertEquals(
-            "No component registered for class '" + TestB.class.getName() + "'",
+            "No component registered for type '" + TestB.class.getName() + "'",
             e.getMessage());
     }
 

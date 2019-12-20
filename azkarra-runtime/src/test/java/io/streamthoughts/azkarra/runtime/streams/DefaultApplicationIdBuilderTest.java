@@ -20,18 +20,14 @@ package io.streamthoughts.azkarra.runtime.streams;
 
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.MapConf;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.TopologyDescription;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.Set;
 
 public class DefaultApplicationIdBuilderTest {
 
@@ -53,60 +49,45 @@ public class DefaultApplicationIdBuilderTest {
 
     @Test
     public void shouldReturnApplicationIdWhenConfigured() {
-
         final String applicationId = "user-defined-application-id";
-        TopologyMetadata metadata = getTopologyMetadata(
-            "dummy",
+        TopologyMetadata metadata = getTopologyMetadata("dummy");
+        ApplicationId result = builderWithUserEnv.buildApplicationId(
+            metadata,
             Conf.with(StreamsConfig.APPLICATION_ID_CONFIG, applicationId));
-        ApplicationId result = builderWithUserEnv.buildApplicationId(metadata);
         Assertions.assertEquals(applicationId, result.toString());
     }
 
     @Test
     public void shouldGenerateIdUsingNameAndVersionPrefixedGivenUserEnv() {
 
-        TopologyMetadata metadata = getTopologyMetadata("dummy", Conf.empty());
-        ApplicationId result = builderWithUserEnv.buildApplicationId(metadata);
+        TopologyMetadata metadata = getTopologyMetadata("dummy");
+        ApplicationId result = builderWithUserEnv.buildApplicationId(
+            metadata,
+            Conf.empty());
         Assertions.assertEquals("test-dummy-1-0", result.toString());
     }
 
     @Test
     public void shouldGenerateIdUsingNameAndVersionNotPrefixedGivenInternalEnv() {
 
-        TopologyMetadata metadata = getTopologyMetadata("dummy", Conf.empty());
-        ApplicationId result = builderWithInternalEnv.buildApplicationId(metadata);
+        TopologyMetadata metadata = getTopologyMetadata("dummy");
+        ApplicationId result = builderWithInternalEnv.buildApplicationId(
+            metadata,
+            Conf.empty());
         Assertions.assertEquals("dummy-1-0", result.toString());
     }
 
     @Test
     public void shouldGenerateNormalizedIdUsingNameAndVersionWhenNoOneIsConfigured() {
 
-        TopologyMetadata metadata = getTopologyMetadata("example.package.MyTopology", Conf.empty());
-        ApplicationId result = builderWithUserEnv.buildApplicationId(metadata);
+        TopologyMetadata metadata = getTopologyMetadata("example.package.MyTopology");
+        ApplicationId result = builderWithUserEnv.buildApplicationId(
+            metadata,
+            Conf.empty());
         Assertions.assertEquals("test-example-package-my-topology-1-0", result.toString());
     }
 
-    private TopologyMetadata getTopologyMetadata(final String dummy, final Conf mapConf) {
-        return new TopologyMetadata(
-                dummy,
-                "1.0",
-                "-",
-                mockTopologyDescription(),
-                mapConf
-        );
-    }
-
-    private TopologyDescription mockTopologyDescription() {
-        return new TopologyDescription() {
-            @Override
-            public Set<Subtopology> subtopologies() {
-                return null;
-            }
-
-            @Override
-            public Set<GlobalStore> globalStores() {
-                return null;
-            }
-        };
+    private TopologyMetadata getTopologyMetadata(final String dummy) {
+        return new TopologyMetadata(dummy, "1.0", "-");
     }
 }

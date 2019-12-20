@@ -18,9 +18,9 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleContext;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class InternalStreamsLifeCycleChainTest {
 
     private List<String> results;
 
-    private List<StreamsLifeCycleInterceptor> interceptors;
+    private List<StreamsLifecycleInterceptor> interceptors;
 
     @BeforeEach
     public void setUp() {
@@ -70,9 +70,9 @@ public class InternalStreamsLifeCycleChainTest {
 
     @Test
     public void shouldNotBreakTheChainWhenAExceptionIsThrown() {
-        interceptors.add(1, new StreamsLifeCycleInterceptor() {
+        interceptors.add(1, new StreamsLifecycleInterceptor() {
             @Override
-            public void onStart(StreamsLifeCycleContext context, StreamsLifeCycleChain chain) {
+            public void onStart(StreamsLifecycleContext context, StreamsLifecycleChain chain) {
                 throw new RuntimeException("Fail!");
             }
         });
@@ -86,7 +86,7 @@ public class InternalStreamsLifeCycleChainTest {
         Assertions.assertEquals(expected, results);
     }
 
-    public static class DummyStreamsLifeCycleInterceptor implements StreamsLifeCycleInterceptor {
+    public static class DummyStreamsLifeCycleInterceptor implements StreamsLifecycleInterceptor {
 
         private final String id;
         private final List<String> collector;
@@ -97,13 +97,13 @@ public class InternalStreamsLifeCycleChainTest {
         }
 
         @Override
-        public void onStart(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
+        public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
             collector.add(id);
             chain.execute();
         }
 
         @Override
-        public void onStop(final StreamsLifeCycleContext context, final StreamsLifeCycleChain chain) {
+        public void onStop(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
             collector.add(id);
             chain.execute();
         }

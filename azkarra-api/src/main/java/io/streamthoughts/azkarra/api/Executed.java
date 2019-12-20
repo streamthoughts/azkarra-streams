@@ -34,7 +34,7 @@ public class Executed {
     protected final String name;
     protected final String description;
     protected final Conf config;
-    protected final List<Supplier<StreamsLifeCycleInterceptor>> interceptors;
+    protected final List<Supplier<StreamsLifecycleInterceptor>> interceptors;
 
     /**
      * Static helper that can be used to creates a new {@link Executed} instance
@@ -91,7 +91,7 @@ public class Executed {
     private Executed(final String name,
                      final String description,
                      final Conf config,
-                     final List<Supplier<StreamsLifeCycleInterceptor>> interceptors) {
+                     final List<Supplier<StreamsLifecycleInterceptor>> interceptors) {
         this.name = name;
         this.description = description;
         this.config = config;
@@ -166,15 +166,32 @@ public class Executed {
      *
      * @return  a new {@link Executed}.
      */
-    public Executed withInterceptor(final Supplier<StreamsLifeCycleInterceptor> interceptor) {
+    public Executed withInterceptor(final Supplier<StreamsLifecycleInterceptor> interceptor) {
         Objects.requireNonNull(config, "config cannot be null");
-        LinkedList<Supplier<StreamsLifeCycleInterceptor>> interceptors = new LinkedList<>(this.interceptors);
+        LinkedList<Supplier<StreamsLifecycleInterceptor>> interceptors = new LinkedList<>(this.interceptors);
         interceptors.add(interceptor);
         return new Executed(
-                name,
-                description,
-                config,
-                interceptors
+            name,
+            description,
+            config,
+            interceptors
+        );
+    }
+
+    /**
+     * Returns a new {@link Executed} with the specified interceptors.
+     *
+     * @param interceptors  the interceptors to add to the streams topology.
+     *
+     * @return  a new {@link Executed}.
+     */
+    public Executed withInterceptors(final List<Supplier<StreamsLifecycleInterceptor>> interceptors) {
+        Objects.requireNonNull(config, "config cannot be null");
+        return new Executed(
+            name,
+            description,
+            config,
+            interceptors
         );
     }
 }

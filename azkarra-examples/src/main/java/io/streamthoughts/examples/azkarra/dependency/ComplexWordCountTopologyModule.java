@@ -36,7 +36,7 @@ public class ComplexWordCountTopologyModule extends ComponentModule<ComplexWordC
 
     @Override
     public ComplexWordCountTopology make() {
-        StopWordsService service = getComponentForType(StopWordsService.class);
+        StopWordsService service = getComponent(StopWordsService.class);
         ComplexWordCountTopology topology = new ComplexWordCountTopology();
         topology.setStopWordsService(service);
 

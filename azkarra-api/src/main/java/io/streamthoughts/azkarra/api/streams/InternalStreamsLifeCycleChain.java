@@ -18,30 +18,30 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
-import io.streamthoughts.azkarra.api.StreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifeCycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
-public class InternalStreamsLifeCycleChain implements StreamsLifeCycleChain {
+public class InternalStreamsLifeCycleChain implements StreamsLifecycleChain {
 
     private static final Logger LOG = LoggerFactory.getLogger(InternalStreamsLifeCycleChain.class);
 
     private final Callback callback;
-    private final Iterator<StreamsLifeCycleInterceptor> interceptors;
+    private final Iterator<StreamsLifecycleInterceptor> interceptors;
     private final Runnable runnable;
 
     /**
      * Creates a new {@link InternalStreamsLifeCycleChain} instance.
      *
-     * @param interceptors  the list of {@link StreamsLifeCycleInterceptor} instance.
+     * @param interceptors  the list of {@link StreamsLifecycleInterceptor} instance.
      * @param callback      the {@link Callback} to invoke on each interceptor.
      * @param runnable      the {@link Runnable} to execute at the end of the chain.
      */
     public InternalStreamsLifeCycleChain(
-            final Iterator<StreamsLifeCycleInterceptor> interceptors,
+            final Iterator<StreamsLifecycleInterceptor> interceptors,
             final Callback callback,
             final Runnable runnable) {
         this.interceptors = interceptors;
@@ -59,7 +59,7 @@ public class InternalStreamsLifeCycleChain implements StreamsLifeCycleChain {
             return;
         }
 
-        StreamsLifeCycleInterceptor interceptor = interceptors.next();
+        StreamsLifecycleInterceptor interceptor = interceptors.next();
         try {
             callback.execute(interceptor, this);
         } catch (Throwable t) {
@@ -73,6 +73,6 @@ public class InternalStreamsLifeCycleChain implements StreamsLifeCycleChain {
     @FunctionalInterface
     public interface Callback {
 
-        void execute(final StreamsLifeCycleInterceptor interceptor, final StreamsLifeCycleChain chain);
+        void execute(final StreamsLifecycleInterceptor interceptor, final StreamsLifecycleChain chain);
     }
 }

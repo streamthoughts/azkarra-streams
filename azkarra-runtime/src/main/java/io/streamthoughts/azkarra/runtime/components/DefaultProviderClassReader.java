@@ -18,12 +18,14 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
+import io.streamthoughts.azkarra.api.annotations.Scope;
 import io.streamthoughts.azkarra.api.annotations.Singleton;
 import io.streamthoughts.azkarra.api.components.ComponentClassReader;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorFactory;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
+import io.streamthoughts.azkarra.api.components.Scoped;
 import io.streamthoughts.azkarra.api.components.Versioned;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
@@ -31,8 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Simple implementation for {@link ComponentClassReader} interface.
@@ -118,6 +122,7 @@ public class DefaultProviderClassReader implements ComponentClassReader {
         Objects.requireNonNull(factory, "factory cannot be null");
         Objects.requireNonNull(registry, "registry cannot be registry");
 
+        final Class<?> factoryType = factory.getClass();
         final Class<T> type = factory.getType();
 
         if (ClassUtils.canBeInstantiated(type)) {
@@ -131,6 +136,8 @@ public class DefaultProviderClassReader implements ComponentClassReader {
             } else {
                 descriptor = new ComponentDescriptor<>(type, classLoader, version);
             }
+            getScopesFor(type, classLoader).forEach(descriptor::addScope);
+            getScopesFor(factoryType, classLoader).forEach(descriptor::addScope);
             registry.registerComponent(descriptor, factory);
         } else {
             LOG.debug("Skipping {} as it is not concrete implementation", type);
@@ -160,6 +167,19 @@ public class DefaultProviderClassReader implements ComponentClassReader {
         try {
             return Versioned.class.isAssignableFrom(cls) ?
                 ClassUtils.newInstance((Class<Versioned>) cls).version() : null;
+        } finally {
+            ClassUtils.compareAndSwapLoaders(saveLoader);
+        }
+    }
+
+    private static List<Scoped> getScopesFor(final Class<?> cls, final ClassLoader classLoader) {
+        ClassLoader saveLoader = ClassUtils.compareAndSwapLoaders(classLoader);
+        try {
+            return ClassUtils.getAllDeclaredAnnotationByType(cls, Scope.class)
+                .stream()
+                .map(s -> new Scoped(s.type(), s.name()))
+                .collect(Collectors.toList());
+
         } finally {
             ClassUtils.compareAndSwapLoaders(saveLoader);
         }

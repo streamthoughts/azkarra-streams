@@ -22,8 +22,6 @@ import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.config.Configurable;
-import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
@@ -64,17 +62,17 @@ public class DefaultStreamsExecutionEnvironmentTest {
                 .with("default.prop", "override")
             );
 
-        Tuple<ApplicationId, TopologyContainer> t = environment.new InternalTopologySupplier(
+        TopologyContainer container = environment.new InternalTopologyProvider(
             DummyTopologyProvider::new,
-            executed).get();
-        TopologyContainer container = t.right();
-        assertEquals(MOCK, container.getTopology());
-        TopologyMetadata metadata = container.getMetadata();
+            executed).getTopology();
+
+        assertEquals(MOCK, container.topology());
+        TopologyMetadata metadata = container.metadata();
 
         assertEquals("dummy-topology",  metadata.name());
         assertEquals("a test topology",  metadata.description());
 
-        Conf streams = metadata.streamsConfig();
+        Conf streams = container.streamsConfig();
         assertEquals("value", streams.getString("prop") );
         assertEquals("value", streams.getString("user.prop") );
         assertEquals("override", streams.getString("default.prop") );

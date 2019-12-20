@@ -18,86 +18,80 @@
  */
 package io.streamthoughts.azkarra.api.streams.topology;
 
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.TopologyDescription;
 
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Default class to encapsulate a {@link Topology} instance.
  */
 public class TopologyContainer {
 
+    private TopologyDescription description;
+
     private final Topology topology;
 
     private final TopologyMetadata metadata;
 
-    public static Builder newBuilder() {
-        return new Builder();
-    }
+    private final ApplicationId applicationId;
 
-    public static class Builder {
+    private final List<StreamsLifecycleInterceptor> interceptors;
 
-        private Topology topology;
-        private String version;
-        private String name;
-        private String description;
-        private Conf conf;
-
-        public Builder withConf(final Conf conf) {
-            this.conf = conf;
-            return this;
-        }
-
-        public Builder withName(final String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder withDescription(final String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder withVersion(final String version) {
-            this.version = version;
-            return this;
-        }
-
-        public Builder withTopology(final Topology topology) {
-            this.topology = topology;
-            return this;
-        }
-
-        public TopologyContainer build() {
-            return new TopologyContainer(
-                topology,
-                new TopologyMetadata(
-                    name,
-                    version,
-                    description,
-                    topology.describe(),
-                    conf != null ? conf : Conf.empty())
-            );
-        }
-    }
+    private Conf streamsConfig;
 
     /**
      * Creates a new {@link TopologyContainer} instance.
      *
-     * @param topology  the {@link Topology} instance.
-     * @param metadata  the {@link TopologyMetadata} instance.
+     * @param topology       the {@link Topology} instance.
+     * @param streamsConfig  the {@link Conf} of the streams.
+     * @param metadata       the {@link TopologyMetadata} instance.
+     *
      */
-    private TopologyContainer(final Topology topology,
-                              final TopologyMetadata metadata) {
-        this.topology = topology;
-        this.metadata = metadata;
+    public TopologyContainer(final Topology topology,
+                             final ApplicationId applicationId,
+                             final Conf streamsConfig,
+                             final TopologyMetadata metadata,
+                             final List<StreamsLifecycleInterceptor> interceptors) {
+        this.topology = Objects.requireNonNull(topology, "topology can't be null");
+        this.applicationId = Objects.requireNonNull(applicationId, "topology can't be null");
+        this.metadata = Objects.requireNonNull(metadata, "metadata can't be null");
+        this.streamsConfig = Objects.requireNonNull(streamsConfig, "streamsConfig can't be null");
+        this.interceptors = interceptors;
     }
 
-    public Topology getTopology() {
+    public List<StreamsLifecycleInterceptor> interceptors() {
+        return interceptors;
+    }
+
+    public ApplicationId applicationId() {
+        return applicationId;
+    }
+
+    public Topology topology() {
         return topology;
     }
 
-    public TopologyMetadata getMetadata() {
+    public TopologyDescription description() {
+        if (description == null) {
+            description = topology.describe();
+        }
+        return description;
+    }
+
+    public Conf streamsConfig() {
+        return streamsConfig;
+    }
+
+    public void streamsConfig(final Conf streamsConfig) {
+        this.streamsConfig = streamsConfig;
+    }
+
+    public TopologyMetadata metadata() {
         return metadata;
     }
 }
