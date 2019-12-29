@@ -16,16 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.streams.components.scantest.test;
+package io.streamthoughts.azkarra.streams.components.scan.supplier;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
-import io.streamthoughts.azkarra.streams.components.ComponentScannerTest;
+import io.streamthoughts.azkarra.streams.MockTopologyProvider;
 
-/**
- * Class used for testing purpose.
- * @see ComponentScannerTest
- */
+import java.util.function.Supplier;
+
 @Component
-public class TestAnnotatedComponent {
+public class TestSupplier implements Supplier<MockTopologyProvider> {
 
+    @Override
+    public MockTopologyProvider get() {
+        return new MockTopologyProvider();
+    }
 }

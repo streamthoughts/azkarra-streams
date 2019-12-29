@@ -101,6 +101,6 @@ public class StreamsHealthIndicator implements HealthIndicator, AzkarraContextAw
      */
     @Override
     public void setAzkarraContext(final AzkarraContext context) {
-        this.service = context.getComponentForType(AzkarraStreamsService.class);
+        this.service = context.getComponent(AzkarraStreamsService.class);
     }
 }

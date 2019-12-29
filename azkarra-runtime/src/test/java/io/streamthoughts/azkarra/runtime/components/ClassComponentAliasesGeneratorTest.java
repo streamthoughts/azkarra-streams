@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.runtime.components;
 
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import org.apache.kafka.streams.Topology;
 import org.junit.jupiter.api.Test;
@@ -30,14 +31,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ClassComponentAliasesGeneratorTest {
 
+    private final ComponentDescriptor<TestTopologyProvider> descriptor = new SimpleComponentDescriptor<>(
+        "DUMMY",
+        TestTopologyProvider.class,
+        TestTopologyProvider::new,
+        false
+    );
+
     @Test
     public void shouldGenerateAliasesForTopologyProvider() {
 
         ClassComponentAliasesGenerator generator = new ClassComponentAliasesGenerator();
-        Set<String> aliases = generator.getAliasesFor(
-            new ComponentDescriptor<>(TestTopologyProvider.class),
-            Collections.emptyList()
-        );
+        Set<String> aliases = generator.getAliasesFor(descriptor, Collections.emptyList());
         assertTrue(aliases.contains("TestTopologyProvider"));
         assertTrue(aliases.contains("TestTopology"));
         assertTrue(aliases.contains("Test"));

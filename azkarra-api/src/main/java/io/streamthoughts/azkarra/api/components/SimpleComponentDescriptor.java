@@ -1,0 +1,237 @@
+/*
+ * Copyright 2019 StreamThoughts.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.streamthoughts.azkarra.api.components;
+
+import io.streamthoughts.azkarra.api.util.Version;
+
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Supplier;
+
+/**
+ * The {@link SimpleComponentDescriptor} is the base class used fro describing components.
+ *
+ * @param <T>   the component-type.
+ */
+public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
+
+    private String name;
+
+    private final Version version;
+
+    private final Class<T> type;
+
+    private final Supplier<T> supplier;
+
+    private final Set<String> aliases;
+
+    private ClassLoader classLoader;
+
+    private ComponentMetadata metadata;
+
+    private final boolean isSingleton;
+
+    /**
+     * Creates a new {@link SimpleComponentDescriptor} instance.
+     *
+     * @param name          the name of the component.
+     * @param type          the type of the component.
+     * @param supplier      the supplier of the component.
+     * @param isSingleton   is the component singleton.
+     */
+    public SimpleComponentDescriptor(final String name,
+                                     final Class<T> type,
+                                     final Supplier<T> supplier,
+                                     final boolean isSingleton) {
+        this(name, type, type.getClassLoader(), supplier, null, isSingleton);
+    }
+
+    /**
+     * Creates a new {@link SimpleComponentDescriptor} instance.
+     *
+     * @param name          the name of the component.
+     * @param type          the type of the component.
+     * @param supplier      the supplier of the component.
+     * @param version       the version of the component.
+     * @param isSingleton   is the component singleton.
+     */
+    public SimpleComponentDescriptor(final String name,
+                                     final Class<T> type,
+                                     final Supplier<T> supplier,
+                                     final String version,
+                                     final boolean isSingleton) {
+        this(name, type, type.getClassLoader(), supplier, version, isSingleton);
+    }
+
+    /**
+     * Creates a new {@link SimpleComponentDescriptor} instance.
+     *
+     * @param name          the name of the component.
+     * @param type          the type of the component.
+     * @param classLoader   the component classloader.
+     * @param supplier      the supplier of the component.
+     * @param version       the version of the component.
+     * @param isSingleton   is the component singleton.
+     */
+    public SimpleComponentDescriptor(final String name,
+                                     final Class<T> type,
+                                     final ClassLoader classLoader,
+                                     final Supplier<T> supplier,
+                                     final String version,
+                                     final boolean isSingleton) {
+        Objects.requireNonNull(type, "type can't be null");
+        Objects.requireNonNull(supplier, "supplier can't be null");
+        this.name = name;
+        this.version = version != null ? Version.parse(version) : null;
+        this.supplier = supplier;
+        this.type = type;
+        this.classLoader = classLoader == null ? type.getClassLoader() : classLoader;
+        this.aliases = new TreeSet<>();
+        this.metadata = new ComponentMetadata();
+        this.isSingleton = isSingleton;
+    }
+
+    /**
+     * Creates a new {@link SimpleComponentDescriptor} instance from the given one.
+     *
+     * @param descriptor    the {@link SimpleComponentDescriptor} to copy.
+     */
+    protected SimpleComponentDescriptor(final ComponentDescriptor<T> descriptor) {
+        this(
+            descriptor.name(),
+            descriptor.type(),
+            descriptor.classLoader(),
+            descriptor.supplier(),
+            descriptor.version().toString(),
+            descriptor.isSingleton()
+        );
+        metadata = descriptor.metadata();
+        aliases.addAll(descriptor.aliases());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String name() {
+        return name;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ComponentMetadata metadata() {
+        return metadata;
+    }
+
+    public void metadata(final ComponentMetadata metadata) {
+        this.metadata = metadata;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ClassLoader classLoader() {
+        return classLoader;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addAliases(final Set<String> aliases) {
+        this.aliases.addAll(aliases);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> aliases() {
+        return aliases;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String className() {
+        return type.getName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Version version() {
+        return version;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Supplier<T> supplier() {
+        return supplier;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<T> type() {
+        return type;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isSingleton()  {
+        return isSingleton;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "[" +
+                "name=" + name +
+                ", version=" + version +
+                ", type=" + type +
+                ", aliases=" + aliases +
+                ", isSingleton=" + isSingleton +
+                ", metadata=" + metadata +
+                ']';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compareTo(final ComponentDescriptor<T> that) {
+        if (!this.isVersioned()) return 1;
+        else if (!that.isVersioned()) return -1;
+        else return this.version.compareTo(that.version());
+    }
+}

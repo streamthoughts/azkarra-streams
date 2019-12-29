@@ -16,27 +16,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.streams.components.scantest.factory;
+package io.streamthoughts.azkarra.api.components;
 
-import io.streamthoughts.azkarra.api.components.ComponentFactory;
-import io.streamthoughts.azkarra.streams.components.ComponentScannerTest;
+import org.junit.jupiter.api.Test;
 
-/**
- * Class used for testing purpose.
- * @see ComponentScannerTest
- */
-public class TestComponentFactory implements ComponentFactory<TestComponentFactory.DummyComponent> {
-    @Override
-    public DummyComponent make() {
-        return null;
-    }
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    @Override
-    public Class<DummyComponent> getType() {
-        return DummyComponent.class;
-    }
+public class ComponentNameGeneratorTest {
 
-    public static class DummyComponent {
+    @Test
+    public void testDefaultImplementation() {
 
+        ComponentDescriptor<ComponentNameGeneratorTest> descriptor = new SimpleComponentDescriptor<>(
+            "NAME",
+            ComponentNameGeneratorTest.class,
+            ComponentNameGeneratorTest::new,
+            true);
+        String name = ComponentNameGenerator.DEFAULT.generate(descriptor);
+        assertNotNull(name);
+        assertEquals("componentNameGeneratorTest", name);
     }
 }

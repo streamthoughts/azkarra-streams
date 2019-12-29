@@ -21,143 +21,76 @@ package io.streamthoughts.azkarra.api.components;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.io.Closeable;
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.function.Supplier;
 
-/**
- * The {@link ComponentDescriptor} is the base class used fro describing components.
- *
- * @param <T>   the component-type.
- */
-public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>> {
-
-    public static final String SCOPE_APPLICATION = "application";
-
-    public static final String SCOPE_ENVIRONMENT = "env";
-
-    public static final String SCOPE_STREAMS     = "streams";
-
-    private static final String UNKNOWN_VERSION = "UNKNOWN";
-
-    private final String name;
-
-    private final String version;
-
-    private final Version comparableVersion;
-
-    private final Class<T> type;
-
-    private final Set<String> aliases;
-
-    private final ClassLoader classLoader;
-
-    private final Set<Scoped> scopes;
-
+public interface ComponentDescriptor<T> extends Comparable<ComponentDescriptor<T>> {
 
     /**
-     * Creates a new {@link ComponentDescriptor} instance.
+     * Gets the name of the component.
      *
-     * @param type   the component class.
+     * @return  the name, or {@code null} if the name is not set.
      */
-    public ComponentDescriptor(final Class<T> type) {
-        this(type, type.getClassLoader(), null);
-    }
+    String name();
 
     /**
-     * Creates a new {@link ComponentDescriptor} instance.
+     * Gets the component metadata.
      *
-     * @param type        the component class (cannot be{@code null}).
-     * @param version     the component version (may be {@code null}).
+     * @return  the {@link ComponentMetadata}.
      */
-    public ComponentDescriptor(final Class<T> type,
-                               final String version) {
-        this(type, type.getClassLoader(), version);
-    }
+    ComponentMetadata metadata();
 
     /**
-     * Creates a new {@link ComponentDescriptor} instance.
+     * Gets the classloader used to load the component.
      *
-     * @param type        the component class (cannot be{@code null}).
-     * @param classLoader the {@link ClassLoader} from which the component is loaded.
-     * @param version     the component version (may be {@code null}).
+     * @return  the {@link ClassLoader}.
      */
-    public ComponentDescriptor(final Class<T> type,
-                               final ClassLoader classLoader,
-                               final String version) {
-        Objects.requireNonNull(type, "type can't be null");
-        this.name = type.getName();
-        this.version = version;
-        this.comparableVersion = version != null ? Version.parse(version) : null;
-        this.type = type;
-        this.classLoader = classLoader;
-        this.aliases = new TreeSet<>();
-        this.scopes = new HashSet<>();
-    }
-
-    public void addScope(final Scoped scoped) {
-        this.scopes.add(scoped);
-    }
-
-    public boolean hasScope(final Scoped scoped) {
-        if (scopes.isEmpty()) {
-            return Scoped.application().equals(scoped);
-        }
-        return scopes.contains(scoped);
-    }
-
-    public Set<Scoped> scopes() {
-        return scopes;
-    }
-
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
+    ClassLoader classLoader();
 
     /**
      * Adds new aliases to reference the described component.
      *
      * @param aliases   the aliases to be added.
      */
-    public void addAliases(final Set<String> aliases) {
-        this.aliases.addAll(aliases);
-    }
+    void addAliases(final Set<String> aliases);
 
     /**
      * Gets the set of aliases for this component.
      *
      * @return  the aliases.
      */
-    public Set<String> aliases() {
-        return aliases;
-    }
+    Set<String> aliases();
 
     /**
      * Gets the name of the describe component.
      *
      * @return  the name.
      */
-    public String className() {
-        return name;
+    default String className() {
+        return type().getName();
     }
 
     /**
      * Gets the version of the described component.
      *
-     * @return  the component version if versioned, otherwise {@link ComponentDescriptor#UNKNOWN_VERSION}.
+     * @return  the component version if versioned, otherwise {@code null}.
      */
-    public String version() {
-        return version == null ? UNKNOWN_VERSION : version.toString();
-    }
+    Version version();
+
+    /**
+     * Gets the supplier used to create a new component of type {@link T}.
+     *
+     * @return  the {@link Supplier}.
+     */
+    Supplier<T> supplier();
 
     /**
      * Checks whether the described component has a valid versioned.
      *
      * @return  {@code true } if versioned, otherwise {@code false}.
      */
-    public boolean isVersioned() {
-        return version != null;
+    default boolean isVersioned() {
+        return version() != null;
     }
 
     /**
@@ -165,40 +98,21 @@ public class ComponentDescriptor<T> implements Comparable<ComponentDescriptor<T>
      *
      * @return  the class of type {@code T}.
      */
-    public Class<T> type() {
-        return type;
-    }
+    Class<T> type();
 
     /**
-     * Checks whether the describe component implement {@link Closeable}.
+     * Checks if the described component implement {@link Closeable}.
      *
      * @return  {@code true } if closeable, otherwise {@code false}.
      */
-    public boolean isCloseable() {
-        return AutoCloseable.class.isAssignableFrom(type);
+    default boolean isCloseable() {
+        return AutoCloseable.class.isAssignableFrom(type());
     }
 
     /**
-     * {@inheritDoc}
+     * Checks if the described component is a singleton.
+     *
+     * @return {@code true } if is singleton, otherwise {@code false}.
      */
-    @Override
-    public int compareTo(final ComponentDescriptor<T> that) {
-        if (!this.isVersioned()) return 1;
-        else if (!that.isVersioned()) return -1;
-        else return this.comparableVersion.compareTo(that.comparableVersion);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return "ComponentDescriptor{" +
-                "name='" + name + '\'' +
-                ", version='" + version + '\'' +
-                ", comparableVersion=" + comparableVersion +
-                ", type=" + type +
-                ", aliases=" + aliases +
-                '}';
-    }
+    boolean isSingleton();
 }

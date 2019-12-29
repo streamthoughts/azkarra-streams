@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.util.Version;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,39 +26,54 @@ import java.io.Closeable;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class ComponentDescriptorTest {
 
     @Test
     public void shouldReturnTrueIfComponentIsCloseable() {
-        Assertions.assertTrue(new ComponentDescriptor<>(CloseableComponent.class).isCloseable());
+        ComponentDescriptor<CloseableComponent> component = newComponent(null);
+        Assertions.assertTrue(component.isCloseable());
     }
 
     @Test
     public void shouldReturnFalseIfComponentIsNotVersioned() {
-        Assertions.assertFalse(new ComponentDescriptor<>(CloseableComponent.class).isVersioned());
+        ComponentDescriptor<CloseableComponent> component = newComponent(null);
+        Assertions.assertFalse(component.isVersioned());
     }
 
     @Test
     public void shouldReturnTrueIfComponentIsNotVersioned() {
-        Assertions.assertTrue(new ComponentDescriptor<>(CloseableComponent.class, "1").isVersioned());
+        ComponentDescriptor<CloseableComponent> component = newComponent("1.0");
+        Assertions.assertTrue(component.isVersioned());
     }
 
     @Test
     public void shouldCompareVersionedComponent() {
         Optional<ComponentDescriptor<CloseableComponent>> latest = Stream.of("1", "2")
-            .map(v -> new ComponentDescriptor<>(CloseableComponent.class, v))
+            .map(this::newComponent)
             .sorted()
             .findFirst();
-        Assertions.assertEquals("2", latest.get().version());
+        assertTrue(Version.isEqual(latest.get().version(), "2"));
     }
 
     @Test
     public void shouldCompareComponentGivenNotVersioned() {
-        ComponentDescriptor<CloseableComponent> c1 = new ComponentDescriptor<>(CloseableComponent.class);
-        ComponentDescriptor<CloseableComponent> c2 = new ComponentDescriptor<>(CloseableComponent.class, "1");
+        ComponentDescriptor<CloseableComponent> c1 = newComponent(null);
+        ComponentDescriptor<CloseableComponent> c2 = newComponent("1.0");
         Optional<ComponentDescriptor<CloseableComponent>> latest = Stream.of(c1, c2).sorted().findFirst();
+        assertTrue(Version.isEqual(latest.get().version(), "1.0"));
+    }
 
-        Assertions.assertEquals("1", latest.get().version());
+    private ComponentDescriptor<CloseableComponent> newComponent(final String version) {
+        return new SimpleComponentDescriptor<>(
+            "name",
+            CloseableComponent.class,
+            () -> null,
+            version,
+            true
+        );
     }
 
     static class CloseableComponent implements Closeable {

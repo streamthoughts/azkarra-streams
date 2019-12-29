@@ -46,7 +46,7 @@ public class ApiHealthRoutes implements HttpHandler, RoutingHandlerProvider, Azk
     @Override
     public void setAzkarraContext(final AzkarraContext context) {
         this.context = context;
-        this.context.addComponent(StreamsHealthIndicator.class);
+        this.context.registerSingleton(StreamsHealthIndicator.class);
     }
 
     /**
@@ -62,7 +62,7 @@ public class ApiHealthRoutes implements HttpHandler, RoutingHandlerProvider, Azk
      */
     @Override
     public void handleRequest(final HttpServerExchange exchange) {
-        Collection<HealthIndicator> indicators = context.getAllComponentForType(HealthIndicator.class);
+        Collection<HealthIndicator> indicators = context.getAllComponents(HealthIndicator.class);
         HealthAggregator aggregator = new HealthAggregator();
         List<Health> healths = indicators
             .stream()

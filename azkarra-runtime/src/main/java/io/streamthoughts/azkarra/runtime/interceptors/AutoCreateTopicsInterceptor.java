@@ -27,6 +27,7 @@ import io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicListing;
+import org.apache.kafka.common.errors.TopicExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -190,11 +190,11 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
             LOG.info("Deleting topology topic(s): {}", createdTopics);
             client.deleteTopics(createdTopics).all().get();
             LOG.info("Topics deleted successfully");
-        } catch (ExecutionException e) {
-            LOG.error("Failed to delete topics", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             // ignore and attempts to start anyway;
+        } catch (Exception e) {
+            LOG.error("Failed to auto delete topics", e);
         }
     }
 
@@ -202,11 +202,13 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
         LOG.info("Creating topology topic(s): {}", getTopicNames());
         try {
             client.createTopics(newTopics).all().get();
-        } catch (ExecutionException e) {
-            LOG.error("Failed to create topics", e);
+        } catch (TopicExistsException e) {
+            LOG.warn("Failed to auto create topics - topics already exists. Error can be ignored.");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             // ignore and attempts to start anyway;
+        } catch (Exception e) {
+            LOG.error("Failed to auto create topics", e);
         }
     }
 

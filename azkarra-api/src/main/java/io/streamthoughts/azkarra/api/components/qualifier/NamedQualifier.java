@@ -16,45 +16,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+package io.streamthoughts.azkarra.api.components.qualifier;
+
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.Qualifier;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
-public class Scoped {
+public class NamedQualifier<T> implements Qualifier<T> {
 
-    public static Scoped application() {
-        return new Scoped(ComponentDescriptor.SCOPE_APPLICATION, "");
-    }
-
-    public static Scoped env(final String name) {
-        return new Scoped(ComponentDescriptor.SCOPE_ENVIRONMENT, name);
-    }
-
-    public static Scoped streams(final String name) {
-        return new Scoped(ComponentDescriptor.SCOPE_STREAMS, name);
-    }
-
-    private final String type;
     private final String name;
 
     /**
-     * Creates a new {@link Scoped} instance.
+     * Creates a new {@link NamedQualifier} instance.
      *
-     * @param type  the scope type.
-     * @param name  the scope name.
+     * @param name  the component name.
      */
-    public Scoped(final String type, final String name) {
-        this.type = type;
-        this.name = name;
+    NamedQualifier(final String name) {
+        this.name = Objects.requireNonNull(name, "name cannot be null");
     }
 
-
-    public String type() {
-        return type;
-    }
-
-    public String name() {
-        return name;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<ComponentDescriptor<T>> filter(final Class<T> componentType,
+                                                 final Stream<ComponentDescriptor<T>> candidates) {
+        return candidates.filter(descriptor -> descriptor.name().equalsIgnoreCase(name));
     }
 
     /**
@@ -63,10 +52,9 @@ public class Scoped {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Scoped)) return false;
-        Scoped scoped = (Scoped) o;
-        return Objects.equals(type, scoped.type) &&
-                Objects.equals(name, scoped.name);
+        if (!(o instanceof NamedQualifier)) return false;
+        NamedQualifier<?> that = (NamedQualifier<?>) o;
+        return name.equals(that.name);
     }
 
     /**
@@ -74,7 +62,7 @@ public class Scoped {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(type, name);
+        return Objects.hash(name);
     }
 
     /**
@@ -82,6 +70,6 @@ public class Scoped {
      */
     @Override
     public String toString() {
-        return "[type=" + type + ", name=" + name + ']';
+        return "@Named(" + name + ")";
     }
 }

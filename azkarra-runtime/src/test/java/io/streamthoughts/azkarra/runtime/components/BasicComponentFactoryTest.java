@@ -16,14 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+package io.streamthoughts.azkarra.runtime.components;
 
-public interface ComponentRegistryAware {
+import org.junit.jupiter.api.Test;
 
-    /**
-     * Sets the registry.
-     *
-     * @param registry  the {@link ComponentRegistry} instance.
-     */
-    void setRegistry(final ComponentRegistry registry);
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class BasicComponentFactoryTest {
+
+    @Test
+    public void test() {
+        assertNotNull(new BasicComponentFactory<>(BasicComponentFactoryTest.class).get());
+    }
 }

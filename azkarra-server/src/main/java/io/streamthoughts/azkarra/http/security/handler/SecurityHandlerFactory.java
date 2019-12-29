@@ -110,7 +110,7 @@ public class SecurityHandlerFactory {
     private AuthorizationManager getAuthorizationManager(final SecurityConfig securityConfig) {
         AuthorizationManager authorizationManager;
         try {
-            authorizationManager = context.getComponentForType(AuthorizationManager.class);
+            authorizationManager = context.getComponent(AuthorizationManager.class);
         } catch (NoSuchComponentException e) {
             authorizationManager = securityConfig.getAuthorizationManager();
         }
@@ -120,7 +120,7 @@ public class SecurityHandlerFactory {
     private UsersIdentityManager getUserIdentityManagerOrNull(final SecurityConfig securityConfig) {
         UsersIdentityManager usersIdentityManager;
         try {
-            usersIdentityManager = context.getComponentForType(UsersIdentityManager.class);
+            usersIdentityManager = context.getComponent(UsersIdentityManager.class);
         } catch (NoSuchComponentException e) {
             usersIdentityManager = securityConfig.getUserIdentityManager();
         }
@@ -130,7 +130,7 @@ public class SecurityHandlerFactory {
     private AzkarraPrincipalBuilder getPrincipalBuilderOrNull(final SecurityConfig securityConfig) {
         AzkarraPrincipalBuilder principalBuilder;
         try {
-            principalBuilder = context.getComponentForType(AzkarraPrincipalBuilder.class);
+            principalBuilder = context.getComponent(AzkarraPrincipalBuilder.class);
         } catch (NoSuchComponentException e) {
             principalBuilder = securityConfig.getAuthenticationPrincipalBuilder();
         }

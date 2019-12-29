@@ -18,16 +18,30 @@
  */
 package io.streamthoughts.azkarra.api.providers;
 
+import io.streamthoughts.azkarra.api.annotations.DefaultStreamsConfig;
+import io.streamthoughts.azkarra.api.annotations.TopologyInfo;
+import io.streamthoughts.azkarra.api.components.ComponentAttribute;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
- *  A {@link ComponentDescriptor} for describing a {@link TopologyProvider} implementation.
+ *  A {@link SimpleComponentDescriptor} for describing a {@link TopologyProvider} implementation.
  *
  * @param <T>   the {@link TopologyProvider} type.
  */
-public final class TopologyDescriptor<T extends TopologyProvider> extends ComponentDescriptor<T> {
+public final class TopologyDescriptor<T extends TopologyProvider> extends SimpleComponentDescriptor<T> {
+
+    private static final String TOPOLOGY_INFO_ATTRIBUTE = TopologyInfo.class.getSimpleName();
+    private static final String STREAMS_CONFIG_ATTRIBUTE = DefaultStreamsConfig.class.getSimpleName();
 
     private final String description;
 
@@ -35,56 +49,22 @@ public final class TopologyDescriptor<T extends TopologyProvider> extends Compon
 
     /**
      * Creates a new {@link TopologyDescriptor} instance.
-     *
-     * @param cls         the topology provider class.
-     * @param version     the topology version.
-     *
-     * @param description the topology description.
      */
-    public TopologyDescriptor(final String version,
-                              final Class<T> cls,
-                              final String description) {
-        this(version, cls, cls.getClassLoader(), description, Conf.empty());
-    }
+    public TopologyDescriptor(final ComponentDescriptor<T> descriptor) {
+        super(descriptor);
+        description = metadata().stringValue(TOPOLOGY_INFO_ATTRIBUTE, "description");
+        String[] aliases = metadata().arrayValue(TOPOLOGY_INFO_ATTRIBUTE, "aliases");
+        addAliases(new HashSet<>(Arrays. asList(aliases)));
 
-
-    /**
-     * Creates a new {@link TopologyDescriptor} instance.
-     *
-     * @param cls         the topology provider class.
-     * @param version     the topology version.
-     * @param classLoader the {@link ClassLoader} from which the component is loaded.
-     *
-     * @param description the topology description.
-     */
-    public TopologyDescriptor(final String version,
-                              final Class<T> cls,
-                              final ClassLoader classLoader,
-                              final String description) {
-        this(version, cls, classLoader, description, Conf.empty());
-    }
-
-    /**
-     * Creates a new {@link TopologyDescriptor} instance.
-     *
-     * @param cls           the topology provider class.
-     * @param version       the topology version.
-     * @param classLoader   the {@link ClassLoader} from which the component is loaded.
-     * @param description   the topology description.
-     * @param streamConfigs the streams configuration.
-     */
-    public TopologyDescriptor(final String version,
-                              final Class<T> cls,
-                              final ClassLoader classLoader,
-                              final String description,
-                              final Conf streamConfigs) {
-        super(cls, classLoader, version);
-        this.description = description;
-        this.streamConfigs = streamConfigs;
-    }
-
-    public String name() {
-        return type().getSimpleName();
+        Collection<ComponentAttribute> attributes = metadata().attributesForName(STREAMS_CONFIG_ATTRIBUTE);
+        Map<String, String> mapConfigs = attributes.stream()
+            .map(attribute -> {
+                String name = attribute.stringValue("name");
+                String value = attribute.stringValue("value");
+                return Tuple.of(name, value);
+            })
+            .collect(Collectors.toMap(Tuple::left, Tuple::right));
+        streamConfigs = Conf.with(mapConfigs);
     }
 
     public String description() {
@@ -93,18 +73,5 @@ public final class TopologyDescriptor<T extends TopologyProvider> extends Compon
 
     public Conf streamsConfigs() {
         return streamConfigs;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return "[" +
-                "name=" + className() +
-                ", version=" + version() +
-                ", aliases=" + aliases() +
-                ", description=" + description +
-                ']';
     }
 }

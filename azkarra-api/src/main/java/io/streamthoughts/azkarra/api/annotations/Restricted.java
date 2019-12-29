@@ -18,8 +18,6 @@
  */
 package io.streamthoughts.azkarra.api.annotations;
 
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -30,16 +28,18 @@ import java.lang.annotation.Target;
 /**
  * Marker interface that a class annotated with {@link Component} can used for describing its scope.
  *
- * @see ComponentDescriptor#SCOPE_APPLICATION
- * @see ComponentDescriptor#SCOPE_ENVIRONMENT
- * @see ComponentDescriptor#SCOPE_STREAMS
+ * @see io.streamthoughts.azkarra.api.components.Restriction#TYPE_APPLICATION
+ * @see io.streamthoughts.azkarra.api.components.Restriction#TYPE_ENVIRONMENT
+ * @see io.streamthoughts.azkarra.api.components.Restriction#TYPE_STREAMS
  *
  */
 @Documented
 @Inherited
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Scopes {
+public @interface Restricted {
 
-    Scope[] value();
+    String type();
+
+    String[] names() default "";
 }

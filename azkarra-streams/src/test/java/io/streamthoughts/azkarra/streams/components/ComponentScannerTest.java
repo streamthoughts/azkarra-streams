@@ -19,62 +19,116 @@
 package io.streamthoughts.azkarra.streams.components;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
-import io.streamthoughts.azkarra.api.components.ComponentClassReader;
-import io.streamthoughts.azkarra.api.components.ComponentFactory;
-import io.streamthoughts.azkarra.api.components.ComponentRegistry;
-import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
-import io.streamthoughts.azkarra.runtime.components.DefaultComponentRegistry;
-import io.streamthoughts.azkarra.runtime.components.DefaultProviderClassReader;
-import io.streamthoughts.azkarra.streams.components.scantest.factory.TestComponentFactory;
-import io.streamthoughts.azkarra.streams.components.scantest.test.TestAnnotatedComponent;
+import io.streamthoughts.azkarra.api.util.Version;
+import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
+import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
+import io.streamthoughts.azkarra.streams.MockTopologyProvider;
+import io.streamthoughts.azkarra.streams.components.scan.component.TestAnnotatedComponent;
+import io.streamthoughts.azkarra.streams.components.scan.factory.TestAnnotatedFactory;
+import io.streamthoughts.azkarra.streams.components.scan.supplier.TestSupplier;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ComponentScannerTest {
 
     @TempDir
-    static Path componentPath;
+    static Path COMPONENT_PATH;
+
+    private DefaultComponentFactory factory;
+    private ComponentScanner scanner;
+
+    @BeforeEach
+    public void setUp() {
+        factory = Mockito.spy(new DefaultComponentFactory(new DefaultComponentDescriptorFactory()));
+        scanner = new ComponentScanner(factory);
+    }
 
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredComponents() {
-        ComponentClassReader reader = Mockito.mock(ComponentClassReader.class);
-        ComponentScanner scanner = new ComponentScanner(reader, null);
-
         scanner.scan(TestAnnotatedComponent.class.getPackage());
 
-        Mockito.verify(reader).registerComponent(
+        Mockito.verify(factory).registerComponent(
+            Matchers.isNull(String.class),
             Mockito.argThat(new ClassMatcher(TestAnnotatedComponent.class)),
-            Mockito.any(ComponentRegistry.class),
-            Mockito.any(ClassLoader.class));
+            Mockito.any(Supplier.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldScanAndRegisterDeclaredSupplier() {
+        scanner.scan(TestSupplier.class.getPackage());
+        Mockito.verify(factory).registerComponent(
+                Matchers.isNull(String.class),
+                Mockito.argThat(new ClassMatcher(MockTopologyProvider.class)),
+                Mockito.any(Supplier.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldScanAndRegisterDeclaredAllComponentFactory() {
+        scanner.scan(TestAnnotatedFactory.class.getPackage());
+
+        Mockito.verify(factory, Mockito.times(2)).registerComponent(
+            Mockito.anyString(),
+            Mockito.argThat(new ClassMatcher(TestAnnotatedFactory.DummyComponent.class)),
+            Mockito.any(Supplier.class));
+
+        Mockito.verify(factory, Mockito.times(1)).registerSingleton(
+            Mockito.anyString(),
+            Mockito.argThat(new ClassMatcher(TestAnnotatedFactory.DummyComponent.class)),
+            Mockito.any(Supplier.class));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredComponentFactory() {
-        ComponentClassReader reader = Mockito.mock(ComponentClassReader.class);
-        ComponentScanner scanner = new ComponentScanner(reader, null);
+        scanner.scan(TestAnnotatedFactory.class.getPackage());
 
-        scanner.scan(TestComponentFactory.class.getPackage());
+        Mockito.verify(factory).registerComponent(
+            Mockito.eq("testComponent"),
+            Mockito.argThat(new ClassMatcher(TestAnnotatedFactory.DummyComponent.class)),
+            Mockito.any(Supplier.class));
+    }
 
-        Mockito.verify(reader).registerComponent(
-            Mockito.argThat(new ComponentFactoryMatcher(
-                TestComponentFactory.DummyComponent.class,
-                false)),
-            Mockito.any(ComponentRegistry.class),
-            Mockito.any(ClassLoader.class));
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldScanAndRegisterDeclaredSingletonFactory() {
+        scanner.scan(TestAnnotatedFactory.class.getPackage());
+
+        Mockito.verify(factory).registerSingleton(
+                Mockito.eq("testSingleton"),
+                Mockito.argThat(new ClassMatcher(TestAnnotatedFactory.DummyComponent.class)),
+                Mockito.any(Supplier.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldScanAndRegisterDeclaredNamedComponentFactory() {
+        scanner.scan(TestAnnotatedFactory.class.getPackage());
+        Mockito.verify(factory).registerComponent(
+            Mockito.eq("namedComponent"),
+            Mockito.argThat(new ClassMatcher(TestAnnotatedFactory.DummyComponent.class)),
+            Mockito.any(Supplier.class));
     }
 
     @Test
@@ -84,20 +138,17 @@ public class ComponentScannerTest {
 
         generateTopologyProviderClass("2.0", "component-version-2");
 
-        final DefaultProviderClassReader reader = new DefaultProviderClassReader();
-        final DefaultComponentRegistry registry = new DefaultComponentRegistry();
-        final ComponentScanner scanner = new ComponentScanner(reader, registry);
+        scanner.scan(COMPONENT_PATH.toString());
 
-        scanner.scan(componentPath.toString());
+        Optional<ComponentDescriptor<Object>> descriptorV10 = factory.findDescriptorByAlias(
+                "test.ByteBuddyTopologyProvider", Qualifiers.byVersion("1.0"));
 
-        TopologyProvider pv1 = registry.getVersionedComponent(
-                "test.ByteBuddyTopologyProvider", "1.0", Conf.empty());
-        Assertions.assertEquals("1.0", pv1.version());
+        assertTrue(Version.isEqual(descriptorV10.get().version(), "1.0"));
 
-        TopologyProvider pv2 = registry.getVersionedComponent(
-                "test.ByteBuddyTopologyProvider", "2.0", Conf.empty());
-        Assertions.assertEquals("2.0", pv2.version());
+        Optional<ComponentDescriptor<Object>> descriptorV20 = factory.findDescriptorByAlias(
+                "test.ByteBuddyTopologyProvider", Qualifiers.byVersion("2.0"));
 
+        assertTrue(Version.isEqual(descriptorV20.get().version(), "2.0"));
     }
 
     private void generateTopologyProviderClass(final String version, final String path) throws IOException {
@@ -108,7 +159,7 @@ public class ComponentScannerTest {
             .method(ElementMatchers.named("version"))
             .intercept(FixedValue.value(version))
             .make()
-            .saveIn(new File(componentPath.toFile(), path));
+            .saveIn(new File(COMPONENT_PATH.toFile(), path));
     }
 
     public static class ClassMatcher extends ArgumentMatcher<Class> {
@@ -123,23 +174,6 @@ public class ComponentScannerTest {
         public boolean matches(Object o) {
             Class c = (Class) o;
             return o.equals(type);
-        }
-    }
-
-    public static class ComponentFactoryMatcher extends ArgumentMatcher<ComponentFactory> {
-
-        private final Class<?> type;
-        private final boolean isSingleton;
-
-        ComponentFactoryMatcher(final Class<?> type, final boolean isSingleton) {
-            this.type = type;
-            this.isSingleton = isSingleton;
-        }
-
-        @Override
-        public boolean matches(Object o) {
-            ComponentFactory c = (ComponentFactory) o;
-            return c.getType().equals(type) && c.isSingleton() == isSingleton;
         }
     }
 }

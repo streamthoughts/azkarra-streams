@@ -18,9 +18,9 @@
  */
 package io.streamthoughts.azkarra.api;
 
-import io.streamthoughts.azkarra.api.components.ComponentClassReader;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
+import io.streamthoughts.azkarra.api.components.ConfigurableComponentFactory;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
@@ -28,44 +28,28 @@ import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import org.apache.kafka.streams.KafkaStreams;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 /**
  * The AzkarraContext.
  */
-public interface AzkarraContext {
+public interface AzkarraContext extends ConfigurableComponentFactory, ComponentRegistry {
 
     /**
-     * Sets the internal the {@link ComponentRegistry} which is used for registering components to this context.
+     * Sets the internal the {@link ComponentFactory} which is used for registering components to this context.
      *
-     * @param registry  the {@link ComponentRegistry} instance to be used.
-     * @return          this {@link AzkarraContext} instance.
+     * @param factory  the {@link ComponentFactory} instance to be used.
+     * @return         this {@link AzkarraContext} instance.
      */
-    AzkarraContext setComponentRegistry(final ComponentRegistry registry);
+    AzkarraContext setComponentFactory(final ComponentFactory factory);
 
     /**
-     * Gets the internal {@link ComponentRegistry}.
+     * Gets the internal {@link ComponentFactory}.
      *
-     * @return  the {@link ComponentRegistry} instance to be used.
+     * @return  the {@link ComponentFactory} instance to be used.
      */
-    ComponentRegistry getComponentRegistry();
-
-    /**
-     * Gets the internal {@link ComponentClassReader}.
-     *
-     * @return  the {@link ComponentClassReader} instance to be used.
-     */
-    ComponentClassReader getComponentClassReader();
-
-    /**
-     * Sets the internal the {@link ComponentClassReader} which is used for registering components to this context.
-     *
-     * @param reader  the {@link ComponentClassReader} instance to be used.
-     * @return        this {@link AzkarraContext} instance.
-     */
-    AzkarraContext setComponentClassReader(final ComponentClassReader reader);
+    ComponentFactory getComponentFactory();
 
     /**
      * Registers a new listener instance to this context.
@@ -214,48 +198,6 @@ public interface AzkarraContext {
      * @return a {@link StreamsExecutionEnvironment} instance.
      */
     StreamsExecutionEnvironment defaultExecutionEnvironment();
-
-    /**
-     * Registers a components into this context.
-     *
-     * @param cls the component class.
-     * @return    this {@link AzkarraContext} instance.
-     */
-    <T> AzkarraContext addComponent(final Class<T> cls);
-
-    /**
-     * Registers a components into this context.
-     *
-     * @param factory   the {@link ComponentFactory} instance.
-     * @return          this {@link AzkarraContext} instance.
-     */
-    <T> AzkarraContext addComponent(final ComponentFactory<T> factory);
-
-    /**
-     * Registers a components into this context.
-     *
-     * @param className      the component class name.
-     * @return               this {@link AzkarraContext} instance.
-     */
-    AzkarraContext addComponent(final String className);
-
-    /**
-     * Gets a component instance for the specified class.
-     *
-     * @param cls   the component class.
-     * @param <T>   the component type.
-     * @return      the component instance of type {@link T}.
-     */
-    <T> T getComponentForType(final Class<T> cls);
-
-    /**
-     * Get all component instances for the specified class.
-     *
-     * @param cls   the component class.
-     * @param <T>   the component type.
-     * @return      the component instance of type {@link T}.
-     */
-    <T> Collection<T> getAllComponentForType(final Class<T> cls);
 
     /**
      * Gets the topology for the specified class name or alias.

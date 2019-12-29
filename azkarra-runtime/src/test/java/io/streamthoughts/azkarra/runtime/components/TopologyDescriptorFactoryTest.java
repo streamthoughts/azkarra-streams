@@ -21,7 +21,7 @@ package io.streamthoughts.azkarra.runtime.components;
 import io.streamthoughts.azkarra.api.annotations.DefaultStreamsConfig;
 import io.streamthoughts.azkarra.api.annotations.TopologyInfo;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptorFactory;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import org.apache.kafka.streams.StreamsConfig;
@@ -29,33 +29,37 @@ import org.apache.kafka.streams.Topology;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TopologyDescriptorFactoryTest {
 
-    @Test
-    public void should() {
-        final TopologyDescriptorFactory factory = new TopologyDescriptorFactory();
-        ComponentDescriptor<TopologyProvider> descriptor = factory.make(TestTopologyProvider.class, "1.0", TestTopologyProvider.class.getClassLoader());
+    private ComponentDescriptorFactory factory = new DefaultComponentDescriptorFactory();
 
-        assertTrue(descriptor.isVersioned());
-        assertEquals("1.0", descriptor.version());
-        assertEquals(TestTopologyProvider.class.getName(), descriptor.className());
-        assertTrue(descriptor.aliases().contains("CustomAlias"));
-        assertTrue((descriptor instanceof TopologyDescriptor));
-        TopologyDescriptor topologyDescriptor = (TopologyDescriptor) descriptor;
+    @Test
+    public void test() {
+
+        ComponentDescriptor<TestTopologyProvider> descriptor = factory.make(
+            null,
+            TestTopologyProvider.class,
+            TestTopologyProvider::new,
+            true
+        );
+
+        TopologyDescriptor<TestTopologyProvider> topologyDescriptor = new TopologyDescriptor<>(descriptor);
+
+        assertEquals(TestTopologyProvider.class.getName(), topologyDescriptor.className());
+        assertEquals("CustomAlias", topologyDescriptor.aliases().iterator().next());
+        assertEquals("1.0", topologyDescriptor.version().toString());
         assertEquals("test description", topologyDescriptor.description());
-        Conf conf = topologyDescriptor.streamsConfigs();
-        assertEquals("2", conf.getString(StreamsConfig.NUM_STREAM_THREADS_CONFIG));
+        assertEquals("2", topologyDescriptor.streamsConfigs().getString(StreamsConfig.NUM_STREAM_THREADS_CONFIG));
     }
 
     @TopologyInfo( description = "test description", aliases = "CustomAlias")
     @DefaultStreamsConfig(name = StreamsConfig.NUM_STREAM_THREADS_CONFIG, value = "2")
-    static class TestTopologyProvider implements TopologyProvider {
+    public static class TestTopologyProvider implements TopologyProvider {
 
         @Override
         public String version() {
-            return null;
+            return "1.0";
         }
 
         @Override

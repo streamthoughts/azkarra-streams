@@ -38,8 +38,17 @@ import java.util.function.Predicate;
  */
 public class ClassComponentAliasesGenerator implements ComponentAliasesGenerator {
 
-    private static final ClassAliasExtractor DEFAULT_LIAS_EXTRACTOR =
-            new DropClassNameSuffixExtractor("Provider", cls -> true);
+    private static final ClassAliasExtractor DEFAULT_ALIAS_EXTRACTOR = new ClassAliasExtractor() {
+        @Override
+        public boolean accept(Class<?> componentClass) {
+            return true;
+        }
+
+        @Override
+        public String extractAlias(Class<?> componentClass) {
+            return componentClass.getSimpleName();
+        }
+    };
 
     private final List<ClassAliasExtractor> extractors;
 
@@ -47,8 +56,10 @@ public class ClassComponentAliasesGenerator implements ComponentAliasesGenerator
      * Creates a new {@link ClassComponentAliasesGenerator} instance.
      */
     public ClassComponentAliasesGenerator() {
-        this.extractors = new ArrayList<>();
-        addClassAliasExtractor(DEFAULT_LIAS_EXTRACTOR);
+        extractors = new ArrayList<>();
+        addClassAliasExtractor(DEFAULT_ALIAS_EXTRACTOR);
+        addClassAliasExtractor(
+            new DropClassNameSuffixExtractor("Provider", cls -> true));
         addClassAliasExtractor(
             new DropClassNameSuffixExtractor("TopologyProvider", TopologyProvider.class::isAssignableFrom)
         );

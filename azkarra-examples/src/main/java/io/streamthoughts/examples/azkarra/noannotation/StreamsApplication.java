@@ -53,7 +53,7 @@ public class StreamsApplication {
         context.addTopology(BasicWordCountTopology.class, Executed.as("BasicWordCount"));
 
         // register the topology to the context (the topology will not be started).
-        context.addComponent(ConfigurableWordCountTopology.class);
+        context.registerComponent(ConfigurableWordCountTopology.class);
 
         new AzkarraApplication()
             .setContext(context)

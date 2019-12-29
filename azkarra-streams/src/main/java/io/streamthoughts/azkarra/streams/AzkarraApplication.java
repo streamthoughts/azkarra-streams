@@ -278,9 +278,7 @@ public class AzkarraApplication {
         }
 
         if (enableComponentScan) {
-            ComponentScanner scanner = new ComponentScanner(
-                    context.getComponentClassReader(),
-                    context.getComponentRegistry());
+            ComponentScanner scanner = new ComponentScanner(context.getComponentFactory());
 
             final Optional<String> componentPaths = configuration.getOptionalString(COMPONENT_PATHS_CONFIG);
             componentPaths.ifPresent(scanner::scan);
@@ -306,7 +304,12 @@ public class AzkarraApplication {
         if (autoStart.isEnable()) {
             StreamsExecutionEnvironment target = context.getEnvironmentForNameOrCreate(autoStart.targetEnvironment());
             context.topologyProviders().forEach(desc ->
-                context.addTopology(desc.className(), desc.version(), target.name(), new InternalExecuted())
+                context.addTopology(
+                    desc.className(),
+                    desc.version().toString(),
+                    target.name(),
+                    new InternalExecuted()
+                )
             );
         }
 

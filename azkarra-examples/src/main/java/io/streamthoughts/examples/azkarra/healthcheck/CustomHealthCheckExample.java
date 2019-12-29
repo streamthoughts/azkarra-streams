@@ -19,12 +19,13 @@
 package io.streamthoughts.examples.azkarra.healthcheck;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
-import io.streamthoughts.azkarra.api.annotations.Singleton;
 import io.streamthoughts.azkarra.http.health.Health;
 import io.streamthoughts.azkarra.http.health.HealthIndicator;
 import io.streamthoughts.azkarra.http.health.Status;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.autoconfigure.annotations.AzkarraStreamsApplication;
+
+import javax.inject.Singleton;
 
 /**
  * Example for registering custom health-check.

@@ -18,21 +18,27 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import java.util.function.Supplier;
+
 /**
- * Factory to create new {@link ComponentDescriptor} instance.
- *
- * @param <T>   the provider type.
+ * Factory to create new {@link SimpleComponentDescriptor} instance.
  */
-public interface ComponentDescriptorFactory<T> {
+public interface ComponentDescriptorFactory {
 
     /**
-     * Makes a new {@link ComponentDescriptor} instance.
+     * Makes a new {@link SimpleComponentDescriptor} instance.
      *
-     * @param type          the component class.
-     * @param version       the provider version.
-     * @param classLoader   the {@link ClassLoader} from which the component is loaded.
+     * @param componentName      the name of the component (can be {@code null}.
+     * @param componentType      the type of the component.
+     * @param componentSupplier  the supplier of the component.
+     * @param isSingleton        is the component singleton.
      *
-     * @return          a new instance of {@link ComponentDescriptor}.
+     * @return                   a new instance of {@link ComponentDescriptor}.
+     *
+     * @throws ComponentRegistrationException if an exception occurred while building the descriptor.
      */
-    ComponentDescriptor<T> make(final Class<? extends T> type, final String version, final ClassLoader classLoader);
+    <T> ComponentDescriptor<T> make(final String componentName,
+                                    final Class<T> componentType,
+                                    final Supplier<T> componentSupplier,
+                                    final boolean isSingleton);
 }

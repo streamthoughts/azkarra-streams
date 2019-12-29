@@ -16,26 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.annotations;
+package io.streamthoughts.azkarra.api.components;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
 
-/**
- * Marker interface that any {@link Component} can used to indicate it can be registered
- * as a shared instance across the application.
- *
- * @see io.streamthoughts.azkarra.api.components.ComponentRegistry
- * @see io.streamthoughts.azkarra.api.components.ComponentFactory
- * @see io.streamthoughts.azkarra.api.annotations.Component
- */
-@Documented
-@Inherited
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Singleton {
+public class ConflictingBeanDefinitionException extends AzkarraException {
+
+    /**
+     * Creates a new {@link ConflictingBeanDefinitionException} instance.
+     *
+     * @param message   the error message.
+     */
+    public ConflictingBeanDefinitionException(final String message) {
+        super(message);
+    }
 }

@@ -18,356 +18,118 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
-import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.Configurable;
-
-import java.io.Closeable;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * The {@link ComponentRegistry} is the main interface for managing components used in an Azkarra application.
  */
-public interface ComponentRegistry extends Closeable {
+public interface ComponentRegistry {
 
     /**
-     * Checks whether the specified components class or alias is already registered.
+     * Registers the component supplier for the specified type.
      *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @return       {@code true} if a provider exist, {code false} otherwise.
+     * @param componentClass    the class-type of the component.
+     * @param supplier          the supplier of the component.
+     * @param <T>               the component-type.
+     *
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    boolean isRegistered(final String alias);
+    default <T> void registerComponent(final Class<T> componentClass, final Supplier<T> supplier) {
+        registerComponent(null, componentClass, supplier);
+    }
 
     /**
-     * Checks whether a components is already registered for the specified class.
+     * Registers the component supplier for the specified type and name.
      *
-     * @param type  the component type.
-     * @return      {@code true} if a provider exist, {code false} otherwise.
+     * @param componentName     the name of the component.
+     * @param componentClass    the class-type of the component.
+     * @param supplier          the supplier of the component.
+     * @param <T>               the component-type.
+     *
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    boolean isRegistered(final Class<?> type);
+    <T> void registerComponent(final String componentName, final Class<T> componentClass, final Supplier<T> supplier);
 
     /**
-     * Checks whether a components is already registered for the specified type and scope.
+     * Registers the component supplier for the specified type.
      *
-     * @param type    the component type.
-     * @param scoped  the component scope.
-     * @return      {@code true} if a provider exist, {code false} otherwise.
+     * @param componentClass    the class-type of the component.
+     * @param <T>               the component-type.
+     *
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    boolean isRegistered(final Class<?> type, final Scoped scoped);
+    default <T> void registerComponent(final Class<T> componentClass) {
+        registerComponent(null, componentClass);
+    }
 
     /**
-     * Finds a {@link ComponentDescriptor} for the specified class or alias.
+     * Registers the component supplier for the specified type and name.
      *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param <T>    the component type.
+     * @param componentName     the name of the component.
+     * @param componentClass    the class-type of the component.
+     * @param <T>               the component-type.
      *
-     * @return       the optional {@link ComponentDescriptor} instance.
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias);
+    <T> void registerComponent(final String componentName, final Class<T> componentClass);
 
     /**
-     * Finds a {@link ComponentDescriptor} for the specified class or alias.
-     * If more than one component is registered for the given alias, the latest version is returned.
+     * Registers the component supplier for the specified type and name.
+     * The given supplier will be used for creating a shared instance of type {@link T}.
      *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param <T>    the component type.
+     * @param componentClass    the class-type of the component.
+     * @param singleton         the supplier of the component.
+     * @param <T>               the component-type.
      *
-     * @return       the optional {@link ComponentDescriptor} instance.
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    <T> Optional<ComponentDescriptor<T>> findLatestDescriptorByAlias(final String alias);
+    default <T> void registerSingleton(final Class<T> componentClass, final Supplier<T> singleton) {
+        registerSingleton(null, componentClass, singleton);
+    }
 
     /**
-     * Finds a {@link ComponentDescriptor} for the specified class or alias.
+     * Registers the component supplier for the specified type and name.
+     * The given supplier will be used for creating a shared instance of type {@link T}.
      *
-     * @param alias    the fully qualified class name or an alias of the component.
-     * @param version  the version of the component.
-     * @param <T>      the component type.
+     * @param componentName     the name of the component.
+     * @param componentClass    the class-type of the component.
+     * @param singleton         the supplier of the component.
+     * @param <T>               the component-type.
      *
-     * @return         the optional {@link ComponentDescriptor} instance.
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    <T> Optional<ComponentDescriptor<T>> findLatestDescriptorByAliasAndVersion(final String alias,
-                                                                               final String version);
+    <T> void registerSingleton(final String componentName, final Class<T> componentClass, final Supplier<T> singleton);
 
     /**
-     * Finds a {@link ComponentDescriptor} for the specified class or alias.
+     * Registers a singleton no-arg constructor component supplier for the specified type.
      *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param <T>    the component type.
+     * @param componentClass    the class-type of the component.
+     * @param <T>               the component-type.
      *
-     * @return       the optional {@link ComponentDescriptor} instance.
-     *
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    <T> Collection<ComponentDescriptor<T>> findAllDescriptorByAlias(final String alias);
+    default <T> void registerSingleton(final Class<T> componentClass) {
+        registerSingleton(null, componentClass);
+    }
 
     /**
-     * Finds all registered providers for the specified type.
+     * Registers a singleton no-arg constructor component supplier for the specified type.
      *
-     * @param type      the component class.
-     * @param <T>       the component type.
-     * @return          the collection of {@link ComponentDescriptor}.
+     * @param componentName     the name of the component.
+     * @param componentClass    the class-type of the component.
+     * @param <T>               the component-type.
+     *
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByType(final Class<T> type);
+    <T> void registerSingleton(final String componentName, final Class<T> componentClass);
 
     /**
-     * Gets an instance, which may be shared or independent, for the specified type.
+     * Register the specified shared instance.
      *
-     * @param type      the component class.
-     * @param conf      the configuration used if the component implement {@link Configurable}.
+     * @param singleton the singleton component instance.
      * @param <T>       the component-type.
      *
-     * @return          the instance of type {@link T}.
-     *
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
-     * @throws NoSuchComponentException     if no component is registered for the given type.
+     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
      */
-    default <T> T getComponent(final Class<T> type, final Conf conf) {
-        return getComponent(type, conf, null);
-    }
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     *
-     * @param type      the component class.
-     * @param conf      the configuration used if the component implement {@link Configurable}.
-     * @param scoped    the component scope.
-     * @param <T>       the component-type.
-     *
-     * @return          the instance of type {@link T}.
-     *
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    <T> T getComponent(final Class<T> type, final Conf conf, final Scoped scoped);
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     *
-     * @param type      the component class.
-     * @param <T>       the component-type.
-     *
-     * @return          the instance of type {@link T}.
-     *
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    <T> GettableComponent<T> getComponent(final Class<T> type, final Scoped scoped);
-
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     * If more than one component is registered for the given type, the latest version is returned.
-     *
-     * @param type      the component class.
-     * @param conf      the configuration used if the component implement {@link Configurable}.
-     * @param <T>       the component-type.
-     *
-     * @return          the instance of type {@link T}.
-     *
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    default <T> T getLatestComponent(final Class<T> type, final Conf conf) {
-        return getLatestComponent(type, conf, null);
-    }
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     * If more than one component is registered for the given type, the latest version is returned.
-     *
-     * @param type      the component class.
-     * @param conf      the configuration used if the component implement {@link Configurable}.
-     * @param <T>       the component-type.
-     *
-     * @return          the instance of type {@link T}.
-     *
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    <T> T getLatestComponent(final Class<T> type, final Conf conf, final Scoped scoped);
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param conf   the configuration used if the component implement {@link Configurable}.
-     * @param <T>    the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
-     * @throws NoSuchComponentException     if no component is registered for the given class or alias..
-     */
-    default <T> T getComponent(final String alias, final Conf conf) {
-        return getComponent(alias, conf, null);
-    }
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param conf   the configuration used if the component implement {@link Configurable}.
-     * @param <T>    the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
-     * @throws NoSuchComponentException     if no component is registered for the given class or alias..
-     */
-    <T> T getComponent(final String alias, final Conf conf, final Scoped scoped);
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     * If more than one component is registered for the given type, the latest version is returned.
-     *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param conf   the configuration used if the component implement {@link Configurable}.
-     * @param <T>    the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    default <T> T getLatestComponent(final String alias, final Conf conf) {
-        return getLatestComponent(alias, conf, null);
-    }
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     * If more than one component is registered for the given type, the latest version is returned.
-     *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param conf   the configuration used if the component implement {@link Configurable}.
-     * @param <T>    the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    <T> T getLatestComponent(final String alias, final Conf conf, final Scoped scoped);
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     * If more than one component is registered for the given type, the latest version is returned.
-     *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param version  the version of the component.
-     * @param conf   the configuration used if the component implement {@link Configurable}.
-     * @param <T>    the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    default <T> T getVersionedComponent(final String alias, final String version, final Conf conf) {
-        return getVersionedComponent(alias, version, conf, null);
-    }
-
-    /**
-     * Gets an instance, which may be shared or independent, for the specified type.
-     * If more than one component is registered for the given type, the latest version is returned.
-     *
-     * @param alias    the fully qualified class name or an alias of the component.
-     * @param version  the version of the component.
-     * @param conf     the configuration used if the component implement {@link Configurable}.
-     * @param scoped   the scoped of the component.
-     * @param <T>      the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoSuchComponentException     if no component is registered for the given type.
-     */
-    <T> T getVersionedComponent(final String alias,
-                                final String version,
-                                final Conf conf,
-                                final Scoped scoped);
-
-    /**
-     * Gets all instances, which may be shared or independent, for the specified type.
-     *
-     * @param alias  the fully qualified class name or an alias of the component.
-     * @param conf   the configuration used if the component implement {@link Configurable}.
-     * @param <T>    the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
-     * @throws NoSuchComponentException     if no component is registered for the given class or alias..
-     */
-    default <T> Collection<T> getAllComponents(final String alias, final Conf conf) {
-        return getAllComponents(alias, conf, null);
-    }
-
-    /**
-     * Gets all instances, which may be shared or independent, for the specified type.
-     *
-     * @param alias   the fully qualified class name or an alias of the component.
-     * @param conf    the configuration used if the component implement {@link Configurable}.
-     * @param scoped  the scoped of the component.
-     * @param <T>     the component-type.
-     *
-     * @return       the instance of type {@link T}.
-     *
-     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
-     * @throws NoSuchComponentException     if no component is registered for the given class or alias..
-     */
-    <T> Collection<T> getAllComponents(final String alias, final Conf conf, final Scoped scoped);
-
-    /**
-     * Gets all instances, which may be shared or independent, for the specified type.
-     *
-     * @param type    the component class.
-     * @param conf    the configuration used if the component implement {@link Configurable}.
-     * @param <T>     the component-type.
-     *
-     * @return        the instance of type {@link T}.
-     */
-    default <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf) {
-        return getAllComponents(type, conf, null);
-    }
-
-    /**
-     * Gets all instances, which may be shared or independent, for the specified type.
-     *
-     * @param type    the component class.
-     * @param conf    the configuration used if the component implement {@link Configurable}.
-     * @param scoped  the scoped of the component.
-     * @param <T>     the component-type.
-     *
-     * @return        the instance of type {@link T}.
-     */
-    <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf, final Scoped scoped);
-
-    /**
-     * Gets all instances, which may be shared or independent, for the specified type.
-     *
-     * @param type    the component class.
-     * @param scoped  the scoped of the component.
-     * @param <T>     the component-type.
-     *
-     * @return        the instance of type {@link T}.
-     */
-    <T> Collection<GettableComponent<T>> getAllComponents(final Class<T> type, final Scoped scoped);
-
-    /**
-     * Registers the specified {@link ComponentDescriptor} to this {@link ComponentRegistry}.
-     *
-     * @param descriptor    the {@link ComponentDescriptor} instance to be registered.
-     * @param <T>           the component type.
-     */
-    <T> void registerComponent(final ComponentDescriptor<T> descriptor);
-
-    /**
-     * Registers the specified {@link ComponentDescriptor} to this {@link ComponentRegistry}.
-     *
-     * @param descriptor    the {@link ComponentDescriptor} instance to be registered.
-     * @param factory       the {@link ComponentFactory} instance.
-     * @param <T>           the component type.
-     */
-    <T> void registerComponent(final ComponentDescriptor<T> descriptor, final ComponentFactory<T> factory);
-
-    /**
-     * Sets the {@link ComponentAliasesGenerator} instance.
-     *
-     * @param generator the {@link ComponentAliasesGenerator} used for generating provider aliases.
-     */
-    ComponentRegistry setComponentAliasesGenerator(final ComponentAliasesGenerator generator);
+    <T> void registerSingleton(final T singleton);
 }

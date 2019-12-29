@@ -19,13 +19,10 @@
 package io.streamthoughts.azkarra.streams.autoconfigure;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
-import io.streamthoughts.azkarra.api.components.ComponentClassReader;
-import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import io.streamthoughts.azkarra.runtime.components.ClassComponentAliasesGenerator;
-import io.streamthoughts.azkarra.runtime.components.DefaultComponentRegistry;
-import io.streamthoughts.azkarra.runtime.components.DefaultProviderClassReader;
-import io.streamthoughts.azkarra.runtime.components.TopologyDescriptorFactory;
+import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
+import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.autoconfigure.annotations.AzkarraStreamsApplication;
@@ -85,16 +82,12 @@ public class AutoConfigure {
     }
 
     private void initializeApplicationContext(final AzkarraApplication application) {
-        final DefaultComponentRegistry registry = new DefaultComponentRegistry();
-        registry.setComponentAliasesGenerator(new ClassComponentAliasesGenerator());
-
-        final ComponentClassReader reader = new DefaultProviderClassReader();
-        reader.addDescriptorFactoryForType(TopologyProvider.class, new TopologyDescriptorFactory());
+        final DefaultComponentFactory factory = new DefaultComponentFactory(
+                new DefaultComponentDescriptorFactory());
+        factory.setComponentAliasesGenerator(new ClassComponentAliasesGenerator());
 
         // Create a default context with empty configuration
-        final AzkarraContext context = DefaultAzkarraContext.create()
-            .setComponentRegistry(registry)
-            .setComponentClassReader(reader);
+        final AzkarraContext context = DefaultAzkarraContext.create(factory);
 
         application.setContext(context);
     }

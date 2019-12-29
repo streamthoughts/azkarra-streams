@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.util;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,15 @@ import java.util.Objects;
 import java.util.Set;
 
 public class ClassUtils {
+
+    public static  <T> T newInstance(final Class<T> cls, final ClassLoader classLoader) {
+        ClassLoader saveLoader = ClassUtils.compareAndSwapLoaders(classLoader);
+        try {
+            return ClassUtils.newInstance(cls);
+        } finally {
+            ClassUtils.compareAndSwapLoaders(saveLoader);
+        }
+    }
 
     public static <T> T newInstance(final Class<T> c) {
         if (c == null)
@@ -70,14 +80,29 @@ public class ClassUtils {
         return annotation.annotationType().equals(type);
     }
 
-    public static <T extends Annotation> List<T> getAllDeclaredAnnotationByType(final Class<?> cls,
-                                                                                final Class<T> type) {
+    public static List<Annotation> getAllDeclaredAnnotations(final Class<?> cls) {
+        List<Annotation> result = new ArrayList<>();
+        for (Class<?> t : getAllSuperTypes(cls)) {
+            Annotation[] declared = t.getDeclaredAnnotations();
+            result.addAll(Arrays.asList(declared));
+        }
+        return result;
+    }
+
+    public static <T extends Annotation> List<T> getAllDeclaredAnnotationsByType(final Class<?> cls,
+                                                                                 final Class<T> type) {
         List<T> result = new ArrayList<>();
         for (Class<?> t : getAllSuperTypes(cls)) {
             T[] declared = t.getDeclaredAnnotationsByType(type);
             result.addAll(Arrays.asList(declared));
         }
         return result;
+    }
+
+    public static <A extends Annotation> boolean isMethodAnnotatedWith(final Method method,
+                                                                       final Class<A> annotation) {
+
+        return method.getDeclaredAnnotation(annotation) != null;
     }
 
     public static <A extends Annotation> boolean isSuperTypesAnnotatedWith(final Class<?> component,

@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.streams.context.internal.ApplicationConfig;
 import io.streamthoughts.azkarra.streams.context.internal.EnvironmentConfig;
@@ -65,7 +66,7 @@ public class AzkarraContextLoader {
         Objects.requireNonNull(configuration, "contextConfig cannot be null");
 
         loadConfiguration(context, configuration);
-        loadConfigurationDeclaredProviders(configuration, context);
+        loadConfigurationDeclaredComponent(configuration, context);
         loadConfigurationDeclaredEnvironments(configuration, context);
 
         return context;
@@ -77,9 +78,16 @@ public class AzkarraContextLoader {
         context.addConfiguration(config.context());
     }
 
-    private static void loadConfigurationDeclaredProviders(final ApplicationConfig config,
+    private static void loadConfigurationDeclaredComponent(final ApplicationConfig config,
                                                            final AzkarraContext context) {
-        config.components().forEach(context::addComponent);
+
+        for (final String componentType : config.components()) {
+            try {
+                context.registerComponent(Class.forName(componentType));
+            } catch (ClassNotFoundException e) {
+                throw new AzkarraException("Invalid configuration", e);
+            }
+        }
     }
 
     private static void loadConfigurationDeclaredEnvironments(final ApplicationConfig config,

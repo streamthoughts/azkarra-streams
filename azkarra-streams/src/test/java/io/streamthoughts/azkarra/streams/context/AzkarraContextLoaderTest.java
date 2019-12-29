@@ -20,10 +20,8 @@ package io.streamthoughts.azkarra.streams.context;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
-import io.streamthoughts.azkarra.api.streams.TopologyProvider;
-import io.streamthoughts.azkarra.runtime.components.DefaultComponentRegistry;
-import io.streamthoughts.azkarra.runtime.components.DefaultProviderClassReader;
-import io.streamthoughts.azkarra.runtime.components.TopologyDescriptorFactory;
+import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
+import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.streams.config.AzkarraConf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +29,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext.create;
 import static io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext.DEFAULT_ENV_NAME;
+import static io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext.create;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,10 +42,7 @@ public class AzkarraContextLoaderTest {
     @BeforeEach
     public void setUp() {
         context = create();
-        context.setComponentRegistry(new DefaultComponentRegistry());
-        DefaultProviderClassReader reader = new DefaultProviderClassReader();
-        reader.addDescriptorFactoryForType(TopologyProvider.class, new TopologyDescriptorFactory());
-        context.setComponentClassReader(reader);
+        context.setComponentFactory(new DefaultComponentFactory(new DefaultComponentDescriptorFactory()));
     }
 
     @Test

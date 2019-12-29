@@ -18,60 +18,43 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
-import io.streamthoughts.azkarra.api.components.ComponentFactory;
-import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.util.ClassUtils;
 
-public class BasicComponentFactory<T> implements ComponentFactory<T> {
+import java.util.Objects;
+import java.util.function.Supplier;
 
-    private final Class<T> type;
+public class BasicComponentFactory<T> implements Supplier<T> {
 
-    private final boolean isSingleton;
-
-    /**
-     * Creates a new {@link BasicComponentFactory} instance.
-     *
-     * @param type  the component type.
-     */
-    public BasicComponentFactory(final Class<T> type) {
-        this(type, false);
-    }
+    private final Class<T> componentClass;
+    private final ClassLoader classLoader;
 
     /**
      * Creates a new {@link BasicComponentFactory} instance.
      *
-     * @param type  the component type.
-     * @param type  is this component a singleton.
+     * @param componentClass  the component class.
      */
-    public BasicComponentFactory(final Class<T> type, final boolean isSingleton) {
-        this.type = type;
-        this.isSingleton = isSingleton;
+    public BasicComponentFactory(final Class<T> componentClass) {
+        this(componentClass, componentClass.getClassLoader());
+    }
+
+    /**
+     * Creates a new {@link BasicComponentFactory} instance.
+     *
+     * @param componentClass  the component class.
+     */
+    public BasicComponentFactory(final Class<T> componentClass,
+                                 final ClassLoader classLoader) {
+        this.componentClass = Objects.requireNonNull(componentClass, "componentClass cannot be null");
+        this.classLoader = classLoader;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public T make() {
-        try {
-            return type.getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException e) {
-            throw new AzkarraException("Cannot create new instance of type '" + getClass().getSimpleName() + "'", e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<T> getType() {
-        return type;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isSingleton() {
-        return isSingleton;
+    public T get() {
+        if (classLoader == null)
+            return ClassUtils.newInstance(componentClass);
+        return ClassUtils.newInstance(componentClass, classLoader);
     }
 }

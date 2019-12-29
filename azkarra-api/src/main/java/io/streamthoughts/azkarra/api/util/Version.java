@@ -32,6 +32,14 @@ import java.util.stream.Stream;
  */
 public class Version implements Comparable<Version> {
 
+    public static boolean isEqual(final String v1, final String v2) {
+        return isEqual(Version.parse(v1), v2);
+    }
+
+    public static boolean isEqual(final Version v1, final String v2) {
+        return v1.equals(Version.parse(v2));
+    }
+
     /**
      * Static helper for creating a new version based on the specified string.
      *
@@ -51,10 +59,11 @@ public class Version implements Comparable<Version> {
             final int incrementalVersion = versions.length > 2 ? Integer.parseInt(versions[2]) : 0;
 
             return new Version(
-                    majorVersion,
-                    minorVersion,
-                    incrementalVersion,
-                    qualifier > 0 ? version.substring(qualifier + 1) : null
+                majorVersion,
+                minorVersion,
+                incrementalVersion,
+                qualifier > 0 ? version.substring(qualifier + 1) : null,
+                version
             );
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid version, cannot parse '" + version + "'");
@@ -77,6 +86,8 @@ public class Version implements Comparable<Version> {
     private final int incrementalVersion;
     private final Qualifier qualifier;
 
+    private final String originalVersion;
+
     /**
      * Creates a new {@link Version} instance.
      *
@@ -89,11 +100,30 @@ public class Version implements Comparable<Version> {
                    final int minorVersion,
                    final int incrementalVersion,
                    final String qualifier) {
+        this(majorVersion, minorVersion, incrementalVersion, qualifier, null);
+    }
+
+    /**
+     * Creates a new {@link Version} instance.
+     *
+     * @param majorVersion          the major version (must be superior or equal to 0).
+     * @param minorVersion          the minor version (must be superior or equal to 0).
+     * @param incrementalVersion    the incremental version (must be superior or equal to 0).
+     * @param qualifier             the qualifier.
+     * @param originalVersion       the original string version.
+     */
+    private Version(final int majorVersion,
+                    final int minorVersion,
+                    final int incrementalVersion,
+                    final String qualifier,
+                    final String originalVersion) {
         this.majorVersion =  requirePositive(majorVersion, "major");
         this.minorVersion = requirePositive(minorVersion, "minor");
         this.incrementalVersion = requirePositive(incrementalVersion, "incremental");
         this.qualifier = qualifier != null ? new Qualifier(qualifier) : null;
+        this.originalVersion = originalVersion;
     }
+
 
     private static int requirePositive(int version, final String message) {
         if (version < 0) {
@@ -145,6 +175,8 @@ public class Version implements Comparable<Version> {
      */
     @Override
     public String toString() {
+        if (originalVersion != null) return originalVersion;
+
         String version =  majorVersion + "." + minorVersion + "." + incrementalVersion;
         return (qualifier != null) ? version +"-" + qualifier : version;
     }

@@ -141,7 +141,10 @@ public class KafkaStreamContainerBuilder {
             });
 
             final CompositeUncaughtExceptionHandler handler = new CompositeUncaughtExceptionHandler();
-            handler.addHandler((t, e) -> container.setException(e));
+            handler.addHandler((t, e) -> {
+                container.logger().error("Handling uncaught streams thread exception: {}", e.getMessage());
+                container.setException(e);
+            });
 
             if (exceptionHandlers != null) {
                 exceptionHandlers.forEach(handler::addHandler);

@@ -22,7 +22,6 @@ import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
-import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
@@ -119,7 +118,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         }
 
         service = new LocalAzkarraStreamsService(context, httpRemoteQueryBuilder.build());
-        context.addComponent(ComponentFactory.singletonOf(service));
+        context.registerSingleton(service);
 
         // Register all routing http-handlers using server loader.
         if (enableServiceLoader) {

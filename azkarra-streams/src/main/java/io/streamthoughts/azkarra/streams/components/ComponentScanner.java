@@ -19,15 +19,17 @@
 package io.streamthoughts.azkarra.streams.components;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
-import io.streamthoughts.azkarra.api.components.ComponentClassReader;
+import io.streamthoughts.azkarra.api.annotations.Factory;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
-import io.streamthoughts.azkarra.runtime.components.DefaultProviderClassReader;
+import io.streamthoughts.azkarra.runtime.components.BasicComponentFactory;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentClassLoader;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentResolver;
 import io.streamthoughts.azkarra.streams.components.isolation.ExternalComponent;
 import org.reflections.Configuration;
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
 import org.reflections.scanners.SubTypesScanner;
@@ -38,6 +40,9 @@ import org.reflections.util.FilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -46,7 +51,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static org.reflections.ReflectionUtils.getAllMethods;
+import static org.reflections.ReflectionUtils.withAnnotation;
 
 /**
  * The {@link ComponentScanner} class can be used used to scan the classpath for automatically
@@ -56,7 +66,8 @@ public class ComponentScanner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ComponentScanner.class);
 
-    private final ComponentClassReader reader;
+    private static final Predicate<Method> GET_METHOD = ReflectionUtils.withName("get")::apply;
+
     private final ComponentRegistry registry;
 
     private FilterBuilder filterBuilder;
@@ -64,14 +75,10 @@ public class ComponentScanner {
     /**
      * Creates a new {@link ComponentScanner} instance.
      *
-     * @param reader    the {@link DefaultProviderClassReader} used to register providers.
      * @param registry  the {@link ComponentRegistry} used to register providers.
      */
-    public ComponentScanner(final ComponentClassReader reader,
-                            final ComponentRegistry registry) {
-        Objects.requireNonNull(reader, "reader cannot be null");
-        Objects.requireNonNull(reader, "registry cannot be null");
-        this.reader = reader;
+    public ComponentScanner(final ComponentRegistry registry) {
+        Objects.requireNonNull(registry, "registry cannot be null");
         this.registry = registry;
         this.filterBuilder = new FilterBuilder();
     }
@@ -147,27 +154,103 @@ public class ComponentScanner {
 
         Reflections reflections = new SafeReflections(builder);
 
-        registerAllDeclaredComponentFactories(reflections, classLoader);
-        registerAllDeclaredComponents(reflections, classLoader);
+        registerClassesAnnotatedComponent(reflections, classLoader);
+        registerClassesAnnotatedFactory(reflections, classLoader);
     }
 
-    private void registerAllDeclaredComponents(final Reflections reflections,
-                                               final ClassLoader classLoader) {
-        final Set<Class<?>> components = reflections.getTypesAnnotatedWith(Component.class, true);
-        components.stream()
-            .filter(ClassUtils::canBeInstantiated)
-            .forEach(type ->  reader.registerComponent(type, registry, classLoader));
-    }
-
-    private void registerAllDeclaredComponentFactories(final Reflections reflections,
-                                                       final ClassLoader classLoader) {
-        Set<Class<? extends ComponentFactory>> factoryClasses = reflections.getSubTypesOf(ComponentFactory.class);
-        for (Class<? extends ComponentFactory> factoryClass : factoryClasses) {
+    private void registerClassesAnnotatedFactory(final Reflections reflections,
+                                                 final ClassLoader classLoader) {
+        final Set<Class<?>> factoryClasses = reflections.getTypesAnnotatedWith(Factory.class, true);
+        for (Class<?> factoryClass : factoryClasses) {
             if (ClassUtils.canBeInstantiated(factoryClass)) {
-                final ComponentFactory<?> factory = ClassUtils.newInstance(factoryClass);
-                reader.registerComponent(factory, registry, classLoader);
+                Set<Method> components = getAllMethods(factoryClass, withAnnotation(Component.class));
+                for (Method method : components) {
+                    registerComponentMethod(factoryClass, method, classLoader);
+                }
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerClassesAnnotatedComponent(final Reflections reflections,
+                                                   final ClassLoader classLoader) {
+        final Set<Class<?>> components = reflections.getTypesAnnotatedWith(Component.class, true);
+
+        for (Class<?> component : components) {
+            if (ClassUtils.canBeInstantiated(component)) {
+                registerComponentClass((Class<Object>)component, classLoader);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerComponentMethod(final Class<?> factoryClass,
+                                         final Method method,
+                                         final ClassLoader classLoader) {
+        final Object target = ClassUtils.newInstance(factoryClass, classLoader);
+        final Class<Object> componentClass = (Class<Object>) method.getReturnType();
+        final ReflectMethodComponentSupplier supplier = new ReflectMethodComponentSupplier(target, method);
+
+        final String componentName = getNamedQualifierOrElse(method, method.getName());
+        if (isSingleton(method))
+            registry.registerSingleton(componentName, componentClass, supplier);
+        else
+            registry.registerComponent(componentName, componentClass, supplier);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerComponentClass(final Class<Object> cls, final ClassLoader classLoader) {
+        final Supplier<Object> supplier;
+        final Class<Object> type;
+        if (isSupplier(cls)) {
+            supplier = (Supplier<Object>) ClassUtils.newInstance(cls, classLoader);
+            type = resolveSupplierReturnType(cls);
+            if (type == null)
+                throw new AzkarraException("Unexpected error while scanning component. " +
+                    "Cannot resolve return type from supplier: " + cls.getName());
+        } else {
+            supplier = new BasicComponentFactory<>(cls, classLoader);
+            type = cls;
+        }
+
+        final String componentName = getNamedQualifierOrNull(cls);
+        if (isSingleton(cls))
+            registry.registerSingleton(componentName, type, supplier);
+        else
+            registry.registerComponent(componentName, type, supplier);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Class<Object> resolveSupplierReturnType(final Class<Object> cls) {
+        Class<Object> type = null;
+        Set<Method> methods = ReflectionUtils.getMethods(cls, GET_METHOD::test);
+        for (Method m : methods) {
+            if (!m.isBridge())
+                type = (Class<Object>) m.getReturnType();
+        }
+        return type;
+    }
+
+    private static boolean isSupplier(final Class<?> componentClass) {
+        return Supplier.class.isAssignableFrom(componentClass);
+    }
+
+    private static boolean isSingleton(final Class<?> componentClass) {
+        return ClassUtils.isSuperTypesAnnotatedWith(componentClass, Singleton.class);
+    }
+
+    private static boolean isSingleton(final Method method) {
+        return ClassUtils.isMethodAnnotatedWith(method, Singleton.class);
+    }
+
+    private static String getNamedQualifierOrNull(final Class<?> componentClass) {
+        List<Named> annotations = ClassUtils.getAllDeclaredAnnotationsByType(componentClass, Named.class);
+        return annotations.isEmpty() ? null : annotations.get(0).value();
+    }
+
+    private static String getNamedQualifierOrElse(final Method componentMethod, final String defaultName) {
+        Named annotation = componentMethod.getDeclaredAnnotation(Named.class);
+        return annotation == null ? defaultName : annotation.value();
     }
 
     // The Reflections class may throw a ReflectionsException when parallel executor

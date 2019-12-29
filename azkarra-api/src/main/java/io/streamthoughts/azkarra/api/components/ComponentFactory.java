@@ -18,91 +18,174 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
-import java.util.Objects;
+import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
 
-/**
- * The {@link ComponentFactory} interface is used for creating new component instance.
- *
- * @see ComponentRegistry
- * @see ComponentDescriptor
- *
- * @param <T>   the component-type.
- */
-public interface ComponentFactory<T> {
+import java.io.Closeable;
+import java.util.Collection;
 
-    static <T> ComponentFactory<T> singletonOf(final T instance) {
-        return new SimpleFactory<>(instance, true);
-    }
-
-    static <T> ComponentFactory<T> prototypeOf(final T instance) {
-        return new SimpleFactory<>(instance, false);
-    }
+public interface ComponentFactory extends ComponentRegistry, ComponentDescriptorRegistry, Closeable {
 
     /**
-     * Creates a new instance for the specified type.
+     * Checks whether the specified components class or alias is already registered.
      *
-     * @return  the new instance of type {@link T}.
+     * @param type   the fully qualified class name or an alias of the component.
+     * @return       {@code true} if a provider exist, {@code false} otherwise.
      */
-    T make();
+    boolean containsComponent(final String type);
 
     /**
-     * Returns the type of the component created by this {@link ComponentFactory}.
+     * Checks whether a components is already registered for the specified type and scope.
      *
-     * @return  a {@link Class} instance.
+     * @param type       the component type.
+     * @param qualifier  the options to qualified the component.
+     * @return           {@code true} if a provider exist, {@code false} otherwise.
      */
-    Class<T> getType();
+    <T> boolean containsComponent(final String type, final Qualifier<T> qualifier);
 
     /**
-     * Returns the if the instance created from this {@link ComponentFactory} must be shared across the application.
+     * Checks whether a components is already registered for the specified class.
      *
-     * @return  {@code true} if the instance is shared, {@code false} otherwise.
+     * @param type  the component type.
+     * @return      {@code true} if a provider exist, {@code false} otherwise.
      */
-    default boolean isSingleton() {
-        return false;
-    }
+    <T> boolean containsComponent(final Class<T> type) ;
 
-    final class SimpleFactory<T> implements ComponentFactory<T> {
+    /**
+     * Checks whether a components is already registered for the specified type and scope.
+     *
+     * @param type       the component type.
+     * @param qualifier  the options to qualified the component.
+     * @return           {@code true} if a provider exist, {@code false} otherwise.
+     */
+    <T> boolean containsComponent(final Class<T> type, final Qualifier<T> qualifier);
 
-        private final T instance;
-        private final Class<T> type;
-        private final boolean isSingleton;
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * @param type      the component class.
+     * @param conf      the configuration used if the component implement {@link Configurable}.
+     * @param <T>       the component-type.
+     *
+     * @return          the instance of type {@link T}.
+     *
+     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
+     * @throws NoSuchComponentException     if no component is registered for the given type.
+     */
+    <T> T getComponent(final Class<T> type, final Conf conf);
 
-        /**
-         * Creates a new {@link SimpleFactory} instance.
-         *
-         * @param instance     the instance of type {@link T}.
-         * @param isSingleton  is the component shared across the application.
-         */
-        @SuppressWarnings("unchecked")
-        SimpleFactory(final T instance, final boolean isSingleton) {
-            Objects.requireNonNull(instance, "instance cannot be null");
-            this.instance = instance;
-            this.type = (Class<T>)instance.getClass();
-            this.isSingleton = isSingleton;
-        }
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * @param type       the component class.
+     * @param conf       the configuration used if the component implement {@link Configurable}.
+     * @param qualifier  the options used to qualify the component.
+     * @param <T>        the component-type.
+     *
+     * @return          the instance of type {@link T}.
+     *
+     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
+     * @throws NoSuchComponentException     if no component is registered for the given type.
+     */
+    <T> T getComponent(final Class<T> type, final Conf conf, final Qualifier<T> qualifier);
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public T make() {
-            return instance;
-        }
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * @param type       the component class.
+     * @param qualifier  the options used to qualified the component.
+     * @param <T>        the component-type.
+     *
+     * @return          the instance of type {@link T}.
+     *
+     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
+     * @throws NoSuchComponentException     if no component is registered for the given type.
+     */
+    <T> GettableComponent<T> getComponent(final Class<T> type, final Qualifier<T> qualifier);
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Class<T> getType() {
-            return type;
-        }
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * @param type   the fully qualified class name or an alias of the component.
+     * @param conf   the configuration used if the component implement {@link Configurable}.
+     * @param <T>    the component-type.
+     *
+     * @return       the instance of type {@link T}.
+     *
+     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
+     * @throws NoSuchComponentException     if no component is registered for the given class or alias..
+     */
+    <T> T getComponent(final String type, final Conf conf);
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean isSingleton() {
-            return isSingleton;
-        }
-    }
+    /**
+     * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * @param type       the fully qualified class name or an alias of the component.
+     * @param conf       the configuration used if the component implement {@link Configurable}.
+     * @param qualifier  the options used to qualify the component.
+     * @param <T>        the component-type.
+     *
+     * @return           the instance of type {@link T}.
+     *
+     * @throws NoUniqueComponentException   if more than one component is registered for the given type.
+     * @throws NoSuchComponentException     if no component is registered for the given class or alias..
+     */
+    <T> T getComponent(final String type, final Conf conf, final Qualifier<T> qualifier);
+
+    /**
+     * Gets all instances, which may be shared or independent, for the specified type.
+     *
+     * @param type   the fully qualified class name or an alias of the component.
+     * @param conf   the configuration used if the component implement {@link Configurable}.
+     * @param <T>    the component-type.
+     *
+     * @return       all instances of type {@link T}.
+     */
+    <T> Collection<T> getAllComponents(final String type, final Conf conf);
+
+    /**
+     * Gets all instances, which may be shared or independent, for the specified type.
+     *
+     * @param type       the fully qualified class name or an alias of the component.
+     * @param conf       the configuration used if the component implement {@link Configurable}.
+     * @param qualifier  the options used to qualify the component.
+     * @param <T>        the component-type.
+     *
+     * @return           all instances of type {@link T}.
+     */
+    <T> Collection<T> getAllComponents(final String type, final Conf conf, final Qualifier<T> qualifier);
+
+    /**
+     * Gets all instances, which may be shared or independent, for the specified type.
+     *
+     * @param type    the component class.
+     * @param conf    the configuration used if the component implement {@link Configurable}.
+     * @param <T>     the component-type.
+     *
+     * @return        all instances of type {@link T}.
+     */
+    <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf);
+
+    /**
+     * Gets all instances, which may be shared or independent, for the specified type.
+     *
+     * @param type       the component class.
+     * @param conf       the configuration used if the component implement {@link Configurable}.
+     * @param qualifier  the options used to qualify the component.
+     * @param <T>        the component-type.
+     *
+     * @return           all instances of type {@link T}.
+     */
+    <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf, final Qualifier<T> qualifier);
+
+    /**
+     * Gets all instances, which may be shared or independent, for the specified type.
+     *
+     * @param type       the component class.
+     * @param qualifier  the options used to qualify the component.
+     * @param <T>        the component-type.
+     *
+     * @return           all instances of type {@link T}.
+     */
+    <T> Collection<GettableComponent<T>> getAllComponents(final Class<T> type, final Qualifier<T> qualifier);
 }

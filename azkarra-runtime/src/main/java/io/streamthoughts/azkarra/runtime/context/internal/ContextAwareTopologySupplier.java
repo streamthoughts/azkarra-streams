@@ -20,7 +20,9 @@ package io.streamthoughts.azkarra.runtime.context.internal;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
-import io.streamthoughts.azkarra.api.components.ComponentRegistry;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.ComponentFactory;
+import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.config.ConfigurableSupplier;
@@ -32,7 +34,7 @@ import java.util.Objects;
 
 public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyProvider> {
 
-    private final TopologyDescriptor descriptor;
+    private final ComponentDescriptor<TopologyProvider>  descriptor;
     private final AzkarraContext context;
 
     /**
@@ -42,7 +44,7 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
      * @param descriptor    the {@link TopologyDescriptor} instance.
      */
     public ContextAwareTopologySupplier(final AzkarraContext context,
-                                 final TopologyDescriptor descriptor) {
+                                        final ComponentDescriptor<TopologyProvider> descriptor) {
         this.descriptor = descriptor;
         this.context = context;
     }
@@ -52,12 +54,12 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
      */
     @Override
     public TopologyProvider get(final Conf configs) {
-        final ComponentRegistry registry = context.getComponentRegistry();
+        final ComponentFactory factory = context.getComponentFactory();
 
-        final TopologyProvider provider = registry.getVersionedComponent(
-                descriptor.className(),
-                descriptor.version(),
-                configs
+        final TopologyProvider provider = factory.getComponent(
+            descriptor.type(),
+            configs,
+            Qualifiers.byVersion(descriptor.version())
         );
 
         if (provider instanceof AzkarraContextAware) {

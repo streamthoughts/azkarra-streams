@@ -24,18 +24,12 @@ import io.streamthoughts.azkarra.api.components.ComponentModule;
 /**
  * A {@link ComponentModule} for providing a new @{link ComplexWordCountTopology} instance.
  */
+
 @Component
 public class ComplexWordCountTopologyModule extends ComponentModule<ComplexWordCountTopology> {
 
-    /**
-     * Creates a new {@link ComplexWordCountTopologyModule} instance.
-     */
-    public ComplexWordCountTopologyModule() {
-        super(ComplexWordCountTopology.class);
-    }
-
     @Override
-    public ComplexWordCountTopology make() {
+    public ComplexWordCountTopology get() {
         StopWordsService service = getComponent(StopWordsService.class);
         ComplexWordCountTopology topology = new ComplexWordCountTopology();
         topology.setStopWordsService(service);

@@ -24,10 +24,10 @@ import java.util.Set;
 public interface ComponentAliasesGenerator {
 
     /**
-     * Gets unique aliases for the specified {@link ComponentDescriptor} descriptor.
+     * Gets unique aliases for the specified {@link SimpleComponentDescriptor} descriptor.
      *
-     * @param descriptor        the {@link ComponentDescriptor} descriptor.
-     * @param allDescriptors    the list of existing {@link ComponentDescriptor} instances.
+     * @param descriptor        the {@link SimpleComponentDescriptor} descriptor.
+     * @param allDescriptors    the list of existing {@link SimpleComponentDescriptor} instances.
      *
      * @return                  the set of unique aliases.
      */

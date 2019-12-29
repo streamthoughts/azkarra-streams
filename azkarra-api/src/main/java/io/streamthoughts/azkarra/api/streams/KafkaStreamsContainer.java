@@ -339,6 +339,10 @@ public class KafkaStreamsContainer {
         return new LocalStoreAccessor<>(() -> kafkaStreams.store(storeName, storeType));
     }
 
+    Logger logger() {
+        return LOG;
+    }
+
     boolean isNotRunning() {
         final State state = state().value();
         return !(state == State.RUNNING || state == State.REBALANCING);
@@ -368,7 +372,7 @@ public class KafkaStreamsContainer {
     }
 
     void setException(final Throwable throwable) {
-        this.lastObservedException = throwable;
+        lastObservedException = throwable;
     }
 
     private StreamsServerInfo newServerInfoFor(final StreamsMetadata metadata) {

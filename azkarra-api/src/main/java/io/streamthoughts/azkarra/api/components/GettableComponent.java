@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.api.components;
 
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
 
 /**
  * Class for getting a configurable component.
@@ -27,9 +28,24 @@ import io.streamthoughts.azkarra.api.config.Conf;
  */
 public interface GettableComponent<T> extends AutoCloseable {
 
+    /**
+     * Gets the instance of type {@link T}, which may be shared or independent.
+     *
+     * @param conf  the configuration to be used if the component implement {@link Configurable}.
+     *
+     * @return  the component of type {@link T}.
+     */
     T get(final Conf conf);
 
+    /**
+     * Gets the descriptor for the component.
+     *
+     * @return  the {@link ComponentDescriptor}.
+     */
     ComponentDescriptor<T> descriptor();
 
+    /**
+     * Closes the created component.
+     */
     void close();
 }

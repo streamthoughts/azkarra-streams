@@ -16,34 +16,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.annotations;
+package io.streamthoughts.azkarra.streams.components.scan.factory;
 
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.annotations.Component;
+import io.streamthoughts.azkarra.api.annotations.Factory;
+import io.streamthoughts.azkarra.streams.components.ComponentScannerTest;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
- * Marker interface that a class annotated with {@link Component} can used for describing its scope.
- *
- * @see ComponentDescriptor#SCOPE_APPLICATION
- * @see ComponentDescriptor#SCOPE_ENVIRONMENT
- * @see ComponentDescriptor#SCOPE_STREAMS
- *
+ * Class used for testing purpose.
+ * @see ComponentScannerTest
  */
-@Documented
-@Inherited
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Repeatable(Scopes.class)
-public @interface Scope {
+@Factory
+public class TestAnnotatedFactory {
 
-    String type();
+    @Component
+    public DummyComponent testComponent() {
+        return new DummyComponent();
+    }
 
-    String name() default "";
+    @Named("namedComponent")
+    @Component
+    public DummyComponent testNamedComponent() {
+        return new DummyComponent();
+    }
+
+    @Component
+    @Singleton
+    public DummyComponent testSingleton() {
+        return new DummyComponent();
+    }
+
+    public static class DummyComponent {
+
+    }
 }

@@ -19,10 +19,10 @@
 package io.streamthoughts.examples.azkarra.dependency;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
-import io.streamthoughts.azkarra.api.annotations.Singleton;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 
+import javax.inject.Singleton;
 import java.util.List;
 
 @Component
