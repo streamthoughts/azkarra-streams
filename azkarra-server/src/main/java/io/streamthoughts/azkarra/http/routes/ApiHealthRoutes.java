@@ -25,12 +25,14 @@ import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.health.Health;
 import io.streamthoughts.azkarra.http.health.HealthAggregator;
 import io.streamthoughts.azkarra.http.health.HealthIndicator;
+import io.streamthoughts.azkarra.http.health.Status;
 import io.streamthoughts.azkarra.http.health.internal.StreamsHealthIndicator;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
+import io.undertow.util.StatusCodes;
 
 import java.util.Collection;
 import java.util.List;
@@ -68,6 +70,13 @@ public class ApiHealthRoutes implements HttpHandler, RoutingHandlerProvider, Azk
             .stream()
             .map(HealthIndicator::getHealth)
             .collect(Collectors.toList());
-        ExchangeHelper.sendJsonResponse(exchange, aggregator.aggregate(healths));
+
+        final Health aggregate = aggregator.aggregate(healths);
+
+        final int statusCode = aggregate.getStatus().equals(Status.DOWN) ?
+                StatusCodes.SERVICE_UNAVAILABLE :
+                StatusCodes.OK;
+
+        ExchangeHelper.sendJsonResponseWithCode(exchange, aggregate, statusCode);
     }
 }

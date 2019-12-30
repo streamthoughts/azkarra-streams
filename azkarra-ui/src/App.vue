@@ -159,15 +159,19 @@ export default {
         return response;
       },
       function (error) {
-        let status = error.response.status
-        // auth modal should not be opened if server is in headless mode.
-        if ( (status == 403 || status == 401) && !that.isHeadless()) {
-          that.openAuthModal = true
-        } else {
-          let errorMessage = (error.response.data == '')
-            ? { error_code: error.response.status, message : error.message }
-            : error.response.data
-          that.pushError(errorMessage);
+        let config = error.config;
+        let isHandlerEnable = !(config.hasOwnProperty('errorInterceptorEnabled') && !config.handlerEnabled);
+        if (isHandlerEnable) {
+          let status = error.response.status
+          // auth modal should not be opened if server is in headless mode.
+          if ((status == 403 || status == 401) && !that.isHeadless()) {
+            that.openAuthModal = true
+          } else {
+            let errorMessage = (error.response.data == '')
+              ? { error_code: error.response.status, message : error.message }
+              : error.response.data
+            that.pushError(errorMessage);
+          }
         }
         return Promise.reject(error.response);
       }
@@ -224,7 +228,6 @@ export default {
     },
 
     removeError(error) {
-     console.log(error);
      this.errors.splice(error.index, 1);
      this.errors.forEach(function(err, index) { err.index = index });
      clearInterval(error.timer);

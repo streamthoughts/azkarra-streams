@@ -51,7 +51,7 @@ class AzkarraApi {
     }
 
     getHealth() {
-      return this.client.get("/health")
+      return this.client.get("/health", { errorInterceptorEnabled: false })
       .then(function (response) {
         return response.data
       })

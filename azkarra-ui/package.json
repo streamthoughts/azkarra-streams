@@ -8,18 +8,18 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.18.0",
     "bootstrap": "^4.4.1",
     "core-js": "^2.6.11",
-    "d3": "^5.14.2",
+    "d3": "^5.15.0",
     "d3-zoom": "^1.8.3",
     "datatables.net-bs4": "^1.10.20",
     "jquery": "^3.4.1",
     "jsoneditor": "^7.5.0",
     "moment": "^2.24.0",
     "popper.js": "^1.16.0",
-    "vue": "^2.6.10",
-    "vue-json-pretty": "^1.6.2",
+    "vue": "^2.6.11",
+    "vue-json-pretty": "^1.6.3",
     "vue-router": "^3.1.3"
   },
   "devDependencies": {
@@ -30,7 +30,7 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
     "root": true,

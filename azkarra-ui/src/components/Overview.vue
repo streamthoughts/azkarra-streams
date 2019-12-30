@@ -38,7 +38,9 @@
                 {{ health.status }}
               </span>
             </h6>
-            <health-indicators-list v-bind:indicators="health.details"></health-indicators-list>
+            <template v-if="health.details">
+              <health-indicators-list v-bind:indicators="health.details"></health-indicators-list>
+            </template>
           </div>
         </div>
       </div>
@@ -59,7 +61,7 @@ export default {
   data: function () {
     return {
       info: {},
-      health: { status : "UNKNOWN", details : { foo : { status : "UP"} } },
+      health: {},
     }
   },
   created () {
@@ -71,7 +73,15 @@ export default {
   methods: {
     load() {
         var that = this;
-        azkarra.getHealth().then(function(data){ that.health = data; });
+        azkarra.getHealth()
+            .then(function(data){
+                that.health = data;
+            })
+            .catch(function (error){
+               if (error.data) {
+                 that.health = error.data;
+               }
+            });
         azkarra.getInfo().then(function(data){ that.info = data; });
     },
 
