@@ -38,11 +38,13 @@ import io.streamthoughts.azkarra.api.errors.AzkarraContextException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
+import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.runtime.config.AzkarraContextConfig;
+import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareApplicationIdBuilderSupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareComponentSupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareKafkaStreamsFactorySupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareLifecycleInterceptorSupplier;
@@ -129,6 +131,8 @@ public class DefaultAzkarraContext implements AzkarraContext {
     private List<Supplier<StreamsLifecycleInterceptor>> globalInterceptors;
 
     private Supplier<KafkaStreamsFactory> globalKafkaStreamsFactory;
+
+    private Supplier<ApplicationIdBuilder> globalApplicationIdBuilder;
 
     /**
      * Creates a new {@link DefaultAzkarraContext} instance.
@@ -443,6 +447,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
             // Resolving components for streams environments with scope 'application'.
             globalInterceptors = getLifecycleInterceptors(APPLICATION_SCOPE);
             globalKafkaStreamsFactory = getKafkaStreamsFactory(APPLICATION_SCOPE).orElse(null);
+            globalApplicationIdBuilder = getApplicationIdBuilder(APPLICATION_SCOPE).orElse(null);
 
             // Initialize and start all streams environments.
             for (StreamsExecutionEnvironment env : environments()) {
@@ -496,18 +501,34 @@ public class DefaultAzkarraContext implements AzkarraContext {
         globalInterceptors.forEach(env::addStreamsLifecycleInterceptor);
         getLifecycleInterceptors(Restriction.env(env.name())).forEach(env::addStreamsLifecycleInterceptor);
 
-        // Inject KafkaStreams streamsFactory
-        Supplier<KafkaStreamsFactory> kafkaStreamsFactory =
+        // Inject environment KafkaStreamsFactory
+        final Supplier<KafkaStreamsFactory> kafkaStreamsFactory =
                 getKafkaStreamsFactory(Restriction.env(env.name())).orElse(globalKafkaStreamsFactory);
-        if (kafkaStreamsFactory != null) {
+        if (kafkaStreamsFactory != null)
             env.setKafkaStreamsFactory(kafkaStreamsFactory);
-        }
 
-        boolean waitForTopicsEnable = new AzkarraContextConfig(env.getConfiguration())
+        // Inject environment ApplicationIdBuilder
+        final Supplier<ApplicationIdBuilder> applicationIdBuilder =
+                getApplicationIdBuilder(Restriction.env(env.name())).orElse(globalApplicationIdBuilder);
+        if (applicationIdBuilder != null)
+            env.setApplicationIdBuilder(applicationIdBuilder);
+
+        final boolean waitForTopicsEnable = new AzkarraContextConfig(env.getConfiguration())
                 .addConfiguration(getConfiguration())
                 .isWaitForTopicsEnable();
 
         env.setWaitForTopicsToBeCreated(waitForTopicsEnable);
+    }
+
+    private Optional<Supplier<ApplicationIdBuilder>> getApplicationIdBuilder(final Restriction restriction) {
+        final Qualifier<ApplicationIdBuilder> qualifier = Qualifiers.byRestriction(restriction);
+        if (componentFactory.containsComponent(ApplicationIdBuilder.class, qualifier)) {
+            return Optional.of(new ContextAwareApplicationIdBuilderSupplier(
+                    this,
+                    componentFactory.getComponent(ApplicationIdBuilder.class, qualifier)
+            ));
+        }
+        return Optional.empty();
     }
 
     private Optional<Supplier<KafkaStreamsFactory>> getKafkaStreamsFactory(final Restriction restriction) {
