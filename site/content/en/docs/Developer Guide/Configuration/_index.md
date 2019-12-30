@@ -23,7 +23,7 @@ For doing that, the `AzkarraApplication` is expecting specific properties :
 |  `azkarra.context`                   |  config             | The configuration of the `AzkarraContext`                           |                   
 |  `azkarra.components`                |  Array[string]      | The list of components (e.g: `TopologyProvider`) to be registered into the `AzkarraContext`. |
 |  `azkarra.environments`              |  Array[Environment] | The list of `StreamsExecutionEnvironment` to initialize and configure.   |
-|  `azkarra.server`                    |  config | The configuration of the embedded HTTP server.                                  |
+|  `azkarra.server`                    |  config             | The configuration of the embedded HTTP server.                           |
 
 **Environment:** 
 
