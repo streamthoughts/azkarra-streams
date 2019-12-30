@@ -2,7 +2,7 @@
 date: 2019-11-29
 title: "RocksDB"
 linkTitle: "RocksDB"
-weight: 4
+weight: 7
 description: >
   How to configure internal RocksDB state stores ?
 ---

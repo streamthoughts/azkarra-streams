@@ -10,6 +10,6 @@ description: >
 
 ---
 
-The latest Azkarra Streams API (0.4) documentation can be found on [here](/azkarra-streams/apidocs/0.4).
+The latest Azkarra Streams API (0.5.0) documentation can be found on [here](/azkarra-streams/apidocs/0.5.0).
 
-Prior releases : [0.3](/azkarra-streams/apidocs/0.3), [0.4](/azkarra-streams/apidocs/0.4)
+Prior releases : [0.3](/azkarra-streams/apidocs/0.3), [0.4](/azkarra-streams/apidocs/0.4), [0.5.0](/azkarra-streams/apidocs/0.5.0)

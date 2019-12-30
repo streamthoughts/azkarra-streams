@@ -24,7 +24,7 @@ Azkarra is available in Maven Central. You can add Azkarra Streams to the depend
     <dependency>
       <groupId>io.streamthoughts</groupId>
       <artifactId>azkarra-streams</artifactId>
-      <version>0.4</version>
+      <version>0.5.0</version>
     </dependency>
 ```
     

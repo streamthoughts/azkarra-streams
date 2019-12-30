@@ -1,5 +1,5 @@
 ---
-date: 2019-12-02
+date: 2020-01-06
 title: "Getting Started"
 linkTitle: "Getting Started"
 weight: 2
@@ -25,7 +25,7 @@ First, run this following command :
 ```bash
 $> mvn archetype:generate -DarchetypeGroupId=io.streamthoughts \
 -DarchetypeArtifactId=azkarra-quickstart-java \
--DarchetypeVersion=0.4 \
+-DarchetypeVersion=0.5.0 \
 -DgroupId=azkarra.streams \
 -DartifactId=azkarra-getting-started \
 -Dversion=1.0-SNAPSHOT \
@@ -40,14 +40,17 @@ $> tree azkarra-getting-started
  azkarra-getting-started
 ├── docker-compose.yml
 ├── pom.xml
+├── quickstart-create-wordcount-topics.sh
 └── src
     └── main
         ├── java
-        │   └── azkarra
-        │       └── SimpleStreamsApp.java
+        │   └── azkarra
+        │       ├── SimpleStreamsApp.java
+        │       └── Version.java
         └── resources
             ├── application.conf
-            └── log4j2.xml
+            ├── log4j2.xml
+            └── version.properties
 ```
 
 The `pom.xml` already contains the Azkarra Streams and Kafka Streams dependencies :
@@ -57,13 +60,13 @@ The `pom.xml` already contains the Azkarra Streams and Kafka Streams dependencie
     <dependency>
         <groupId>org.apache.kafka</groupId>
         <artifactId>kafka-streams</artifactId>
-        <version>2.3.0</version>
+        <version>2.4.0</version>
     </dependency>
 
     <dependency>
         <groupId>io.streamthoughts</groupId>
         <artifactId>azkarra-streams</artifactId>
-        <version>0.4</version>
+        <version>0.5.0</version>
     </dependency>
 </dependencies>
 ```
@@ -260,12 +263,9 @@ public static class WordCountTopologyProvider implements TopologyProvider, Confi
 
     @Override
     public void configure(final Conf conf) {
-        topicSource = conf.getOptionalString("topic.source")
-                .orElse("streams-plaintext-input");
-        topicSink = conf.getOptionalString("topic.sink")
-                .orElse("streams-wordcount-output");
-        stateStoreName = conf.getOptionalString("state.store.name")
-                .orElse("count");
+        topicSource = conf.getString("topic.source");
+        topicSink = conf.getString("topic.sink");
+        stateStoreName = conf.getOptionalString("state.store.name").orElse("count");
     }
     @Override
     public String version() { return "1.0"; }
@@ -297,12 +297,12 @@ For doing this, we can use the helper class `ConfBuilder`.
 ```java
 Conf config = ConfBuilder.newConf()
     .with("streams", props)
-    .with("topic.source", "input-topic")
-    .with("topic.sink", "output-topic")
+    .with("topic.source", "streams-plaintext-input")
+    .with("topic.sink", "streams-wordcount-output")
     .with("state.store.name", "WordCount")
     .build();
 
-// And register the TopologyProvider to the environment.
+    // And register the TopologyProvider to the environment.
     env.addTopology(
         WordCountTopologyProvider::new,
         Executed.as("wordcount").withConfig(config)
@@ -354,8 +354,8 @@ public class SimpleStreamsApp {
 
         final Conf config = ConfBuilder.newConf()
             .with("streams", props)
-            .with("topic.source", "input-topic")
-            .with("topic.sink", "output-topic")
+            .with("topic.source", "streams-plaintext-input")
+            .with("topic.sink", "streams-wordcount-output")
             .with("state.store.name", "WordCount")
             .build();
 
@@ -377,12 +377,9 @@ public class SimpleStreamsApp {
 
         @Override
         public void configure(final Conf conf) {
-            topicSource = conf.getOptionalString("topic.source")
-                    .orElse("streams-plaintext-input");
-            topicSink = conf.getOptionalString("topic.sink")
-                    .orElse("streams-wordcount-output");
-            stateStoreName = conf.getOptionalString("state.store.name")
-                    .orElse("count");
+            topicSource = conf.getString("topic.source");
+            topicSink = conf.getString("topic.sink");
+            stateStoreName = conf.getOptionalString("state.store.name").orElse("count");
         }
 
         @Override
@@ -426,8 +423,8 @@ public static void main(final String[] args) {
 
     final Conf config = ConfBuilder.newConf()
         .with("streams", props)
-        .with("topic.source", "input-topic")
-        .with("topic.sink", "output-topic")
+        .with("topic.source", "streams-plaintext-input")
+        .with("topic.sink", "streams-wordcount-output")
         .with("state.store.name", "WordCount")
         .build();
 
@@ -472,8 +469,8 @@ Next, we have to create the two source and sink topics used by the topology.
 For that, you can run the provided script : 
 
 ```bash
-$> chmod u+x quickstart-create-wordcount-topic.sh
-$> quickstart-create-wordcount-topic.sh
+$> chmod u+x ./quickstart-create-wordcount-topics.sh
+$> ./quickstart-create-wordcount-topics.sh
 ```
 
 Or directly run those commands :
@@ -489,7 +486,7 @@ $> docker exec -it azkarra-cp-broker /usr/bin/kafka-topics \
 As a last step, we will package and run the Maven project :
 
 ```bash
-$> mvn clean package && java -jar target/azkarra-quickstart-java-0.4.jar
+$> mvn clean package && java -jar target/azkarra-quickstart-java-0.5.0.jar
 ```
 
 Let's produce some input messages to Kafka topic `streams-plaintext-input` : 
@@ -527,10 +524,10 @@ For this, we are going to remove the environment instance previously created for
 to the context using the method `addTopology()`.
 
 ```java
-final AzkarraContext context = DefaultAzkarraContext.create(config);
+AzkarraContext context = DefaultAzkarraContext.create(config);
 context.addTopology(WordCountTopologyProvider.class, Executed.as("wordcount"));
-context.setRegisterShutdownHook(true)
-       .start();
+
+context.setRegisterShutdownHook(true).start();
 ```
 
 ## Externalizing Context Configuration
@@ -549,8 +546,8 @@ streams {
 }
 
 topic {
-  source = "input-topic"
-  sink = "output-topic"
+  source = "streams-plaintext-input"
+  sink = "streams-wordcount-output"
   store.name = "WordCount"
 }
 ```
@@ -582,10 +579,10 @@ public class SimpleStreamsApp {
 
     public static void main(final String[] args) {
         // Create a new AzkarraConf from the classpath file application.conf
-        AzkarraConf config = AzkarraConf.create("application");
+        AzkarraConf config = AzkarraConf.create();
 
         // Create and start a default AzkarraContext
-        final AzkarraContext context = DefaultAzkarraContext.create(config);
+        AzkarraContext context = DefaultAzkarraContext.create(config);
         context.addTopology(WordCountTopologyProvider.class, Executed.as("wordcount"));
         
         context.setRegisterShutdownHook(true).start();
@@ -628,7 +625,7 @@ public class SimpleStreamsApp {
 
     public static void main(final String[] args) {
         // Create configuration from externalized file.
-        final AzkarraConf config = AzkarraConf.create("application");
+        AzkarraConf config = AzkarraConf.create();
 
         new AzkarraApplication(SimpleStreamsApp.class)
             .setConfiguration(config)
@@ -676,8 +673,8 @@ azkarra {
           // The topology configuration.
           config {
             topic {
-              source = "input-topic"
-              sink = "output-topic"
+              source = "streams-plaintext-input"
+              sink = "streams-wordcount-output"
               store.name = "WordCount"
             }
           }  
@@ -696,7 +693,7 @@ but also to execute interactive queries on your application states stores.
 The HTTP-Server can be enable and configured via the `AzkarraApplication` as follows : 
 
 ```java
-AzkarraConf config = AzkarraConf.create("application");
+AzkarraConf config = AzkarraConf.create();
 
 new AzkarraApplication(SimpleStreamsApp.class)
     .setConfiguration(config)
@@ -732,7 +729,7 @@ $> curl -sX GET 'http://localhost:8080/api/v1/streams/word-count-demo-1-0/metric
 $> curl -sX POST 'http://localhost:8080/api/v1/applications/word-count-demo-1-0/stores/count' --data '{ "type":"key_value", "query" : {"all":{} } }' | jq
 ```
 
-## Annotations and Provider Scan
+## Annotations and Component Scan
 
 For even more simplicity, Azkarra provides mechanisms for auto-discovering `TopologyProvider` classes.
 
@@ -741,6 +738,7 @@ Finally, the complete version of our application looks like this :
 ```java
 package azkarra;
 
+import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
@@ -772,12 +770,9 @@ public class SimpleStreamsApp {
 
         @Override
         public void configure(final Conf conf) {
-            topicSource = conf.getOptionalString("topic.source")
-                    .orElse("streams-plaintext-input");
-            topicSink = conf.getOptionalString("topic.sink")
-                    .orElse("streams-wordcount-output");
-            stateStoreName = conf.getOptionalString("state.store.name")
-                    .orElse("count");
+            topicSource = conf.getString("topic.source");
+            topicSink = conf.getString("topic.sink");
+            stateStoreName = conf.getOptionalString("state.store.name").orElse("count");
         }
 
         @Override
@@ -826,8 +821,8 @@ azkarra {
       default.value.serde = "org.apache.kafka.common.serialization.Serdes$StringSerde"
     }
     topic {
-      source = "input-topic"
-      sink = "output-topic"
+      source = "streams-plaintext-input"
+      sink = "streams-wordcount-output"
       store.name = "WordCount"    
     }
   }

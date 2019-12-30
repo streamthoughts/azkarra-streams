@@ -1,8 +1,8 @@
 ---
-date: 2019-11-29
+date: 2020-01-06
 title: "Dependency Injection"
 linkTitle: "Dependency Injection"
-weight: 4
+weight: 3
 description: >
   How to use the dependency injection pattern in Azkarra Streams ?
 ---
@@ -13,46 +13,124 @@ development to get code that is modular and testable.
 Azkarra does not implement any advanced dependency injection mechanism.
 We think that you can leverage one of the existing IoC frameworks for achieving this.
 
-However, Azkarra implements a simple mechanism based on the factory pattern 
+However, Azkarra implements a simple mechanism based on the Supplier<T> interface 
 for internally registering and getting concrete class instances.
 
-You can easily use this mechanism to inject services into your topologies.
+You can easily use this mechanism to wire your services together.
 
-## Component
+## Defining Components
 
-In Azkarra, a `TopologyProvider` or any other class of service is called a component. 
-A component can be of any type, it is just a java class.
+When component-scan is enable, Azkarra will scan the current classpath and the configured external paths (i.e: `azkarra.component.paths`) to look up for classes
+with `@Component` or `@Factory` annotations.
 
-To be managed by the application, the components must be registered to the `AzkarraContext` 
-either programmatically, or by external or annotated configuration.
-
-For registering a component, `AzkarraContext` defines the method `AzkarraContext#addComponent()`.
-```java
-var context = AzkarraContext.create()
-context.addComponent(ServiceA.class);
-```
-The only requirement, when using this method, is that the registered component class
- must defined a no-arg constructor to be later instantiated.
- 
-In addition, when a component is added to the context is registered for the given class type and all its supertypes.
-
-Later, we can retrieve an instance of a registered component through the method `AzkarraContext#getComponentForType`.
+You can enable component-scan either programmatically : 
 
 ```java
-ServiceA instance = context.getComponentForType(ServiceA.class);
+new AzkarraApplication().setEnableComponentScan(true)  
 ```
 
-The returned object can be a new instance or an instance shared across the application (i.e a singleton).
+or by annotate your main class with one of these annotations: `@AzkarraStreamsApplication` or `@ComponentScan`.
 
-You should note that when "component-scan" is enable, classes must be annotated with `@Component` 
-to be automatically registered.
+The following is a simple component example:
 
-The `@Singleton` annotation can also be used for declaring a component shared across the application.
+```java
+@Component
+@Singleton
+public class ConfigurableStopWordsService implements StopWordsService, Configurable {
 
-## Versioned
+    private List<String> stopsWords;
 
-A component can be attached to a version by implementing the `Versioned` interface.
-This is the case, for example, for the `TopologyProvider` interface.
+    @Override
+    public void configure(final Conf conf) {
+        stopsWords = conf.getStringList("service.stopwords");
+    }
+
+    @Override
+    public boolean test(final String word) {
+        return stopsWords.contains(word.toLowerCase());
+    }
+}
+```
+
+Azkarra does not implement the [JSR-330 (javax.inject) - Dependency Injection for Java specification](http://javax-inject.github.io/javax-inject/) 
+but leverages some of the defined Java annotations : 
+
+* [`Singleton`](https://docs.oracle.com/javaee/6/api/javax/inject/Singleton.html)
+* [`Named`](https://docs.oracle.com/javaee/6/api/javax/inject/Named.html)
+
+Components are automatically registered to the `AzkrarraContext` which implement the interface `ComponentRegistry`.
+
+Components can also be register programmatically : 
+
+```java
+AzkarraContext context = ...
+context.registerComponent(ConfigurableStopWordsService.class);
+```
+
+or 
+
+```java
+context.registerSingleton(ConfigurableStopWordsService.class);
+```
+
+Note : A component is registered both for its type and all its supertypes.
+
+A component instance can be retrieve directly from the `AzkarraContext` or the `ComponentFactory`.
+
+```java
+StopWordsService service = context.getComponent(StopWordsService.class);
+```
+
+The returned instance may be shared or independent, depending if it has been registered as a singleton or prototype.
+In addition, if the component implements `Configurable`, then the new instance will be automatically configured using the context configuration.
+
+Internally, Azkarra uses the `ComponentFactory` not only to automatically discover available Kafka Streams topologies
+but also any classes that implement : 
+
+* StreamsLifecycleInterceptor
+* KafkaStreamsFactory
+* HealthIndicator
+
+This allows developers to easily extend Azkarra Streams features.
+
+## Qualifying By Name
+
+By default, a component is named based on the name of its class.
+
+To explicitly define the name of the component, you can use the [`Named`](https://docs.oracle.com/javaee/6/api/javax/inject/Named.html) annotation
+at the class level.
+
+```java
+@Component
+@Singleton
+@Named("StopWordsService")
+public class ConfigurableStopWordsService implements StopWordsService, Configurable {
+
+    private List<String> stopsWords;
+
+    @Override
+    public void configure(final Conf conf) {
+        stopsWords = conf.getStringList("service.stopwords");
+    }
+
+    @Override
+    public boolean test(final String word) {
+        return stopsWords.contains(word.toLowerCase());
+    }
+}
+```
+
+```java
+StopWordsService service = context.getComponent(StopWordsService.class, Qualifiers.byName("StopWordsService"));
+```
+
+## Component Version
+
+A component is uniquely identify by a type, a name and optionally a version.
+
+A component class that implements the `Versioned` interface can be qualified by the version return from the `Versioned:version` method.
+
+For example, this is the case of the `TopologyProvider` interface.
 
 ```java
 public interface Versioned {
@@ -74,64 +152,138 @@ Here are some valid examples :
 
 Moreover, Azkarra only supports a pre-defined subset of qualifiers: `alpha`, `beta`, `snapshot`, `rc` and `release`.
 
-You can then get a component instance for the latest version registered in the context.
+You can then get a component instance for a specific version.
 
 ```java
-ServiceA instance = context.getLatestComponentForType(ServiceA.class);
+WordCountTopology topology = context.getComponent(WordCountTopology.class, Qualifiers.byVersion("1.0.0"));
 ```
 
-## ComponentFactory
+or 
 
-For building more complex objects, you can implement the so-called `ComponentFactory` interface.
+```java
+WordCountTopology topology = context.getComponent(WordCountTopology.class, Qualifiers.byLatestVersion());
+```
 
-```java 
-public class ServiceAFactory implement ComponentFactory<ServiceA> {
+Note: A class that implement the `Versionned` interface must define a no-arg constructor. 
 
-    public T make() {
-        return new ServiceA();
+## Component Factories
+
+Defining a component either programmatically or using the `@Component` annotation is pretty straightforward.
+However, this approach has some limitations. First, a class annotated with the `@Component` annotation must have a no-arg constructor in order
+to be instantiable. Secondly, because you cannot annotated classes provided by third-party libraries, you cannot use the `@Component` annotation
+to register as a component a class that is not part of your codebase.
+
+For that, you can use a factory class.
+
+A factory class is a simple Java class annotated with the `@Factory` annotation that provides one or more methods annotated with `@Component`.
+
+```java
+@Factory
+public class TopicsFactory {
+
+    @Component
+    @Singleton
+    public NewTopic streamsInputTopic() {
+        return new NewTopic("streams-plaintext-input", 6, (short)1);
     }
 
-    public Class<T> getType() {
-        return ServiceA.class
-    }
-
-    boolean isSingleton() {
-        return true;
+    @Component
+    @Singleton
+    public NewTopic streamsOuputTopic() {
+        return new NewTopic("streams-wordcount-output", 6, (short)1);
     }
 }
 ```
-Azkarra provides helpers methods for creating a such factory based on a specified class : 
+
+For each method, Azkarra will create one proxy `Supplier` instance that delegate the component creation to 
+one instance of the TopicsFactory.
+
+Note : A factory class can implement the `Configurable` interface.
+
+## Component Suppliers
+
+Another way to provide a component is to directly annotated a class implementing the [`Supplier`](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html) interface with the `@Component` annotation.
 
 ```java
-ComponentFactory<ServiceA> f = ComponentFactory.singletonOf(ServiceA.class);
-// or
-ComponentFactory<ServiceA> f = ComponentFactory.prototypeOf(ServiceA.class);
-```
+@Component
+@Bean("simpleStopWordsService")
+public class StopWordsServiceSupplier implements Supplier<StopWordsService>, Configurable {
+    
+    private Conf conf;
 
-Then, registering a component factory is almost similar to previous example :
-
-```java
-var context = AzkarraContext.create()
-context.addComponent(new ServiceAFactory());
-```
-
-## ComponentModule
-
-When building a component with dependencies you can extend the `ComponentModule` class which under the hood implement 
-the following interfaces : `ComponentFactory`, `ComponentRegistryAware` and `Configurable`.
-
-```java
-public class CustomTopologyProviderModule extends ComponentModule<CustomTopologyProvider> {
     @Override
-    public CustomTopologyProvider make() {
-        final ServiceA serviceA = getComponentForType(ServiceA.class);
-        final ServiceB serviceB = getComponentForType(ServiceB.class);
-        return new CustomTopologyProvider(serviceA, serviceB);
+    public void configure(final Conf conf) {
+       this.conf = conf; 
+    }
+
+    @Override
+    public StopWordsService get() {
+        return new SimpleStopWordsService(conf.getStringList("service.stopwords"));
+    }
+}
+``` 
+
+## Building the Graph
+
+Azkarra does **NOT** support the [`@Inject`](https://docs.oracle.com/javaee/6/api/javax/inject/Inject.html) annotation specified by JSR-330 
+to automatically linked components by their dependencies.
+
+Developers are responsible for building the graph of objects programmatically by defining either a `@Factory` class or a `Supplier`
+that implement the `ComponentFactoryAware` interface and `Configurable` (optionally).
+
+For that purpose Azkarra provides the `ComponentModule` class.
+
+The following is a simple example:
+
+```java
+@Component
+public class ComplexWordCountTopologyModule extends ComponentModule<ComplexWordCountTopology> {
+
+    @Override
+    public ComplexWordCountTopology get() {
+        StopWordsService service = getComponent(StopWordsService.class);
+        ComplexWordCountTopology topology = new ComplexWordCountTopology();
+        topology.setStopWordsService(service);
+        return topology;
     }
 }
 ```
 
-Both `ComponentFactory` and `ComponentModule` can be annotated with `@Component` in order to be automatically registered.
+## Restricted Component
+
+The `DefaultAzkarraContext` class will try to automatically configure streams environments and streams topologies using
+the registered components. Specifically, the context looks for the components of type : 
+
+* StreamsLifecycleInterceptor
+* KafkaStreamsFactory
+* NewTopic (when `auto.create.topics.enable` is `true`)
+
+In many cases, you may want the `DefaultAzkarraContext` to only configure such component for specific environments or
+streams topologies.
+
+Azkarra defines the `@Restricted` annotation that can be used to limit/qualify the usage scope of a component.
+
+A component can be restricted to : 
+
+* one ore many specific streams environments (type = `env`).
+* one ore many specific streams topologies (type = `streams`).
+* the application (type = `application`).
+
+For example, the following `KafkaStreamsFactory` will only be used for the streams application named *wordCountTopology*.
+
+```java
+@Component
+@Restricted(type = Restriction.TYPE_STREAMS, names = "wordCountTopology")
+public static class CustomKafkaStreamsFactory implements KafkaStreamsFactory {
+
+    @Override
+    public KafkaStreams make(final Topology topology, final Conf streamsConfig) {
+        return new KafkaStreams(topology, streamsConfig.getConfAsProperties());
+    }
+}
+```
+
+Note: Defining a component with `@Restricted(type = Restriction.TYPE_APPLICATION)` annotation is equivalent to no annotation.
 
 A complete code example is available on the GitHub project [azkarra-examples](https://github.com/streamthoughts/azkarra-streams/tree/master/azkarra-examples/src/main/java/io/streamthoughts/examples/azkarra/dependency)
 
