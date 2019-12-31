@@ -253,7 +253,7 @@ export default {
           server.stores.forEach(s => storeNames.add(s));
           that.applicationServers.push(server.host + ":" + server.port);
         });
-        storeNames.forEach(s => that.stateStoreNames.push(s));
+        that.stateStoreNames = storeNames;
       });
     },
 
