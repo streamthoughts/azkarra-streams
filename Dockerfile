@@ -43,8 +43,8 @@ COPY ./docker-build/classes/ ${AZKARRA_HOME}/share/java/azkarra-worker
 
 LABEL io.streamthoughts.docker.name="azkarra-streams" \
       io.streamthoughts.docker.version=$AZKARRA_VERSION \
-      io.streamthoughts.docker.branch=$AZKARRA_VERSION \
-      io.streamthoughts.docker.commit=$AZKARRA_VERSION
+      io.streamthoughts.docker.branch=$AZKARRA_BRANCH \
+      io.streamthoughts.docker.commit=$AZKARRA_COMMIT
 
 EXPOSE 8080
 
