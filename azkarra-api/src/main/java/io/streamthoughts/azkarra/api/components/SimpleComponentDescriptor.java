@@ -48,6 +48,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
 
     private final boolean isSingleton;
 
+    private final int order;
+
     /**
      * Creates a new {@link SimpleComponentDescriptor} instance.
      *
@@ -60,7 +62,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final Class<T> type,
                                      final Supplier<T> supplier,
                                      final boolean isSingleton) {
-        this(name, type, type.getClassLoader(), supplier, null, isSingleton);
+        this(name, type, type.getClassLoader(), supplier, null, isSingleton, Ordered.LOWEST_ORDER);
     }
 
     /**
@@ -77,7 +79,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final Supplier<T> supplier,
                                      final String version,
                                      final boolean isSingleton) {
-        this(name, type, type.getClassLoader(), supplier, version, isSingleton);
+        this(name, type, type.getClassLoader(), supplier, version, isSingleton, Ordered.LOWEST_ORDER);
     }
 
     /**
@@ -95,7 +97,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final ClassLoader classLoader,
                                      final Supplier<T> supplier,
                                      final String version,
-                                     final boolean isSingleton) {
+                                     final boolean isSingleton,
+                                     final int order) {
         Objects.requireNonNull(type, "type can't be null");
         Objects.requireNonNull(supplier, "supplier can't be null");
         this.name = name;
@@ -106,6 +109,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
         this.aliases = new TreeSet<>();
         this.metadata = new ComponentMetadata();
         this.isSingleton = isSingleton;
+        this.order = order;
     }
 
     /**
@@ -120,7 +124,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
             descriptor.classLoader(),
             descriptor.supplier(),
             descriptor.version().toString(),
-            descriptor.isSingleton()
+            descriptor.isSingleton(),
+            descriptor.order()
         );
         metadata = descriptor.metadata();
         aliases.addAll(descriptor.aliases());
@@ -214,6 +219,14 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
      * {@inheritDoc}
      */
     @Override
+    public int order() {
+        return order;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return "[" +
                 "name=" + name +
@@ -222,16 +235,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                 ", aliases=" + aliases +
                 ", isSingleton=" + isSingleton +
                 ", metadata=" + metadata +
+                ", order=" + order +
                 ']';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int compareTo(final ComponentDescriptor<T> that) {
-        if (!this.isVersioned()) return 1;
-        else if (!that.isVersioned()) return -1;
-        else return this.version.compareTo(that.version());
     }
 }

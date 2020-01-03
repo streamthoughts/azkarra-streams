@@ -20,11 +20,14 @@ package io.streamthoughts.azkarra.streams.components;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.annotations.Factory;
+import io.streamthoughts.azkarra.api.annotations.Order;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import io.streamthoughts.azkarra.runtime.components.BasicComponentFactory;
+import io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentClassLoader;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentResolver;
 import io.streamthoughts.azkarra.streams.components.isolation.ExternalComponent;
@@ -192,10 +195,18 @@ public class ComponentScanner {
         final ReflectMethodComponentSupplier supplier = new ReflectMethodComponentSupplier(target, method);
 
         final String componentName = getNamedQualifierOrElse(method, method.getName());
-        if (isSingleton(method))
-            registry.registerSingleton(componentName, componentClass, supplier);
+
+        final Integer order = getOrderOrNull(method);
+        if (order != null)
+            registerComponent(
+                componentName,
+                componentClass,
+                supplier,
+                isSingleton(method),
+                ComponentDescriptorModifiers.withOrder(order)
+            );
         else
-            registry.registerComponent(componentName, componentClass, supplier);
+            registerComponent(componentName, componentClass, supplier, isSingleton(method));
     }
 
     @SuppressWarnings("unchecked")
@@ -214,10 +225,18 @@ public class ComponentScanner {
         }
 
         final String componentName = getNamedQualifierOrNull(cls);
-        if (isSingleton(cls))
-            registry.registerSingleton(componentName, type, supplier);
+        registerComponent(componentName, type, supplier, isSingleton(cls));
+    }
+
+    private void registerComponent(final String componentName,
+                                   final Class<Object> type,
+                                   final Supplier<Object> supplier,
+                                   final boolean isSingleton,
+                                   final ComponentDescriptorModifier... modifiers) {
+        if (isSingleton)
+            registry.registerSingleton(componentName, type, supplier, modifiers);
         else
-            registry.registerComponent(componentName, type, supplier);
+            registry.registerComponent(componentName, type, supplier, modifiers);
     }
 
     @SuppressWarnings("unchecked")
@@ -251,6 +270,11 @@ public class ComponentScanner {
     private static String getNamedQualifierOrElse(final Method componentMethod, final String defaultName) {
         Named annotation = componentMethod.getDeclaredAnnotation(Named.class);
         return annotation == null ? defaultName : annotation.value();
+    }
+
+    private static Integer getOrderOrNull(final Method componentMethod) {
+        Order annotation = componentMethod.getDeclaredAnnotation(Order.class);
+        return annotation == null ? null : annotation.value();
     }
 
     // The Reflections class may throw a ReflectionsException when parallel executor

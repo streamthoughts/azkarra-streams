@@ -21,10 +21,19 @@ package io.streamthoughts.azkarra.api.components;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.io.Closeable;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public interface ComponentDescriptor<T> extends Comparable<ComponentDescriptor<T>> {
+public interface ComponentDescriptor<T> extends Ordered {
+
+    Comparator<ComponentDescriptor<?>> ORDER_BY_VERSION = (c1, c2) -> {
+        if (!c1.isVersioned()) return 1;
+        else if (!c2.isVersioned()) return -1;
+        else return c1.version().compareTo(c2.version());
+    };
+
+    Comparator<ComponentDescriptor<?>> ORDER_BY_ORDER = Comparator.comparingInt(Ordered::order);
 
     /**
      * Gets the name of the component.

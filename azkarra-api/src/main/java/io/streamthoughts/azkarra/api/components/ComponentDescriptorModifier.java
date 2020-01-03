@@ -16,24 +16,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components.qualifier;
+package io.streamthoughts.azkarra.api.components;
 
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-import io.streamthoughts.azkarra.api.components.Qualifier;
-
-import java.util.stream.Stream;
-
-public class LatestVersionQualifier<T> implements Qualifier<T> {
+/**
+ * Callback for modifying a given component descriptor.
+ *
+ * @param <T> the component type.
+ */
+@FunctionalInterface
+public interface ComponentDescriptorModifier {
 
     /**
-     * {@inheritDoc}
+     * Modifies the given {@link ComponentDescriptor}.
+     *
+     * @param descriptor    the {@link ComponentDescriptor} instance.
+     * @return              the modified descriptor or a new instance.
      */
-    @Override
-    public Stream<ComponentDescriptor<T>> filter(final Class<T> componentType,
-                                                 final Stream<ComponentDescriptor<T>> candidates) {
-        return candidates
-            .filter(ComponentDescriptor::isVersioned)
-            .sorted(ComponentDescriptor.ORDER_BY_VERSION)
-            .limit(1);
-    }
+    <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor);
 }

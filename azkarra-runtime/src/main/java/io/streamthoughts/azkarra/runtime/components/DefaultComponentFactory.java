@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.runtime.components;
 import io.streamthoughts.azkarra.api.components.ComponentAliasesGenerator;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorFactory;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentFactoryAware;
 import io.streamthoughts.azkarra.api.components.ComponentRegistrationException;
@@ -299,7 +300,7 @@ public class DefaultComponentFactory implements ComponentFactory {
             Stream<ComponentDescriptor<T>> stream = findDescriptorCandidatesByType(type);
             return (qualifier == null) ? stream : qualifier.filter(type, stream);
         });
-        return candidates.collect(Collectors.toList());
+        return candidates.sorted(ComponentDescriptor.ORDER_BY_ORDER).collect(Collectors.toList());
     }
 
     /**
@@ -355,7 +356,9 @@ public class DefaultComponentFactory implements ComponentFactory {
     @SuppressWarnings("unchecked")
     private <T> Stream<ComponentDescriptor<T>> findDescriptorCandidatesByType(final Class<T> type) {
         List<ComponentDescriptor> candidates = descriptorsByType.getOrDefault(type, Collections.emptyList());
-        return candidates.stream().map(d -> (ComponentDescriptor<T>)d);
+        return candidates.stream()
+            .map(d -> (ComponentDescriptor<T>)d)
+            .sorted(ComponentDescriptor.ORDER_BY_ORDER);
     }
 
     /**
@@ -364,10 +367,20 @@ public class DefaultComponentFactory implements ComponentFactory {
     @Override
     public <T> void registerComponent(final String componentName,
                                       final Class<T> componentClass,
-                                      final Supplier<T> supplier) {
+                                      final Supplier<T> supplier,
+                                      final ComponentDescriptorModifier... modifiers) {
         Objects.requireNonNull(componentClass, "componentClass can't be null");
         Objects.requireNonNull(supplier, "supplier can't be null");
-        registerDescriptor(descriptorFactory.make(componentName, componentClass, supplier, false));
+        ComponentDescriptor<T> descriptor = descriptorFactory.make(
+            componentName,
+            componentClass,
+            supplier,
+            false
+        );
+        for (ComponentDescriptorModifier modifier : modifiers) {
+            descriptor = modifier.apply(descriptor);
+        }
+        registerDescriptor(descriptor);
     }
 
     /**
@@ -375,13 +388,14 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> void registerComponent(final String componentName,
-                                      final Class<T> componentClass) {
+                                      final Class<T> componentClass,
+                                      final ComponentDescriptorModifier... modifiers) {
         Objects.requireNonNull(componentClass, "componentClass can't be null");
         final BasicComponentFactory<T> supplier = new BasicComponentFactory<>(
             componentClass,
             componentClass.getClassLoader()
         );
-        registerComponent(componentName, componentClass, supplier);
+        registerComponent(componentName, componentClass, supplier, modifiers);
     }
 
     /**
@@ -390,10 +404,21 @@ public class DefaultComponentFactory implements ComponentFactory {
     @Override
     public <T> void registerSingleton(final String componentName,
                                       final Class<T> componentClass,
-                                      final Supplier<T> singleton) {
+                                      final Supplier<T> singleton,
+                                      final ComponentDescriptorModifier... modifiers) {
         Objects.requireNonNull(componentClass, "componentClass can't be null");
         Objects.requireNonNull(singleton, "singleton can't be null");
-        registerDescriptor(descriptorFactory.make(componentName, componentClass, singleton, true));
+        ComponentDescriptor<T> descriptor = descriptorFactory.make(
+            componentName,
+            componentClass,
+            singleton,
+            true
+        );
+        for (ComponentDescriptorModifier modifier : modifiers) {
+            descriptor = modifier.apply(descriptor);
+        }
+
+        registerDescriptor(descriptor);
     }
 
     /**
@@ -401,13 +426,14 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> void registerSingleton(final String componentName,
-                                      final Class<T> componentClass) {
+                                      final Class<T> componentClass,
+                                      final ComponentDescriptorModifier... modifiers) {
         Objects.requireNonNull(componentClass, "componentClass can't be null");
         final BasicComponentFactory<T> singleton = new BasicComponentFactory<>(
             componentClass,
             componentClass.getClassLoader()
         );
-        registerSingleton(componentName, componentClass, singleton);
+        registerSingleton(componentName, componentClass, singleton, modifiers);
     }
 
     /**

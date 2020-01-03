@@ -16,24 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components.qualifier;
+package io.streamthoughts.azkarra.api.annotations;
 
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-import io.streamthoughts.azkarra.api.components.Qualifier;
+import io.streamthoughts.azkarra.api.components.Ordered;
 
-import java.util.stream.Stream;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class LatestVersionQualifier<T> implements Qualifier<T> {
+@Documented
+@Inherited
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Order {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<ComponentDescriptor<T>> filter(final Class<T> componentType,
-                                                 final Stream<ComponentDescriptor<T>> candidates) {
-        return candidates
-            .filter(ComponentDescriptor::isVersioned)
-            .sorted(ComponentDescriptor.ORDER_BY_VERSION)
-            .limit(1);
-    }
+    int value() default Ordered.LOWEST_ORDER;
 }

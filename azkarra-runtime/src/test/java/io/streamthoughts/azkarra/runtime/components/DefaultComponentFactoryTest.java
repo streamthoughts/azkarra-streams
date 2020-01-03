@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
+import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ConflictingBeanDefinitionException;
 import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -158,15 +160,35 @@ public class DefaultComponentFactoryTest {
         assertTrue(descriptor.isPresent());
     }
 
+    @Test
+    public void shouldGetAllComponentSortedByOrder() {
+        factory.registerSingleton(TestC.class, TestC::new);
+        factory.registerSingleton(TestB.class, TestB::new);
+        factory.registerSingleton(TestD.class, TestD::new);
+
+        List<TestA> components = (List<TestA>)factory.getAllComponents(TestA.class, Conf.empty());
+
+        assertEquals(1, components.get(0).value());
+        assertEquals(2, components.get(1).value());
+        assertEquals(3, components.get(2).value());
+    }
+
     interface TestA {
-
+        default int value() { return 0; }
     }
 
+    @Order(1)
     static class TestB implements TestA {
-
+        public int value() { return 1; }
     }
 
+    @Order(2)
     static class TestC extends TestB {
+        public int value() { return 2; }
+    }
 
+    @Order(3)
+    static class TestD implements TestA {
+        public int value() { return 3; }
     }
 }

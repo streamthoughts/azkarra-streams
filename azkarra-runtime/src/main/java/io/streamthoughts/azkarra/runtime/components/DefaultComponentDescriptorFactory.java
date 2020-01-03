@@ -18,26 +18,24 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
+import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.components.ComponentAttribute;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorFactory;
 import io.streamthoughts.azkarra.api.components.ComponentMetadata;
 import io.streamthoughts.azkarra.api.components.ComponentNameGenerator;
 import io.streamthoughts.azkarra.api.components.ComponentRegistrationException;
-import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.Ordered;
 import io.streamthoughts.azkarra.api.components.Versioned;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
-import io.streamthoughts.azkarra.api.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Supplier;
 
 public class DefaultComponentDescriptorFactory implements ComponentDescriptorFactory {
@@ -84,7 +82,8 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
            .type(componentType)
            .supplier(componentSupplier)
            .metadata(metadata)
-           .isSingleton(isSingleton);
+           .isSingleton(isSingleton)
+           .order(getOrderFor(componentType));
 
         if (version != null)
             builder.version(version);
@@ -114,14 +113,17 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
         return builder.build();
     }
 
+    private static int getOrderFor(final Class<?> cls) {
+        List<Order> annotations = ClassUtils.getAllDeclaredAnnotationsByType(cls, Order.class);
+        return annotations.isEmpty() ? Ordered.LOWEST_ORDER : annotations.get(0).value();
+    }
 
-    @SuppressWarnings("unchecked")
     private static String getVersionFor(final Class<?> cls, final ClassLoader classLoader) {
         ClassLoader saveLoader = ClassUtils.compareAndSwapLoaders(classLoader);
         try {
             String version = null;
             if (Versioned.class.isAssignableFrom(cls)) {
-                version = ClassUtils.newInstance((Class<Versioned>) cls).version();
+                version = ((Versioned)ClassUtils.newInstance(cls)).version();
                 if (version == null)
                     throw new ComponentRegistrationException(
                         "Class '" + cls.getName() + "' must return a non-empty version.");
@@ -131,116 +133,4 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
             ClassUtils.compareAndSwapLoaders(saveLoader);
         }
     }
-
-    private static class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
-
-        private String name;
-        private ComponentMetadata metadata;
-        private Class<T> type;
-        private ClassLoader classLoader;
-        private String version;
-        private Supplier<T> supplier;
-        private boolean isSingleton;
-        private Set<String> aliases = new HashSet<>();
-
-        @Override
-        public String name() {
-            return name;
-        }
-
-        ComponentDescriptorBuilder<T> name(final String name) {
-            this.name = name;
-            return this;
-        }
-
-        @Override
-        public ComponentMetadata metadata() {
-            return metadata;
-        }
-
-        ComponentDescriptorBuilder<T> metadata(final ComponentMetadata metadata) {
-            this.metadata = metadata;
-            return this;
-        }
-
-        @Override
-        public ClassLoader classLoader() {
-            return classLoader;
-        }
-
-        ComponentDescriptorBuilder<T> classLoader(final ClassLoader classLoader) {
-            this.classLoader = classLoader;
-            return this;
-        }
-
-        @Override
-        public void addAliases(final Set<String> aliases) {
-            this.aliases.addAll(aliases);
-        }
-
-        @Override
-        public Set<String> aliases() {
-            return aliases;
-        }
-
-        @Override
-        public Version version() {
-            return version != null ? Version.parse(version) : null;
-        }
-
-        ComponentDescriptorBuilder<T> version(final String version) {
-            this.version = version;
-            return this;
-        }
-
-        @Override
-        public Supplier<T> supplier() {
-            return supplier;
-        }
-
-        ComponentDescriptorBuilder<T> supplier(final Supplier<T> supplier) {
-            this.supplier = supplier;
-            return this;
-        }
-
-        @Override
-        public Class<T> type() {
-            return type;
-        }
-
-        ComponentDescriptorBuilder<T> type(final Class<T> type) {
-            this.type = type;
-            return this;
-        }
-
-        @Override
-        public boolean isSingleton() {
-            return isSingleton;
-        }
-
-        ComponentDescriptorBuilder<T> isSingleton(final boolean isSingleton) {
-            this.isSingleton = isSingleton;
-            return this;
-        }
-
-        @Override
-        public int compareTo(final ComponentDescriptor<T> o) {
-            throw new UnsupportedOperationException();
-        }
-
-        public ComponentDescriptor<T> build() {
-            SimpleComponentDescriptor<T> descriptor = new SimpleComponentDescriptor<>(
-                name,
-                type,
-                classLoader,
-                supplier,
-                version,
-                isSingleton
-            );
-            descriptor.metadata(metadata);
-            descriptor.addAliases(aliases);
-            return descriptor;
-        }
-    }
-
 }

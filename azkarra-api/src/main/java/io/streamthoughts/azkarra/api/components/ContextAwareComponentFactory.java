@@ -169,8 +169,9 @@ public class ContextAwareComponentFactory implements ComponentFactory {
     @Override
     public <T> void registerComponent(final String componentName,
                                       final Class<T> componentClass,
-                                      final Supplier<T> supplier) {
-        factory.registerSingleton(componentName, componentClass, supplier);
+                                      final Supplier<T> supplier,
+                                      final ComponentDescriptorModifier... modifiers) {
+        factory.registerSingleton(componentName, componentClass, supplier, modifiers);
     }
 
     /**
@@ -178,8 +179,9 @@ public class ContextAwareComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> void registerComponent(final String componentName,
-                                      final Class<T> componentClass) {
-        factory.registerComponent(componentName, componentClass);
+                                      final Class<T> componentClass,
+                                      final ComponentDescriptorModifier... modifiers) {
+        factory.registerComponent(componentName, componentClass, modifiers);
     }
 
     /**
@@ -188,8 +190,9 @@ public class ContextAwareComponentFactory implements ComponentFactory {
     @Override
     public <T> void registerSingleton(final String componentName,
                                       final Class<T> componentClass,
-                                      final Supplier<T> singleton) {
-        factory.registerSingleton(componentName, componentClass, singleton);
+                                      final Supplier<T> singleton,
+                                      final ComponentDescriptorModifier... modifiers) {
+        factory.registerSingleton(componentName, componentClass, singleton, modifiers);
     }
 
     /**
@@ -197,8 +200,9 @@ public class ContextAwareComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> void registerSingleton(final String componentName,
-                                      final Class<T> componentClass) {
-        factory.registerSingleton(componentName, componentClass);
+                                      final Class<T> componentClass,
+                                      final ComponentDescriptorModifier... modifiers) {
+        factory.registerSingleton(componentName, componentClass, modifiers);
     }
 
     /**

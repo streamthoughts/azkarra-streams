@@ -26,6 +26,7 @@ import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.ContextAwareComponentFactory;
@@ -575,8 +576,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public <T> void registerComponent(final String componentName,
                                       final Class<T> componentClass,
-                                      final Supplier<T> supplier) {
-        componentFactory.registerComponent(componentName, componentClass, supplier);
+                                      final Supplier<T> supplier,
+                                      final ComponentDescriptorModifier... modifiers) {
+        componentFactory.registerComponent(componentName, componentClass, supplier, modifiers);
     }
 
     /**
@@ -584,8 +586,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public <T> void registerComponent(final String componentName,
-                                      final Class<T> componentClass) {
-        componentFactory.registerComponent(componentName, componentClass);
+                                      final Class<T> componentClass,
+                                      final ComponentDescriptorModifier... modifiers) {
+        componentFactory.registerComponent(componentName, componentClass, modifiers);
     }
 
     /**
@@ -594,8 +597,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public <T> void registerSingleton(final String componentName,
                                       final Class<T> componentClass,
-                                      final Supplier<T> singleton) {
-        componentFactory.registerComponent(componentName, componentClass, singleton);
+                                      final Supplier<T> singleton,
+                                      final ComponentDescriptorModifier... modifiers) {
+        componentFactory.registerComponent(componentName, componentClass, singleton, modifiers);
     }
 
     /**
@@ -603,8 +607,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public <T> void registerSingleton(final String componentName,
-                                      final Class<T> componentClass) {
-        componentFactory.registerComponent(componentName, componentClass);
+                                      final Class<T> componentClass,
+                                      final ComponentDescriptorModifier... modifiers) {
+        componentFactory.registerComponent(componentName, componentClass, modifiers);
     }
 
     /**

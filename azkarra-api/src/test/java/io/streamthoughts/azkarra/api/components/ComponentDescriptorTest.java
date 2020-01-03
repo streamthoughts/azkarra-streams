@@ -23,7 +23,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,29 +52,55 @@ public class ComponentDescriptorTest {
     }
 
     @Test
-    public void shouldCompareVersionedComponent() {
+    public void shouldCompareVersionedComponents() {
         Optional<ComponentDescriptor<CloseableComponent>> latest = Stream.of("1", "2")
             .map(this::newComponent)
-            .sorted()
+            .sorted(ComponentDescriptor.ORDER_BY_VERSION)
             .findFirst();
         assertTrue(Version.isEqual(latest.get().version(), "2"));
+    }
+
+    @Test
+    public void shouldCompareOrderedComponents() {
+        List<ComponentDescriptor<CloseableComponent>> list = Stream.of(3, 2, 1)
+                .map(this::newComponent)
+                .sorted(ComponentDescriptor.ORDER_BY_ORDER)
+                .collect(Collectors.toList());
+        assertEquals(1, list.get(0).order());
+        assertEquals(2, list.get(1).order());
+        assertEquals(3, list.get(2).order());
     }
 
     @Test
     public void shouldCompareComponentGivenNotVersioned() {
         ComponentDescriptor<CloseableComponent> c1 = newComponent(null);
         ComponentDescriptor<CloseableComponent> c2 = newComponent("1.0");
-        Optional<ComponentDescriptor<CloseableComponent>> latest = Stream.of(c1, c2).sorted().findFirst();
+        Optional<ComponentDescriptor<CloseableComponent>> latest = Stream.of(c1, c2)
+                .sorted(ComponentDescriptor.ORDER_BY_VERSION).findFirst();
         assertTrue(Version.isEqual(latest.get().version(), "1.0"));
+    }
+
+    private ComponentDescriptor<CloseableComponent> newComponent(final int order) {
+        return new SimpleComponentDescriptor<>(
+                "name",
+                CloseableComponent.class,
+                CloseableComponent.class.getClassLoader(),
+                () -> null,
+                null,
+                true,
+                order
+        );
     }
 
     private ComponentDescriptor<CloseableComponent> newComponent(final String version) {
         return new SimpleComponentDescriptor<>(
             "name",
             CloseableComponent.class,
+            CloseableComponent.class.getClassLoader(),
             () -> null,
             version,
-            true
+            true,
+            Ordered.LOWEST_ORDER
         );
     }
 

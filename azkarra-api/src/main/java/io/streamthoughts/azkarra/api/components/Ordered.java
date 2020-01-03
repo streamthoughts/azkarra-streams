@@ -16,24 +16,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components.qualifier;
+package io.streamthoughts.azkarra.api.components;
 
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-import io.streamthoughts.azkarra.api.components.Qualifier;
+public interface Ordered extends Comparable<Ordered> {
 
-import java.util.stream.Stream;
+    int HIGHEST_ORDER = Integer.MIN_VALUE;
 
-public class LatestVersionQualifier<T> implements Qualifier<T> {
+    int LOWEST_ORDER = Integer.MAX_VALUE;
+
+    int order();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Stream<ComponentDescriptor<T>> filter(final Class<T> componentType,
-                                                 final Stream<ComponentDescriptor<T>> candidates) {
-        return candidates
-            .filter(ComponentDescriptor::isVersioned)
-            .sorted(ComponentDescriptor.ORDER_BY_VERSION)
-            .limit(1);
+    default int compareTo(final Ordered that) {
+        return Integer.compare(this.order(), that.order());
     }
 }
