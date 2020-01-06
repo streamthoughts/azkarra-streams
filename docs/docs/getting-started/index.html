@@ -26,7 +26,7 @@
 " />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/getting-started/" />
-<meta property="og:updated_time" content="2019-12-02T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="og:updated_time" content="2020-01-06T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Getting Started">
 <meta itemprop="description" content="Get started with Azkarra Streams through a step by step tutorial.
 "><meta name="twitter:card" content="summary"/>
@@ -309,6 +309,52 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/streamslifecycle-interceptors/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">The StreamsLifeCycle Intercepting Chain</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-streamslifecycle-interceptors">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/kafkastreams-factory/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">KafkaStreams Factory</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-kafkastreams-factory">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
     <a  href="/azkarra-streams/docs/developer-guide/error-management/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Error Management</a>
   </li>
   <ul>
@@ -555,7 +601,7 @@
     <li><a href="#externalizing-context-configuration">Externalizing Context Configuration</a></li>
     <li><a href="#autoconfigure">Auto-Configure</a></li>
     <li><a href="#embedded-http-server">Embedded Http Server</a></li>
-    <li><a href="#annotations-and-provider-scan">Annotations and Provider Scan</a></li>
+    <li><a href="#annotations-and-component-scan">Annotations and Component Scan</a></li>
     <li><a href="#azkarra-web-ui">Azkarra Web UI</a></li>
   </ul>
 </nav>
@@ -607,7 +653,7 @@ For that purpose we are going to develop a Kafka Streams application using the f
 First, run this following command :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; mvn archetype:generate -DarchetypeGroupId<span style="color:#ce5c00;font-weight:bold">=</span>io.streamthoughts <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-DarchetypeArtifactId<span style="color:#ce5c00;font-weight:bold">=</span>azkarra-quickstart-java <span style="color:#4e9a06">\
-</span><span style="color:#4e9a06"></span>-DarchetypeVersion<span style="color:#ce5c00;font-weight:bold">=</span>0.4 <span style="color:#4e9a06">\
+</span><span style="color:#4e9a06"></span>-DarchetypeVersion<span style="color:#ce5c00;font-weight:bold">=</span>0.5.0 <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-DgroupId<span style="color:#ce5c00;font-weight:bold">=</span>azkarra.streams <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-DartifactId<span style="color:#ce5c00;font-weight:bold">=</span>azkarra-getting-started <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-Dversion<span style="color:#ce5c00;font-weight:bold">=</span>1.0-SNAPSHOT <span style="color:#4e9a06">\
@@ -618,26 +664,29 @@ First, run this following command :</p>
  azkarra-getting-started
 ├── docker-compose.yml
 ├── pom.xml
+├── quickstart-create-wordcount-topics.sh
 └── src
     └── main
         ├── java
-        │   └── azkarra
-        │       └── SimpleStreamsApp.java
+        │   └── azkarra
+        │       ├── SimpleStreamsApp.java
+        │       └── Version.java
         └── resources
             ├── application.conf
-            └── log4j2.xml
+            ├── log4j2.xml
+            └── version.properties
 </code></pre></div><p>The <code>pom.xml</code> already contains the Azkarra Streams and Kafka Streams dependencies :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#204a87;font-weight:bold">&lt;dependencies</span><span style="color:#204a87;font-weight:bold">&gt;</span>
     <span style="color:#204a87;font-weight:bold">&lt;dependency</span><span style="color:#204a87;font-weight:bold">&gt;</span>
         <span style="color:#204a87;font-weight:bold">&lt;groupId</span><span style="color:#204a87;font-weight:bold">&gt;</span>org.apache.kafka<span style="color:#204a87;font-weight:bold">&lt;/groupId&gt;</span>
         <span style="color:#204a87;font-weight:bold">&lt;artifactId</span><span style="color:#204a87;font-weight:bold">&gt;</span>kafka-streams<span style="color:#204a87;font-weight:bold">&lt;/artifactId&gt;</span>
-        <span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>2.3.0<span style="color:#204a87;font-weight:bold">&lt;/version&gt;</span>
+        <span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>2.4.0<span style="color:#204a87;font-weight:bold">&lt;/version&gt;</span>
     <span style="color:#204a87;font-weight:bold">&lt;/dependency&gt;</span>
 
     <span style="color:#204a87;font-weight:bold">&lt;dependency</span><span style="color:#204a87;font-weight:bold">&gt;</span>
         <span style="color:#204a87;font-weight:bold">&lt;groupId</span><span style="color:#204a87;font-weight:bold">&gt;</span>io.streamthoughts<span style="color:#204a87;font-weight:bold">&lt;/groupId&gt;</span>
         <span style="color:#204a87;font-weight:bold">&lt;artifactId</span><span style="color:#204a87;font-weight:bold">&gt;</span>azkarra-streams<span style="color:#204a87;font-weight:bold">&lt;/artifactId&gt;</span>
-        <span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>0.4<span style="color:#204a87;font-weight:bold">&lt;/version&gt;</span>
+        <span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>0.5.0<span style="color:#204a87;font-weight:bold">&lt;/version&gt;</span>
     <span style="color:#204a87;font-weight:bold">&lt;/dependency&gt;</span>
 <span style="color:#204a87;font-weight:bold">&lt;/dependencies&gt;</span>
 </code></pre></div><p>By default, Maven resources files are add to <code>src/main/resources</code>
@@ -787,12 +836,9 @@ To make our topology configurable, we will modify the <code>WordCountTopologyPro
 
     <span style="color:#5c35cc;font-weight:bold">@Override</span>
     <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-        <span style="color:#000">topicSource</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-        <span style="color:#000">topicSink</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-        <span style="color:#000">stateStoreName</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;count&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#000">topicSource</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#000">topicSink</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#000">stateStoreName</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;count&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
     <span style="color:#ce5c00;font-weight:bold">}</span>
     <span style="color:#5c35cc;font-weight:bold">@Override</span>
     <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">String</span> <span style="color:#000">version</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span> <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#4e9a06">&#34;1.0&#34;</span><span style="color:#ce5c00;font-weight:bold">;</span> <span style="color:#ce5c00;font-weight:bold">}</span>
@@ -819,12 +865,12 @@ The <code>StreamsExecutionEnvironment</code> will be responsible for invoking th
 <p>For doing this, we can use the helper class <code>ConfBuilder</code>.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">Conf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">ConfBuilder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">newConf</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
     <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span>
-    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;input-topic&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;output-topic&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
     <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;WordCount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
     <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 
-<span style="color:#8f5902;font-style:italic">// And register the TopologyProvider to the environment.
+    <span style="color:#8f5902;font-style:italic">// And register the TopologyProvider to the environment.
 </span><span style="color:#8f5902;font-style:italic"></span>    <span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addTopology</span><span style="color:#ce5c00;font-weight:bold">(</span>
         <span style="color:#000">WordCountTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">:</span><span style="color:#ce5c00;font-weight:bold">:</span><span style="color:#204a87;font-weight:bold">new</span><span style="color:#ce5c00;font-weight:bold">,</span>
         <span style="color:#000">Executed</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;wordcount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">withConfig</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span>
@@ -867,8 +913,8 @@ All topologies will then automatically inherit the configuration of their <code>
 
         <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">ConfBuilder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">newConf</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
             <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span>
-            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;input-topic&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;output-topic&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
             <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;WordCount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
             <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 
@@ -890,12 +936,9 @@ All topologies will then automatically inherit the configuration of their <code>
 
         <span style="color:#5c35cc;font-weight:bold">@Override</span>
         <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-            <span style="color:#000">topicSource</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-            <span style="color:#000">topicSink</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-            <span style="color:#000">stateStoreName</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;count&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#000">topicSource</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#000">topicSink</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#000">stateStoreName</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;count&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
         <span style="color:#ce5c00;font-weight:bold">}</span>
 
         <span style="color:#5c35cc;font-weight:bold">@Override</span>
@@ -934,8 +977,8 @@ can also be configured and all environments will automatically inherit from it.<
 
     <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">ConfBuilder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">newConf</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
         <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span>
-        <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;input-topic&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-        <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;output-topic&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+        <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+        <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
         <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;WordCount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
         <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 
@@ -969,8 +1012,8 @@ use the official Kafka Docker images maintain by Confluent.Inc.</p>
 $&gt; docker-compose up -d
 </code></pre><p>Next, we have to create the two source and sink topics used by the topology.
 For that, you can run the provided script :</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; chmod u+x quickstart-create-wordcount-topic.sh
-$&gt; quickstart-create-wordcount-topic.sh
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; chmod u+x ./quickstart-create-wordcount-topics.sh
+$&gt; ./quickstart-create-wordcount-topics.sh
 </code></pre></div><p>Or directly run those commands :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; docker <span style="color:#204a87">exec</span> -it azkarra-cp-broker /usr/bin/kafka-topics <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>--create --topic streams-plaintext-input --replication-factor <span style="color:#0000cf;font-weight:bold">1</span> --partitions <span style="color:#0000cf;font-weight:bold">3</span> --zookeeper zookeeper:2181
@@ -978,7 +1021,7 @@ $&gt; quickstart-create-wordcount-topic.sh
 $&gt; docker <span style="color:#204a87">exec</span> -it azkarra-cp-broker /usr/bin/kafka-topics <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>--create --topic streams-wordcount-output --replication-factor <span style="color:#0000cf;font-weight:bold">1</span> --partitions <span style="color:#0000cf;font-weight:bold">3</span> --zookeeper zookeeper:2181
 </code></pre></div><p>As a last step, we will package and run the Maven project :</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; mvn clean package <span style="color:#ce5c00;font-weight:bold">&amp;&amp;</span> java -jar target/azkarra-quickstart-java-0.4.jar
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; mvn clean package <span style="color:#ce5c00;font-weight:bold">&amp;&amp;</span> java -jar target/azkarra-quickstart-java-0.5.0.jar
 </code></pre></div><p>Let's produce some input messages to Kafka topic <code>streams-plaintext-input</code> :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; docker <span style="color:#204a87">exec</span> -it azkarra-cp-broker /usr/bin/kafka-console-producer <span style="color:#4e9a06">\ </span>
 --topic streams-plaintext-input --broker-list kafka:9092
@@ -1002,10 +1045,10 @@ Defining environments in a programmatic way gives you flexibility but can be som
 <p>Our application can be simplified by using a default environment that will be created by the <code>ArkarraContext</code>.
 For this, we are going to remove the environment instance previously created for directly registering the <code>WordCountTopologyProvider</code>
 to the context using the method <code>addTopology()</code>.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">AzkarraContext</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">DefaultAzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">AzkarraContext</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">DefaultAzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Executed</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;wordcount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-<span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setRegisterShutdownHook</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">)</span>
-       <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">start</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+<span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setRegisterShutdownHook</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">start</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 </code></pre></div><h2 id="externalizing-context-configuration">Externalizing Context Configuration</h2>
 <p>The externalization of configuration is a requirement to deploy any application in production.</p>
 <p>For that purpose, Azkarra provide the class so-called <code>AzkarraConf</code>.
@@ -1018,8 +1061,8 @@ Internally, it uses the <a href="https://github.com/lightbend/config">Config</a>
 }
 
 topic {
-  source = &quot;input-topic&quot;
-  sink = &quot;output-topic&quot;
+  source = &quot;streams-plaintext-input&quot;
+  sink = &quot;streams-wordcount-output&quot;
   store.name = &quot;WordCount&quot;
 }
 </code></pre><p>Next, we will replace our configuration by loading the <code>application.conf</code> using <code>AzkarraConf.create(&quot;application&quot;)</code></p>
@@ -1046,10 +1089,10 @@ topic {
 
     <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">static</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">main</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">[</span><span style="color:#ce5c00;font-weight:bold">]</span> <span style="color:#000">args</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
         <span style="color:#8f5902;font-style:italic">// Create a new AzkarraConf from the classpath file application.conf
-</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">AzkarraConf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraConf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;application&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">AzkarraConf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraConf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 
         <span style="color:#8f5902;font-style:italic">// Create and start a default AzkarraContext
-</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">AzkarraContext</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">DefaultAzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">AzkarraContext</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">DefaultAzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
         <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Executed</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;wordcount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
         
         <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setRegisterShutdownHook</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">start</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
@@ -1086,7 +1129,7 @@ Internally, it will create an <code>AzkarraContext</code> instance and the <code
 
     <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">static</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">main</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">[</span><span style="color:#ce5c00;font-weight:bold">]</span> <span style="color:#000">args</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
         <span style="color:#8f5902;font-style:italic">// Create configuration from externalized file.
-</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">AzkarraConf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraConf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;application&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">AzkarraConf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraConf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 
         <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">AzkarraApplication</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">SimpleStreamsApp</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span>
             <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setConfiguration</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span>
@@ -1129,8 +1172,8 @@ Internally, it will create an <code>AzkarraContext</code> instance and the <code
           // The topology configuration.
           config {
             topic {
-              source = &quot;input-topic&quot;
-              sink = &quot;output-topic&quot;
+              source = &quot;streams-plaintext-input&quot;
+              sink = &quot;streams-wordcount-output&quot;
               store.name = &quot;WordCount&quot;
             }
           }  
@@ -1144,7 +1187,7 @@ Internally, it will create an <code>AzkarraContext</code> instance and the <code
 These APIs can be used not only to manage your local Kafka Streams instances and Topologies
 but also to execute interactive queries on your application states stores.</p>
 <p>The HTTP-Server can be enable and configured via the <code>AzkarraApplication</code> as follows :</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">AzkarraConf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraConf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;application&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">AzkarraConf</span> <span style="color:#000">config</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraConf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 
 <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">AzkarraApplication</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">SimpleStreamsApp</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span>
     <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setConfiguration</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">config</span><span style="color:#ce5c00;font-weight:bold">)</span>
@@ -1169,11 +1212,12 @@ but also to execute interactive queries on your application states stores.</p>
 <li>Query state store</li>
 </ul>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; curl -sX POST <span style="color:#4e9a06">&#39;http://localhost:8080/api/v1/applications/word-count-demo-1-0/stores/count&#39;</span> --data <span style="color:#4e9a06">&#39;{ &#34;type&#34;:&#34;key_value&#34;, &#34;query&#34; : {&#34;all&#34;:{} } }&#39;</span> <span style="color:#000;font-weight:bold">|</span> jq
-</code></pre></div><h2 id="annotations-and-provider-scan">Annotations and Provider Scan</h2>
+</code></pre></div><h2 id="annotations-and-component-scan">Annotations and Component Scan</h2>
 <p>For even more simplicity, Azkarra provides mechanisms for auto-discovering <code>TopologyProvider</code> classes.</p>
 <p>Finally, the complete version of our application looks like this :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">package</span> <span style="color:#000">azkarra</span><span style="color:#ce5c00;font-weight:bold">;</span>
 
+<span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">io.streamthoughts.azkarra.api.annotations.Component</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">io.streamthoughts.azkarra.api.config.Conf</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">io.streamthoughts.azkarra.api.config.Configurable</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">io.streamthoughts.azkarra.api.streams.TopologyProvider</span><span style="color:#ce5c00;font-weight:bold">;</span>
@@ -1205,12 +1249,9 @@ but also to execute interactive queries on your application states stores.</p>
 
         <span style="color:#5c35cc;font-weight:bold">@Override</span>
         <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-            <span style="color:#000">topicSource</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-            <span style="color:#000">topicSink</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-            <span style="color:#000">stateStoreName</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-                    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;count&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#000">topicSource</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.source&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#000">topicSink</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;topic.sink&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+            <span style="color:#000">stateStoreName</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getOptionalString</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;state.store.name&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">orElse</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;count&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
         <span style="color:#ce5c00;font-weight:bold">}</span>
 
         <span style="color:#5c35cc;font-weight:bold">@Override</span>
@@ -1254,8 +1295,8 @@ Azkarra will automatically load all your <code>TopologyProvider</code> by scanni
       default.value.serde = &quot;org.apache.kafka.common.serialization.Serdes$StringSerde&quot;
     }
     topic {
-      source = &quot;input-topic&quot;
-      sink = &quot;output-topic&quot;
+      source = &quot;streams-plaintext-input&quot;
+      sink = &quot;streams-wordcount-output&quot;
       store.name = &quot;WordCount&quot;    
     }
   }
@@ -1316,12 +1357,16 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
         
             
         
+            
+        
+            
+        
     
 </div>
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified December 2, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/cde4b7fb63620d7f92306ea549b63d55484a6705">update(site): update site documentation for release (cde4b7f)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified December 30, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/3a3bc13f2d277cbd9528183a52da0431a470aefb">docs(site): update site documentation for Azkarra v0.5.0 (3a3bc13)</a>
 </div>
 </div>
 
@@ -1355,7 +1400,7 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
         
       </div>
       <div class="col-12 col-sm-4 text-center py-2 order-sm-2">
-        <small class="text-white">&copy; 2019 The Azkarra Streams Authors All Rights Reserved</small>
+        <small class="text-white">&copy; 2020 The Azkarra Streams Authors All Rights Reserved</small>
         
 	
 		

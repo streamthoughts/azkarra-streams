@@ -26,7 +26,7 @@
 " />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/dependency-injection/" />
-<meta property="og:updated_time" content="2019-11-29T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="og:updated_time" content="2020-01-06T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Dependency Injection">
 <meta itemprop="description" content="How to use the dependency injection pattern in Azkarra Streams ?
 "><meta name="twitter:card" content="summary"/>
@@ -309,6 +309,52 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/streamslifecycle-interceptors/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">The StreamsLifeCycle Intercepting Chain</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-streamslifecycle-interceptors">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/kafkastreams-factory/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">KafkaStreams Factory</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-kafkastreams-factory">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
     <a  href="/azkarra-streams/docs/developer-guide/error-management/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Error Management</a>
   </li>
   <ul>
@@ -546,10 +592,13 @@
 
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#component">Component</a></li>
-    <li><a href="#versioned">Versioned</a></li>
-    <li><a href="#componentfactory">ComponentFactory</a></li>
-    <li><a href="#componentmodule">ComponentModule</a></li>
+    <li><a href="#defining-components">Defining Components</a></li>
+    <li><a href="#qualifying-by-name">Qualifying By Name</a></li>
+    <li><a href="#component-version">Component Version</a></li>
+    <li><a href="#component-factories">Component Factories</a></li>
+    <li><a href="#component-suppliers">Component Suppliers</a></li>
+    <li><a href="#building-the-graph">Building the Graph</a></li>
+    <li><a href="#restricted-component">Restricted Component</a></li>
   </ul>
 </nav>
 
@@ -599,29 +648,83 @@
 development to get code that is modular and testable.</p>
 <p>Azkarra does not implement any advanced dependency injection mechanism.
 We think that you can leverage one of the existing IoC frameworks for achieving this.</p>
-<p>However, Azkarra implements a simple mechanism based on the factory pattern
+<p>However, Azkarra implements a simple mechanism based on the Supplier<T> interface
 for internally registering and getting concrete class instances.</p>
-<p>You can easily use this mechanism to inject services into your topologies.</p>
-<h2 id="component">Component</h2>
-<p>In Azkarra, a <code>TopologyProvider</code> or any other class of service is called a component.
-A component can be of any type, it is just a java class.</p>
-<p>To be managed by the application, the components must be registered to the <code>AzkarraContext</code>
-either programmatically, or by external or annotated configuration.</p>
-<p>For registering a component, <code>AzkarraContext</code> defines the method <code>AzkarraContext#addComponent()</code>.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">var</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
-<span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><p>The only requirement, when using this method, is that the registered component class
-must defined a no-arg constructor to be later instantiated.</p>
-<p>In addition, when a component is added to the context is registered for the given class type and all its supertypes.</p>
-<p>Later, we can retrieve an instance of a registered component through the method <code>AzkarraContext#getComponentForType</code>.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">ServiceA</span> <span style="color:#000">instance</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getComponentForType</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><p>The returned object can be a new instance or an instance shared across the application (i.e a singleton).</p>
-<p>You should note that when &ldquo;component-scan&rdquo; is enable, classes must be annotated with <code>@Component</code>
-to be automatically registered.</p>
-<p>The <code>@Singleton</code> annotation can also be used for declaring a component shared across the application.</p>
-<h2 id="versioned">Versioned</h2>
-<p>A component can be attached to a version by implementing the <code>Versioned</code> interface.
-This is the case, for example, for the <code>TopologyProvider</code> interface.</p>
+<p>You can easily use this mechanism to wire your services together.</p>
+<h2 id="defining-components">Defining Components</h2>
+<p>When component-scan is enable, Azkarra will scan the current classpath and the configured external paths (i.e: <code>azkarra.component.paths</code>) to look up for classes
+with <code>@Component</code> or <code>@Factory</code> annotations.</p>
+<p>You can enable component-scan either programmatically :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">AzkarraApplication</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setEnableComponentScan</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">)</span>  
+</code></pre></div><p>or by annotate your main class with one of these annotations: <code>@AzkarraStreamsApplication</code> or <code>@ComponentScan</code>.</p>
+<p>The following is a simple component example:</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Component</span>
+<span style="color:#5c35cc;font-weight:bold">@Singleton</span>
+<span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">ConfigurableStopWordsService</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">StopWordsService</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Configurable</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+
+    <span style="color:#204a87;font-weight:bold">private</span> <span style="color:#000">List</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">stopsWords</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#000">stopsWords</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getStringList</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;service.stopwords&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">boolean</span> <span style="color:#000">test</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">String</span> <span style="color:#000">word</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">stopsWords</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">contains</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">word</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">toLowerCase</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><p>Azkarra does not implement the <a href="http://javax-inject.github.io/javax-inject/">JSR-330 (javax.inject) - Dependency Injection for Java specification</a>
+but leverages some of the defined Java annotations :</p>
+<ul>
+<li><a href="https://docs.oracle.com/javaee/6/api/javax/inject/Singleton.html"><code>Singleton</code></a></li>
+<li><a href="https://docs.oracle.com/javaee/6/api/javax/inject/Named.html"><code>Named</code></a></li>
+</ul>
+<p>Components are automatically registered to the <code>AzkrarraContext</code> which implement the interface <code>ComponentRegistry</code>.</p>
+<p>Components can also be register programmatically :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">AzkarraContext</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">.</span>
+<span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">registerComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ConfigurableStopWordsService</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><p>or</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">registerSingleton</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ConfigurableStopWordsService</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><p>Note : A component is registered both for its type and all its supertypes.</p>
+<p>A component instance can be retrieve directly from the <code>AzkarraContext</code> or the <code>ComponentFactory</code>.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">StopWordsService</span> <span style="color:#000">service</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StopWordsService</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><p>The returned instance may be shared or independent, depending if it has been registered as a singleton or prototype.
+In addition, if the component implements <code>Configurable</code>, then the new instance will be automatically configured using the context configuration.</p>
+<p>Internally, Azkarra uses the <code>ComponentFactory</code> not only to automatically discover available Kafka Streams topologies
+but also any classes that implement :</p>
+<ul>
+<li>StreamsLifecycleInterceptor</li>
+<li>KafkaStreamsFactory</li>
+<li>HealthIndicator</li>
+</ul>
+<p>This allows developers to easily extend Azkarra Streams features.</p>
+<h2 id="qualifying-by-name">Qualifying By Name</h2>
+<p>By default, a component is named based on the name of its class.</p>
+<p>To explicitly define the name of the component, you can use the <a href="https://docs.oracle.com/javaee/6/api/javax/inject/Named.html"><code>Named</code></a> annotation
+at the class level.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Component</span>
+<span style="color:#5c35cc;font-weight:bold">@Singleton</span>
+<span style="color:#5c35cc;font-weight:bold">@Named</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;StopWordsService&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">ConfigurableStopWordsService</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">StopWordsService</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Configurable</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+
+    <span style="color:#204a87;font-weight:bold">private</span> <span style="color:#000">List</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">stopsWords</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#000">stopsWords</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getStringList</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;service.stopwords&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">boolean</span> <span style="color:#000">test</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">String</span> <span style="color:#000">word</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">stopsWords</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">contains</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">word</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">toLowerCase</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">StopWordsService</span> <span style="color:#000">service</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StopWordsService</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Qualifiers</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">byName</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;StopWordsService&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><h2 id="component-version">Component Version</h2>
+<p>A component is uniquely identify by a type, a name and optionally a version.</p>
+<p>A component class that implements the <code>Versioned</code> interface can be qualified by the version return from the <code>Versioned:version</code> method.</p>
+<p>For example, this is the case of the <code>TopologyProvider</code> interface.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">interface</span> <span style="color:#000">Versioned</span> <span style="color:#ce5c00;font-weight:bold">{</span>
     <span style="color:#000">String</span> <span style="color:#000">version</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#ce5c00;font-weight:bold">}</span>
@@ -636,43 +739,100 @@ This is the case, for example, for the <code>TopologyProvider</code> interface.<
 <li><code>2.0.1-rc3</code></li>
 </ul>
 <p>Moreover, Azkarra only supports a pre-defined subset of qualifiers: <code>alpha</code>, <code>beta</code>, <code>snapshot</code>, <code>rc</code> and <code>release</code>.</p>
-<p>You can then get a component instance for the latest version registered in the context.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">ServiceA</span> <span style="color:#000">instance</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getLatestComponentForType</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><h2 id="componentfactory">ComponentFactory</h2>
-<p>For building more complex objects, you can implement the so-called <code>ComponentFactory</code> interface.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">ServiceAFactory</span> <span style="color:#000">implement</span> <span style="color:#000">ComponentFactory</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+<p>You can then get a component instance for a specific version.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">WordCountTopology</span> <span style="color:#000">topology</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopology</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Qualifiers</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">byVersion</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;1.0.0&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><p>or</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">WordCountTopology</span> <span style="color:#000">topology</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopology</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Qualifiers</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">byLatestVersion</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><p>Note: A class that implement the <code>Versionned</code> interface must define a no-arg constructor.</p>
+<h2 id="component-factories">Component Factories</h2>
+<p>Defining a component either programmatically or using the <code>@Component</code> annotation is pretty straightforward.
+However, this approach has some limitations. First, a class annotated with the <code>@Component</code> annotation must have a no-arg constructor in order
+to be instantiable. Secondly, because you cannot annotated classes provided by third-party libraries, you cannot use the <code>@Component</code> annotation
+to register as a component a class that is not part of your codebase.</p>
+<p>For that, you can use a factory class.</p>
+<p>A factory class is a simple Java class annotated with the <code>@Factory</code> annotation that provides one or more methods annotated with <code>@Component</code>.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Factory</span>
+<span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">TopicsFactory</span> <span style="color:#ce5c00;font-weight:bold">{</span>
 
-    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">T</span> <span style="color:#000">make</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#5c35cc;font-weight:bold">@Component</span>
+    <span style="color:#5c35cc;font-weight:bold">@Singleton</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">NewTopic</span> <span style="color:#000">streamsInputTopic</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">NewTopic</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">6</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">short</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#000">1</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
     <span style="color:#ce5c00;font-weight:bold">}</span>
 
-    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Class</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">T</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">getType</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span>
-    <span style="color:#ce5c00;font-weight:bold">}</span>
-
-    <span style="color:#204a87;font-weight:bold">boolean</span> <span style="color:#000">isSingleton</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#5c35cc;font-weight:bold">@Component</span>
+    <span style="color:#5c35cc;font-weight:bold">@Singleton</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">NewTopic</span> <span style="color:#000">streamsOuputTopic</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">NewTopic</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-wordcount-output&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">6</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">short</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#000">1</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
     <span style="color:#ce5c00;font-weight:bold">}</span>
 <span style="color:#ce5c00;font-weight:bold">}</span>
-</code></pre></div><p>Azkarra provides helpers methods for creating a such factory based on a specified class :</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">ComponentFactory</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">f</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">ComponentFactory</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">singletonOf</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-<span style="color:#8f5902;font-style:italic">// or
-</span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000">ComponentFactory</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">f</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">ComponentFactory</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">prototypeOf</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><p>Then, registering a component factory is almost similar to previous example :</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">var</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">AzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
-<span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">ServiceAFactory</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><h2 id="componentmodule">ComponentModule</h2>
-<p>When building a component with dependencies you can extend the <code>ComponentModule</code> class which under the hood implement
-the following interfaces : <code>ComponentFactory</code>, <code>ComponentRegistryAware</code> and <code>Configurable</code>.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">CustomTopologyProviderModule</span> <span style="color:#204a87;font-weight:bold">extends</span> <span style="color:#000">ComponentModule</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">CustomTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+</code></pre></div><p>For each method, Azkarra will create one proxy <code>Supplier</code> instance that delegate the component creation to
+one instance of the TopicsFactory.</p>
+<p>Note : A factory class can implement the <code>Configurable</code> interface.</p>
+<h2 id="component-suppliers">Component Suppliers</h2>
+<p>Another way to provide a component is to directly annotated a class implementing the <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html"><code>Supplier</code></a> interface with the <code>@Component</code> annotation.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Component</span>
+<span style="color:#5c35cc;font-weight:bold">@Bean</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;simpleStopWordsService&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">StopWordsServiceSupplier</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">Supplier</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">StopWordsService</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Configurable</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+    
+    <span style="color:#204a87;font-weight:bold">private</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
     <span style="color:#5c35cc;font-weight:bold">@Override</span>
-    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">CustomTopologyProvider</span> <span style="color:#000">make</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-        <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">ServiceA</span> <span style="color:#000">serviceA</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">getComponentForType</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceA</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-        <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">ServiceB</span> <span style="color:#000">serviceB</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">getComponentForType</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">ServiceB</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">CustomTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">serviceA</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">serviceB</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+       <span style="color:#204a87;font-weight:bold">this</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">conf</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">;</span> 
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">StopWordsService</span> <span style="color:#000">get</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">SimpleStopWordsService</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getStringList</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;service.stopwords&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
     <span style="color:#ce5c00;font-weight:bold">}</span>
 <span style="color:#ce5c00;font-weight:bold">}</span>
-</code></pre></div><p>Both <code>ComponentFactory</code> and <code>ComponentModule</code> can be annotated with <code>@Component</code> in order to be automatically registered.</p>
+</code></pre></div><h2 id="building-the-graph">Building the Graph</h2>
+<p>Azkarra does <strong>NOT</strong> support the <a href="https://docs.oracle.com/javaee/6/api/javax/inject/Inject.html"><code>@Inject</code></a> annotation specified by JSR-330
+to automatically linked components by their dependencies.</p>
+<p>Developers are responsible for building the graph of objects programmatically by defining either a <code>@Factory</code> class or a <code>Supplier</code>
+that implement the <code>ComponentFactoryAware</code> interface and <code>Configurable</code> (optionally).</p>
+<p>For that purpose Azkarra provides the <code>ComponentModule</code> class.</p>
+<p>The following is a simple example:</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Component</span>
+<span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">ComplexWordCountTopologyModule</span> <span style="color:#204a87;font-weight:bold">extends</span> <span style="color:#000">ComponentModule</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">ComplexWordCountTopology</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">ComplexWordCountTopology</span> <span style="color:#000">get</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#000">StopWordsService</span> <span style="color:#000">service</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">getComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StopWordsService</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#000">ComplexWordCountTopology</span> <span style="color:#000">topology</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">ComplexWordCountTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setStopWordsService</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">service</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><h2 id="restricted-component">Restricted Component</h2>
+<p>The <code>DefaultAzkarraContext</code> class will try to automatically configure streams environments and streams topologies using
+the registered components. Specifically, the context looks for the components of type :</p>
+<ul>
+<li>StreamsLifecycleInterceptor</li>
+<li>KafkaStreamsFactory</li>
+<li>NewTopic (when <code>auto.create.topics.enable</code> is <code>true</code>)</li>
+</ul>
+<p>In many cases, you may want the <code>DefaultAzkarraContext</code> to only configure such component for specific environments or
+streams topologies.</p>
+<p>Azkarra defines the <code>@Restricted</code> annotation that can be used to limit/qualify the usage scope of a component.</p>
+<p>A component can be restricted to :</p>
+<ul>
+<li>one ore many specific streams environments (type = <code>env</code>).</li>
+<li>one ore many specific streams topologies (type = <code>streams</code>).</li>
+<li>the application (type = <code>application</code>).</li>
+</ul>
+<p>For example, the following <code>KafkaStreamsFactory</code> will only be used for the streams application named <em>wordCountTopology</em>.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Component</span>
+<span style="color:#5c35cc;font-weight:bold">@Restricted</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">type</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Restriction</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">TYPE_STREAMS</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">names</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;wordCountTopology&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">static</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">CustomKafkaStreamsFactory</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">KafkaStreamsFactory</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">KafkaStreams</span> <span style="color:#000">make</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Topology</span> <span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">streamsConfig</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">KafkaStreams</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">streamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getConfAsProperties</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><p>Note: Defining a component with <code>@Restricted(type = Restriction.TYPE_APPLICATION)</code> annotation is equivalent to no annotation.</p>
 <p>A complete code example is available on the GitHub project <a href="https://github.com/streamthoughts/azkarra-streams/tree/master/azkarra-examples/src/main/java/io/streamthoughts/examples/azkarra/dependency">azkarra-examples</a></p>
 
         <div class="section-index">
@@ -726,12 +886,16 @@ the following interfaces : <code>ComponentFactory</code>, <code>ComponentRegistr
         
             
         
+            
+        
+            
+        
     
 </div>
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified December 5, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/639ab9230567a27fe856f18982de0f4491acd320">docs(site): add documentation about security, fix some typos. (639ab92)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified December 30, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/3a3bc13f2d277cbd9528183a52da0431a470aefb">docs(site): update site documentation for Azkarra v0.5.0 (3a3bc13)</a>
 </div>
 </div>
 
@@ -765,7 +929,7 @@ the following interfaces : <code>ComponentFactory</code>, <code>ComponentRegistr
         
       </div>
       <div class="col-12 col-sm-4 text-center py-2 order-sm-2">
-        <small class="text-white">&copy; 2019 The Azkarra Streams Authors All Rights Reserved</small>
+        <small class="text-white">&copy; 2020 The Azkarra Streams Authors All Rights Reserved</small>
         
 	
 		
