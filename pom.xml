@@ -83,7 +83,7 @@
     </distributionManagement>
 
     <properties>
-        <kafka.streams.version>2.3.0</kafka.streams.version>
+        <kafka.streams.version>2.4.0</kafka.streams.version>
         <slf4j.version>1.7.28</slf4j.version>
         <log4j.version>2.12.1</log4j.version>
         <junit.version>4.12</junit.version>
