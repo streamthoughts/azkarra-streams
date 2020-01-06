@@ -133,7 +133,6 @@ public class Executed {
      * @return  a new {@link Executed}.
      */
     public Executed withDescription(final String description) {
-        Objects.requireNonNull(description, "description cannot be null");
         return new Executed(
             name,
             description,
@@ -167,15 +166,10 @@ public class Executed {
      * @return  a new {@link Executed}.
      */
     public Executed withInterceptor(final Supplier<StreamsLifecycleInterceptor> interceptor) {
-        Objects.requireNonNull(config, "config cannot be null");
-        LinkedList<Supplier<StreamsLifecycleInterceptor>> interceptors = new LinkedList<>(this.interceptors);
+        Objects.requireNonNull(interceptor, "interceptor cannot be null");
+        List<Supplier<StreamsLifecycleInterceptor>> interceptors = new LinkedList<>(this.interceptors);
         interceptors.add(interceptor);
-        return new Executed(
-            name,
-            description,
-            config,
-            interceptors
-        );
+        return withInterceptors(interceptors);
     }
 
     /**
@@ -186,7 +180,7 @@ public class Executed {
      * @return  a new {@link Executed}.
      */
     public Executed withInterceptors(final List<Supplier<StreamsLifecycleInterceptor>> interceptors) {
-        Objects.requireNonNull(config, "config cannot be null");
+        Objects.requireNonNull(interceptors, "interceptors cannot be null");
         return new Executed(
             name,
             description,
