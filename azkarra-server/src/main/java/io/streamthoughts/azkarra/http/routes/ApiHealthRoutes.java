@@ -48,7 +48,7 @@ public class ApiHealthRoutes implements HttpHandler, RoutingHandlerProvider, Azk
     @Override
     public void setAzkarraContext(final AzkarraContext context) {
         this.context = context;
-        this.context.registerSingleton(StreamsHealthIndicator.class);
+        this.context.registerSingleton(StreamsHealthIndicator.class, StreamsHealthIndicator::new);
     }
 
     /**

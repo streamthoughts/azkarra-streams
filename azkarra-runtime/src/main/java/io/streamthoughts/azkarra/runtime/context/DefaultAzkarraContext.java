@@ -293,7 +293,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
                                      final Executed executed) {
         initializeDefaultEnvironment();
         checkIfEnvironmentExists(environment, String.format(
-            "Error while adding topology '%s', environment '%s'not found", type, environment
+            "Error while adding topology '%s', environment '%s' not found", type, environment
         ));
 
         if (!componentFactory.containsComponent(type)) {

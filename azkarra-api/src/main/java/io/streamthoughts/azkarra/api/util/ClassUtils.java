@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -117,7 +116,7 @@ public class ClassUtils {
     }
 
     public static Set<Class<?>> getAllSuperTypes(final Class<?> type) {
-        Set<Class<?>> result = new HashSet<>();
+        Set<Class<?>> result = new LinkedHashSet<>();
         if (type != null && !type.equals(Object.class)) {
             result.add(type);
             for (Class<?> supertype : getSuperTypes(type)) {
