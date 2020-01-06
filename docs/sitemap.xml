@@ -28,8 +28,8 @@
   </url>
   
   <url>
-    <loc>https://streamthoughts.github.io/azkarra-streams/docs/examples/</loc>
-    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/</loc>
+    <lastmod>2020-01-06T23:13:46+01:00</lastmod>
   </url>
   
   <url>
@@ -38,8 +38,13 @@
   </url>
   
   <url>
-    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/</loc>
-    <lastmod>2019-11-29T15:27:51+01:00</lastmod>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/examples/</loc>
+    <lastmod>2020-01-06T23:13:46+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/azkarra-worker/</loc>
+    <lastmod>2020-01-06T23:13:46+01:00</lastmod>
   </url>
   
   <url>
