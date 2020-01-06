@@ -2,7 +2,7 @@
 date: 2019-11-29
 title: "Developer Guide"
 linkTitle: "Developer Guide"
-weight: 4
+weight: 3
 description: >
   Learn about the concepts and the functionalities of the Azkarra Streams Framework.
 ---
