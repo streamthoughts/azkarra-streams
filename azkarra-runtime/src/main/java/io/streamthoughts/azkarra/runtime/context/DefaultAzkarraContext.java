@@ -42,6 +42,7 @@ import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
+import io.streamthoughts.azkarra.runtime.components.ClassComponentAliasesGenerator;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.runtime.config.AzkarraContextConfig;
@@ -112,6 +113,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     public static AzkarraContext create(final Conf configuration) {
         // Set all default implementations
         DefaultComponentFactory factory = new DefaultComponentFactory(new DefaultComponentDescriptorFactory());
+        factory.setComponentAliasesGenerator(new ClassComponentAliasesGenerator());
         return new DefaultAzkarraContext(configuration).setComponentFactory(factory);
     }
 

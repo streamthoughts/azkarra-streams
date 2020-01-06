@@ -47,5 +47,5 @@ public @interface TopologyInfo {
      *
      * @return  an array of alias.
      */
-    String[] aliases() default "";
+    String[] aliases() default {};
 }
