@@ -20,8 +20,6 @@ package io.streamthoughts.azkarra.api.components;
 
 /**
  * Callback for modifying a given component descriptor.
- *
- * @param <T> the component type.
  */
 @FunctionalInterface
 public interface ComponentDescriptorModifier {
@@ -30,6 +28,7 @@ public interface ComponentDescriptorModifier {
      * Modifies the given {@link ComponentDescriptor}.
      *
      * @param descriptor    the {@link ComponentDescriptor} instance.
+     * @param <T>           the component type.
      * @return              the modified descriptor or a new instance.
      */
     <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor);

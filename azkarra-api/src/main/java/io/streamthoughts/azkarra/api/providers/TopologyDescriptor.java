@@ -20,18 +20,17 @@ package io.streamthoughts.azkarra.api.providers;
 
 import io.streamthoughts.azkarra.api.annotations.DefaultStreamsConfig;
 import io.streamthoughts.azkarra.api.annotations.TopologyInfo;
-import io.streamthoughts.azkarra.api.components.ComponentAttribute;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static io.streamthoughts.azkarra.api.util.ClassUtils.getAllDeclaredAnnotationsByType;
 
 /**
  *  A {@link SimpleComponentDescriptor} for describing a {@link TopologyProvider} implementation.
@@ -41,7 +40,6 @@ import java.util.stream.Collectors;
 public final class TopologyDescriptor<T extends TopologyProvider> extends SimpleComponentDescriptor<T> {
 
     private static final String TOPOLOGY_INFO_ATTRIBUTE = TopologyInfo.class.getSimpleName();
-    private static final String STREAMS_CONFIG_ATTRIBUTE = DefaultStreamsConfig.class.getSimpleName();
 
     private final String description;
 
@@ -56,14 +54,12 @@ public final class TopologyDescriptor<T extends TopologyProvider> extends Simple
         String[] aliases = metadata().arrayValue(TOPOLOGY_INFO_ATTRIBUTE, "aliases");
         addAliases(new HashSet<>(Arrays. asList(aliases)));
 
-        Collection<ComponentAttribute> attributes = metadata().attributesForName(STREAMS_CONFIG_ATTRIBUTE);
-        Map<String, String> mapConfigs = attributes.stream()
-            .map(attribute -> {
-                String name = attribute.stringValue("name");
-                String value = attribute.stringValue("value");
-                return Tuple.of(name, value);
-            })
-            .collect(Collectors.toMap(Tuple::left, Tuple::right));
+        // Because DefaultStreamsConfig is a repeatable annotation is more straightforward
+        // to directly lookup for the annotation instead of using attributes
+        // that will contains the container annotation)
+        Map<String, String> mapConfigs = getAllDeclaredAnnotationsByType(type(), DefaultStreamsConfig.class)
+            .stream()
+            .collect(Collectors.toMap(DefaultStreamsConfig::name, DefaultStreamsConfig::value));
         streamConfigs = Conf.with(mapConfigs);
     }
 

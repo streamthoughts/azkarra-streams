@@ -51,10 +51,12 @@ public class TopologyDescriptorFactoryTest {
         assertEquals("1.0", topologyDescriptor.version().toString());
         assertEquals("test description", topologyDescriptor.description());
         assertEquals("2", topologyDescriptor.streamsConfigs().getString(StreamsConfig.NUM_STREAM_THREADS_CONFIG));
+        assertEquals("static.app.id", topologyDescriptor.streamsConfigs().getString(StreamsConfig.APPLICATION_ID_CONFIG));
     }
 
     @TopologyInfo( description = "test description", aliases = "CustomAlias")
     @DefaultStreamsConfig(name = StreamsConfig.NUM_STREAM_THREADS_CONFIG, value = "2")
+    @DefaultStreamsConfig(name = StreamsConfig.APPLICATION_ID_CONFIG, value = "static.app.id")
     public static class TestTopologyProvider implements TopologyProvider {
 
         @Override
