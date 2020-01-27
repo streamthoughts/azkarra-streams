@@ -23,19 +23,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 import java.util.Objects;
 
-public class Metric implements Comparable<Metric> {
+public class Metric {
 
     private final String name;
+    private final String group;
     private final String description;
     private final Map<String, String> tags;
     private final Object value;
 
+    private int hash = 0;
 
     public Metric(final String name,
+                  final String group,
                   final String description,
                   final Map<String, String> tags,
                   final Object value) {
         this.name = name;
+        this.group = group;
         this.description = description;
         this.tags = tags;
         this.value = value;
@@ -67,24 +71,24 @@ public class Metric implements Comparable<Metric> {
         if (!(o instanceof Metric)) return false;
         Metric metric = (Metric) o;
         return Objects.equals(name, metric.name) &&
-                Objects.equals(description, metric.description) &&
-                Objects.equals(tags, metric.tags);
+               Objects.equals(group, metric.group) &&
+               Objects.equals(description, metric.description) &&
+               Objects.equals(tags, metric.tags);
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, tags);
-    }
-
-    @Override
-    public int compareTo(Metric that) {
-        return this.name.compareTo(that.name);
+        if (hash == 0)
+            hash = Objects.hash(name, group, description, tags);
+        return hash;
     }
 
     @Override
     public String toString() {
         return "[" +
                 "name=" + name +
+                "group=" + group +
                 ", description=" + description +
                 ", tags=" + tags +
                 ", value=" + value +

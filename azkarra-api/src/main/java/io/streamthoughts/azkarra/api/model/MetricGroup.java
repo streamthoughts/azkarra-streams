@@ -20,23 +20,25 @@ package io.streamthoughts.azkarra.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class MetricGroup implements Comparable<MetricGroup> {
 
     private final String name;
 
-    private final Set<Metric> metrics;
+    private final List<Metric> metrics;
 
     /**
      * Creates a new {@link MetricGroup} instance.
      * @param name  the group name.
      */
-    public MetricGroup(final String name, final Set<Metric> metrics) {
+    public MetricGroup(final String name, final List<Metric> metrics) {
         Objects.requireNonNull(name, "name cannot be null");
         this.name = name;
         this.metrics = metrics;
+        metrics.sort(Comparator.comparing(Metric::name));
     }
 
     @JsonProperty("name")
@@ -45,7 +47,7 @@ public class MetricGroup implements Comparable<MetricGroup> {
     }
 
     @JsonProperty("metrics")
-    public Set<Metric> metrics() {
+    public List<Metric> metrics() {
         return metrics;
     }
 
@@ -58,7 +60,7 @@ public class MetricGroup implements Comparable<MetricGroup> {
         if (!(o instanceof MetricGroup)) return false;
         MetricGroup that = (MetricGroup) o;
         return Objects.equals(name, that.name) &&
-                Objects.equals(metrics, that.metrics);
+               Objects.equals(metrics, that.metrics);
     }
 
     /**
