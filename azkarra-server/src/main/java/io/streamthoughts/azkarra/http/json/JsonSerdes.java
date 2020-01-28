@@ -117,7 +117,7 @@ public class JsonSerdes {
         try {
             return OBJECT_MAPPER.readValue(data, type);
         } catch (IOException e) {
-            throw new SerializationException("Error happens while de-serializing '" + data + "'", e);
+            throw new SerializationException(e.getMessage(), e);
         }
     }
 

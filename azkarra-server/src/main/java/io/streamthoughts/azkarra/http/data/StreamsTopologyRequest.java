@@ -21,7 +21,10 @@ package io.streamthoughts.azkarra.http.data;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Collections;
 import java.util.Map;
+
+import static io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext.DEFAULT_ENV_NAME;
 
 public class StreamsTopologyRequest {
 
@@ -30,21 +33,22 @@ public class StreamsTopologyRequest {
     private final String version;
     private final String description;
     private final String env;
+
     private final Map<String, Object> config;
 
     @JsonCreator
-    public StreamsTopologyRequest(final @JsonProperty("name") String name,
-                                  final @JsonProperty("type") String type,
-                                  final @JsonProperty("version") String version,
+    public StreamsTopologyRequest(final @JsonProperty(value = "name", required = true) String name,
+                                  final @JsonProperty(value = "type", required = true) String type,
+                                  final @JsonProperty(value = "version", required = true) String version,
+                                  final @JsonProperty(value = "env", defaultValue = DEFAULT_ENV_NAME) String env,
                                   final @JsonProperty("description") String description,
-                                  final @JsonProperty("env") String env,
                                   final @JsonProperty("config") Map<String, Object> config) {
         this.name = name;
         this.type = type;
         this.version = version;
         this.description = description;
         this.env = env;
-        this.config = config;
+        this.config = config != null ? config : Collections.emptyMap();
     }
 
     public String getName() {
