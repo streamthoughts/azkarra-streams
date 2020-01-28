@@ -211,6 +211,13 @@ class AzkarraApi {
           return response.data;
       })
     }
+
+    getQueryStateStoreAsCurl(query) {
+        let url = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+        url = url +  apiBasePath + '/applications/' + query.application + "/stores/" + query.store;
+        let data = {set_options: query.options, type: query.type, query : { [query.operation] : query.params } };
+        return 'curl -H "Accept: application/json" -H "Content-Type:application/json" -sX POST ' + url + " --data '" + JSON.stringify(data) + "'";
+    }
 }
 
 // Create the default instance to be exported

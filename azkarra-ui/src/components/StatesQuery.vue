@@ -176,7 +176,16 @@
                         </div>
                     </div>
                 </div>
-                <button v-on:click.prevent="execute()" class="btn btn-primary">Execute</button>
+                <div class="row mb-3">
+                    <div class="col-3">
+                        <button v-on:click.prevent="execute()"
+                                v-bind:disabled="isActionBtnDisabled()" class="btn btn-primary">Execute</button>
+                    </div>
+                    <div class="col-3">
+                        <button v-on:click.prevent="copyAsCurl()"
+                                 v-bind:disabled="isActionBtnDisabled()" class="btn btn-secondary">CopyAsCurl</button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -257,9 +266,33 @@ export default {
       });
     },
 
+    copyAsCurl() {
+        // do quick copy to clipboard
+        var input = document.createElement('input');
+        input.setAttribute('value', azkarra.getQueryStateStoreAsCurl(this.buildQuery()));
+        document.body.appendChild(input);
+        input.select();
+        var result = document.execCommand('copy');
+        document.body.removeChild(input);
+        return result;
+    },
+
     execute() {
       let that = this;
-      let query = {
+      azkarra.sendQueryStateStore(that.buildQuery()).then(function(data){
+        that.response = data
+      });
+    },
+
+    isActionBtnDisabled() {
+        return !(this.query.store &&
+               this.query.application &&
+               this.query.operation &&
+               this.query.type);
+    },
+
+    buildQuery() {
+      return {
         params : this.query.params,
         type: this.query.type.typeValue,
         operation: this.query.operation.name,
@@ -267,9 +300,6 @@ export default {
         application : this.query.application,
         options: this.query.options
       };
-      azkarra.sendQueryStateStore(query).then(function(data){
-        that.response = data
-      });
     }
   }
 }
