@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.api;
 
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.Environment;
 import io.streamthoughts.azkarra.api.model.Metric;
@@ -202,6 +203,8 @@ public interface AzkarraStreamsService {
      * @param options       the query execution options.
      *
      * @return              the {@link QueryResult} instance.
+     *
+     * @throws InvalidStreamsStateException if the streams is not running for the given applicationId.
      */
     <K, V> QueryResult<K, V>  query(final String applicationId,
                                     final Query<K, V> query,

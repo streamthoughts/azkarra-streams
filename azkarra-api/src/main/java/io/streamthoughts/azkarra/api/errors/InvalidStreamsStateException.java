@@ -16,31 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.query.result;
 
-public enum QueryStatus {
+package io.streamthoughts.azkarra.api.errors;
+
+public class InvalidStreamsStateException extends AzkarraException {
+
     /**
-     * The query is executed successfully.
+     * Creates a new {@link InvalidStreamsStateException} instance.
+     * @param message   the error message.
      */
-    SUCCESS,
-    /**
-     * The query is executed successfully but no result found.
-     */
-    NO_RESULT,
-    /**
-     * The query is executed successfully partially (some instances failed to respond).
-     */
-    PARTIAL,
-    /**
-     * The requested store is not available for querying.
-     */
-    NOT_AVAILABLE,
-    /**
-     * Unexpected error happens while querying store.
-     */
-    ERROR,
-    /**
-     * The query is not valid.
-     */
-    INVALID;
+    public InvalidStreamsStateException(final String message) {
+        super(message);
+    }
 }

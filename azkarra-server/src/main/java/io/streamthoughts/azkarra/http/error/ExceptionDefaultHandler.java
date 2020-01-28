@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.http.error;
 
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.data.ErrorMessage;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import static io.undertow.util.StatusCodes.BAD_REQUEST;
 import static io.undertow.util.StatusCodes.INTERNAL_SERVER_ERROR;
 import static io.undertow.util.StatusCodes.NOT_FOUND;
+import static io.undertow.util.StatusCodes.SERVICE_UNAVAILABLE;
 import static io.undertow.util.StatusCodes.UNAUTHORIZED;
 
 /**
@@ -65,6 +67,8 @@ public class ExceptionDefaultHandler implements HttpHandler {
             error = new ErrorMessage(BAD_REQUEST, exceptionMessage, exception, path);
         } else if (throwable instanceof UnauthorizedAccessException) {
             error = new ErrorMessage(UNAUTHORIZED, exceptionMessage, exception, path);
+        } else if (throwable instanceof InvalidStreamsStateException) {
+            error = new ErrorMessage(SERVICE_UNAVAILABLE, exceptionMessage, exception, path);
         } else if (throwable instanceof AzkarraException) {
             error = internalServerError("Internal Azkarra Streams API Error : "
                     + exceptionMessage, exception, path);

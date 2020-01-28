@@ -24,6 +24,7 @@ import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.Error;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.Environment;
 import io.streamthoughts.azkarra.api.model.Metric;
@@ -299,9 +300,11 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
                                           final Query<K, V> query,
                                           final QueryParams parameters,
                                           final Queried options) {
-        long now = Time.SYSTEM.milliseconds();
+        final long now = Time.SYSTEM.milliseconds();
 
         final KafkaStreamsContainer container = getStreamsById(applicationId);
+
+        checkIsRunning(applicationId, container);
 
         Optional<StreamsServerInfo> server = container.getLocalServerInfo();
 
@@ -320,6 +323,15 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
 
         final DistributedQuery<K, V> distributed = new DistributedQuery<>(remoteQueryClient, query.prepare(parameters));
         return distributed.query(container, options);
+    }
+
+    private void checkIsRunning(String applicationId, KafkaStreamsContainer container) {
+        if (container.isNotRunning()) {
+            throw new InvalidStreamsStateException(
+                "KafkaStreams instance for id '" + applicationId +
+                "' is not running (" + container.state().value() + ")"
+            );
+        }
     }
 
     private Collection<KafkaStreamsContainer> containers() {

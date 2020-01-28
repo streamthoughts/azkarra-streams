@@ -319,7 +319,7 @@ public class KafkaStreamsContainer {
         Objects.requireNonNull(key, "key cannot be null");
         Objects.requireNonNull(keySerializer, "keySerializer cannot be null");
         StreamsMetadata metadata = kafkaStreams.metadataForKey(storeName, key, keySerializer);
-        return newServerInfoFor(metadata);
+        return metadata == null || metadata.equals(StreamsMetadata.NOT_AVAILABLE) ? null : newServerInfoFor(metadata);
     }
 
     public <K, V> LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> getLocalKeyValueStore(final String storeName) {
@@ -343,9 +343,8 @@ public class KafkaStreamsContainer {
         return LOG;
     }
 
-    boolean isNotRunning() {
-        final State state = state().value();
-        return !(state == State.RUNNING || state == State.REBALANCING);
+    public boolean isNotRunning() {
+        return !kafkaStreams.state().isRunning();
     }
 
     void stateChanges(final long now,

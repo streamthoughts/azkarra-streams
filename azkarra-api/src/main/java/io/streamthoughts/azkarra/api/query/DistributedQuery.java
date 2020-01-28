@@ -79,7 +79,6 @@ public class DistributedQuery<K, V> {
      *
      * @return           a {@link QueryResult} instance.
      */
-    @SuppressWarnings("unchecked")
     public QueryResult<K, V> query(final KafkaStreamsContainer streams,
                                    final Queried options) {
         Objects.requireNonNull(streams, "streams cannot be null");
@@ -109,6 +108,11 @@ public class DistributedQuery<K, V> {
         final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results = new LinkedList<>();
 
         Collection<StreamsServerInfo> servers = streams.getAllMetadataForStore(query.storeName());
+
+        if (servers.isEmpty()) {
+            return buildStoreNotFoundResult(localServerName, now);
+        }
+
         if (options.remoteAccessAllowed()) {
             // Forward query to all remote instances
             remotes = servers.stream()
@@ -153,13 +157,18 @@ public class DistributedQuery<K, V> {
             final Serde<K> serde = (Serde<K>) streams.getDefaultKeySerde().orElse(Serdes.String());
             keySerializer = serde.serializer();
         }
-        final StreamsServerInfo remoteServer = streams.getMetadataForStoreAndKey(
+
+        final StreamsServerInfo serverInfoForKey = streams.getMetadataForStoreAndKey(
             query.storeName(),
             query.key(),
             keySerializer
         );
 
-        if (remoteServer.isLocal()) {
+        if (serverInfoForKey == null) {
+            return buildStoreNotFoundResult(localServerName, now);
+        }
+
+        if (serverInfoForKey.isLocal()) {
             // Execute the query locally
             final Either<SuccessResultSet<K, V>, ErrorResultSet> localResultSet =
                 executeLocallyAndGet(localServerName, streams, options);
@@ -167,9 +176,9 @@ public class DistributedQuery<K, V> {
 
         } else if (options.remoteAccessAllowed()) {
 
-            final String remoteServerName = remoteServer.hostAndPort();
+            final String remoteServerName = serverInfoForKey.hostAndPort();
             try {
-                CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(remoteServer, query, options);
+                CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(serverInfoForKey, query, options);
                 result =  future
                     .exceptionally(t -> buildInternalErrorResult(localServerName, remoteServerName, t, now))
                     .get();
@@ -189,10 +198,24 @@ public class DistributedQuery<K, V> {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+    private QueryResult<K, V> buildStoreNotFoundResult(final String server, final long now) {
+        ErrorResultSet error = new ErrorResultSet(
+            server,
+            false,
+            new QueryError("no metadata found for store '" + query.storeName() + "'")
+        );
+        final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
+        return builder
+            .setServer(server)
+            .setTook(Time.SYSTEM.milliseconds() - now)
+            .setStatus(QueryStatus.NOT_AVAILABLE)
+            .setFailedResultSet(Collections.singletonList(error))
+            .build();
+    }
+
     private QueryResult<K, V> buildQueryResult(final String localServerName,
-                                         final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results,
-                                         final long now) {
+                                               final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results,
+                                               final long now) {
         final List<ErrorResultSet> errors = results.stream()
                 .filter(Either::isRight)
                 .map(e -> e.right().get()).collect(Collectors.toList());
@@ -247,7 +270,6 @@ public class DistributedQuery<K, V> {
         return status;
     }
 
-    @SuppressWarnings("unchecked")
     private static <K, V> List<Either<SuccessResultSet<K, V>, ErrorResultSet>> waitRemoteThenGet(
             final List<CompletableFuture<QueryResult<K, V>>> futures
     )  {
