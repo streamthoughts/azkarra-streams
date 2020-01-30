@@ -18,22 +18,27 @@
  */
 package io.streamthoughts.azkarra.api.query;
 
+import io.streamthoughts.azkarra.api.errors.Error;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
+import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Either;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.monad.Retry;
+import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.internal.PreparedQuery;
 import io.streamthoughts.azkarra.api.query.result.ErrorResultSet;
-import io.streamthoughts.azkarra.api.query.result.GlobalResultSet;
 import io.streamthoughts.azkarra.api.query.result.QueryError;
-import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
+import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
 import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.api.util.FutureCollectors;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +54,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Default class to query a state storeName either locally or remotely.
+ * Default class to query a state store either locally, remotely or globally.
  */
 public class DistributedQuery<K, V> {
 
@@ -72,144 +77,153 @@ public class DistributedQuery<K, V> {
     }
 
     /**
-     * Executes a state storeName query for specified arguments.
+     * Executes this interactive query for the given {@link org.apache.kafka.streams.KafkaStreams} instance.
      *
      * @param streams    the {@link KafkaStreamsContainer} instance on which to execute this query.
      * @param options    the {@link Queried} options.
      *
      * @return           a {@link QueryResult} instance.
+     *
+     * @throws  InvalidStreamsStateException if streams is not running
      */
-    public QueryResult<K, V> query(final KafkaStreamsContainer streams,
-                                   final Queried options) {
+    public QueryResult<K, V> query(final KafkaStreamsContainer streams, final Queried options) {
         Objects.requireNonNull(streams, "streams cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
 
         long now = Time.SYSTEM.milliseconds();
 
-        Optional<StreamsServerInfo> localServerInfo = streams.getLocalServerInfo();
-
-        final String localServerName = localServerInfo.map(StreamsServerInfo::hostAndPort).orElse("N/A");
+        // Quickly check if streams instance is still running
+        if (streams.isNotRunning()) {
+            throw new InvalidStreamsStateException(
+                "streams instance for id '" + streams.applicationId() +
+                        "' is not running (" + streams.state().value() + ")"
+            );
+        }
 
         QueryResult<K, V> result;
         if (query.isKeyedQuery()) {
-            result = querySingleHostStateStore(streams, localServerName, options, now);
+            result = querySingleHostStateStore(streams, options, now);
         } else {
-            result = queryMultiHostStateStore(streams, localServerName, options, now);
+            result = queryMultiHostStateStore(streams, options, now);
         }
         return result;
     }
 
     private QueryResult<K, V> queryMultiHostStateStore(final KafkaStreamsContainer streams,
-                                                       final String localServerName,
                                                        final Queried options,
                                                        final long now) {
-        List<CompletableFuture<QueryResult<K, V>>> remotes = null;
 
         final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results = new LinkedList<>();
 
         Collection<StreamsServerInfo> servers = streams.getAllMetadataForStore(query.storeName());
-
         if (servers.isEmpty()) {
-            return buildStoreNotFoundResult(localServerName, now);
+            String error = "no metadata available for store '" + query.storeName() + "'";
+            LOG.warn(error);
+            return buildNotAvailableResult(streams.applicationServer(), error, now);
         }
 
+        List<CompletableFuture<QueryResult<K, V>>> remotes = null;
         if (options.remoteAccessAllowed()) {
             // Forward query to all remote instances
             remotes = servers.stream()
                 .filter(Predicate.not(StreamsServerInfo::isLocal))
-                .map(server -> {
-                    final String remoteServerName = server.hostAndPort();
-                    CompletableFuture<QueryResult<K, V>> query = remoteQueryClient.query(
-                        server,
-                        this.query,
-                        options.withRemoteAccessAllowed(false)
-                    );
-                    return query.exceptionally(t ->
-                        buildInternalErrorResult(localServerName, remoteServerName, t, now));
-                })
+                .map(remote -> executeAsyncQueryRemotely(
+                    streams.applicationServer(),
+                    remote,
+                    options.withRemoteAccessAllowed(false),
+                    now
+                ))
                 .collect(Collectors.toList());
         }
         //Execute the query locally only if the local instance own the queried store.
         servers.stream()
             .filter(StreamsServerInfo::isLocal)
             .findFirst()
-            .ifPresent(o -> results.add(executeLocallyAndGet(localServerName, streams, options)));
+            .ifPresent(o -> results.add(executeQueryLocally(streams, false)));
 
         if (remotes != null) {
             // Blocking
             results.addAll(waitRemoteThenGet(remotes));
         }
 
-        return buildQueryResult(localServerName, results, now);
+        return buildQueryResult(streams.applicationServer(), results, now);
     }
 
     @SuppressWarnings("unchecked")
     private QueryResult<K, V> querySingleHostStateStore(final KafkaStreamsContainer streams,
-                                                        final String localServerName,
                                                         final Queried options,
                                                         final long now) {
-
-        QueryResult<K, V> result = null;
-
-        Serializer<K> keySerializer = query.keySerializer();
-        if (keySerializer == null) {
+        final Serializer<K> keySerializer;
+        if (query.keySerializer() != null) {
+            keySerializer = query.keySerializer();
+        } else {
             // Let's try to get the default configured key serializer, fallback to StringSerializer otherwise.
             final Serde<K> serde = (Serde<K>) streams.getDefaultKeySerde().orElse(Serdes.String());
             keySerializer = serde.serializer();
         }
 
-        final StreamsServerInfo serverInfoForKey = streams.getMetadataForStoreAndKey(
-            query.storeName(),
-            query.key(),
-            keySerializer
+        // Try to query
+        final Retry retry = Retry
+            .withMaxAttempts(options.retries())
+            .withFixedWaitDuration(options.retryBackoff())
+            .stopAfterDuration(options.queryTimeout())
+            .ifExceptionOfType(InvalidStateStoreException.class);
+
+        final String server = streams.applicationServer();
+        return Try
+            .retriable(() -> querySingleHostStateStore(streams, keySerializer, options, now), retry)
+            .recover(t -> Try.success(buildNotAvailableResult(
+                server,
+                "streams is re-initializing or state store '" + query.storeName() + "' is not initialized",
+                now)
+                )
+            ).get();
+    }
+
+    private QueryResult<K, V> querySingleHostStateStore(final KafkaStreamsContainer streams,
+                                                        final Serializer<K> keySerializer ,
+                                                        final Queried options,
+                                                        final long now) throws InvalidStateStoreException {
+        final String serverName = streams.applicationServer();
+
+        final Optional<StreamsServerInfo> info = streams.getMetadataForStoreAndKey(
+                query.storeName(),
+                query.key(),
+                keySerializer
         );
 
-        if (serverInfoForKey == null) {
-            return buildStoreNotFoundResult(localServerName, now);
+        if (info.isEmpty()) {
+            String error = "no metadata available for store '" + query.storeName() + "', key '" + query.key() + "'";
+            return buildNotAvailableResult(serverName, error, now);
         }
 
-        if (serverInfoForKey.isLocal()) {
-            // Execute the query locally
-            final Either<SuccessResultSet<K, V>, ErrorResultSet> localResultSet =
-                executeLocallyAndGet(localServerName, streams, options);
-            result = buildQueryResult(localServerName, Collections.singletonList(localResultSet), now);
+        final StreamsServerInfo server = info.get();
 
+        final QueryResult<K, V> result;
+        if (server.isLocal()) {
+            // Try to execute the query locally, this may throw an InvalidStateStoreException is streams
+            // is re-initializing (task migration) or the store is not initialized (or closed).
+            Either<SuccessResultSet<K, V>, ErrorResultSet> rs = executeQueryLocally(streams, true);
+            result = buildQueryResult(serverName, Collections.singletonList(rs), now);
         } else if (options.remoteAccessAllowed()) {
-
-            final String remoteServerName = serverInfoForKey.hostAndPort();
-            try {
-                CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(serverInfoForKey, query, options);
-                result =  future
-                    .exceptionally(t -> buildInternalErrorResult(localServerName, remoteServerName, t, now))
-                    .get();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                result = buildInternalErrorResult(localServerName, remoteServerName, e, now);
-            } catch (ExecutionException e) {
-                /* cannot happens */
-            }
-        }
-
-        if (result == null) {
+            result = executeQueryRemotely(serverName, server, options, now);
+        } else {
             // build empty result.
-            result = buildQueryResult(localServerName, Collections.emptyList(), now);
+            result = buildQueryResult(serverName, Collections.emptyList(), now);
         }
 
         return result;
     }
 
-    private QueryResult<K, V> buildStoreNotFoundResult(final String server, final long now) {
-        ErrorResultSet error = new ErrorResultSet(
-            server,
-            false,
-            new QueryError("no metadata found for store '" + query.storeName() + "'")
-        );
+    private QueryResult<K, V> buildNotAvailableResult(final String server,
+                                                      final String error,
+                                                      final long now) {
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
         return builder
             .setServer(server)
             .setTook(Time.SYSTEM.milliseconds() - now)
             .setStatus(QueryStatus.NOT_AVAILABLE)
-            .setFailedResultSet(Collections.singletonList(error))
+            .setError(error)
             .build();
     }
 
@@ -280,7 +294,7 @@ public class DistributedQuery<K, V> {
             // TODO must handle exception case.
             return future.handle((results, throwable) ->
                 results.stream()
-                .map(result -> (GlobalResultSet<K, V>)result.getResult())
+                .map(QueryResult::getResult)
                 .flatMap(o -> o.unwrap().stream())
                 .collect(Collectors.toList())).get();
 
@@ -290,11 +304,54 @@ public class DistributedQuery<K, V> {
         }
     }
 
-    private Either<SuccessResultSet<K, V>, ErrorResultSet> executeLocallyAndGet(final String serverName,
-                                                                                final KafkaStreamsContainer streams,
-                                                                                final Queried options) {
+    private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final String localServerName,
+                                                                           final StreamsServerInfo remote,
+                                                                           final Queried options,
+                                                                           final long now) {
+        CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(remote, query, options);
+        return future
+            .thenApply(rs -> rs.server(localServerName))
+            .exceptionally(t -> buildInternalErrorResult(localServerName, remote.hostAndPort(), t, now));
+    }
 
-        return query.execute(streams, options)
+    private QueryResult<K, V> executeQueryRemotely(final String localServerName,
+                                                   final StreamsServerInfo remote,
+                                                   final Queried options,
+                                                   final long now) {
+        final String remoteServerName = remote.hostAndPort();
+        QueryResult<K, V> result = null;
+        try {
+            result = executeAsyncQueryRemotely(localServerName, remote, options, now).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            result = buildInternalErrorResult(localServerName, remoteServerName, e, now);
+        } catch (ExecutionException e) {
+            /* cannot happens */
+        }
+        return result;
+    }
+
+    private Either<SuccessResultSet<K, V>, ErrorResultSet> executeQueryLocally(final KafkaStreamsContainer streams,
+                                                                               final boolean throwFailure) {
+
+        Try<List<KV<K, V>>> executed = query.execute(streams);
+
+        if (throwFailure && executed.isFailure()) {
+            Throwable exception = executed.getThrowable();
+            if (exception instanceof InvalidStateStoreException) {
+                throw (InvalidStateStoreException)exception;
+            }
+            // else ignore
+        }
+
+        final Try<Either<List<KV<K, V>>, List<Error>>> attempt = executed
+            .transform(
+                v -> Try.success(Either.left(v)),
+                t -> Try.success(Either.right(Collections.singletonList(new Error(t))))
+            );
+
+        final String serverName = streams.applicationServer();
+        return attempt.get()
              .left()
              .map(records -> new SuccessResultSet<>(serverName, false, records))
              .right()

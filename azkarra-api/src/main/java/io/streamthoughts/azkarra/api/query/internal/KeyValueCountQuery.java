@@ -23,7 +23,6 @@ import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
@@ -68,7 +67,7 @@ public class KeyValueCountQuery implements LocalStoreQuery<String, Long> {
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<String, Long>>> execute(final KafkaStreamsContainer container, final Queried queried) {
+    public Try<List<KV<String, Long>>> execute(final KafkaStreamsContainer container) {
 
         final LocalStoreAccessor<ReadOnlyKeyValueStore<Object, Object>> accessor =
                 container.getLocalKeyValueStore(storeName);
@@ -78,7 +77,7 @@ public class KeyValueCountQuery implements LocalStoreQuery<String, Long> {
                 .map(v -> Collections.singletonList(new KV<>(STATIC_KEY, v)))
                 .orElse(Collections.emptyList()));
 
-        return new LocalStoreQueryExecutor<>(accessor).execute(reader, queried);
+        return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }
 
     private Reader<ReadOnlyKeyValueStore<Object, Object>, Long> reader() {

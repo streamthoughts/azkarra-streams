@@ -19,14 +19,13 @@
 package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.model.KV;
-import io.streamthoughts.azkarra.api.monad.Try;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
 import io.streamthoughts.azkarra.api.monad.Reader;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
+import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.StoreType;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
@@ -65,15 +64,14 @@ public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container,
-                                       final Queried queried) {
+    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
 
         final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.getLocalKeyValueStore(storeName);
 
         final Reader<ReadOnlyKeyValueStore<K, V>, List<KV<K, V>>> reader = reader()
             .map(LocalStoreQuery::toKeyValueListAndClose);
 
-        return new LocalStoreQueryExecutor<>(accessor).execute(reader, queried);
+        return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }
 
     private Reader<ReadOnlyKeyValueStore<K, V>, KeyValueIterator<K, V>> reader() {

@@ -199,6 +199,15 @@ public class KafkaStreamsContainer {
     }
 
     /**
+     * Gets configured {@link StreamsConfig#APPLICATION_SERVER_CONFIG} for this {@link KafkaStreams} instance.
+     *
+     * @return  a string application.server.
+     */
+    public String applicationServer() {
+        return applicationServer;
+    }
+
+    /**
      * Gets the last observed exception thrown the {@link KafkaStreams} instance.
      *
      * @return a {@link Throwable} instance.
@@ -312,14 +321,15 @@ public class KafkaStreamsContainer {
             .collect(Collectors.toList());
     }
 
-    public <K> StreamsServerInfo getMetadataForStoreAndKey(final String storeName,
+    public <K> Optional<StreamsServerInfo> getMetadataForStoreAndKey(final String storeName,
                                                            final K key,
                                                            final Serializer<K> keySerializer) {
         Objects.requireNonNull(storeName, "storeName cannot be null");
         Objects.requireNonNull(key, "key cannot be null");
         Objects.requireNonNull(keySerializer, "keySerializer cannot be null");
         StreamsMetadata metadata = kafkaStreams.metadataForKey(storeName, key, keySerializer);
-        return metadata == null || metadata.equals(StreamsMetadata.NOT_AVAILABLE) ? null : newServerInfoFor(metadata);
+        return metadata == null || metadata.equals(StreamsMetadata.NOT_AVAILABLE) ?
+            Optional.empty(): Optional.of(newServerInfoFor(metadata));
     }
 
     public <K, V> LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> getLocalKeyValueStore(final String storeName) {

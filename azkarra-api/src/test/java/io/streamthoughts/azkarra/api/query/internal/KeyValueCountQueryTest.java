@@ -21,7 +21,6 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.jupiter.api.Assertions;
@@ -48,7 +47,7 @@ public class KeyValueCountQueryTest {
         when(store.approximateNumEntries()).thenReturn(42L);
         when(mkContainer.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
-        Try<List<KV<String, Long>>> result = query.execute(mkContainer, Queried.immediatly());
+        Try<List<KV<String, Long>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());
         Assertions.assertEquals(KV.of("count", 42L), result.get().get(0));
     }

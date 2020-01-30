@@ -68,6 +68,16 @@ public class QueryResult<K, V> implements Serializable {
         this.result = result;
     }
 
+    public QueryResult<K, V>  server(final String server) {
+        return new QueryResult<>(
+            took,
+            timeout,
+            server,
+            status,
+            result
+        );
+    }
+
     public long getTook() {
         return took;
     }

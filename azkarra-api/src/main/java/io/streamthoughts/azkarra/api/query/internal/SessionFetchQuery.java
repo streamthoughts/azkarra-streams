@@ -23,7 +23,6 @@ import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
@@ -68,8 +67,7 @@ public class SessionFetchQuery<K, V>  extends KeyedLocalStoreQuery<K, Windowed<K
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<Windowed<K>, V>>>  execute(final KafkaStreamsContainer container,
-                                       final Queried queried) {
+    public Try<List<KV<Windowed<K>, V>>>  execute(final KafkaStreamsContainer container) {
 
         final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = container.getLocalSessionStore(storeName());
 
@@ -77,7 +75,7 @@ public class SessionFetchQuery<K, V>  extends KeyedLocalStoreQuery<K, Windowed<K
             reader(key())
            .map(LocalStoreQuery::toKeyValueListAndClose);
 
-        return new LocalStoreQueryExecutor<>(accessor).execute(reader, queried);
+        return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }
 
     private Reader<ReadOnlySessionStore<K, V>, KeyValueIterator<Windowed<K>, V>> reader(final K key) {

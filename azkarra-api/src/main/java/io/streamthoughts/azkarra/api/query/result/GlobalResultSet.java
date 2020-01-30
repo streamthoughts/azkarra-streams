@@ -50,6 +50,11 @@ public class GlobalResultSet<K, V> implements Serializable {
     private final Long total;
 
     /**
+     * The global query result.
+     */
+    private String error;
+
+    /**
      * The returned records.
      */
     private List<ErrorResultSet> failure;
@@ -67,9 +72,26 @@ public class GlobalResultSet<K, V> implements Serializable {
      * @param failure the error record set.
      * @param success the result record set.
      */
+    public GlobalResultSet(final String store,
+                           final String type,
+                           final List<ErrorResultSet> failure,
+                           final List<SuccessResultSet<K, V>> success) {
+        this(store, type, null, failure, success);
+    }
+
+    /**
+     * Creates a new {@link GlobalResultSet} instance.
+     *
+     * @param store   the name of the store.
+     * @param type    the type of the store.
+     * @param type    the global error message.
+     * @param failure the error record set.
+     * @param success the result record set.
+     */
     @JsonCreator
     public GlobalResultSet(@JsonProperty("store") final String store,
                            @JsonProperty("type") final String type,
+                           @JsonProperty("error") final String error,
                            @JsonProperty("failure") final List<ErrorResultSet> failure,
                            @JsonProperty("success") final List<SuccessResultSet<K, V>> success) {
         this.store = store;
@@ -77,12 +99,17 @@ public class GlobalResultSet<K, V> implements Serializable {
         this.total = computeTotal(success);
         this.success = success;
         this.failure = failure;
+        this.error = error;
     }
 
     private Long computeTotal(final List<SuccessResultSet<K, V>> success) {
         return Optional.ofNullable(success)
             .map(l -> l.stream().map(SuccessResultSet::getTotal).reduce(0L,  Long::sum))
             .orElse(0L);
+    }
+
+    public String getError() {
+        return error;
     }
 
     public String getStore() {

@@ -18,12 +18,9 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
-import io.streamthoughts.azkarra.api.errors.Error;
 import io.streamthoughts.azkarra.api.model.KV;
-import io.streamthoughts.azkarra.api.monad.Either;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.QueryInfo;
 import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
@@ -31,7 +28,6 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 
 public class PreparedQuery<K, V> extends QueryInfo {
@@ -69,35 +65,19 @@ public class PreparedQuery<K, V> extends QueryInfo {
      * Executes this query locally on the specified streams instance.
      *
      * @param container the {@link KafkaStreamsContainer} instance.
-     * @param option    the {@link Queried} instance.
      */
-    public Either<List<KV<K, V>>, List<Error>> execute(final KafkaStreamsContainer container,
-                                                       final Queried option) {
-        final Try<List<KV<K, V>>> executed = Try
-            .success(localStoreQuery)
-            .flatMap(q -> q.execute(container, option));
-
-        logErrorIfQueryFailed(executed);
-
-        final Try<Either<List<KV<K, V>>, List<Error>>> attempt = executed
-            .transform(
-                v -> Try.success(Either.left(v)),
-                t -> Try.success(Either.right(Collections.singletonList(new Error(t))))
-            );
-        return attempt.get();
+    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
+        return logFailure(Try.success(localStoreQuery).flatMap(q -> q.execute(container)));
     }
 
-    private void logErrorIfQueryFailed(final Try<List<KV<K, V>>> executed) {
+    private Try<List<KV<K, V>>> logFailure(final Try<List<KV<K, V>>> executed) {
         if (executed.isFailure()) {
-            LOG.error(
-                String.format(
-                    "Error happens while executing query '%s' on '%s' state storeName '%s'with params '%s'.",
-                    localStoreQuery.operationType(),
-                    localStoreQuery.operationType(),
-                    storeName,
-                    parameters
-                ),
-                executed.getThrowable());
+            LOG.error("Error happens while executing query '{}' on state store '{}' with params '{}': {}",
+                localStoreQuery.operationType(),
+                storeName,
+                parameters,
+                executed.getThrowable().getMessage());
         }
+        return executed;
     }
 }

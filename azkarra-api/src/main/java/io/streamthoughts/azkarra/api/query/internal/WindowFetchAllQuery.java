@@ -23,7 +23,6 @@ import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
@@ -75,8 +74,7 @@ public class WindowFetchAllQuery<K, V> implements LocalStoreQuery<Windowed<K>, V
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container,
-                                                 final Queried queried) {
+    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.getLocalWindowStore(store);
 
@@ -84,7 +82,7 @@ public class WindowFetchAllQuery<K, V> implements LocalStoreQuery<Windowed<K>, V
             reader(timeFrom, timeTo)
             .map(LocalStoreQuery::toKeyValueListAndClose);
 
-        return new LocalStoreQueryExecutor<>(accessor).execute(reader, queried);
+        return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }
 
     private Reader<ReadOnlyWindowStore<K, V>, KeyValueIterator<Windowed<K>, V>> reader(final Instant timeFrom,

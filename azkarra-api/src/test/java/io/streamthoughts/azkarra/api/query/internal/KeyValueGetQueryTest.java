@@ -21,7 +21,6 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -48,7 +47,7 @@ public class KeyValueGetQueryTest {
         when(store.get("key")).thenReturn("value");
         when(mkContainer.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
-        Try<List<KV<String, String>>> result = query.execute(mkContainer, Queried.immediatly());
+        Try<List<KV<String, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());
         Assertions.assertEquals(KV.of("key", "value"), result.get().get(0));
     }

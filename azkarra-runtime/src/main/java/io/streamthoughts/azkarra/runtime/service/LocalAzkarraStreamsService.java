@@ -302,34 +302,31 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
                                           final Queried options) {
         final long now = Time.SYSTEM.milliseconds();
 
-        final KafkaStreamsContainer container = getStreamsById(applicationId);
+        final KafkaStreamsContainer streams = getStreamsById(applicationId);
 
-        checkIsRunning(applicationId, container);
-
-        Optional<StreamsServerInfo> server = container.getLocalServerInfo();
-
-        final String localServerName = server.map(StreamsServerInfo::hostAndPort).orElse("N/A");
+        checkIsRunning(streams);
 
         final Optional<List<Error>> errors = query.validate(parameters);
         if (errors.isPresent()) {
             QueryResultBuilder<K, V> queryBuilder = QueryResultBuilder.newBuilder();
+            final String server = streams.applicationServer();
             return queryBuilder
-            .setServer(localServerName)
+            .setServer(server)
             .setTook(Time.SYSTEM.milliseconds() - now)
             .setStatus(QueryStatus.INVALID)
-            .setFailedResultSet(new ErrorResultSet(localServerName, false, QueryError.allOf(errors.get())))
+            .setFailedResultSet(new ErrorResultSet(server, false, QueryError.allOf(errors.get())))
             .build();
         }
 
         final DistributedQuery<K, V> distributed = new DistributedQuery<>(remoteQueryClient, query.prepare(parameters));
-        return distributed.query(container, options);
+        return distributed.query(streams, options);
     }
 
-    private void checkIsRunning(String applicationId, KafkaStreamsContainer container) {
-        if (container.isNotRunning()) {
+    private void checkIsRunning(final KafkaStreamsContainer streams) {
+        if (streams.isNotRunning()) {
             throw new InvalidStreamsStateException(
-                "KafkaStreams instance for id '" + applicationId +
-                "' is not running (" + container.state().value() + ")"
+                "streams instance for id '" + streams.applicationId() +
+                "' is not running (" + streams.state().value() + ")"
             );
         }
     }

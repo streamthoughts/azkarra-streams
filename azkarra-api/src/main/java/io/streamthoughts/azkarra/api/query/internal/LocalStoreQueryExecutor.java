@@ -19,22 +19,19 @@
 package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.model.KV;
-import io.streamthoughts.azkarra.api.monad.Retry;
-import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.monad.Reader;
+import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.Queried;
-import org.apache.kafka.streams.errors.InvalidStateStoreException;
 
 import java.util.List;
 import java.util.function.Function;
 
 /**
- * @param <S> the read-only storeName type.
+ * @param <S> the read-only store type.
  */
 class LocalStoreQueryExecutor<S> {
 
-    private final LocalStoreAccessor<S> storeAccess;
+    private final LocalStoreAccessor<S> store;
 
     /**
      * Creates a new {@link LocalStoreQueryExecutor} instance.
@@ -42,40 +39,30 @@ class LocalStoreQueryExecutor<S> {
      * @param accessor the {@link LocalStoreAccessor} instance.
      */
     LocalStoreQueryExecutor(final LocalStoreAccessor<S> accessor) {
-        this.storeAccess = accessor;
+        this.store = accessor;
     }
 
     /**
      * Executes this execute on the specified instance with the specified options.
      *
      * @param reader     the {@link Reader} instance.
-     * @param options    the {@link Queried} options.
      * @return           the execute result.
      */
-    <K,V> Try<List<KV<K, V>>> execute(final Reader<S, ? extends List<KV<K, V>>> reader,
-                                      final Queried options) {
-
-        final AttemptToReadStore<KV<K, V>> attempt = new AttemptToReadStore<>(reader, options);
-        return storeAccess.get(options).flatMap(attempt);
+    <K,V> Try<List<KV<K, V>>> execute(final Reader<S, ? extends List<KV<K, V>>> reader) {
+        return store.get().flatMap(new AttemptToReadStore<>(reader));
     }
 
     private final class AttemptToReadStore<V> implements Function<S, Try<List<V>>> {
 
         final Reader<S, ? extends List<V>> reader;
-        final Queried options;
 
-        AttemptToReadStore(final Reader<S, ? extends List<V>> reader, final Queried options) {
+        AttemptToReadStore(final Reader<S, ? extends List<V>> reader) {
             this.reader = reader;
-            this.options = options;
         }
 
         @Override
         public Try<List<V>> apply(final S store) {
-            return Try.retriable(() -> reader.apply(store), Retry
-                .withMaxAttempts(options.retries())
-                .withFixedWaitDuration(options.retryBackoff())
-                .stopAfterDuration(options.queryTimeout())
-                .ifExceptionOfType(InvalidStateStoreException.class));
+            return Try.failable(() -> reader.apply(store));
         }
     }
 }

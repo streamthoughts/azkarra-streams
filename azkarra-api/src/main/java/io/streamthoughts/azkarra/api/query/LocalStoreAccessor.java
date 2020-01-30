@@ -19,7 +19,6 @@
 package io.streamthoughts.azkarra.api.query;
 
 import io.streamthoughts.azkarra.api.monad.CheckedSupplier;
-import io.streamthoughts.azkarra.api.monad.Retry;
 import io.streamthoughts.azkarra.api.monad.Try;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 
@@ -45,16 +44,11 @@ public class LocalStoreAccessor<T> {
         this.supplier = supplier;
     }
 
-    public Try<T> get(final Queried options) {
-        if (store != null && store.isSuccess()) {
+    public Try<T> get() {
+        if (store != null && store.isSuccess())
             return store;
-        }
-        store = Try.retriable(supplier, Retry
-             .withMaxAttempts(options.retries())
-             .withFixedWaitDuration(options.retryBackoff())
-             .stopAfterDuration(options.queryTimeout())
-             .ifExceptionOfType(InvalidStateStoreException.class));
 
+        store = Try.failable(supplier);
         return store;
     }
 

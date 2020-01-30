@@ -79,13 +79,13 @@ public class DistributedQueryTest {
     @Test
     public void shouldQueryLocalKVStateStoreGivenKeyQuery() {
         distributed = new DistributedQuery<>(client, buildKeyValueQuery());
-
+        when(streams.applicationServer()).thenReturn("local:1234");
         StreamsServerInfo localServer = newServerInfo("local", true);
         when(streams.getLocalServerInfo())
             .thenReturn(Optional.of(localServer));
 
         when(streams.getMetadataForStoreAndKey(any(), any(), any()))
-            .thenReturn(localServer);
+            .thenReturn(Optional.of(localServer));
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn(42L);
@@ -106,12 +106,12 @@ public class DistributedQueryTest {
     @Test
     public void shouldQueryRemoteKVStateStoreGivenKeyQuery() {
         distributed = new DistributedQuery<>(client, buildKeyValueQuery());
-
+        when(streams.applicationServer()).thenReturn("local:1234");
         when(streams.getLocalServerInfo())
             .thenReturn(Optional.of(newServerInfo("local", true)));
 
         when(streams.getMetadataForStoreAndKey(any(), any(), any()))
-            .thenReturn(newServerInfo("remote", false));
+            .thenReturn(Optional.of(newServerInfo("remote", false)));
 
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediatly());
         assertNotNull(result);
@@ -130,7 +130,7 @@ public class DistributedQueryTest {
         Query<String, Long> all = new QueryBuilder(STORE_NAME).keyValue().all();
         PreparedQuery<String, Long> query = all.prepare();
         distributed = new DistributedQuery<>(client, query);
-
+        when(streams.applicationServer()).thenReturn("local:1234");
         when(streams.getLocalServerInfo())
             .thenReturn(Optional.of(newServerInfo("local", true)));
 

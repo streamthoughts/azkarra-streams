@@ -22,7 +22,6 @@ import io.streamthoughts.azkarra.api.InMemoryKeyValueIterator;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.kstream.Windowed;
@@ -53,7 +52,7 @@ public class SessionFetchQueryTest {
         when(store.fetch(KEY)).thenReturn(new InMemoryKeyValueIterator<>(new Windowed<>("key", null), "value"));
         when(mkContainer.getLocalSessionStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
-        Try<List<KV<Windowed<String>, String>>> result = query.execute(mkContainer, Queried.immediatly());
+        Try<List<KV<Windowed<String>, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());
         Assertions.assertEquals("value", result.get().get(0).value());
     }

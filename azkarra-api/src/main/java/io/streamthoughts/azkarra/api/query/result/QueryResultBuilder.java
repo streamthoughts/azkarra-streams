@@ -42,11 +42,18 @@ public final class QueryResultBuilder<K, V> {
 
     private String storeType;
 
+    private String error;
+
     private List<SuccessResultSet<K, V>> successResultSetList;
 
     private List<ErrorResultSet> failedResultSetList;
 
-    QueryStatus status;
+    private QueryStatus status;
+
+    public QueryResultBuilder<K, V> setError(final String error) {
+        this.error = error;
+        return this;
+    }
 
     public QueryResultBuilder<K, V> setTook(final long took) {
         this.took = took;
@@ -101,6 +108,7 @@ public final class QueryResultBuilder<K, V> {
                 new GlobalResultSet<>(
                     storeName,
                     storeType,
+                    error,
                     failedResultSetList,
                     successResultSetList
                 )

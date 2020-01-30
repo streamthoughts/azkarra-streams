@@ -52,9 +52,8 @@ public interface LocalStoreQuery<K, V> {
      * Executes this query to the specified KafkaStreams application.
      *
      * @param container the {@link KafkaStreamsContainer} instance.
-     * @param queried   the {@link Queried} options.
      */
-    Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final Queried queried);
+    Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container);
 
     static <K, V> List<KV<K, V>> toKeyValueListAndClose(final KeyValueIterator<K, V> it) {
         List<KV<K, V>> result = StreamSupport
