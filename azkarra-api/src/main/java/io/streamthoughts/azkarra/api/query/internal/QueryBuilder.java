@@ -35,35 +35,35 @@ public class QueryBuilder {
     }
 
     /**
-     * Key-Value storeName.
+     * Key-Value store.
      */
     public KeyValueQueryBuilder keyValue() {
         return new KeyValueQueryBuilder(storeName);
     }
 
     /**
-     * Session storeName.
+     * Session store.
      */
     public SessionQueryBuilder session() {
         return new SessionQueryBuilder(storeName);
     }
 
     /**
-     * Window storeName.
+     * Window store.
      */
     public WindowQueryBuilder window() {
         return new WindowQueryBuilder(storeName);
     }
 
     /**
-     * Timestamped Key-Value storeName.
+     * Timestamped Key-Value store.
      */
     public void timestampedKeyValue() {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Timestamped Window storeName
+     * Timestamped Window store
      */
     public void timestampedWindow() {
         throw new UnsupportedOperationException();

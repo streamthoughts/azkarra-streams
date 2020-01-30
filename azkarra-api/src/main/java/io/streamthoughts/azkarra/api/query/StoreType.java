@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.query;
 import io.streamthoughts.azkarra.api.query.internal.KeyValueQueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.Query;
 import io.streamthoughts.azkarra.api.query.internal.QueryBuilder;
+import io.streamthoughts.azkarra.api.query.internal.SessionQueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.WindowQueryBuilder;
 
 import java.util.Arrays;
@@ -29,12 +30,12 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The storeName types supported by {@link org.apache.kafka.streams.KafkaStreams}.
+ * The store types supported by {@link org.apache.kafka.streams.KafkaStreams}.
  */
 public enum StoreType {
 
     /**
-     * Key-Value storeName.
+     * Key-Value store.
      */
     KEY_VALUE {
         @Override
@@ -45,7 +46,7 @@ public enum StoreType {
         }
     },
     /**
-     * Window storeName.
+     * Window store.
      */
     WINDOW {
         @Override
@@ -56,30 +57,32 @@ public enum StoreType {
         }
     },
     /**
-     * Session storeName.
+     * Session store.
      */
     SESSION {
         @Override
+        @SuppressWarnings("unchecked")
         public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            throw new UnsupportedOperationException();
+            SessionQueryBuilder builder = new QueryBuilder(storeName).session();
+            return builder.operation(operation);
         }
     },
     /**
-     * Timestamped Key-Value storeName.
+     * Timestamped Key-Value store.
      */
     TIMESTAMPED_KEY_VALUE {
         @Override
         public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Timestamped Key-Value store is not supported");
         }
     },
     /**
-     * Timestamped Window storeName
+     * Timestamped Window store
      */
     TIMESTAMPED_WINDOW {
         @Override
         public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Timestamped Window store is not supported");
         }
     };
 
