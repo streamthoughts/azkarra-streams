@@ -116,12 +116,13 @@ public class DistributedQueryTest {
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediatly());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
-        assertEquals(newServerInfo("remote", true).hostAndPort(), result.getServer());
+        assertEquals(newServerInfo("local", true).hostAndPort(), result.getServer());
 
         GlobalResultSet<String, Long> rs = result.getResult();
         List<SuccessResultSet<String, Long>> success = rs.getSuccess();
         assertEquals(1, success.size());
         assertEquals(1, success.get(0).getTotal());
+        assertEquals("remote:1234", success.get(0).getServer());
         assertEquals(42L, success.get(0).getRecords().get(0).value());
     }
 

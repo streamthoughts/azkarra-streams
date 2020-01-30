@@ -18,6 +18,8 @@
  */
 package io.streamthoughts.azkarra.api.query;
 
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.errors.AzkarraRetriableException;
 import io.streamthoughts.azkarra.api.errors.Error;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
 import io.streamthoughts.azkarra.api.model.KV;
@@ -102,16 +104,15 @@ public class DistributedQuery<K, V> {
 
         QueryResult<K, V> result;
         if (query.isKeyedQuery()) {
-            result = querySingleHostStateStore(streams, options, now);
+            result = querySingleHostStateStore(streams, options);
         } else {
-            result = queryMultiHostStateStore(streams, options, now);
+            result = queryMultiHostStateStore(streams, options);
         }
-        return result;
+        return result.took(Time.SYSTEM.milliseconds() - now);
     }
 
     private QueryResult<K, V> queryMultiHostStateStore(final KafkaStreamsContainer streams,
-                                                       final Queried options,
-                                                       final long now) {
+                                                       final Queried options) {
 
         final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results = new LinkedList<>();
 
@@ -119,45 +120,43 @@ public class DistributedQuery<K, V> {
         if (servers.isEmpty()) {
             String error = "no metadata available for store '" + query.storeName() + "'";
             LOG.warn(error);
-            return buildNotAvailableResult(streams.applicationServer(), error, now);
+            return buildNotAvailableResult(streams.applicationServer(), error);
         }
 
         List<CompletableFuture<QueryResult<K, V>>> remotes = null;
         if (options.remoteAccessAllowed()) {
             // Forward query to all remote instances
+
+            RemoteQueryContext context = new RemoteQueryContext(streams.applicationServer(), options);
             remotes = servers.stream()
                 .filter(Predicate.not(StreamsServerInfo::isLocal))
-                .map(remote -> executeAsyncQueryRemotely(
-                    streams.applicationServer(),
-                    remote,
-                    options.withRemoteAccessAllowed(false),
-                    now
-                ))
+                .map(context::executeAsyncQueryRemotely)
                 .collect(Collectors.toList());
         }
         //Execute the query locally only if the local instance own the queried store.
+        LocalQueryContext localQueryContext = new LocalQueryContext(streams);
         servers.stream()
             .filter(StreamsServerInfo::isLocal)
             .findFirst()
-            .ifPresent(o -> results.add(executeQueryLocally(streams, false)));
+            .map(target -> localQueryContext.execute(target, false).getResult().unwrap().get(0)
+            ).ifPresent(results::add);
 
         if (remotes != null) {
             // Blocking
             results.addAll(waitRemoteThenGet(remotes));
         }
 
-        return buildQueryResult(streams.applicationServer(), results, now);
+        return buildQueryResult(streams.applicationServer(), results);
     }
 
-    @SuppressWarnings("unchecked")
     private QueryResult<K, V> querySingleHostStateStore(final KafkaStreamsContainer streams,
-                                                        final Queried options,
-                                                        final long now) {
+                                                        final Queried options) {
         final Serializer<K> keySerializer;
         if (query.keySerializer() != null) {
             keySerializer = query.keySerializer();
         } else {
             // Let's try to get the default configured key serializer, fallback to StringSerializer otherwise.
+            @SuppressWarnings("unchecked")
             final Serde<K> serde = (Serde<K>) streams.getDefaultKeySerde().orElse(Serdes.String());
             keySerializer = serde.serializer();
         }
@@ -167,69 +166,73 @@ public class DistributedQuery<K, V> {
             .withMaxAttempts(options.retries())
             .withFixedWaitDuration(options.retryBackoff())
             .stopAfterDuration(options.queryTimeout())
-            .ifExceptionOfType(InvalidStateStoreException.class);
+            .ifExceptionOfType(AzkarraRetriableException.class);
 
         final String server = streams.applicationServer();
         return Try
-            .retriable(() -> querySingleHostStateStore(streams, keySerializer, options, now), retry)
-            .recover(t -> Try.success(buildNotAvailableResult(
-                server,
-                "streams is re-initializing or state store '" + query.storeName() + "' is not initialized",
-                now)
-                )
-            ).get();
+            .retriable(() -> querySingleHostStateStore(streams, keySerializer, options), retry)
+            .recover(t -> {
+                String cause = t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
+                String error = "Retries exhausted for querying state store " + query.storeName() + ". " + cause;
+                return Try.success(buildNotAvailableResult(server, error).timeout(true));
+            }).get();
     }
 
+    /**
+     * Execute this key-query either locally or remotely.
+     *
+     * @param streams       the {@link KafkaStreamsContainer} instance.
+     * @param keySerializer the {@link Serializer} used for serializing the key.
+     * @param options       the {@link Queried} option.
+     *
+     * @return              the {@link QueryResult}
+     * @throws AzkarraException
+     *             A local query can fail if the streams is re-initializing (task migration)
+     *             or the store is not initialized (or closed).
+     *
+     *             A remote query can fail if the remote instance is down and re-balancing has not occurred yet.
+     */
     private QueryResult<K, V> querySingleHostStateStore(final KafkaStreamsContainer streams,
                                                         final Serializer<K> keySerializer ,
-                                                        final Queried options,
-                                                        final long now) throws InvalidStateStoreException {
+                                                        final Queried options) throws AzkarraException {
         final String serverName = streams.applicationServer();
 
         final Optional<StreamsServerInfo> info = streams.getMetadataForStoreAndKey(
-                query.storeName(),
-                query.key(),
-                keySerializer
+            query.storeName(),
+            query.key(),
+            keySerializer
         );
 
         if (info.isEmpty()) {
             String error = "no metadata available for store '" + query.storeName() + "', key '" + query.key() + "'";
-            return buildNotAvailableResult(serverName, error, now);
+            return buildNotAvailableResult(serverName, error);
         }
 
-        final StreamsServerInfo server = info.get();
+        final StreamsServerInfo targetServer = info.get();
 
-        final QueryResult<K, V> result;
-        if (server.isLocal()) {
-            // Try to execute the query locally, this may throw an InvalidStateStoreException is streams
-            // is re-initializing (task migration) or the store is not initialized (or closed).
-            Either<SuccessResultSet<K, V>, ErrorResultSet> rs = executeQueryLocally(streams, true);
-            result = buildQueryResult(serverName, Collections.singletonList(rs), now);
+        final QueryContext<K, V> context;
+        if (targetServer.isLocal()) {
+            context = new LocalQueryContext(streams);
         } else if (options.remoteAccessAllowed()) {
-            result = executeQueryRemotely(serverName, server, options, now);
+            context = new RemoteQueryContext(streams.applicationServer(), options);
         } else {
-            // build empty result.
-            result = buildQueryResult(serverName, Collections.emptyList(), now);
+            context = (target, failable) -> buildQueryResult(serverName, Collections.emptyList());
         }
-
-        return result;
+        return context.execute(targetServer, true);
     }
 
     private QueryResult<K, V> buildNotAvailableResult(final String server,
-                                                      final String error,
-                                                      final long now) {
+                                                      final String error) {
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
         return builder
             .setServer(server)
-            .setTook(Time.SYSTEM.milliseconds() - now)
             .setStatus(QueryStatus.NOT_AVAILABLE)
             .setError(error)
             .build();
     }
 
     private QueryResult<K, V> buildQueryResult(final String localServerName,
-                                               final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results,
-                                               final long now) {
+                                               final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results) {
         final List<ErrorResultSet> errors = results.stream()
                 .filter(Either::isRight)
                 .map(e -> e.right().get()).collect(Collectors.toList());
@@ -243,7 +246,6 @@ public class DistributedQuery<K, V> {
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
         return builder
             .setServer(localServerName)
-            .setTook(Time.SYSTEM.milliseconds() - now)
             .setStatus(status)
             .setFailedResultSet(errors)
             .setSuccessResultSet(success)
@@ -252,8 +254,7 @@ public class DistributedQuery<K, V> {
 
     private QueryResult<K, V> buildInternalErrorResult(final String localServerName,
                                                        final String remoteServerName,
-                                                       final Throwable t,
-                                                       final long now) {
+                                                       final Throwable t) {
         final QueryError error = QueryError.of(t);
         final ErrorResultSet errorResultSet = new ErrorResultSet(
             remoteServerName,
@@ -263,7 +264,6 @@ public class DistributedQuery<K, V> {
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
         return builder
             .setServer(localServerName)
-            .setTook(Time.SYSTEM.milliseconds() - now)
             .setStatus(QueryStatus.ERROR)
             .setFailedResultSet(errorResultSet)
             .build();
@@ -304,57 +304,99 @@ public class DistributedQuery<K, V> {
         }
     }
 
-    private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final String localServerName,
-                                                                           final StreamsServerInfo remote,
-                                                                           final Queried options,
-                                                                           final long now) {
-        CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(remote, query, options);
-        return future
-            .thenApply(rs -> rs.server(localServerName))
-            .exceptionally(t -> buildInternalErrorResult(localServerName, remote.hostAndPort(), t, now));
-    }
 
-    private QueryResult<K, V> executeQueryRemotely(final String localServerName,
-                                                   final StreamsServerInfo remote,
-                                                   final Queried options,
-                                                   final long now) {
-        final String remoteServerName = remote.hostAndPort();
-        QueryResult<K, V> result = null;
-        try {
-            result = executeAsyncQueryRemotely(localServerName, remote, options, now).get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            result = buildInternalErrorResult(localServerName, remoteServerName, e, now);
-        } catch (ExecutionException e) {
-            /* cannot happens */
+
+    private interface QueryContext<K, V>  {
+
+        default QueryResult<K, V> execute(final StreamsServerInfo target) throws AzkarraException {
+            return execute(target, false);
         }
-        return result;
+
+        QueryResult<K, V> execute(final StreamsServerInfo target, final boolean failable) throws AzkarraException;
     }
 
-    private Either<SuccessResultSet<K, V>, ErrorResultSet> executeQueryLocally(final KafkaStreamsContainer streams,
-                                                                               final boolean throwFailure) {
+    private class LocalQueryContext implements QueryContext<K, V> {
 
-        Try<List<KV<K, V>>> executed = query.execute(streams);
+        private final KafkaStreamsContainer streams;
 
-        if (throwFailure && executed.isFailure()) {
-            Throwable exception = executed.getThrowable();
-            if (exception instanceof InvalidStateStoreException) {
-                throw (InvalidStateStoreException)exception;
+        LocalQueryContext(final KafkaStreamsContainer streams) {
+            this.streams = streams;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public QueryResult<K, V> execute(final StreamsServerInfo target, final boolean failable) {
+            Try<List<KV<K, V>>> executed = query.execute(streams);
+
+            if (failable && executed.isFailure()) {
+                Throwable exception = executed.getThrowable();
+                if (exception instanceof InvalidStateStoreException) {
+                    throw new AzkarraRetriableException(exception);
+                }
+                // cannot be retriable, ignored exception.
             }
-            // else ignore
+
+            final Try<Either<List<KV<K, V>>, List<Error>>> attempt = executed
+                .transform(
+                    v -> Try.success(Either.left(v)),
+                    t -> Try.success(Either.right(Collections.singletonList(new Error(t))))
+                );
+
+            final String serverName = streams.applicationServer();
+            final Either<SuccessResultSet<K, V>, ErrorResultSet> rs = attempt.get()
+                .left()
+                .map(records -> new SuccessResultSet<>(serverName, false, records))
+                .right()
+                .map(errors -> new ErrorResultSet(serverName, false, QueryError.allOf(errors)));
+
+            return buildQueryResult(streams.applicationServer(), Collections.singletonList(rs));
+        }
+    }
+
+    private class RemoteQueryContext implements QueryContext<K, V>  {
+
+        private final Queried options;
+        private final String localServerName;
+
+        RemoteQueryContext(final String localServerName,
+                           final Queried options) {
+            this.localServerName = localServerName;
+            this.options = options;
         }
 
-        final Try<Either<List<KV<K, V>>, List<Error>>> attempt = executed
-            .transform(
-                v -> Try.success(Either.left(v)),
-                t -> Try.success(Either.right(Collections.singletonList(new Error(t))))
-            );
+        private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final StreamsServerInfo remote) {
+            return executeAsyncQueryRemotely(remote, false);
+        }
 
-        final String serverName = streams.applicationServer();
-        return attempt.get()
-             .left()
-             .map(records -> new SuccessResultSet<>(serverName, false, records))
-             .right()
-             .map(errors -> new ErrorResultSet(serverName, false, QueryError.allOf(errors)));
+        private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final StreamsServerInfo remote,
+                                                                               final boolean failable) {
+            CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(remote, query, options);
+            if (!failable) {
+                future.exceptionally(t -> buildInternalErrorResult(localServerName, remote.hostAndPort(), t));
+            }
+            return future.thenApply(rs -> rs.server(localServerName));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public QueryResult<K, V> execute(final StreamsServerInfo remote, final boolean failable) {
+            final String remoteServerName = remote.hostAndPort();
+            QueryResult<K, V> result;
+            try {
+                result = executeAsyncQueryRemotely(remote, failable).get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                result = buildInternalErrorResult(localServerName, remoteServerName, e);
+            } catch (ExecutionException e) {
+                // cast should be OK.
+                LOG.error("Cannot query remote state store. {}", e.getCause().getMessage());
+                throw (RuntimeException)e.getCause();
+            }
+            return result;
+        }
     }
 }

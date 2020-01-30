@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.http.query;
 
+import io.streamthoughts.azkarra.api.errors.AzkarraRetriableException;
 import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.QueryInfo;
 import io.streamthoughts.azkarra.api.query.RemoteQueryClient;
@@ -83,6 +84,7 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
         Request request = new Request.Builder()
                 .url(path)
                 .addHeader("Accept", "application/json")
+                .addHeader("Content-type", "application/json")
                 .post(RequestBody.create(json, JSON))
                 .build();
 
@@ -123,8 +125,8 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
          */
         @Override
         public void onFailure(final Call call, final IOException e) {
-            LOG.error("Failed to query remote state store. Cause: {}", e.getMessage());
-            completableFuture.complete(buildQueryResultFor(remoteServerName, QueryError.of(e)));
+            // Failed the future with the IOException so that que the query can be retried by the caller.
+            completableFuture.completeExceptionally(new AzkarraRetriableException(e));
         }
 
         /**

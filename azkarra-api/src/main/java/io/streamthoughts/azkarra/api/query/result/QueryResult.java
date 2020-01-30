@@ -68,16 +68,6 @@ public class QueryResult<K, V> implements Serializable {
         this.result = result;
     }
 
-    public QueryResult<K, V>  server(final String server) {
-        return new QueryResult<>(
-            took,
-            timeout,
-            server,
-            status,
-            result
-        );
-    }
-
     public long getTook() {
         return took;
     }
@@ -96,5 +86,51 @@ public class QueryResult<K, V> implements Serializable {
 
     public GlobalResultSet<K, V> getResult() {
         return result;
+    }
+
+    /**
+     * Sets the server information.
+     *
+     * @param server    the server to set.
+     * @return          a new {@link QueryResult} instance.
+     */
+    public QueryResult<K, V>  server(final String server) {
+        return new QueryResult<>(
+                took,
+                timeout,
+                server,
+                status,
+                result
+        );
+    }
+    /**
+     * Sets the took information.
+     *
+     * @param took    the query took millisecond.
+     * @return        a new {@link QueryResult} instance.
+     */
+    public  QueryResult<K, V> took(final long took) {
+        return new QueryResult<>(
+                took,
+                timeout,
+                server,
+                status,
+                result
+        );
+    }
+    /**
+     * Sets the timeout information.
+     *
+     * @param timeout   is the query timeout.
+     * @return          a new {@link QueryResult} instance.
+     */
+    public  QueryResult<K, V> timeout(final boolean timeout) {
+        return new QueryResult<>(
+                took,
+                timeout,
+                server,
+                status,
+                result
+        );
     }
 }
