@@ -18,14 +18,15 @@
  */
 package io.streamthoughts.azkarra.http.handler;
 
-import io.streamthoughts.azkarra.http.data.StreamsInstanceResponse;
-import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
+import io.streamthoughts.azkarra.http.ExchangeHelper;
+import io.streamthoughts.azkarra.http.data.StreamsInstanceResponse;
 import io.undertow.server.HttpServerExchange;
 
-import java.util.Arrays;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class StreamsGetDetailsHandler extends AbstractStreamHttpHandler implements WithApplication {
 
@@ -58,8 +59,14 @@ public class StreamsGetDetailsHandler extends AbstractStreamHttpHandler implemen
             .setVersion(metadata.version())
             .setDescription(metadata.description())
             .setState(streams.state().value().name(), streams.state().timestamp())
-            .setException(streams.exception().map(e -> Arrays.toString(e.getStackTrace())).orElse(null))
+            .setException(streams.exception().map(StreamsGetDetailsHandler::formatStackTrace).orElse(null))
             .build();
+    }
+
+    private static String formatStackTrace(final Throwable t) {
+        StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }
 

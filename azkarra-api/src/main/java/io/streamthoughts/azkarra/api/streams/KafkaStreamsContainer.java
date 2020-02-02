@@ -35,6 +35,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TopologyDescription;
+import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -82,7 +83,7 @@ public class KafkaStreamsContainer {
     private final LinkedBlockingQueue<StateChangeWatcher> stateChangeWatchers = new LinkedBlockingQueue<>();
 
     /**
-     * The {@link Executor} which is used for starting the internal streams in a non-blocking way.
+     * The {@link Executor} which is used top start/stop the internal streams in a non-blocking way.
      */
     private Executor executor;
 
@@ -119,6 +120,7 @@ public class KafkaStreamsContainer {
             topologyContainer.topology(),
             topologyContainer.streamsConfig()
         );
+        reset();
         setState(State.CREATED);
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
         // https://issues.apache.org/jira/browse/KAFKA-7380
@@ -127,12 +129,23 @@ public class KafkaStreamsContainer {
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
                 (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifeCycleContext(), chain),
-                () -> kafkaStreams.start()
+                () -> {
+                    try {
+                        kafkaStreams.start();
+                    } catch (StreamsException e) {
+                        lastObservedException = e;
+                        throw e;
+                    }
+                }
             );
             streamsLifeCycle.execute();
             return kafkaStreams.state();
 
          }, executor);
+    }
+
+    private void reset() {
+        lastObservedException = null;
     }
 
     private void setState(final State state) {
@@ -225,6 +238,11 @@ public class KafkaStreamsContainer {
         return topologyContainer.metadata();
     }
 
+    /**
+     * Gets the {@link TopologyDescription} for this {@link KafkaStreams} instance.
+     *
+     * @return  a new {@link TopologyDescription} instance.
+     */
     public TopologyDescription topologyDescription() {
         return topologyContainer.description();
     }
@@ -251,17 +269,24 @@ public class KafkaStreamsContainer {
      * @param cleanUp flag to clean up the local streams states.
      */
     public void close(final boolean cleanUp) {
-        StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
-            topologyContainer.interceptors().iterator(),
-            (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifeCycleContext(), chain),
-            () -> {
-                kafkaStreams.close();
-                if (cleanUp) {
-                    kafkaStreams.cleanUp();
+        if (cleanUp) reset();
+        // close() method can be invoked from a StreamThread (i.e through UncaughtExceptionHandler),
+        // to avoid thread deadlock streams instance should be closed using another thread.
+        final Thread shutdownThread = new Thread(() -> {
+            StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
+                topologyContainer.interceptors().iterator(),
+                (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifeCycleContext(), chain),
+                () -> {
+                    kafkaStreams.close();
+                    if (cleanUp) {
+                        kafkaStreams.cleanUp();
+                    }
                 }
-            }
-        );
-        streamsLifeCycle.execute();
+            );
+            streamsLifeCycle.execute();
+        }, "kafka-streams-container-close-thread");
+        shutdownThread.setDaemon(true);
+        shutdownThread.start();
     }
 
     public void restart() {
