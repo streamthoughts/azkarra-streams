@@ -28,7 +28,9 @@
                 {{ streams.name }}
               </li>
               <li class="list-inline-item">{{ streams.since }}</li>
-              <li class="list-inline-item">{{ streams.state.state }} ({{ streams.state.since }})</li>
+              <li class="list-inline-item">
+                {{ streams.state.state }} ({{ streams.state.since }})
+              </li>
            </ul>
         </div>
         <div class="col-3 justify-content-end">
@@ -98,6 +100,17 @@
                     aria-selected="false">
                     Metrics
                  </a>
+                 <template v-if="streams.exception">
+                 <a class="nav-item nav-link"
+                    id="nav-streams-trace-tab"
+                    data-toggle="tab"
+                    href="#nav-streams-error-trace"
+                    role="tab"
+                    aria-controls="nav-streams-error-trace"
+                    aria-selected="false">
+                    Error Trace
+                 </a>
+                 </template>
               </div>
            </nav>
            <div class="tab-content" id="nav-tabContent">
@@ -213,12 +226,17 @@
                     <streams-metrics v-bind:id="id"></streams-metrics>
                 </div>
               </div>
+              <div class="tab-pane fade" id="nav-streams-error-trace" role="tabpanel" aria-labelledby="nav-streams-metrics-tab">
+                <div class="tab-pane-content bg-white rounded box-shadow bordered">
+                    {{ streams.exception }}
+                </div>
+              </div>
            </div>
         </div>
      </div>
      <vue-modal v-if="openConfirmModal">
        <template v-slot:header>
-         <h3> Are you absolutely sure?</h3>
+         <h3>Are you absolutely sure?</h3>
        </template>
        <template v-slot:body>
          <form>

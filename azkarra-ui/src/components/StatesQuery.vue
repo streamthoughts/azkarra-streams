@@ -33,6 +33,9 @@
               <li class="list-inline-item">
                 Server: <span class="badge badge-secondary badge-pill">{{ response.server }}</span>
               </li>
+              <li class="list-inline-item" v-if="response.error">
+                error: <span class="badge badge-secondary badge-pill">{{ response.error }}</span>
+              </li>
            </ul>
             <div v-if="response.result.success">
                 <template v-for="response in response.result.success">
@@ -279,6 +282,7 @@ export default {
 
     execute() {
       let that = this;
+      that.response = {};
       azkarra.sendQueryStateStore(that.buildQuery()).then(function(data){
         that.response = data
       });
