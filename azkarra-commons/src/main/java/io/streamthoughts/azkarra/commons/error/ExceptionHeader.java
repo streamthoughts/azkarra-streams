@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamsthoughts.azkarra.commons.error;
+package io.streamthoughts.azkarra.commons.error;
 
 /**
  * The default record-headers added to record write to the dead-letter-topic.

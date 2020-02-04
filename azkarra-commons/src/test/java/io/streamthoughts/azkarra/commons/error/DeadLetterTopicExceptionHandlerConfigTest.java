@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamsthoughts.azkarra.commons.error;
+package io.streamthoughts.azkarra.commons.error;
 
 import org.apache.kafka.streams.errors.StreamsException;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static io.streamsthoughts.azkarra.commons.error.DeadLetterTopicExceptionHandlerConfig.*;
+import static io.streamthoughts.azkarra.commons.error.DeadLetterTopicExceptionHandlerConfig.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
