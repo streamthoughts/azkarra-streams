@@ -19,51 +19,126 @@
 <template>
 <div id="query-container" class="container-fluid">
 <div class="row">
-    <div class="col">
+    <div class="col-8">
         <h3 class="mb-6">Query Results</h3>
         <span class="text-no-data" v-if="!response.status">No query executed</span>
         <div class="query-response-container" v-if="response.status">
-           <ul class="list-inline left-border">
-              <li class="list-inline-item">
-                Status: <span class="badge badge-success badge-pill">{{ response.status }}</span>
-              </li>
-              <li class="list-inline-item">
-                Took:  <span class="badge badge-info badge-pill">{{ response.took }}ms</span>
-              </li>
-              <li class="list-inline-item">
-                Server: <span class="badge badge-secondary badge-pill">{{ response.server }}</span>
-              </li>
-              <li class="list-inline-item" v-if="response.error">
-                error: <span class="badge badge-secondary badge-pill">{{ response.error }}</span>
-              </li>
-           </ul>
-            <div v-if="response.result.success">
-                <template v-for="response in response.result.success">
-                    <ul class="list-group query-server-response-group">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="badge badge-success">server: {{ response.server }} </span>
-                            <span class="badge badge-info badge-pill">{{ response.total }}</span>
-                        </li>
-                    <template v-for="record in response.records">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>key : <span class="badge badge-dark">{{ record.key }}</span> </span>
-                            <span>value : <span class="badge badge-dark"> {{ record.value }}</span></span>
-                    </template>
-                    </ul>
-                </template>
+            <ul class="list-inline left-border">
+                <li class="list-inline-item">
+                    Status: <span class="badge badge-success badge-pill">{{ response.status }}</span>
+                </li>
+                <li class="list-inline-item">
+                    Took:  <span class="badge badge-info badge-pill">{{ response.took }}ms</span>
+                </li>
+                <li class="list-inline-item">
+                    Server: <span class="badge badge-secondary badge-pill">{{ response.server }}</span>
+                </li>
+                <li class="list-inline-item" v-if="response.error">
+                    error: <span class="badge badge-secondary badge-pill">{{ response.error }}</span>
+                </li>
+            </ul>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input v-model="displayJsonValue"
+                    class="custom-control-input"
+                    type="checkbox"
+                    id="display-option-json-value">
+                <label class="custom-control-label" for="display-option-json-value">JSON Values</label>
             </div>
-            <div v-if="response.result.failure">
-                <template v-for="response in response.result.failure">
-                    <ul class="list-group query-server-response-group">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="badge badge-danger">server: {{ response.server }} </span>
-                            <span class="badge badge-primary badge-pill">{{ response.total }}</span>
-                        </li>
-                        <template v-for="error in response.errors">
-                            <li class="list-group-item">message : {{ error.message }}</li>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input v-model="showRecordIndex"
+                    type="checkbox"
+                    id="display-record-index"
+                    class="custom-control-input">
+                <label class="custom-control-label" for="display-record-index">Show Row Index</label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input v-model="showRecordKey"
+                    type="checkbox"
+                    id="display-record-key"
+                    class="custom-control-input">
+                 <label class="custom-control-label" for="display-record-key">Show Record Keys</label>
+            </div>
+            <div id="query-response-list">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <template v-if="response.result.success">
+                            <template v-for="(success,  responseIndex) in response.result.success">
+                                <a class="nav-item nav-link"
+                                    v-bind:class="{ active: responseIndex == 0 }"
+                                    v-bind:id="'nav-'+ normalizeHtmlAttr(success.server) + '-tab'"
+                                    v-bind:href="'#nav-' + normalizeHtmlAttr(success.server)"
+                                    v-bind:aria-controls="'nav-' + normalizeHtmlAttr(success.server)"
+                                    data-toggle="tab"
+                                    v-bind:aria-selected="responseIndex == 0 ? 'true' : 'false'">
+                                    <span class="badge badge-success">server: {{ success.server }} </span>
+                                    <span class="badge badge-info badge-pill">{{ success.total }}</span>
+                                </a>
+                            </template>
                         </template>
-                    </ul>
-                </template>
+                        <template v-if="response.result.failure">
+                            <template v-for="(failure, responseIndex) in response.result.failure">
+                                <a class="nav-item nav-link"
+                                    v-bind:class="{ active: responseIndex == 0 && !response.result.success }"
+                                    v-bind:id="'nav-'+ normalizeHtmlAttr(failure.server) + '-tab'"
+                                    v-bind:href="'#nav-' + normalizeHtmlAttr(failure.server)"
+                                    v-bind:aria-controls="'nav-' + normalizeHtmlAttr(failure.server)"
+                                    data-toggle="tab"
+                                    v-bind:aria-selected="responseIndex == 0 ? 'true' : 'false'">
+                                    <span class="badge badge-danger">server: {{ failure.server }} </span>
+                                    <span class="badge badge-primary badge-pill">{{ failure.total }}</span>
+                                </a>
+                            </template>
+                        </template>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <template v-for="(success, responseIndex) in response.result.success">
+                        <div class="tab-pane fade"
+                            v-bind:class="{ active: responseIndex == 0, show: responseIndex == 0 }"
+                            v-bind:id="'nav-' + normalizeHtmlAttr(success.server)"
+                             v-bind:aria-labelledby="'nav-' + normalizeHtmlAttr(success.server) + '-tab'"
+                            role="tabpanel">
+                            <div class="tab-pane-content bg-white rounded box-shadow">
+                                <table class="table-records table">
+                                    <thead>
+                                        <tr>
+                                            <th v-if="showRecordIndex" scope="col">#</th>
+                                            <th v-if="showRecordKey">Key</th>
+                                            <th>Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(record, index) in success.records">
+                                            <th v-if="showRecordIndex" scope="row">{{ index + 1 }}</th>
+                                            <td v-if="showRecordKey">{{ record.key }}</td>
+                                            <td>
+                                                 <template v-if="displayJsonValue">
+                                                     <vue-json-pretty
+                                                       :deep="1"
+                                                       :data="record.value"
+                                                       @click="handleClick">
+                                                     </vue-json-pretty>
+                                                 </template>
+                                                 <template v-else>{{ record.value }}</template>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                         </div>
+                    </template>
+                    <template v-for="(failure, responseIndex) in response.result.failure">
+                        <div class="tab-pane fade"
+                            v-bind:class="{ active: responseIndex == 0, show: responseIndex == 0 }"
+                            v-bind:id="'nav-' + normalizeHtmlAttr(failure.server)"
+                             v-bind:aria-labelledby="'nav-' + normalizeHtmlAttr(failure.server) + '-tab'"
+                            role="tabpanel">
+                            <template v-for="error in failure.errors">
+                                <li class="list-group-item"><strong>Trace:</strong><br /> {{ error.message }}</li>
+                            </template>
+                         </div>
+                    </template>
+                </div>
             </div>
         </div>
     </div>
@@ -179,12 +254,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-3">
+                <div class="row mb-3 justify-content-md-center">
+                    <div class="col-md-auto">
                         <button v-on:click.prevent="execute()"
                                 v-bind:disabled="isActionBtnDisabled()" class="btn btn-primary">Execute</button>
                     </div>
-                    <div class="col-3">
+                    <div class="col-md-auto">
                         <button v-on:click.prevent="copyAsCurl()"
                                  v-bind:disabled="isActionBtnDisabled()" class="btn btn-secondary">CopyAsCurl</button>
                     </div>
@@ -197,6 +272,10 @@
 </template>
 <script>
 import azkarra from '../services/azkarra-api.js'
+import VueJsonPretty from 'vue-json-pretty';
+import $ from 'jquery';
+import * as datatables from "datatables.net-bs4";
+import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 
 const windowOperations = [
    { name: 'fetch', params:['key', 'time'] },
@@ -219,8 +298,14 @@ const sessionOperations = [
 ]
 
 export default {
+  components: {
+    'vue-json-pretty' : VueJsonPretty,
+  },
   data: function () {
     return {
+      showRecordKey: true,
+      showRecordIndex: true,
+      displayJsonValue: false,
       response: {},
       query: {
         params: {},
@@ -248,6 +333,9 @@ export default {
   },
   watch: {
     '$route': 'fetchLocalActiveStreams'
+  },
+  updated( ) {
+     $('.table-records').DataTable();
   },
   methods: {
     fetchLocalActiveStreams() {
@@ -278,6 +366,10 @@ export default {
         var result = document.execCommand('copy');
         document.body.removeChild(input);
         return result;
+    },
+
+    normalizeHtmlAttr(str) {
+        return str.replace(/(\.|:)/g, '-');
     },
 
     execute() {
