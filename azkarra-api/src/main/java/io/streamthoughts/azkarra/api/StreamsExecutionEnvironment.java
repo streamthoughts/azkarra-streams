@@ -188,6 +188,8 @@ public interface StreamsExecutionEnvironment {
      *
      * @param cleanUp if local states of each {@link KafkaStreams} instance must be cleanup.
      * @see KafkaStreams#cleanUp() .
+     *
+     * @throws IllegalStateException if the environment is not started.
      */
     void stop(boolean cleanUp);
 
@@ -197,6 +199,9 @@ public interface StreamsExecutionEnvironment {
      * @param id      the {@link ApplicationId} of the streams instance.
      * @param cleanUp if local states of each {@link KafkaStreams} instance must be cleanup.
      * @see KafkaStreams#cleanUp() .
+     *
+     * @throws IllegalStateException if the environment is not started.
+     * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
      */
     void stop(final ApplicationId id, boolean cleanUp);
 
@@ -206,6 +211,9 @@ public interface StreamsExecutionEnvironment {
      *
      * @param id      the {@link ApplicationId} of the streams instance.
      * @see KafkaStreams#cleanUp() .
+     *
+     * @throws IllegalStateException if the environment is not started.
+     * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
      */
     void remove(final ApplicationId id);
 }

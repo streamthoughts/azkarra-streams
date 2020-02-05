@@ -223,5 +223,7 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
     /**
      * Stops this {@link AzkarraContext} instance.
      */
-    void stop();
+    default void stop() {
+        stop(false);
+    }
 }

@@ -46,6 +46,7 @@ import org.apache.kafka.streams.state.StreamsMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -125,12 +126,13 @@ public class KafkaStreamsContainer {
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
         // https://issues.apache.org/jira/browse/KAFKA-7380
         return CompletableFuture.supplyAsync(() -> {
-            LOG.info("Starting Kafka Streams instance for application.id: {}", applicationId());
+            LOG.info("Initializing KafkaStreams container (application.id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
                 (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifeCycleContext(), chain),
                 () -> {
                     try {
+                        LOG.info("Starting KafkaStreams (application.id={})", applicationId());
                         kafkaStreams.start();
                     } catch (StreamsException e) {
                         lastObservedException = e;
@@ -139,7 +141,13 @@ public class KafkaStreamsContainer {
                 }
             );
             streamsLifeCycle.execute();
-            return kafkaStreams.state();
+            KafkaStreams.State state = kafkaStreams.state();
+            LOG.info(
+                "Completed KafkaStreams initialization (application.id={}, state={})",
+                applicationId(),
+                state
+            );
+            return state;
 
          }, executor);
     }
@@ -259,34 +267,51 @@ public class KafkaStreamsContainer {
     /**
      * Closes this {@link KafkaStreams} instance.
      */
-    public void close() {
-        close(false);
+    public void close(final Duration timeout) {
+        close(false, timeout);
     }
 
     /**
-     * Closes this {@link KafkaStreams} instance.
+     * Closes this {@link KafkaStreams} instance and wait up to the timeout for the streams to be closed.
+     *
+     * A {@code timeout} of 0 means to return immediately (i.e {@code Duration.ZERO}
      *
      * @param cleanUp flag to clean up the local streams states.
+     * @param timeout the duration to wait for the streams to shutdown.
+     *
      */
-    public void close(final boolean cleanUp) {
+    public void close(final boolean cleanUp, final Duration timeout) {
         if (cleanUp) reset();
         // close() method can be invoked from a StreamThread (i.e through UncaughtExceptionHandler),
         // to avoid thread deadlock streams instance should be closed using another thread.
         final Thread shutdownThread = new Thread(() -> {
+            LOG.info("Closing KafkaStreams container (application.id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
                 (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifeCycleContext(), chain),
                 () -> {
                     kafkaStreams.close();
                     if (cleanUp) {
+                        LOG.info("Cleanup local states (application.id={})", applicationId());
                         kafkaStreams.cleanUp();
                     }
+                    LOG.info("KafkaStreams closed completely (application.id={})", applicationId());
                 }
             );
             streamsLifeCycle.execute();
         }, "kafka-streams-container-close-thread");
         shutdownThread.setDaemon(true);
         shutdownThread.start();
+
+        final long waitMs = timeout.toMillis();
+        if (waitMs > 0) {
+            try {
+                // This will cause a deadlock if the call is a StreamThread.
+                shutdownThread.join(waitMs);
+            } catch (InterruptedException e) {
+                LOG.debug("Cannot transit to {} within {}ms", KafkaStreams.State.NOT_RUNNING, waitMs);
+            }
+        }
     }
 
     public void restart() {
@@ -305,8 +330,8 @@ public class KafkaStreamsContainer {
                     restartNow();
                 }
             });
-            // While restarting the streams we should not cleanup the local states.
-            close(false);
+            // Do NOT clean-up states while restarting the streams.
+            close(false, Duration.ZERO);
         }
     }
 

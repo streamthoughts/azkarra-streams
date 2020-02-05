@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -202,13 +203,16 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
         LOG.info("Creating topology topic(s): {}", getTopicNames());
         try {
             client.createTopics(newTopics).all().get();
-        } catch (TopicExistsException e) {
-            LOG.warn("Failed to auto create topics - topics already exists. Error can be ignored.");
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause != null & cause instanceof TopicExistsException) {
+                LOG.error("Cannot auto create topics - topics already exists. Error can be ignored.");
+            } else {
+                LOG.error("Cannot auto create topics", e);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             // ignore and attempts to start anyway;
-        } catch (Exception e) {
-            LOG.error("Failed to auto create topics", e);
         }
     }
 

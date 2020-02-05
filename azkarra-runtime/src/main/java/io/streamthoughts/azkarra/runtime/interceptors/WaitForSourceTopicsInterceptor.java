@@ -69,7 +69,6 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
     @Override
     public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
         if (context.getState() == State.CREATED) {
-
             final Set<String> sourceTopics = getSourceTopics(context.getTopology())
                 .stream()
                 .filter(Predicate.not(TopologyUtils::isInternalTopic))
@@ -86,6 +85,7 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
                     // ignore and attempts to start anyway;
                     }
                 });
+                LOG.info("All source topics are created. KafkaStreams instance can be safely started");
             }
         }
         chain.execute();

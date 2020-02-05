@@ -471,7 +471,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public void stop(boolean cleanUp) {
-        LOG.info("Stopping Azkarra context");
+        LOG.info("Stopping AzkarraContext");
         listeners.forEach(listener -> {
             try {
                 listener.onContextStop(this);
@@ -484,19 +484,12 @@ public class DefaultAzkarraContext implements AzkarraContext {
         if (state == State.STARTED) {
             environments().forEach(env -> env.stop(cleanUp));
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stop() {
-        stop(false);
         try {
             componentFactory.close();
         } catch (final IOException e) {
             LOG.warn("Unexpected error while stopping context, " + e.getMessage());
         }
+        LOG.info("AzkarraContext stopped completely");
     }
 
     private void initializeEnvironment(final StreamsExecutionEnvironment env) {

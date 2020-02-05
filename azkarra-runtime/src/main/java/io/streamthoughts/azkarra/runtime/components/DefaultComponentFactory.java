@@ -273,6 +273,7 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public void close() {
+        LOG.info("Closing all registered components");
         componentObjects.values().forEach(GettableComponent::close);
     }
 

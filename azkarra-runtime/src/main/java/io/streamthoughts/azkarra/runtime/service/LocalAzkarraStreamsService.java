@@ -50,6 +50,7 @@ import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import org.apache.kafka.common.MetricName;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -252,7 +253,7 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
     public void stopStreams(final String applicationId, final boolean cleanUp) {
         Objects.requireNonNull(applicationId, "cannot stop streams for an empty application.id");
         final KafkaStreamsContainer container = getStreamsById(applicationId);
-        container.close(cleanUp);
+        container.close(cleanUp, Duration.ZERO); // non-blocking
     }
 
     /**

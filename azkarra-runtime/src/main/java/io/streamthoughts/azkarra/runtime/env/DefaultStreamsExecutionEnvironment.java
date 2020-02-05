@@ -46,6 +46,7 @@ import org.apache.kafka.streams.processor.StateRestoreListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -323,7 +324,9 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             .withTopologyContainer(topologyContainer)
             .withStateListeners(stateListeners)
             .withRestoreListeners(restoreListeners)
-            .withUncaughtExceptionHandler(Collections.singletonList((t, e) -> stop(applicationId, false)))
+            .withUncaughtExceptionHandler(Collections.singletonList(
+                new CloseImmediatelyUncaughtExceptionHandler(applicationId))
+            )
             .withKafkaStreamsFactory(topologyProvider.getKafkaStreamsFactory())
             .build();
 
@@ -362,7 +365,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     @Override
     public void stop(final ApplicationId id, final boolean cleanUp) {
         checkIsStarted();
-        stop(activeStreams.get(id), cleanUp);
+        closeStreamsContainer(id, cleanUp, Duration.ofMillis(Long.MAX_VALUE));
     }
 
     /**
@@ -371,8 +374,26 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     @Override
     public void remove(final ApplicationId id) {
         checkIsStarted();
-        stop(activeStreams.remove(id), true);
+        closeStreamsContainer(id, true, Duration.ofMillis(Long.MAX_VALUE));
         topologies.removeIf(t -> t.isApplication(id));
+    }
+
+    /**
+     * Close the {@link KafkaStreams} instance for the given identifier and wait up to the {@code timeout}
+     * for the instance to be closed.
+     *
+     * @param id        the streams application identifier.
+     * @param cleanUp   flag to indicate if local states must be cleanup.
+     * @param timeout   the duration to wait for the streams to shutdown.
+     *
+     * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
+     */
+    private void closeStreamsContainer(final ApplicationId id, final boolean cleanUp, final Duration timeout) {
+        KafkaStreamsContainer container = activeStreams.get(id);
+        if (container == null) {
+            throw new IllegalStateException("Try to stop a non existing streams applications.");
+        }
+        container.close(cleanUp, timeout);
     }
 
     private void setState(final State started) {
@@ -382,15 +403,8 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     private void checkStreamsIsAlreadyRunningFor(final ApplicationId id) {
         if (activeStreams.containsKey(id)) {
             throw new AlreadyExistsException(
-                    "A streams instance is already registered for application.id '" + id + "'");
+                "A streams instance is already registered for application.id '" + id + "'");
         }
-    }
-
-    private void stop(final KafkaStreamsContainer container, final boolean cleanUp) {
-        if (container == null) {
-            throw new IllegalStateException("Try to stop a non existing streams applications.");
-        }
-        container.close(cleanUp);
     }
 
     private void checkIsStarted() {
@@ -503,7 +517,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             return container;
         }
 
-        public boolean isApplication(final ApplicationId id) {
+        boolean isApplication(final ApplicationId id) {
             return container.applicationId().equals(id);
         }
 
@@ -519,6 +533,28 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             return executed.config()
                 .withFallback(DefaultStreamsExecutionEnvironment.this.getConfiguration())
                 .withFallback(context != null ? context.getConfiguration() : Conf.empty());
+        }
+    }
+
+    private class CloseImmediatelyUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+        private final ApplicationId applicationId;
+
+        /**
+         * Creates a new {@link CloseImmediatelyUncaughtExceptionHandler} instance.
+         *
+         * @param applicationId the id of the application to close if an exception is uncaught.
+         */
+        private CloseImmediatelyUncaughtExceptionHandler(final ApplicationId applicationId) {
+            this.applicationId = Objects.requireNonNull(applicationId, "applicationId cannot be null");
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void uncaughtException(final Thread t, final Throwable e) {
+            closeStreamsContainer(applicationId, false, Duration.ZERO);
         }
     }
 }

@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Collection;
 
 public interface ComponentFactory extends ComponentRegistry, ComponentDescriptorRegistry, Closeable {
@@ -188,4 +189,7 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
      * @return           all instances of type {@link T}.
      */
     <T> Collection<GettableComponent<T>> getAllComponents(final Class<T> type, final Qualifier<T> qualifier);
+
+    @Override
+    void close() throws IOException;
 }
