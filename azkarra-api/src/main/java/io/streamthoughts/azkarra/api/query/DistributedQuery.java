@@ -126,8 +126,9 @@ public class DistributedQuery<K, V> {
         List<CompletableFuture<QueryResult<K, V>>> remotes = null;
         if (options.remoteAccessAllowed()) {
             // Forward query to all remote instances
-
-            RemoteQueryContext context = new RemoteQueryContext(streams.applicationServer(), options);
+            RemoteQueryContext context = new RemoteQueryContext(
+                streams.applicationServer(),
+                options.withRemoteAccessAllowed(false));
             remotes = servers.stream()
                 .filter(Predicate.not(StreamsServerInfo::isLocal))
                 .map(context::executeAsyncQueryRemotely)
