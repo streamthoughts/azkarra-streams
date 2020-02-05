@@ -134,10 +134,13 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
 
     private final TopologyContainerFactory topologyFactory;
 
+    /**
+     * The list of topologies to initialize when the environment is started.
+     */
     private final List<InternalTopologyProvider> topologies;
 
     /**
-     * The list of streams instances currently running.
+     * The list of streams instances currently started.
      */
     private final Map<ApplicationId, KafkaStreamsContainer> activeStreams;
 
@@ -365,7 +368,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     @Override
     public void stop(final ApplicationId id, final boolean cleanUp) {
         checkIsStarted();
-        closeStreamsContainer(id, cleanUp, Duration.ofMillis(Long.MAX_VALUE));
+        closeStreamsContainer(id, cleanUp, Duration.ofMillis(Long.MAX_VALUE), false);
     }
 
     /**
@@ -374,8 +377,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     @Override
     public void remove(final ApplicationId id) {
         checkIsStarted();
-        closeStreamsContainer(id, true, Duration.ofMillis(Long.MAX_VALUE));
-        topologies.removeIf(t -> t.isApplication(id));
+        closeStreamsContainer(id, true, Duration.ofMillis(Long.MAX_VALUE), true);
     }
 
     /**
@@ -385,15 +387,24 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      * @param id        the streams application identifier.
      * @param cleanUp   flag to indicate if local states must be cleanup.
      * @param timeout   the duration to wait for the streams to shutdown.
+     * @param remove    if the instance should be removed from active streams.
      *
      * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
      */
-    private void closeStreamsContainer(final ApplicationId id, final boolean cleanUp, final Duration timeout) {
+    private void closeStreamsContainer(final ApplicationId id,
+                                       final boolean cleanUp,
+                                       final Duration timeout,
+                                       final boolean remove) {
         KafkaStreamsContainer container = activeStreams.get(id);
         if (container == null) {
             throw new IllegalStateException("Try to stop a non existing streams applications.");
         }
         container.close(cleanUp, timeout);
+        if (remove) {
+            activeStreams.remove(id);
+            topologies.removeIf(t -> t.isApplication(id));
+            LOG.info("Streams instance '{}' was removed from environment '{}'", id, name);
+        }
     }
 
     private void setState(final State started) {
@@ -554,7 +565,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
          */
         @Override
         public void uncaughtException(final Thread t, final Throwable e) {
-            closeStreamsContainer(applicationId, false, Duration.ZERO);
+            closeStreamsContainer(applicationId, false, Duration.ZERO, false);
         }
     }
 }
