@@ -58,11 +58,18 @@
                     class="custom-control-input">
                  <label class="custom-control-label" for="display-record-key">Show Record Keys</label>
             </div>
+            <div v-if="isTimestampedStore()" class="custom-control custom-checkbox custom-control-inline">
+                <input v-model="showRecordTimestamp"
+                    type="checkbox"
+                    id="display-record-timestamp"
+                    class="custom-control-input">
+                 <label class="custom-control-label" for="display-record-timestamp">Show Record Timestamps</label>
+            </div>
             <div id="query-response-list">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
                         <template v-if="response.result.success">
-                            <template v-for="(success,  responseIndex) in response.result.success">
+                            <template v-for="(success,  responseIndex) in successResultsOrderByServer">
                                 <a class="nav-item nav-link"
                                     v-bind:class="{ active: responseIndex == 0 }"
                                     v-bind:id="'nav-'+ normalizeHtmlAttr(success.server) + '-tab'"
@@ -71,12 +78,11 @@
                                     data-toggle="tab"
                                     v-bind:aria-selected="responseIndex == 0 ? 'true' : 'false'">
                                     <span class="badge badge-success">server: {{ success.server }} </span>
-                                    <span class="badge badge-info badge-pill">{{ success.total }}</span>
                                 </a>
                             </template>
                         </template>
                         <template v-if="response.result.failure">
-                            <template v-for="(failure, responseIndex) in response.result.failure">
+                            <template v-for="(failure, responseIndex)  in failureResultsOrderByServer">
                                 <a class="nav-item nav-link"
                                     v-bind:class="{ active: responseIndex == 0 && !response.result.success }"
                                     v-bind:id="'nav-'+ normalizeHtmlAttr(failure.server) + '-tab'"
@@ -92,23 +98,25 @@
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
-                    <template v-for="(success, responseIndex) in response.result.success">
+                    <template v-for="(success, responseIndex) in successResultsOrderByServer">
                         <div class="tab-pane fade"
                             v-bind:class="{ active: responseIndex == 0, show: responseIndex == 0 }"
                             v-bind:id="'nav-' + normalizeHtmlAttr(success.server)"
                              v-bind:aria-labelledby="'nav-' + normalizeHtmlAttr(success.server) + '-tab'"
                             role="tabpanel">
                             <div class="tab-pane-content bg-white rounded box-shadow">
+                                <p>Total Record Count: {{ success.total }}</p>
                                 <table class="table-records table">
                                     <thead>
                                         <tr>
                                             <th v-if="showRecordIndex" scope="col">#</th>
                                             <th v-if="showRecordKey">Key</th>
                                             <th>Value</th>
+                                            <th v-if="showRecordTimestamp">Timestamp</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="(record, index) in success.records">
+                                        <tr v-for="(record, index) in success.records" v-bind:key="record.key">
                                             <th v-if="showRecordIndex" scope="row">{{ index + 1 }}</th>
                                             <td v-if="showRecordKey">{{ record.key }}</td>
                                             <td>
@@ -121,13 +129,14 @@
                                                  </template>
                                                  <template v-else>{{ record.value }}</template>
                                             </td>
+                                            <td v-if="showRecordTimestamp">{{ record.timestamp }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                          </div>
                     </template>
-                    <template v-for="(failure, responseIndex) in response.result.failure">
+                    <template v-for="(failure, responseIndex) in failureResultsOrderByServer">
                         <div class="tab-pane fade"
                             v-bind:class="{ active: responseIndex == 0, show: responseIndex == 0 }"
                             v-bind:id="'nav-' + normalizeHtmlAttr(failure.server)"
@@ -143,7 +152,7 @@
         </div>
     </div>
     <div class="col-4">
-        <div class="bg-white box-shadow p-3">
+        <div id="query-col-form" class="bg-white box-shadow p-3">
             <h4 class="mb-3">Store</h4>
             <form>
                 <div class="input-group mb-3">
@@ -273,6 +282,7 @@
 <script>
 import azkarra from '../services/azkarra-api.js'
 import VueJsonPretty from 'vue-json-pretty';
+import _ from 'lodash';
 import $ from 'jquery';
 import * as datatables from "datatables.net-bs4";
 import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
@@ -305,6 +315,7 @@ export default {
     return {
       showRecordKey: true,
       showRecordIndex: true,
+      showRecordTimestamp: true,
       displayJsonValue: false,
       response: {},
       query: {
@@ -321,9 +332,9 @@ export default {
       stateStoreNames: [],
       stores: [
         { typeLabel : 'KeyValue', typeValue :'key_value', operations : keyValueOperations},
-        { typeLabel : 'TimestampedKeyValue', typeValue :'timestamped_key_value', operations : keyValueOperations},
+        { typeLabel : 'TimestampedKeyValue', typeValue :'timestamped_key_value', operations : keyValueOperations, isTimestamped: true},
         { typeLabel : 'Window', typeValue :'window', operations : windowOperations },
-        { typeLabel : 'TimestampedWindow', typeValue :'window', operations : windowOperations },
+        { typeLabel : 'TimestampedWindow', typeValue :'window', operations : windowOperations, isTimestamped: true},
         { typeLabel : 'Session', typeValue :'session', operations : sessionOperations}
       ]
     }
@@ -336,6 +347,15 @@ export default {
   },
   updated( ) {
      $('.table-records').DataTable();
+  },
+  computed: {
+    successResultsOrderByServer: function () {
+      return _.orderBy(this.response.result.success, 'server');
+    },
+
+    failureResultsOrderByServer: function () {
+      return _.orderBy(this.response.result.failure, 'server');
+    }
   },
   methods: {
     fetchLocalActiveStreams() {
@@ -375,6 +395,7 @@ export default {
     execute() {
       let that = this;
       that.response = {};
+      that.showRecordTimestamp = that.isTimestampedStore();
       azkarra.sendQueryStateStore(that.buildQuery()).then(function(data){
         that.response = data
       });
@@ -382,9 +403,13 @@ export default {
 
     isActionBtnDisabled() {
         return !(this.query.store &&
-               this.query.application &&
-               this.query.operation &&
-               this.query.type);
+           this.query.application &&
+           this.query.operation &&
+           this.query.type);
+    },
+
+    isTimestampedStore() {
+        return this.query.type && this.query.type.isTimestamped;
     },
 
     buildQuery() {
@@ -400,5 +425,12 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  #query-col-form {
+    display: block;
+    position: fixed;
+  }
+</style>
 
 
