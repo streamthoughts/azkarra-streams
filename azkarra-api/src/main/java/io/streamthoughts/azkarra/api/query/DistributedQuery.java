@@ -131,7 +131,7 @@ public class DistributedQuery<K, V> {
                 options.withRemoteAccessAllowed(false));
             remotes = servers.stream()
                 .filter(Predicate.not(StreamsServerInfo::isLocal))
-                .map(context::executeAsyncQueryRemotely)
+                .map(server -> context.executeAsyncQueryRemotely(server, false))
                 .collect(Collectors.toList());
         }
         //Execute the query locally only if the local instance own the queried store.
@@ -288,16 +288,23 @@ public class DistributedQuery<K, V> {
     private static <K, V> List<Either<SuccessResultSet<K, V>, ErrorResultSet>> waitRemoteThenGet(
             final List<CompletableFuture<QueryResult<K, V>>> futures
     )  {
+
         final CompletableFuture<List<QueryResult<K, V>>> future = futures
                 .stream()
                 .collect(FutureCollectors.allOf());
         try {
-            // TODO must handle exception case.
-            return future.handle((results, throwable) ->
-                results.stream()
-                .map(QueryResult::getResult)
-                .flatMap(o -> o.unwrap().stream())
-                .collect(Collectors.toList())).get();
+            // futures should never complete exceptionally.
+            return future.handle((results, throwable) -> {
+                if (results != null) {
+                    return results.stream()
+                        .map(QueryResult::getResult)
+                        .flatMap(o -> o.unwrap().stream())
+                        .collect(Collectors.toList());
+                }
+                LOG.error("This exception should not have happened", throwable);
+                // should never happens.
+                return Collections.<Either<SuccessResultSet<K, V>, ErrorResultSet>>emptyList();
+            }).get();
 
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Unexpected error happens while waiting for remote query results", e);
@@ -367,15 +374,11 @@ public class DistributedQuery<K, V> {
             this.options = options;
         }
 
-        private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final StreamsServerInfo remote) {
-            return executeAsyncQueryRemotely(remote, false);
-        }
-
         private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final StreamsServerInfo remote,
                                                                                final boolean failable) {
             CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(remote, query, options);
             if (!failable) {
-                future.exceptionally(t -> buildInternalErrorResult(localServerName, remote.hostAndPort(), t));
+                future = future.exceptionally(t -> buildInternalErrorResult(localServerName, remote.hostAndPort(), t));
             }
             return future.thenApply(rs -> rs.server(localServerName));
         }
