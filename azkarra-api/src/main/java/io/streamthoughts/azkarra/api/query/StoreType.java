@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.query.internal.KeyValueQueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.Query;
 import io.streamthoughts.azkarra.api.query.internal.QueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.SessionQueryBuilder;
+import io.streamthoughts.azkarra.api.query.internal.TimestampedKeyValueQueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.WindowQueryBuilder;
 
 import java.util.Arrays;
@@ -72,8 +73,10 @@ public enum StoreType {
      */
     TIMESTAMPED_KEY_VALUE {
         @Override
+        @SuppressWarnings("unchecked")
         public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            throw new UnsupportedOperationException("Timestamped Key-Value store is not supported");
+            TimestampedKeyValueQueryBuilder builder = new QueryBuilder(storeName).timestampedKeyValue();
+            return builder.operation(operation);
         }
     },
     /**

@@ -19,7 +19,6 @@
 package io.streamthoughts.azkarra.api.query.result;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.streamthoughts.azkarra.api.model.KV;
 
@@ -47,7 +46,6 @@ public class SuccessResultSet<K, V> extends AbstractResultSet implements Seriali
         this.total = records.size();
     }
 
-    @JsonIgnore
     public long getTotal() {
         return total;
     }

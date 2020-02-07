@@ -25,7 +25,7 @@ import io.streamthoughts.azkarra.api.query.StoreOperation;
 
 import java.util.Objects;
 
-public class KeyValueQueryBuilder implements QueryOperationBuilder {
+public class TimestampedKeyValueQueryBuilder implements QueryOperationBuilder {
 
     public static final String QUERY_PARAM_KEY = "key";
     public static final String QUERY_PARAM_KEY_FROM = "keyFrom";
@@ -34,10 +34,10 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
     private final String storeName;
 
     /**
-     * Creates a new {@link KeyValueQueryBuilder} instance.
+     * Creates a new {@link TimestampedKeyValueQueryBuilder} instance.
      * @param storeName     the name of the store.
      */
-    KeyValueQueryBuilder(final String storeName) {
+    TimestampedKeyValueQueryBuilder(final String storeName) {
         Objects.requireNonNull(storeName, "storeName cannot be null");
         this.storeName = storeName;
     }
@@ -61,11 +61,11 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
     }
 
     public <K, V> Query<K, V> all() {
-        return new Query<>(storeName, (store, parameters) -> new KeyValueGetAllQuery<>(store));
+        return new Query<>(storeName, (store, parameters) -> new TimestampedKeyValueGetAllQuery<>(store));
     }
 
     public <K, V> Query<K, V> get() {
-        return new Query<>(storeName, new GetKeyValueQueryBuilder<>());
+        return new Query<>(storeName, new TimestampedGetKeyValueQueryBuilder<>());
     }
 
     public <K, V> Query<K, V> range() {
@@ -76,7 +76,7 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
         return new Query<>(storeName, (store, parameters) -> new KeyValueCountQuery(store));
     }
 
-    static class GetKeyValueQueryBuilder<K, V>  implements LocalStoreQueryBuilder<K, V>  {
+    static class TimestampedGetKeyValueQueryBuilder<K, V>  implements LocalStoreQueryBuilder<K, V>  {
 
         /**
          * {@inheritDoc}
@@ -94,7 +94,7 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
         public LocalStoreQuery<K, V> build(final String store, final QueryParams parameters) {
 
             final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
-            return new KeyValueGetQuery<>(store, p.getValue(QUERY_PARAM_KEY), null);
+            return new TimestampedKeyValueGetQuery<>(store, p.getValue(QUERY_PARAM_KEY), null);
         }
     }
 
@@ -116,7 +116,7 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
         @Override
         public LocalStoreQuery<K, V>  build(final String store, final QueryParams parameters) {
             final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
-            return new KeyValueGetRangeQuery<>(
+            return new TimestampedKeyValueGetRangeQuery<>(
                     store,
                     p.getValue(QUERY_PARAM_KEY_FROM),
                     p.getValue(QUERY_PARAM_KEY_TO)

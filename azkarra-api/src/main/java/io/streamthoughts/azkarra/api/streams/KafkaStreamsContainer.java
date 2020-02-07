@@ -43,6 +43,7 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlySessionStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.apache.kafka.streams.state.StreamsMetadata;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -384,6 +385,11 @@ public class KafkaStreamsContainer {
 
     public <K, V> LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> getLocalKeyValueStore(final String storeName) {
         return getLocalStoreAccess(storeName, QueryableStoreTypes.keyValueStore());
+    }
+
+    public <K, V> LocalStoreAccessor<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>> getLocalTimestampedKeyValueStore(
+            final String storeName) {
+        return getLocalStoreAccess(storeName, QueryableStoreTypes.timestampedKeyValueStore());
     }
 
     public <K, V> LocalStoreAccessor<ReadOnlyWindowStore<K, V>> getLocalWindowStore(final String storeName) {

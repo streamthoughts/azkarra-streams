@@ -41,7 +41,7 @@ public class KeyValueCountQuery implements LocalStoreQuery<String, Long> {
     /**
      * Creates a new {@link KeyValueCountQuery} instance.
      *
-     * @param storeName     the store name..
+     * @param storeName     the name of the store.
      */
     KeyValueCountQuery(final String storeName) {
         this.storeName = storeName;

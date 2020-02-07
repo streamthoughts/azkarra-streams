@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.api;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 
 import java.util.Collections;
 import java.util.Iterator;

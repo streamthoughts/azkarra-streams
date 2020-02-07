@@ -58,8 +58,8 @@ public class QueryBuilder {
     /**
      * Timestamped Key-Value store.
      */
-    public void timestampedKeyValue() {
-        throw new UnsupportedOperationException();
+    public TimestampedKeyValueQueryBuilder timestampedKeyValue() {
+       return new TimestampedKeyValueQueryBuilder(storeName);
     }
 
     /**

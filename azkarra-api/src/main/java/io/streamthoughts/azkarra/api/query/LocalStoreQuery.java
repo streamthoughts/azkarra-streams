@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 
 import java.util.List;
 import java.util.Spliterator;
@@ -58,8 +59,19 @@ public interface LocalStoreQuery<K, V> {
     static <K, V> List<KV<K, V>> toKeyValueListAndClose(final KeyValueIterator<K, V> it) {
         List<KV<K, V>> result = StreamSupport
             .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
-            .map(kv -> new KV<>(kv.key, kv.value))
+            .map(kv -> KV.of(kv.key, kv.value))
             .collect(Collectors.toList());
+        // close the underlying RocksDBs iterator (if persistent) - avoid memory leak.
+        it.close();
+        return result;
+    }
+
+    static <K, V> List<KV<K, V>> toKeyValueAndTimestampListAndClose(
+            final KeyValueIterator<K, ValueAndTimestamp<V>> it) {
+        List<KV<K, V>> result = StreamSupport
+                .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
+                .map(kv -> KV.of(kv.key, kv.value.value(), kv.value.timestamp()))
+                .collect(Collectors.toList());
         // close the underlying RocksDBs iterator (if persistent) - avoid memory leak.
         it.close();
         return result;

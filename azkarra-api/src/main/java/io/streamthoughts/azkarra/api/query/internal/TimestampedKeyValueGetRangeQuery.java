@@ -28,21 +28,29 @@ import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 
 import java.util.List;
+import java.util.Objects;
 
-public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
+public class TimestampedKeyValueGetRangeQuery<K, V> implements LocalStoreQuery<K, V> {
 
-    private String storeName;
+    private final String store;
+    private final K keyFrom;
+    private final K keyTo;
 
     /**
-     * Creates a new {@link KeyValueGetAllQuery} instance.
+     * Creates a new {@link TimestampedKeyValueGetRangeQuery} instance.
      *
-     * @param storeName     the name of the store.
+     * @param keyFrom   the params key from.
+     * @param keyTo     the params key to.
      */
-    KeyValueGetAllQuery(final String storeName) {
-        this.storeName = storeName;
+    TimestampedKeyValueGetRangeQuery(final String store, final K keyFrom, final K keyTo) {
+        this.store = store;
+        this.keyFrom = keyFrom;
+        this.keyTo = keyTo;
     }
+
 
     /**
      * {@inheritDoc}
@@ -57,7 +65,27 @@ public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
      */
     @Override
     public StoreOperation operationType() {
-        return StoreOperation.ALL;
+        return StoreOperation.RANGE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TimestampedKeyValueGetRangeQuery)) return false;
+        TimestampedKeyValueGetRangeQuery<?, ?> that = (TimestampedKeyValueGetRangeQuery<?, ?>) o;
+        return Objects.equals(keyFrom, that.keyFrom) &&
+                Objects.equals(keyTo, that.keyTo);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(keyFrom, keyTo);
     }
 
     /**
@@ -66,15 +94,19 @@ public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
     @Override
     public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
 
-        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.getLocalKeyValueStore(storeName);
+        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>> accessor =
+                container.getLocalKeyValueStore(store);
 
-        final Reader<ReadOnlyKeyValueStore<K, V>, List<KV<K, V>>> reader = reader()
-            .map(LocalStoreQuery::toKeyValueListAndClose);
+        final Reader<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>, List<KV<K, V>>> reader =
+                reader(keyFrom, keyTo).map(LocalStoreQuery::toKeyValueAndTimestampListAndClose);
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }
 
-    private Reader<ReadOnlyKeyValueStore<K, V>, KeyValueIterator<K, V>> reader() {
-        return Reader.of(ReadOnlyKeyValueStore::all);
+    private Reader<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>, KeyValueIterator<K, ValueAndTimestamp<V>>> reader(
+            final K keyFrom,
+           final K keyTo) {
+       return Reader.of(store -> store.range(keyFrom, keyTo));
     }
+
 }

@@ -37,7 +37,7 @@ public class KeyValueGetQuery<K, V> extends KeyedLocalStoreQuery<K, K, V> {
     /**
      * Creates a new {@link KeyValueGetQuery} instance.
      *
-     * @param storeName     the storeName name.
+     * @param storeName     the name of the store.
      * @param key           the record key.
      * @param keySerializer the key serializer.
      */

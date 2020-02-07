@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.api.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.kafka.streams.KeyValue;
 
@@ -33,17 +34,23 @@ import java.util.Optional;
  * @param <K>   the key type.
  * @param <V>   the value type.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class KV<K, V> implements Comparable<KV<K, V>>, Serializable {
 
     private final K key;
     private final V value;
+    private final Long timestamp;
 
     public static <K, V> KV<K, V> of(final K key, V value) {
-        return new KV<>(key, value);
+        return new KV<>(key, value, null);
+    }
+
+    public static <K, V> KV<K, V> of(final K key, V value, final Long timestamp) {
+        return new KV<>(key, value, timestamp);
     }
 
     public static <K, V> KV<K, V> of(final KeyValue<K, V> kv) {
-        return new KV<>(kv.key, kv.value);
+        return of(kv.key, kv.value);
     }
 
     /**
@@ -52,11 +59,25 @@ public class KV<K, V> implements Comparable<KV<K, V>>, Serializable {
      * @param key       the record key.
      * @param value     the record value.
      */
+    public KV(final K key,
+              final V value) {
+        this(key, value, null);
+    }
+
+    /**
+     * Creates a new {@link KV} instance.
+     *
+     * @param key       the record key.
+     * @param value     the record value.
+     * @param timestamp the record timestamp, can be {@code null}.
+     */
     @JsonCreator
     public KV(@JsonProperty("key") final K key,
-              @JsonProperty("value") final V value) {
+              @JsonProperty("value") final V value,
+              @JsonProperty("timestamp") final Long timestamp) {
         this.key = key;
         this.value = value;
+        this.timestamp = timestamp;
     }
 
     public Optional<K> nullableKey() {
@@ -77,6 +98,11 @@ public class KV<K, V> implements Comparable<KV<K, V>>, Serializable {
         return value;
     }
 
+    @JsonProperty("timestamp")
+    public Long timestamp() {
+        return timestamp;
+    }
+
     public KeyValue<K, V> toKafkaKeyValue() {
         return KeyValue.pair(key, value);
     }
@@ -90,7 +116,8 @@ public class KV<K, V> implements Comparable<KV<K, V>>, Serializable {
         if (!(o instanceof KV)) return false;
         KV<?, ?> keyValue = (KV<?, ?>) o;
         return Objects.equals(key, keyValue.key) &&
-                Objects.equals(value, keyValue.value);
+               Objects.equals(value, keyValue.value) &&
+               Objects.equals(timestamp, keyValue.timestamp);
     }
 
     @JsonIgnore
@@ -98,8 +125,12 @@ public class KV<K, V> implements Comparable<KV<K, V>>, Serializable {
         return key == null;
     }
 
+    /**
+     * Swaps the key and value.
+     * @return
+     */
     public KV<V, K> swap() {
-        return new KV<>(value, key);
+        return new KV<>(value, key, timestamp);
     }
 
     /**
@@ -107,7 +138,7 @@ public class KV<K, V> implements Comparable<KV<K, V>>, Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(key, value);
+        return Objects.hash(key, value, timestamp);
     }
 
     /**
@@ -115,7 +146,7 @@ public class KV<K, V> implements Comparable<KV<K, V>>, Serializable {
      */
     @Override
     public String toString() {
-        return "[key=" + key + ", value=" + value + "]";
+        return "[key=" + key + ", value=" + value + ", timestamp=" + timestamp + "]";
     }
 
     /**

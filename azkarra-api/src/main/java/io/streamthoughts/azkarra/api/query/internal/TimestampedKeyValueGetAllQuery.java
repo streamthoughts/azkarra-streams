@@ -28,19 +28,20 @@ import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 
 import java.util.List;
 
-public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
+public class TimestampedKeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
 
     private String storeName;
 
     /**
-     * Creates a new {@link KeyValueGetAllQuery} instance.
+     * Creates a new {@link TimestampedKeyValueGetAllQuery} instance.
      *
      * @param storeName     the name of the store.
      */
-    KeyValueGetAllQuery(final String storeName) {
+    TimestampedKeyValueGetAllQuery(final String storeName) {
         this.storeName = storeName;
     }
 
@@ -66,15 +67,16 @@ public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
     @Override
     public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
 
-        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.getLocalKeyValueStore(storeName);
+        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>> accessor =
+                container.getLocalTimestampedKeyValueStore(storeName);
 
-        final Reader<ReadOnlyKeyValueStore<K, V>, List<KV<K, V>>> reader = reader()
-            .map(LocalStoreQuery::toKeyValueListAndClose);
+        final Reader<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>, List<KV<K, V>>> reader =
+            reader().map(LocalStoreQuery::toKeyValueAndTimestampListAndClose);
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }
 
-    private Reader<ReadOnlyKeyValueStore<K, V>, KeyValueIterator<K, V>> reader() {
+    private Reader<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>, KeyValueIterator<K, ValueAndTimestamp<V>>> reader() {
         return Reader.of(ReadOnlyKeyValueStore::all);
     }
 }

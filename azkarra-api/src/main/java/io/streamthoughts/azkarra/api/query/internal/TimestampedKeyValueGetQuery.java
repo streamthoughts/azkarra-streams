@@ -22,26 +22,30 @@ import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
-
-    private String storeName;
+public class TimestampedKeyValueGetQuery<K, V> extends KeyedLocalStoreQuery<K, K, V> {
 
     /**
-     * Creates a new {@link KeyValueGetAllQuery} instance.
+     * Creates a new {@link TimestampedKeyValueGetQuery} instance.
      *
      * @param storeName     the name of the store.
+     * @param key           the record key.
+     * @param keySerializer the key serializer.
      */
-    KeyValueGetAllQuery(final String storeName) {
-        this.storeName = storeName;
+    TimestampedKeyValueGetQuery(final String storeName,
+                                final K key,
+                                final Serializer<K> keySerializer) {
+        super(storeName, key, keySerializer);
     }
 
     /**
@@ -57,7 +61,7 @@ public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
      */
     @Override
     public StoreOperation operationType() {
-        return StoreOperation.ALL;
+        return StoreOperation.GET;
     }
 
     /**
@@ -66,15 +70,18 @@ public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
     @Override
     public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
 
-        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.getLocalKeyValueStore(storeName);
+        LocalStoreAccessor<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>> accessor =
+                container.getLocalTimestampedKeyValueStore(storeName());
 
-        final Reader<ReadOnlyKeyValueStore<K, V>, List<KV<K, V>>> reader = reader()
-            .map(LocalStoreQuery::toKeyValueListAndClose);
+        final Reader<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>, List<KV<K, V>>> reader =
+            reader(key()).map(value -> Optional.ofNullable(value)
+                .map(v -> Collections.singletonList(KV.of(key(), v.value(), v.timestamp())))
+                .orElse(Collections.emptyList()));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }
 
-    private Reader<ReadOnlyKeyValueStore<K, V>, KeyValueIterator<K, V>> reader() {
-        return Reader.of(ReadOnlyKeyValueStore::all);
+    private Reader<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>, ValueAndTimestamp<V>> reader(final K key) {
+        return Reader.of(store -> store.get(key));
     }
 }
