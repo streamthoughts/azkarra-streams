@@ -68,7 +68,7 @@ public class TimestampedKeyValueGetQuery<K, V> extends KeyedLocalStoreQuery<K, K
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         LocalStoreAccessor<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>> accessor =
                 container.getLocalTimestampedKeyValueStore(storeName());

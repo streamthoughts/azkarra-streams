@@ -91,7 +91,7 @@ public class DistributedQueryTest {
         when(store.get("key")).thenReturn(42L);
         when(streams.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
-        QueryResult<String, Long> result = distributed.query(streams, Queried.immediatly());
+        QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
         assertEquals(localServer.hostAndPort(), result.getServer());
@@ -113,7 +113,7 @@ public class DistributedQueryTest {
         when(streams.getMetadataForStoreAndKey(any(), any(), any()))
             .thenReturn(Optional.of(newServerInfo("remote", false)));
 
-        QueryResult<String, Long> result = distributed.query(streams, Queried.immediatly());
+        QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
         assertEquals(newServerInfo("local", true).hostAndPort(), result.getServer());
@@ -145,7 +145,7 @@ public class DistributedQueryTest {
         when(store.all()).thenReturn(new InMemoryKeyValueIterator<>("key", 42L));
         when(streams.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
-        QueryResult<String, Long> result = distributed.query(streams, Queried.immediatly());
+        QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
         assertEquals(newServerInfo("local", true).hostAndPort(), result.getServer());

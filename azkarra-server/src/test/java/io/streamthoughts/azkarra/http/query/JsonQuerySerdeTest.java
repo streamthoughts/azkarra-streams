@@ -105,7 +105,7 @@ public class JsonQuerySerdeTest {
             "\"query\":{\"get\":{}}," +
             "\"type\":\"key_value\"," +
             "\"set_options\":{" +
-            "\"retries\":0,\"retry_backoff_ms\":0,\"query_timeout_ms\":0,\"remote_access_allowed\":false}}"
+            "\"retries\":0,\"retry_backoff_ms\":0,\"query_timeout_ms\":0,\"remote_access_allowed\":false,\"limit\":-1}}"
             , json);
     }
 }

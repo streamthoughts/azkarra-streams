@@ -223,6 +223,16 @@
                 <hr class="mb-4">
                 <h4 class="mb-3">Options</h4>
                 <div class="row mb-3">
+                    <label for="query-options-limit" class="col-sm-2 col-form-label">Limit</label>
+                    <div class="col-sm-10">
+                        <input v-model:value="query.options.limit"
+                               type="text"
+                               class="form-control"
+                               id="query-options-limit"
+                               placeholder="The maximum number of records to return (per host)">
+                    </div>
+                </div>
+                <div class="row mb-3">
                     <label for="query-options-timeout" class="col-sm-2 col-form-label">Timeout</label>
                     <div class="col-sm-10">
                         <input v-model:value="query.options.query_timeout_ms"

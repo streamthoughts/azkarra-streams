@@ -67,7 +67,7 @@ public class KeyValueGetQuery<K, V> extends KeyedLocalStoreQuery<K, K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.getLocalKeyValueStore(storeName());
 

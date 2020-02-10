@@ -66,13 +66,13 @@ public class TimestampedWindowGetAllQuery<K, V> implements LocalStoreQuery<Windo
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> accessor =
                 container.getLocalTimestampedWindowStore(store);
 
         final Reader<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>, List<KV<Windowed<K>, V>>> reader =
-            reader().map(LocalStoreQuery::toKeyValueAndTimestampListAndClose);
+            reader().map(iterator -> LocalStoreQuery.toKeyValueAndTimestampListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

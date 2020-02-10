@@ -140,19 +140,21 @@ public class JsonQuerySerde {
                 options.retries(),
                 options.retryBackoff().toMillis(),
                 options.queryTimeout().toMillis(),
-                options.remoteAccessAllowed()
+                options.remoteAccessAllowed(),
+                options.limit()
         ));
         return JsonSerdes.serialize(json);
     }
 
     private static Queried newQueried(final QueryOptionsRequest options) {
         return options == null ?
-            Queried.immediatly() :
+            Queried.immediately() :
             new Queried(
                 Optional.ofNullable(options.getRetries()).orElse(0),
                 Duration.ofMillis(Optional.ofNullable(options.getRetryBackoff()).orElse(0L)),
                 Duration.ofMillis(Optional.ofNullable(options.getQueryTimeout()).orElse(0L)),
-                Optional.ofNullable(options.isRemoteAccessAllowed()).orElse(true)
+                Optional.ofNullable(options.isRemoteAccessAllowed()).orElse(true),
+                Optional.ofNullable(options.limit()).orElse(-1L)
             );
     }
 }

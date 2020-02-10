@@ -72,7 +72,7 @@ public class TimestampedWindowFetchQuery<K, V> extends KeyedLocalStoreQuery<K, K
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> accessor =
                 container.getLocalTimestampedWindowStore(storeName());

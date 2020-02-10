@@ -78,14 +78,14 @@ public class TimestampedWindowFetchTimeRangeQuery<K, V> implements LocalStoreQue
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<Long, V>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<Long, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> accessor =
                 container.getLocalTimestampedWindowStore(store);
 
         final Reader<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>, List<KV<Long, V>>> reader =
             reader(key, timeFrom, timeTo)
-            .map(LocalStoreQuery::toKeyValueAndTimestampListAndClose);
+            .map(iterator -> LocalStoreQuery.toKeyValueAndTimestampListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

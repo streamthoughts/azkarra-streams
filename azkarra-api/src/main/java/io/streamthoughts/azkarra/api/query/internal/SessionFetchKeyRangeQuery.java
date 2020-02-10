@@ -75,13 +75,13 @@ public class SessionFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<Windowed<K>, V>>>  execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<Windowed<K>, V>>>  execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = container.getLocalSessionStore(store);
 
         final Reader<ReadOnlySessionStore<K, V>, List<KV<Windowed<K>, V>>> reader =
             reader(keyFrom, keyTo)
-           .map(LocalStoreQuery::toKeyValueListAndClose);
+           .map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

@@ -66,8 +66,8 @@ public class PreparedQuery<K, V> extends QueryInfo {
      *
      * @param container the {@link KafkaStreamsContainer} instance.
      */
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
-        return logFailure(Try.success(localStoreQuery).flatMap(q -> q.execute(container)));
+    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
+        return logFailure(Try.success(localStoreQuery).flatMap(q -> q.execute(container, limit)));
     }
 
     private Try<List<KV<K, V>>> logFailure(final Try<List<KV<K, V>>> executed) {

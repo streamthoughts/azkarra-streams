@@ -65,12 +65,12 @@ public class WindowGetAllQuery<K, V> implements LocalStoreQuery<Windowed<K>, V> 
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.getLocalWindowStore(store);
 
         final Reader<ReadOnlyWindowStore<K, V>, List<KV<Windowed<K>, V>>> reader =
-            reader().map(LocalStoreQuery::toKeyValueListAndClose);
+            reader().map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

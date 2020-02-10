@@ -36,15 +36,19 @@ public class QueryOptionsRequest {
 
     private final Boolean remoteAccessAllowed;
 
+    private final Long limit;
+
     @JsonCreator
     public QueryOptionsRequest(@JsonProperty("retries") final Integer retries,
                                @JsonProperty("retry_backoff_ms") final Long retryBackoff,
                                @JsonProperty("query_timeout_ms") final Long queryTimeout,
-                               @JsonProperty("remote_access_allowed") final Boolean remoteAccessAllowed) {
+                               @JsonProperty("remote_access_allowed") final Boolean remoteAccessAllowed,
+                               @JsonProperty("limit") final Long limit) {
         this.retries = retries;
         this.retryBackoff = retryBackoff;
         this.queryTimeout = queryTimeout;
         this.remoteAccessAllowed = remoteAccessAllowed;
+        this.limit = limit;
     }
 
     @JsonProperty("retries")
@@ -65,5 +69,10 @@ public class QueryOptionsRequest {
     @JsonProperty("remote_access_allowed")
     public Boolean isRemoteAccessAllowed() {
         return remoteAccessAllowed;
+    }
+
+    @JsonProperty("limit")
+    public Long limit() {
+        return limit;
     }
 }

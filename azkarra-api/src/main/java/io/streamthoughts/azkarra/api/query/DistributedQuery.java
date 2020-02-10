@@ -135,7 +135,7 @@ public class DistributedQuery<K, V> {
                 .collect(Collectors.toList());
         }
         //Execute the query locally only if the local instance own the queried store.
-        LocalQueryContext localQueryContext = new LocalQueryContext(streams);
+        LocalQueryContext localQueryContext = new LocalQueryContext(streams, options);
         servers.stream()
             .filter(StreamsServerInfo::isLocal)
             .findFirst()
@@ -213,7 +213,7 @@ public class DistributedQuery<K, V> {
 
         final QueryContext<K, V> context;
         if (targetServer.isLocal()) {
-            context = new LocalQueryContext(streams);
+            context = new LocalQueryContext(streams, options);
         } else if (options.remoteAccessAllowed()) {
             context = new RemoteQueryContext(streams.applicationServer(), options);
         } else {
@@ -326,9 +326,11 @@ public class DistributedQuery<K, V> {
     private class LocalQueryContext implements QueryContext<K, V> {
 
         private final KafkaStreamsContainer streams;
+        private final Queried queried;
 
-        LocalQueryContext(final KafkaStreamsContainer streams) {
+        LocalQueryContext(final KafkaStreamsContainer streams, final Queried queried) {
             this.streams = streams;
+            this.queried = queried;
         }
 
         /**
@@ -336,7 +338,7 @@ public class DistributedQuery<K, V> {
          */
         @Override
         public QueryResult<K, V> execute(final StreamsServerInfo target, final boolean failable) {
-            Try<List<KV<K, V>>> executed = query.execute(streams);
+            Try<List<KV<K, V>>> executed = query.execute(streams, queried.limit());
 
             if (failable && executed.isFailure()) {
                 Throwable exception = executed.getThrowable();

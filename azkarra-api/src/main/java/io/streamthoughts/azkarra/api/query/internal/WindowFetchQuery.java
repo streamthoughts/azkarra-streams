@@ -71,7 +71,7 @@ public class WindowFetchQuery<K, V> extends KeyedLocalStoreQuery<K, K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.getLocalWindowStore(storeName());
 

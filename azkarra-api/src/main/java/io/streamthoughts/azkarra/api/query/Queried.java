@@ -24,19 +24,20 @@ import java.util.Objects;
 public class Queried {
 
     public static Queried with(final Duration timeout) {
-        return new Queried(0, Duration.ZERO, timeout, true);
+        return new Queried(0, Duration.ZERO, timeout, true, -1L);
     }
 
     public static Queried locally() {
-        return new Queried(0, Duration.ZERO, Duration.ZERO,false);
+        return new Queried(0, Duration.ZERO, Duration.ZERO,false, -1L);
     }
 
-    public static Queried immediatly() {
-        return new Queried(0, Duration.ZERO, Duration.ZERO,true);
+    public static Queried immediately() {
+        return new Queried(0, Duration.ZERO, Duration.ZERO,true, -1L);
     }
 
-    public static Queried withRetries(final int retries, final Duration retryBackoff) {
-        return new Queried(retries, retryBackoff, retryBackoff.multipliedBy(retries + 1), true);
+    public static Queried retries(final int retries, final Duration retryBackoff) {
+        Duration queryTimeout = retryBackoff.multipliedBy(retries + 1);
+        return new Queried(retries, retryBackoff, queryTimeout, true, -1L);
     }
 
     /**
@@ -60,37 +61,49 @@ public class Queried {
     private final boolean remoteAccessAllowed;
 
     /**
+     * Only return the first n records.
+     */
+    private final Long limit;
+
+    /**
      * Creates a new {@link Queried} instance.
      *
      * @param retries               {@link #retries}.
      * @param retryBackoff          {@link #retryBackoff}.
      * @param queryTimeout          {@link #queryTimeout}.
      * @param remoteAccessAllowed   {@link #retryBackoff}.
+     * @param limit                 {@link #limit}.
      */
     public Queried(final int retries,
                    final Duration retryBackoff,
                    final Duration queryTimeout,
-                   final boolean remoteAccessAllowed) {
+                   final boolean remoteAccessAllowed,
+                   final Long limit) {
         this.retries = retries;
         this.retryBackoff = retryBackoff;
         this.queryTimeout = queryTimeout;
         this.remoteAccessAllowed = remoteAccessAllowed;
+        this.limit = limit;
     }
 
     public Queried withRemoteAccessAllowed(final boolean remoteAccessAllowed) {
-        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed);
+        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
     public Queried withQueryTimeout(final Duration timeout) {
-        return new Queried(retries, retryBackoff, timeout, remoteAccessAllowed);
+        return new Queried(retries, retryBackoff, timeout, remoteAccessAllowed, limit);
     }
 
     public Queried withRetries(final int retries) {
-        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed);
+        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
     public Queried withRetryBackoffMs(final Duration retryBackoff) {
-        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed);
+        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
+    }
+
+    public Queried withLimit(final Long limit) {
+        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
     /**
@@ -130,6 +143,15 @@ public class Queried {
     }
 
     /**
+     * Gets the maximum number of records to return. -1 is infinite.
+     *
+     * @return  the limit.
+     */
+    public Long limit() {
+        return limit;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -140,7 +162,8 @@ public class Queried {
         return retries == queried.retries &&
                 remoteAccessAllowed == queried.remoteAccessAllowed &&
                 Objects.equals(retryBackoff, queried.retryBackoff) &&
-                Objects.equals(queryTimeout, queried.queryTimeout);
+                Objects.equals(queryTimeout, queried.queryTimeout) &&
+                Objects.equals(limit, queried.limit);
     }
 
     /**
@@ -148,7 +171,7 @@ public class Queried {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(retries, retryBackoff, queryTimeout, remoteAccessAllowed);
+        return Objects.hash(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
     /**
@@ -161,6 +184,7 @@ public class Queried {
                 ", retryBackoff=" + retryBackoff +
                 ", queryTimeout=" + queryTimeout +
                 ", remoteAccessAllowed=" + remoteAccessAllowed +
+                ", limit=" + limit +
                 '}';
     }
 }

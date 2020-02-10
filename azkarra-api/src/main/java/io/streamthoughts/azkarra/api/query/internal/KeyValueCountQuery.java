@@ -67,7 +67,8 @@ public class KeyValueCountQuery implements LocalStoreQuery<String, Long> {
      * {@inheritDoc}
      */
     @Override
-    public Try<List<KV<String, Long>>> execute(final KafkaStreamsContainer container) {
+    public Try<List<KV<String, Long>>> execute(final KafkaStreamsContainer container,
+                                               final long limit) {
 
         final LocalStoreAccessor<ReadOnlyKeyValueStore<Object, Object>> accessor =
                 container.getLocalKeyValueStore(storeName);

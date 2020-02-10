@@ -28,12 +28,15 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
  * Default interface to execute a local state storeName.
  */
 public interface LocalStoreQuery<K, V> {
+
+    int NO_LIMIT = -1;
 
     /**
      * The storeName type on which this query can be executed.
@@ -54,24 +57,44 @@ public interface LocalStoreQuery<K, V> {
      *
      * @param container the {@link KafkaStreamsContainer} instance.
      */
-    Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container);
+    default Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
+        return execute(container, NO_LIMIT);
+    }
 
-    static <K, V> List<KV<K, V>> toKeyValueListAndClose(final KeyValueIterator<K, V> it) {
-        List<KV<K, V>> result = StreamSupport
-            .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
-            .map(kv -> KV.of(kv.key, kv.value))
-            .collect(Collectors.toList());
+    /**
+     * Executes this query to the specified KafkaStreams application.
+     *
+     * @param container the {@link KafkaStreamsContainer} instance.
+     * @param limit     the maximum number of records the result should be limited to (-1 means no limit).
+     */
+    Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, long limit);
+
+    static <K, V> List<KV<K, V>> toKeyValueListAndClose(final KeyValueIterator<K, V> it, final long limit) {
+        Stream<KV<K, V>> kvStream = StreamSupport
+                .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
+                .map(kv -> KV.of(kv.key, kv.value));
+
+        if (limit > 0)
+            kvStream = kvStream.limit(limit);
+
+        final List<KV<K, V>> result = kvStream.collect(Collectors.toList());
+
         // close the underlying RocksDBs iterator (if persistent) - avoid memory leak.
         it.close();
         return result;
     }
 
     static <K, V> List<KV<K, V>> toKeyValueAndTimestampListAndClose(
-            final KeyValueIterator<K, ValueAndTimestamp<V>> it) {
-        List<KV<K, V>> result = StreamSupport
+            final KeyValueIterator<K, ValueAndTimestamp<V>> it, final long limit) {
+        Stream<KV<K, V>> kvStream = StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
-                .map(kv -> KV.of(kv.key, kv.value.value(), kv.value.timestamp()))
-                .collect(Collectors.toList());
+                .map(kv -> KV.of(kv.key, kv.value.value(), kv.value.timestamp()));
+
+        if (limit > 0)
+            kvStream = kvStream.limit(limit);
+
+        final List<KV<K, V>> result = kvStream.collect(Collectors.toList());
+
         // close the underlying RocksDBs iterator (if persistent) - avoid memory leak.
         it.close();
         return result;
