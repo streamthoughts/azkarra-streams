@@ -23,6 +23,7 @@ import io.streamthoughts.azkarra.api.query.internal.Query;
 import io.streamthoughts.azkarra.api.query.internal.QueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.SessionQueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.TimestampedKeyValueQueryBuilder;
+import io.streamthoughts.azkarra.api.query.internal.TimestampedWindowQueryBuilder;
 import io.streamthoughts.azkarra.api.query.internal.WindowQueryBuilder;
 
 import java.util.Arrays;
@@ -84,8 +85,10 @@ public enum StoreType {
      */
     TIMESTAMPED_WINDOW {
         @Override
+        @SuppressWarnings("unchecked")
         public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            throw new UnsupportedOperationException("Timestamped Window store is not supported");
+            TimestampedWindowQueryBuilder builder = new QueryBuilder(storeName).timestampedWindow();
+            return builder.operation(operation);
         }
     };
 

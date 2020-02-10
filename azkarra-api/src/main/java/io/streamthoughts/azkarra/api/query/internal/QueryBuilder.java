@@ -65,8 +65,8 @@ public class QueryBuilder {
     /**
      * Timestamped Window store
      */
-    public void timestampedWindow() {
-        throw new UnsupportedOperationException();
+    public TimestampedWindowQueryBuilder timestampedWindow() {
+        return new TimestampedWindowQueryBuilder(storeName);
     }
 
 

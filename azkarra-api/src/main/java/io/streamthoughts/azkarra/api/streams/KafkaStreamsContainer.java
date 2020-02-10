@@ -396,6 +396,11 @@ public class KafkaStreamsContainer {
         return getLocalStoreAccess(storeName, QueryableStoreTypes.windowStore());
     }
 
+    public <K, V> LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> getLocalTimestampedWindowStore(
+            final String storeName) {
+        return getLocalStoreAccess(storeName, QueryableStoreTypes.timestampedWindowStore());
+    }
+
     public <K, V> LocalStoreAccessor<ReadOnlySessionStore<K, V>> getLocalSessionStore(final String storeName) {
         return getLocalStoreAccess(storeName, QueryableStoreTypes.sessionStore());
     }
