@@ -61,8 +61,8 @@ public class ApplicationConfig {
      * @param environments    the environments configuration.
      */
     private ApplicationConfig(final Conf context,
-                          final Set<String> components,
-                          final List<EnvironmentConfig> environments) {
+                              final Set<String> components,
+                              final List<EnvironmentConfig> environments) {
         this.context = context;
         this.components = components;
         this.environments = environments;
@@ -97,11 +97,19 @@ public class ApplicationConfig {
 
     public static final class Reader {
 
+        private static final String AZKARRA_METRICS = "azkarra.metrics";
+
         public ApplicationConfig read(final Conf conf) {
 
             Objects.requireNonNull(conf, "conf cannot be null");
 
             Conf context = conf.hasPath(CONTEXT_CONFIG) ? conf.getSubConf(CONTEXT_CONFIG) : Conf.empty();
+            if (conf.hasPath(AZKARRA_METRICS)) {
+                // Lookup for configuration prefixed with 'metrics' to simplify the user-defined configuration.
+                // Note : this will be refactored in later version because this create a direct reference
+                // to the Azkarra Metrics module.
+                context = context.withFallback(Conf.with("metrics", conf.getSubConf(AZKARRA_METRICS)));
+            }
             return new ApplicationConfig(
                 context,
                 mayGetConfiguredComponents(conf),

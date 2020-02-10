@@ -606,6 +606,17 @@ public class KafkaStreamsContainer {
     }
 
     /**
+     * Returns the wrapper {@link KafkaStreams} instance.
+     *
+     * @return  the {@link KafkaStreams}.
+     */
+    public KafkaStreams getKafkaStreams() {
+        if (kafkaStreams == null)
+            throw new IllegalStateException("Cannot get access to KafkaStreams, instance is not created yet.");
+        return kafkaStreams;
+    }
+
+    /**
      * Watch a {@link KafkaStreams} instance for {@link KafkaStreams.State} change.
      *
      * By default, a {@link StateChangeWatcher} is one time called, i.e. once it is triggered,
