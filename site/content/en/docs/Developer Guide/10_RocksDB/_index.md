@@ -1,10 +1,10 @@
 ---
-date: 2019-11-29
+date: 2020-02-12
 title: "RocksDB"
 linkTitle: "RocksDB"
-weight: 7
+weight: 10
 description: >
-  How to configure internal RocksDB state stores ?
+  How to tune internal RocksDB state stores ?
 ---
 
 Internally, KafkaStreams relies on an embedded key-value store so-called [RocksDB](https://rocksdb.org/) to provided persistent storage.

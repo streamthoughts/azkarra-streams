@@ -1,8 +1,8 @@
 ---
-date: 2020-01-06
-title: "The StreamsLifeCycle Intercepting Chain"
-linkTitle: "The StreamsLifeCycle Intercepting Chain"
-weight: 4
+date: 2020-02-12
+title: "StreamsLifecycleInterceptor"
+linkTitle: "The StreamsLifecycle Intercepting Chain"
+weight: 7
 description: >
   How to execute operations before/after a KafkaStreams instance starts/stops?
 ---
@@ -12,7 +12,7 @@ Azkarra maintains an *intercepting filter chain* internally to easily perform op
 
 Azkarra provides built-in interceptors for common operations like waiting for topics to be created before starting a streams instance.
 
-## The StreamsLifecycleInterceptor Interface
+## 8.1 The StreamsLifecycleInterceptor Interface
 
 The `StreamsLifecycleInterceptor` interface defines two methods `onStart` and `onStop` that are respectively invoked
 before the streams instance is started or before is stopped.
@@ -44,11 +44,11 @@ public interface StreamsLifecycleInterceptor {
 The information about the current streams application, such as the application ID or the topology description,  can be retrieved from the `StreamsLifecycleContext` argument.
 The `StreamsLifecycleContext` object can also be used for updating the current state of the Kafka Streams instance.
 
-## Registering an Interceptor
+## 8.2 Registering an Interceptor
 
 `StreamsLifecycleInterceptor` can be registered like any other components using the `registerComponent` methods that are exposed by
 the `AzkarraContext` class or dynamically using the component-scan mechanism. 
-The `AzkarraContext` will be responsible to add the registered interceptors to the `StreamsExecutionEnvironment`s and topologies.  `
+The `AzkarraContext` will be responsible to add the registered interceptors to the `StreamsExecutionEnvironment`s and topologies.
 
 The interceptors can also be directly add on a `StreamsExecutionEnvironment` level using the `addStreamsLifecycleInterceptor` method.
 When, an interceptor is add to an environment, then it will be executed for all topologies running in that environment.
@@ -66,12 +66,12 @@ env.addTopology(
 );
 ```
 
-## Configuring an Interceptor
+## 8.3 Configuring an Interceptor
 
 Like any other component, a `StreamLifecycleInterceptor` can implement the `Configurable` interface. 
 The `Conf` object passed to the `configure()` method corresponds to the topology configuration.
 
-## WaitForSourceTopicsInterceptor
+## 8.4 WaitForSourceTopicsInterceptor
 
 When starting a new `KafkaStreams` instance, the application will fail while performing tasks assignment if one of the source topic is missing 
 (error: INCOMPLETE_SOURCE_TOPIC_METADATA). 
@@ -83,7 +83,7 @@ your *application.conf* file.
 
 In addition, you can enable that interceptor per environment using the `StreamsExecutionEnvironment#setWaitForTopicsToBeCreated` method.
 
-## AutoCreateTopicsInterceptor
+## 8.5 AutoCreateTopicsInterceptor
 
 During the development phase, you may find yourself creating and deleting Kafka topics manually and before each run of your application.
 To ease this operation, Azkarra provides the built-in `AutoCreateTopicsInterceptor` which can be used to automatically create the source and sink topics
@@ -112,7 +112,7 @@ env.addStreamsLifecycleInterceptor( () -> {
 });
 ```
 
-### Defining the list of Topics
+### 8.5.1 Defining the list of Topics
 
 By default, the `AutoCreateTopicsInterceptor` resolves the list of topics to be created from the `TopologyDescription` object.
 But, you can also specify your own list of `NewTopic` to be created.
@@ -145,7 +145,7 @@ public class TopicsFactory {
 }
 ```
 
-### Automatically deleting topics
+### 8.5.2 Automatically deleting topics
 
 The `AutoCreateTopicsInterceptor` can also be used for automatically deleting any topics used by the topology when the streams instance is stopped.
 Note: This property should be used with care and not enable for production.

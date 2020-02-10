@@ -1,14 +1,14 @@
 ---
-date: 2019-11-29
+date: 2020-02-12
 title: "Security"
 linkTitle: "Security"
-weight: 8
+weight: 9
 description: >
   How to secure your streams application?
 ---
 
 
-## Why Azkarra needs to be secured?
+## 8.1 Why Azkarra needs to be secured?
 
 {{% alert title="" color="info" %}}
 Security is one of the most important concerns (if not the most important) when it comes to deploying an application in production.
@@ -43,7 +43,7 @@ The only exception to this rule is that you can still query the state stores of 
 |-------------------------------------|---------|-------------------------------------------------|
 |  `azkarra.server.headless`          | boolean | Enable Server Headless mode                     |
 
-## Disable Web UI
+## Disabling Web UI
 
 As of Azkarra 0.4, you can also disable the Web UI by using the server configuration :
 
@@ -205,7 +205,7 @@ This class can be configured using the following properties :
 |  `azkarra.server.rest.authentication.roles` | string  | The list of users or roles to authorize separated by a comma (default: `*`).  |
 |  `azkarra.server.auth.restricted.roles` | string  | The list of users or roles to restrict access  |
 
-N.B: You can use a wildcard(*) to authorize all authenticated users.
+N.B: You can use a wildcard(\*) to authorize all authenticated users.
 
 A restricted user will only be allowed to perform GET HTTP requests.
 

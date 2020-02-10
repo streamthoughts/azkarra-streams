@@ -1,8 +1,8 @@
 ---
-date: 2020-01-06
+date: 2020-02-12
 title: "Dependency Injection"
 linkTitle: "Dependency Injection"
-weight: 3
+weight: 6
 description: >
   How to use the dependency injection pattern in Azkarra Streams ?
 ---
@@ -18,7 +18,7 @@ for internally registering and getting concrete class instances.
 
 You can easily use this mechanism to wire your services together.
 
-## Defining Components
+## 6.1 Defining Components
 
 When component-scan is enable, Azkarra will scan the current classpath and the configured external paths (i.e: `azkarra.component.paths`) to look up for classes
 with `@Component` or `@Factory` annotations.
@@ -93,7 +93,7 @@ but also any classes that implement :
 
 This allows developers to easily extend Azkarra Streams features.
 
-## Qualifying By Name
+## 6.2 Qualifying By Name
 
 By default, a component is named based on the name of its class.
 
@@ -124,7 +124,7 @@ public class ConfigurableStopWordsService implements StopWordsService, Configura
 StopWordsService service = context.getComponent(StopWordsService.class, Qualifiers.byName("StopWordsService"));
 ```
 
-## Component Version
+## 6.3 Component Version
 
 A component is uniquely identify by a type, a name and optionally a version.
 
@@ -166,7 +166,7 @@ WordCountTopology topology = context.getComponent(WordCountTopology.class, Quali
 
 Note: A class that implement the `Versionned` interface must define a no-arg constructor. 
 
-## Component Factories
+## 6.4 Component Factories
 
 Defining a component either programmatically or using the `@Component` annotation is pretty straightforward.
 However, this approach has some limitations. First, a class annotated with the `@Component` annotation must have a no-arg constructor in order
@@ -200,7 +200,7 @@ one instance of the TopicsFactory.
 
 Note : A factory class can implement the `Configurable` interface.
 
-## Component Suppliers
+## 6.5 Component Suppliers
 
 Another way to provide a component is to directly annotated a class implementing the [`Supplier`](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html) interface with the `@Component` annotation.
 
@@ -223,7 +223,7 @@ public class StopWordsServiceSupplier implements Supplier<StopWordsService>, Con
 }
 ``` 
 
-## Building the Graph
+## 6.6 Building the Graph
 
 Azkarra does **NOT** support the [`@Inject`](https://docs.oracle.com/javaee/6/api/javax/inject/Inject.html) annotation specified by JSR-330 
 to automatically linked components by their dependencies.
@@ -249,7 +249,7 @@ public class ComplexWordCountTopologyModule extends ComponentModule<ComplexWordC
 }
 ```
 
-## Restricted Component
+## 6.7 Restricted Component
 
 The `DefaultAzkarraContext` class will try to automatically configure streams environments and streams topologies using
 the registered components. Specifically, the context looks for the components of type : 
