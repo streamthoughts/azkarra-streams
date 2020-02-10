@@ -38,6 +38,7 @@
         <module>azkarra-worker</module>
         <module>azkarra-examples</module>
         <module>azkarra-json-serializers</module>
+        <module>azkarra-metrics</module>
     </modules>
 
     <name>Azkarra Streams</name>
