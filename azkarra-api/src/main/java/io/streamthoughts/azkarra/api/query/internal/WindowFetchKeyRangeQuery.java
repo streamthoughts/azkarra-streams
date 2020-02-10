@@ -44,22 +44,22 @@ public class WindowFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed<
     /**
      * Creates a new {@link WindowFetchKeyRangeQuery} instance.
      *
-     * @param storeName     the storeName name.
-     * @param keyFrom       the query param key from.
-     * @param keyTo         the query param key to.
-     * @param timeFrom      the query param time from.
-     * @param timeTo        the query param time to.
+     * @param storeName     the name of the store.
+     * @param fromKey       the query param key from.
+     * @param toKey         the query param key to.
+     * @param fromTime      the query param time from.
+     * @param toTime        the query param time to.
      */
     WindowFetchKeyRangeQuery(final String storeName,
-                             final K keyFrom,
-                             final K keyTo,
-                             final Instant timeFrom,
-                             final Instant timeTo) {
+                             final K fromKey,
+                             final K toKey,
+                             final Instant fromTime,
+                             final Instant toTime) {
         this.store = storeName;
-        this.keyFrom = keyFrom;
-        this.keyTo = keyTo;
-        this.timeFrom = timeFrom;
-        this.timeTo = timeTo;
+        this.keyFrom = fromKey;
+        this.keyTo = toKey;
+        this.timeFrom = fromTime;
+        this.timeTo = toTime;
     }
 
     /**

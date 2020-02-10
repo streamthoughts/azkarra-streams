@@ -92,7 +92,7 @@ public class JsonQuerySerde {
 
                 Map<String, Object> params = StreamSupport
                         .stream(spliteratorUnknownSize(entry.getValue().fields(), 0), false)
-                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().asText()));
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> getJsonNodeValue(e.getValue())));
 
                 queries.add(Tuple.of(storeOperation.get(), new QueryParams(params)));
             }
@@ -114,6 +114,19 @@ public class JsonQuerySerde {
         } catch (final SerializationException e) {
             throw new InvalidStateStoreQueryException("Invalid JSON query: " + e.getMessage(), e);
         }
+    }
+
+    public static Object getJsonNodeValue(final JsonNode jsonNode) {
+        if (jsonNode.isBoolean())
+            return jsonNode.asBoolean();
+        if (jsonNode.isLong())
+            return jsonNode.asLong();
+        if (jsonNode.isInt())
+            return jsonNode.asInt();
+        if (jsonNode.isDouble())
+            return jsonNode.doubleValue();
+
+        return jsonNode.asText();
     }
 
     public static String serialize(final QueryInfo query, final Queried options) {

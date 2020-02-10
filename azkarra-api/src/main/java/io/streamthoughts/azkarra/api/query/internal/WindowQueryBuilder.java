@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
+import io.streamthoughts.azkarra.api.errors.Error;
 import io.streamthoughts.azkarra.api.monad.Validator;
 import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
@@ -26,6 +27,7 @@ import org.apache.kafka.streams.kstream.Windowed;
 
 import java.time.Instant;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class WindowQueryBuilder implements QueryOperationBuilder {
 
@@ -34,13 +36,15 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
     public static final String QUERY_PARAM_KEY_TO = "keyTo";
     public static final String QUERY_PARAM_TIME = "time";
     public static final String QUERY_PARAM_TIME_FROM = "timeFrom";
-    public static final String QUERY_PARAM_TIME_TO = "timTo";
+    public static final String QUERY_PARAM_TIME_TO = "timeTo";
+    public static final Error INVALID_TIME_ERROR = new Error(
+        "invalid parameters: 'timeFrom' must be inferior to 'timeTo'");
 
-    private final String storeName;
+    protected final String storeName;
 
     /**
      * Creates a new {@link WindowQueryBuilder} instance.
-     * @param storeName     the storeName name.
+     * @param storeName         the name of the store.
      */
     WindowQueryBuilder(final String storeName) {
         Objects.requireNonNull(storeName, "storeName cannot be null");
@@ -76,10 +80,10 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
     }
 
     public <K, V> Query<Windowed<K>, V> fetchKeyRange() {
-        return new Query<>(storeName, new WindowFetKeyRangeQueryBuilder<>());
+        return new Query<>(storeName, new WindowFetchKeyRangeQueryBuilder<>());
     }
 
-    public <K, V> Query<Long, V> fetchTimeRange() {
+    public <V> Query<Long, V> fetchTimeRange() {
         return new Query<>(storeName, new WindowFetchTimeRangeQueryBuilder<>());
     }
 
@@ -113,12 +117,12 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
                 store,
                 p.getValue(QUERY_PARAM_KEY),
                 null,
-                p.getValue(QUERY_PARAM_TIME)
+                p.getLong(QUERY_PARAM_TIME)
             );
         }
     }
 
-    static class WindowFetKeyRangeQueryBuilder<K, V> implements LocalStoreQueryBuilder<Windowed<K>, V> {
+    static class WindowFetchKeyRangeQueryBuilder<K, V> implements LocalStoreQueryBuilder<Windowed<K>, V> {
 
         /**
          * {@inheritDoc}
@@ -129,7 +133,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
                 .validates(p -> p.contains(QUERY_PARAM_KEY_FROM), MissingRequiredKeyError.of(QUERY_PARAM_KEY_FROM))
                 .validates(p -> p.contains(QUERY_PARAM_KEY_TO), MissingRequiredKeyError.of(QUERY_PARAM_KEY_TO))
                 .validates(p -> p.contains(QUERY_PARAM_TIME_FROM), MissingRequiredKeyError.of(QUERY_PARAM_TIME_FROM))
-                .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO));
+                .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO))
+                .validates(new TimeValidator(), INVALID_TIME_ERROR);
         }
 
         /**
@@ -142,13 +147,13 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
                 store,
                 p.getValue(QUERY_PARAM_KEY_FROM),
                 p.getValue(QUERY_PARAM_KEY_TO),
-                Instant.ofEpochMilli(p.getValue(QUERY_PARAM_TIME_FROM)),
-                Instant.ofEpochMilli(p.getValue(QUERY_PARAM_TIME_TO))
+                Instant.ofEpochMilli(p.getLong(QUERY_PARAM_TIME_FROM)),
+                Instant.ofEpochMilli(p.getLong(QUERY_PARAM_TIME_TO))
             );
         }
     }
 
-    static class WindowFetchTimeRangeQueryBuilder<K, V> implements LocalStoreQueryBuilder<Long, V> {
+    static class WindowFetchTimeRangeQueryBuilder<V> implements LocalStoreQueryBuilder<Long, V> {
 
         /**
          * {@inheritDoc}
@@ -158,7 +163,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
             return Validator.of(parameters)
                 .validates(p -> p.contains(QUERY_PARAM_KEY), MissingRequiredKeyError.of(QUERY_PARAM_KEY))
                 .validates(p -> p.contains(QUERY_PARAM_TIME_FROM), MissingRequiredKeyError.of(QUERY_PARAM_TIME_FROM))
-                .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO));
+                .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO))
+                .validates(new TimeValidator(), INVALID_TIME_ERROR);
         }
 
         /**
@@ -170,8 +176,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
             return new WindowFetchTimeRangeQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY),
-                Instant.ofEpochMilli(p.getValue(QUERY_PARAM_TIME_FROM)),
-                Instant.ofEpochMilli(p.getValue(QUERY_PARAM_TIME_TO))
+                Instant.ofEpochMilli(p.getLong(QUERY_PARAM_TIME_FROM)),
+                Instant.ofEpochMilli(p.getLong(QUERY_PARAM_TIME_TO))
             );
         }
     }
@@ -185,7 +191,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
         public Validator<QueryParams> validates(final QueryParams parameters) {
             return Validator.of(parameters)
                 .validates(p -> p.contains(QUERY_PARAM_TIME_FROM), MissingRequiredKeyError.of(QUERY_PARAM_TIME_FROM))
-                .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO));
+                .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO))
+                .validates(new TimeValidator(), INVALID_TIME_ERROR);
         }
 
         /**
@@ -199,6 +206,16 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
                 Instant.ofEpochMilli(p.getValue(QUERY_PARAM_TIME_FROM)),
                 Instant.ofEpochMilli(p.getValue(QUERY_PARAM_TIME_TO))
             );
+        }
+    }
+
+    private static class TimeValidator implements Predicate<QueryParams> {
+
+        @Override
+        public boolean test(final QueryParams p) {
+            return !p.contains(QUERY_PARAM_TIME_FROM) ||
+                   !p.contains(QUERY_PARAM_TIME_TO) ||
+                    p.getLong(QUERY_PARAM_TIME_TO) >= p.getLong(QUERY_PARAM_TIME_FROM);
         }
     }
 }

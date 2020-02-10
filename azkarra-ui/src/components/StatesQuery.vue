@@ -289,9 +289,9 @@ import 'datatables.net-bs4/css/dataTables.bootstrap4.min.css';
 
 const windowOperations = [
    { name: 'fetch', params:['key', 'time'] },
-   { name: 'fetch_range', params:['key', 'fromTime', 'toTime']},
-   { name: 'fetch_key_range', params:['keyFrom', 'keyTo', 'fromTime', 'toTime']},
-   { name: 'fetch_all', params:['fromTime', 'toTime']},
+   { name: 'fetch_time_range', params:['key', 'timeFrom', 'timeTo']},
+   { name: 'fetch_key_range', params:['keyFrom', 'keyTo', 'timeFrom', 'timeTo']},
+   { name: 'fetch_all', params:['timeFrom', 'timeTo']},
    { name: 'all', params:[]},
 ];
 
@@ -304,7 +304,7 @@ const keyValueOperations = [
 
 const sessionOperations = [
    { name: 'fetch', params:['key'] },
-   { name: 'fetch_range', params:['keyFrom', 'keyTo']}
+   { name: 'fetch_key_range', params:['keyFrom', 'keyTo']}
 ]
 
 export default {
@@ -334,7 +334,7 @@ export default {
         { typeLabel : 'KeyValue', typeValue :'key_value', operations : keyValueOperations},
         { typeLabel : 'TimestampedKeyValue', typeValue :'timestamped_key_value', operations : keyValueOperations, isTimestamped: true},
         { typeLabel : 'Window', typeValue :'window', operations : windowOperations },
-        { typeLabel : 'TimestampedWindow', typeValue :'window', operations : windowOperations, isTimestamped: true},
+        { typeLabel : 'TimestampedWindow', typeValue :'timestamped_window', operations : windowOperations, isTimestamped: true},
         { typeLabel : 'Session', typeValue :'session', operations : sessionOperations}
       ]
     }

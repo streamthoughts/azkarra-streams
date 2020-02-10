@@ -39,7 +39,7 @@ public class WindowGetAllQuery<K, V> implements LocalStoreQuery<Windowed<K>, V> 
     /**
      * Creates a new {@link WindowGetAllQuery} instance.
      *
-     * @param storeName     the storeName name.
+     * @param storeName     the name of the store.
      */
     WindowGetAllQuery(final String storeName) {
         this.store = storeName;

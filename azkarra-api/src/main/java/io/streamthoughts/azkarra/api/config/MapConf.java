@@ -40,7 +40,7 @@ import java.util.stream.Stream;
  */
 public class MapConf extends AbstractConf {
 
-    private final Map<String, ?> parameters;
+    protected final Map<String, ?> parameters;
 
     private final Conf fallback;
 
@@ -81,9 +81,9 @@ public class MapConf extends AbstractConf {
         this(parameters, null, explode);
     }
 
-    private MapConf(final Map<String, ?> parameters,
-                    final Conf fallback,
-                    final boolean explode) {
+    protected MapConf(final Map<String, ?> parameters,
+                      final Conf fallback,
+                      final boolean explode) {
         Objects.requireNonNull(parameters, "parameters Conf cannot be null");
         this.parameters = explode ? explode(parameters).unwrap() : parameters;
         this.fallback =  fallback;

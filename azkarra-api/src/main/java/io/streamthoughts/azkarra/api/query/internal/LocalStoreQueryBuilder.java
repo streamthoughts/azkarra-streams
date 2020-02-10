@@ -53,11 +53,18 @@ public interface LocalStoreQueryBuilder<K, V> {
     }
     
     static InvalidQueryException toInvalidQueryException(final List<Error> errors) {
-        final String missing = errors.stream()
+        final boolean isAllMissingRequiredKey = errors.stream().allMatch(e -> e instanceof MissingRequiredKeyError);
+        if (isAllMissingRequiredKey) {
+            final String missing = errors.stream()
                 .map(e -> (MissingRequiredKeyError) e)
                 .map(MissingRequiredKeyError::invalidKey)
                 .collect(Collectors.joining(", "));
-        return new InvalidQueryException("Missing requires parameters : [" + missing + "]");
+            return new InvalidQueryException("Missing requires parameters : [" + missing + "]");
+        }
+
+        final String causes = errors.stream().map(Error::message).collect(Collectors.joining(", "));
+        return new InvalidQueryException("Invalid query parameters : [" + causes + "]");
+
     }
 
 }

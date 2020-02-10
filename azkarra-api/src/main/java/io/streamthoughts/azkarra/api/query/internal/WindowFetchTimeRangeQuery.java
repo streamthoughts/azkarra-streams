@@ -42,7 +42,7 @@ public class WindowFetchTimeRangeQuery<K, V> implements LocalStoreQuery<Long, V>
     /**
      * Creates a new {@link WindowFetchTimeRangeQuery} instance.
      *
-     * @param storeName     the storeName name.
+     * @param storeName     the name of the store.
      * @param key           the query param key.
      * @param timeFrom      the query param time from.
      * @param timeTo        the query param time to.

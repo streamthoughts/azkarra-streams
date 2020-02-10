@@ -18,17 +18,18 @@
  */
 package io.streamthoughts.azkarra.api.query;
 
+import io.streamthoughts.azkarra.api.config.MapConf;
+
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 public class QueryParams {
-
-    private final Map<String, Object> params;
 
     public static QueryParams empty() {
         return new QueryParams(Collections.emptyMap());
     }
+
+    private final InnerMapConf parameters;
 
     /**
      * Creates a new {@link QueryParams} instance.
@@ -36,34 +37,63 @@ public class QueryParams {
      * @param params the key-value parameters.
      */
     public QueryParams(final Map<String, Object> params) {
-        Objects.requireNonNull(params,"params can't be null");
-        this.params = params;
+        this.parameters = new InnerMapConf(params);
+    }
+
+    /**
+     * Gets the parameter for the given key.
+     *
+     * @param key   the parameter key.
+     * @return      the object value.
+     */
+    @SuppressWarnings("unchecked")
+    public <V> V getValue(final String key) {
+        return (V) originals().get(key);
+    }
+
+    /**
+     * Gets the parameter as string for the given key.
+     *
+     * @param key   the parameter key.
+     * @return      the string value.
+     */
+    public String getString(final String key) {
+        return parameters.getString(key);
+    }
+
+    /**
+     * Gets the parameter as long for the given key.
+     *
+     * @param key   the parameter key.
+     * @return      the long value.
+     */
+    public Long getLong(final String key) {
+        return parameters.getLong(key);
     }
 
     public boolean contains(final String key) {
-        return params.containsKey(key);
-    }
-
-    public <T> T getValue(final String key) {
-        checkContains(key);
-        return (T) params.get(key);
-    }
-
-    private void checkContains(final String key) {
-        Objects.requireNonNull(key, "key can't be null");
-        if (!params.containsKey(key)) {
-            throw new IllegalArgumentException("no param for key '" + key + "'");
-        }
+        return parameters.hasPath(key);
     }
 
     public Map<String, Object> originals() {
-        return Collections.unmodifiableMap(params);
+        return Collections.unmodifiableMap(parameters.originals());
     }
 
     @Override
     public String toString() {
         return "Parameters{" +
-                "params=" + params +
+                "params=" + parameters.originals() +
                 '}';
+    }
+
+    private static class InnerMapConf extends MapConf {
+
+        InnerMapConf(final Map<String, ?> props) {
+            super(props, null, false); // we don't need to explode the Map.
+        }
+
+        Map<String, ?> originals() {
+            return parameters;
+        }
     }
 }

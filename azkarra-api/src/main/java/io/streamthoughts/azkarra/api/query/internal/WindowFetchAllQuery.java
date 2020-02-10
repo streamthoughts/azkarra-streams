@@ -42,7 +42,7 @@ public class WindowFetchAllQuery<K, V> implements LocalStoreQuery<Windowed<K>, V
     /**
      * Creates a new {@link WindowFetchAllQuery} instance.
      *
-     * @param storeName     the storeName name.
+     * @param storeName     the name of the store.
      * @param timeFrom      the query param time from.
      * @param timeTo        the query param time to.
      */
