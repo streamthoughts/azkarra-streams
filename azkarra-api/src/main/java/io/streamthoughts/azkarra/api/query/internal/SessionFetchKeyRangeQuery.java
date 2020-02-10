@@ -60,7 +60,7 @@ public class SessionFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed
      */
     @Override
     public StoreType storeType() {
-        return StoreType.WINDOW;
+        return StoreType.SESSION;
     }
 
     /**

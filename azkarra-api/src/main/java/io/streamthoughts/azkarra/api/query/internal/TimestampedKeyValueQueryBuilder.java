@@ -18,46 +18,18 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
-import io.streamthoughts.azkarra.api.monad.Validator;
 import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
-import io.streamthoughts.azkarra.api.query.StoreOperation;
 
-import java.util.Objects;
-
-public class TimestampedKeyValueQueryBuilder implements QueryOperationBuilder {
-
-    public static final String QUERY_PARAM_KEY = "key";
-    public static final String QUERY_PARAM_KEY_FROM = "keyFrom";
-    public static final String QUERY_PARAM_KEY_TO = "keyTo";
-
-    private final String storeName;
+public class TimestampedKeyValueQueryBuilder extends KeyValueQueryBuilder {
 
     /**
      * Creates a new {@link TimestampedKeyValueQueryBuilder} instance.
+     *
      * @param storeName     the name of the store.
      */
     TimestampedKeyValueQueryBuilder(final String storeName) {
-        Objects.requireNonNull(storeName, "storeName cannot be null");
-        this.storeName = storeName;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Query operation(final StoreOperation operation) {
-
-        if (operation == StoreOperation.GET)
-            return get();
-        if (operation == StoreOperation.RANGE)
-            return range();
-        if (operation == StoreOperation.ALL)
-            return all();
-        if (operation == StoreOperation.COUNT)
-            return count();
-
-        throw new InvalidQueryException("Operation not supported '" + operation.name() + "'");
+        super(storeName);
     }
 
     public <K, V> Query<K, V> all() {
@@ -69,23 +41,10 @@ public class TimestampedKeyValueQueryBuilder implements QueryOperationBuilder {
     }
 
     public <K, V> Query<K, V> range() {
-        return new Query<>(storeName, new GetKeyValueRangeQueryBuilder<>());
+        return new Query<>(storeName, new TimestampedGetKeyValueRangeQueryBuilder<>());
     }
 
-    public Query<String, Long> count() {
-        return new Query<>(storeName, (store, parameters) -> new KeyValueCountQuery(store));
-    }
-
-    static class TimestampedGetKeyValueQueryBuilder<K, V>  implements LocalStoreQueryBuilder<K, V>  {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
-                    .validates(p -> p.contains(QUERY_PARAM_KEY), MissingRequiredKeyError.of(QUERY_PARAM_KEY));
-        }
+    static class TimestampedGetKeyValueQueryBuilder<K, V> extends KeyValueQueryBuilder.GetKeyValueQueryBuilder<K, V> {
 
         /**
          * {@inheritDoc}
@@ -98,17 +57,7 @@ public class TimestampedKeyValueQueryBuilder implements QueryOperationBuilder {
         }
     }
 
-    static class GetKeyValueRangeQueryBuilder<K, V>  implements LocalStoreQueryBuilder<K, V>  {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
-                    .validates(p -> p.contains(QUERY_PARAM_KEY_FROM), MissingRequiredKeyError.of(QUERY_PARAM_KEY_FROM))
-                    .validates(p -> p.contains(QUERY_PARAM_KEY_TO), MissingRequiredKeyError.of(QUERY_PARAM_KEY_TO));
-        }
+    static class TimestampedGetKeyValueRangeQueryBuilder<K, V> extends GetKeyValueRangeQueryBuilder<K, V>  {
 
         /**
          * {@inheritDoc}

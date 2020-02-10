@@ -52,7 +52,7 @@ public class SessionFetchQuery<K, V>  extends KeyedLocalStoreQuery<K, Windowed<K
      */
     @Override
     public StoreType storeType() {
-        return StoreType.WINDOW;
+        return StoreType.SESSION;
     }
 
     /**

@@ -57,7 +57,7 @@ public class TimestampedKeyValueGetRangeQuery<K, V> implements LocalStoreQuery<K
      */
     @Override
     public StoreType storeType() {
-        return StoreType.KEY_VALUE;
+        return StoreType.TIMESTAMPED_KEY_VALUE;
     }
 
     /**

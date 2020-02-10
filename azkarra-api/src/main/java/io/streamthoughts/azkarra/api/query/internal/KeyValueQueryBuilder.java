@@ -31,7 +31,7 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
     public static final String QUERY_PARAM_KEY_FROM = "keyFrom";
     public static final String QUERY_PARAM_KEY_TO = "keyTo";
 
-    private final String storeName;
+    protected final String storeName;
 
     /**
      * Creates a new {@link KeyValueQueryBuilder} instance.
@@ -76,7 +76,7 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
         return new Query<>(storeName, (store, parameters) -> new KeyValueCountQuery(store));
     }
 
-    static class GetKeyValueQueryBuilder<K, V>  implements LocalStoreQueryBuilder<K, V>  {
+    static class GetKeyValueQueryBuilder<K, V> implements LocalStoreQueryBuilder<K, V>  {
 
         /**
          * {@inheritDoc}
@@ -98,7 +98,7 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
         }
     }
 
-    static class GetKeyValueRangeQueryBuilder<K, V>  implements LocalStoreQueryBuilder<K, V>  {
+    static class GetKeyValueRangeQueryBuilder<K, V> implements LocalStoreQueryBuilder<K, V>  {
 
         /**
          * {@inheritDoc}

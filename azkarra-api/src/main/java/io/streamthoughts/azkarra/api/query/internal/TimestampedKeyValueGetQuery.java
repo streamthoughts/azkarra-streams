@@ -53,7 +53,7 @@ public class TimestampedKeyValueGetQuery<K, V> extends KeyedLocalStoreQuery<K, K
      */
     @Override
     public StoreType storeType() {
-        return StoreType.KEY_VALUE;
+        return StoreType.TIMESTAMPED_KEY_VALUE;
     }
 
     /**
