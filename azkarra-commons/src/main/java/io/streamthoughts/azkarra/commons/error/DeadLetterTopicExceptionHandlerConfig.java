@@ -32,11 +32,13 @@ import java.util.Map;
  */
 public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
 
-    public static final String DEAD_LETTER_TOPIC_CONFIG = "exception.handler.dlt.topic";
+    public static final String DEAD_LETTER_TOPIC_CONFIG = "exception.handler.dead.letter.topic";
     public static final String DEAD_LETTER_TOPIC_DOC = "The output topic to write rejected records.";
 
-    public static final String FATAL_ERRORS_CONFIG = "exception.handler.dlt.fatal.errors";
+    public static final String FATAL_ERRORS_CONFIG = "exception.handler.dead.letter.fatal.errors";
     public static final String FATAL_ERRORS_DOC = "List of exception classes on which the handler must fail.";
+
+    public static final String DEAD_LETTER_PRODUCER_CONFIG = "exception.handler.dead.letter.producer.";
 
     public static final String DEAD_LETTER_HEADERS_PREFIX = "exception.handler.dead.letter.headers.";
 
@@ -55,6 +57,10 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
 
     public Map<String, Object> customHeaders() {
         return originalsWithPrefix(DEAD_LETTER_HEADERS_PREFIX);
+    }
+
+    public Map<String, Object> producerConfigs() {
+        return originalsWithPrefix(DEAD_LETTER_PRODUCER_CONFIG);
     }
 
     public List<Class<?>> getFatalExceptions() {

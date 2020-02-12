@@ -23,9 +23,12 @@ package io.streamthoughts.azkarra.commons.error;
  */
 public class ExceptionHeader {
 
-    public static final String STACKTRACE = "_exception.stacktrace";
-    public static final String MESSAGE    = "_exception.message";
-    public static final String CLASS_NAME = "_exception.class";
-    public static final String TIMESTAMP  = "_exception.timestamp";
-
+    public static final String ERROR_EXCEPTION_STACKTRACE  = "__errors.exception.stacktrace";
+    public static final String ERROR_EXCEPTION_MESSAGE     = "__errors.exception.message";
+    public static final String ERROR_EXCEPTION_CLASS_NAME  = "__errors.exception.class.name";
+    public static final String ERROR_TIMESTAMP             = "__errors.timestamp";
+    public static final String ERROR_APPLICATION_ID        = "__errors.application.id";
+    public static final String ERROR_RECORD_TOPIC          = "__errors.record.topic";
+    public static final String ERROR_RECORD_PARTITION      = "__errors.record.partition";
+    public static final String ERROR_RECORD_OFFSET         = "__errors.record.offset";
 }

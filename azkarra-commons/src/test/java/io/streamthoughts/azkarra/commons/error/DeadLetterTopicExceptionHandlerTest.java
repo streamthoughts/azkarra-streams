@@ -24,6 +24,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.processor.StreamPartitioner;
 import org.apache.kafka.streams.processor.internals.ProcessorContextImpl;
@@ -36,9 +37,10 @@ import org.mockito.Mockito;
 import java.util.Collections;
 import java.util.Map;
 
-class DeadLetterTopicExceptionHandlerTest {
+public class DeadLetterTopicExceptionHandlerTest {
 
-    public static final String TEST_ERROR_MEESAGE = "test error";
+    public static final String TEST_ERROR_MESSAGE = "test error";
+
     private DeadLetterTopicExceptionHandler handler;
 
     private MockRecordCollector collector;
@@ -48,7 +50,7 @@ class DeadLetterTopicExceptionHandlerTest {
     @BeforeEach
     public void setUp() {
         handler = new DeadLetterTopicExceptionHandler();
-        handler.configure(Collections.emptyMap());
+        handler.configure(Collections.singletonMap(StreamsConfig.APPLICATION_ID_CONFIG, "test-app"));
 
         context = Mockito.mock(ProcessorContextImpl.class);
 
@@ -71,16 +73,16 @@ class DeadLetterTopicExceptionHandlerTest {
             key,
             value);
 
-        handler.handle(context, consumerRecord,  new StreamsException(TEST_ERROR_MEESAGE));
+        handler.handle(context, consumerRecord,  new StreamsException(TEST_ERROR_MESSAGE));
 
         Assertions.assertEquals("test-topic-rejected", collector.capturedTopic);
         Assertions.assertEquals(key, collector.capturedKey);
         Assertions.assertEquals(value, collector.capturedValue);
 
-        Assertions.assertEquals(TEST_ERROR_MEESAGE,
-            new String(collector.capturedHeaders.lastHeader(ExceptionHeader.MESSAGE).value()));
+        Assertions.assertEquals(TEST_ERROR_MESSAGE,
+            new String(collector.capturedHeaders.lastHeader(ExceptionHeader.ERROR_EXCEPTION_MESSAGE).value()));
         Assertions.assertEquals(StreamsException.class.getName(),
-            new String(collector.capturedHeaders.lastHeader(ExceptionHeader.CLASS_NAME).value()));
+            new String(collector.capturedHeaders.lastHeader(ExceptionHeader.ERROR_EXCEPTION_CLASS_NAME).value()));
     }
 
     private static class MockRecordCollector implements RecordCollector {
