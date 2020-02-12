@@ -7,7 +7,7 @@
 
 <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
 
-<link rel="alternate" type="application/rss&#43;xml" href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/error-management/index.xml">
+<link rel="alternate" type="application/rss&#43;xml" href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/index.xml">
 
 
 <link rel="shortcut icon" href="/favicons/favicon.ico" >
@@ -21,17 +21,17 @@
 <link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-144x144.png" sizes="144x144">
 <link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-192x192.png" sizes="192x192">
 
-<title>Error Management | Azkarra Streams</title><meta property="og:title" content="Error Management" />
-<meta property="og:description" content="How to handle exception thrown during Kafka Streams execution ?
+<title>Configuration | Azkarra Streams</title><meta property="og:title" content="Configuration" />
+<meta property="og:description" content="How to configure your application ?
 " />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/error-management/" />
-<meta property="og:updated_time" content="2019-11-29T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
-<meta itemprop="name" content="Error Management">
-<meta itemprop="description" content="How to handle exception thrown during Kafka Streams execution ?
+<meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/" />
+<meta property="og:updated_time" content="2020-02-12T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta itemprop="name" content="Configuration">
+<meta itemprop="description" content="How to configure your application ?
 "><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Error Management"/>
-<meta name="twitter:description" content="How to handle exception thrown during Kafka Streams execution ?
+<meta name="twitter:title" content="Configuration"/>
+<meta name="twitter:description" content="How to configure your application ?
 "/>
 
 
@@ -50,7 +50,7 @@
   crossorigin="anonymous"></script>
 
 
-    <title>Error Management | Azkarra Streams</title>
+    <title>Configuration | Azkarra Streams</title>
   </head>
   <body class="td-section">
     <header>
@@ -217,10 +217,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/concepts/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Concepts</a>
+    <a  href="/azkarra-streams/docs/developer-guide/03_configuration/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">Configuration</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-concepts">
+    <li class="collapse show" id="azkarra-streams-docs-developer-guide-03-configuration">
       
       
       
@@ -240,10 +240,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/configuration/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Configuration</a>
+    <a  href="/azkarra-streams/docs/developer-guide/01_topology/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">TopologyProvider</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-configuration">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-01-topology">
       
       
       
@@ -263,10 +263,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/dependency-injection/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Dependency Injection</a>
+    <a  href="/azkarra-streams/docs/developer-guide/02_streamsexecutionenvironment/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">StreamsExecutionEnvironment</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-dependency-injection">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-02-streamsexecutionenvironment">
       
       
       
@@ -286,10 +286,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/streamslifecycle-interceptors/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">The StreamsLifeCycle Intercepting Chain</a>
+    <a  href="/azkarra-streams/docs/developer-guide/04_azkarracontext/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">AzkarraContext</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-streamslifecycle-interceptors">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-04-azkarracontext">
       
       
       
@@ -309,10 +309,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/kafkastreams-factory/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">KafkaStreams Factory</a>
+    <a  href="/azkarra-streams/docs/developer-guide/05_azkarraapplication/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">AzkarraApplication</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-kafkastreams-factory">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-05-azkarraapplication">
       
       
       
@@ -332,10 +332,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/error-management/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">Error Management</a>
+    <a  href="/azkarra-streams/docs/developer-guide/06_dependencyinjection/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Dependency Injection</a>
   </li>
   <ul>
-    <li class="collapse show" id="azkarra-streams-docs-developer-guide-error-management">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-06-dependencyinjection">
       
       
       
@@ -355,10 +355,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/rocksdb/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">RocksDB</a>
+    <a  href="/azkarra-streams/docs/developer-guide/08_streamslifecycleinterceptor/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">The StreamsLifecycle Intercepting Chain</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-rocksdb">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-08-streamslifecycleinterceptor">
       
       
       
@@ -378,10 +378,56 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/security/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Security</a>
+    <a  href="/azkarra-streams/docs/developer-guide/07_errormanagement/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Error Management</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-security">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-07-errormanagement">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/09_security/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Security</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-09-security">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/10_rocksdb/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">RocksDB</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-10-rocksdb">
       
       
       
@@ -600,8 +646,8 @@
 
 
 
-<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/docs/Developer%20Guide/Error%20Management/_index.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
-<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=Error%20Management" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/docs/Developer%20Guide/03_Configuration/_index.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=Configuration" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
 
 
 <a href="https://github.com/streamthoughts/azkarra-streams/issues/new" target="_blank"><i class="fas fa-tasks fa-fw"></i> Create project issue</a>
@@ -612,6 +658,13 @@
 
 
 
+
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#21-the-configurable-interface">2.1 The Configurable interface</a></li>
+    <li><a href="#23-the-conf-interface">2.3 The Conf interface</a></li>
+  </ul>
+</nav>
 
 
 
@@ -645,7 +698,7 @@
 
 
 <li class="breadcrumb-item active" aria-current="page">
-	<a href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/error-management/">Error Management</a>
+	<a href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/">Configuration</a>
 </li>
 
 	</ol>
@@ -653,9 +706,27 @@
 
             
 <div class="td-content">
-	<h1>Error Management</h1>
-	<div class="lead">How to handle exception thrown during Kafka Streams execution ?</div>
-	
+	<h1>Configuration</h1>
+	<div class="lead">How to configure your application ?</div>
+	<p>This section describes how you can configure an Azkarra Application.</p>
+<h2 id="21-the-configurable-interface">2.1 The <code>Configurable</code> interface</h2>
+<p>Azkarra allows any component registered into the <code>AzkarraContext</code> as well as the <code>TopologyProvider</code> to be configurable by implementing the interface <code>io.streamthoughts.azkarra.api.config.Configurable</code> :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">interface</span> <span style="color:#000">Configurable</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+    <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">configuration</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><p>The <code>configure</code> method is automatically invoked after instantiating the <code>TopologyProvider</code>.
+The <code>Conf</code> instance passed as parameter contains the <code>StreamsExecutionEnvironment</code> configuration, in which the Topology has been registered, merged
+with the <code>Conf</code> provided through the <code>Executed</code> object.</p>
+<h2 id="23-the-conf-interface">2.3 The <code>Conf</code> interface</h2>
+<p>The Azkarra project provides some built-in <code>Conf</code> implementations which are used internally.</p>
+<ul>
+<li><strong>ArgsConf</strong> : A Conf implementation that can be created from an arguments array.</li>
+<li><strong>AzkarraConf</strong> : A Conf implementation which is based on the Lightbend Config library.</li>
+<li><strong>MapConf</strong> : A Conf implementation that can be created from a Map.</li>
+<li><strong>Property</strong> : A single key-value with configuration.</li>
+</ul>
+<p>The <code>Conf</code> interface define methods : <code>getConfAsMap</code> and <code>getConfAsProperties</code> which be can used to easily creating a Consumer/Producer/KafkaStreams instance.</p>
+
         <div class="section-index">
     
     
@@ -713,12 +784,16 @@
         
             
         
+            
+        
+            
+        
     
 </div>
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified December 30, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/3a3bc13f2d277cbd9528183a52da0431a470aefb">docs(site): update site documentation for Azkarra v0.5.0 (3a3bc13)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified February 10, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/36e150422c998595a135216b4b83b2de0424d9a3">release(stream): bump maven version to 0.6.0 [update_api_docs] (36e1504)</a>
 </div>
 </div>
 

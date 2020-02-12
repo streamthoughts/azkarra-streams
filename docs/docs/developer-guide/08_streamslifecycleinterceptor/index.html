@@ -7,7 +7,7 @@
 
 <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
 
-<link rel="alternate" type="application/rss&#43;xml" href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/streamslifecycle-interceptors/index.xml">
+<link rel="alternate" type="application/rss&#43;xml" href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/08_streamslifecycleinterceptor/index.xml">
 
 
 <link rel="shortcut icon" href="/favicons/favicon.ico" >
@@ -21,16 +21,16 @@
 <link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-144x144.png" sizes="144x144">
 <link rel="icon" type="image/png" href="/azkarra-streams/favicons/android-192x192.png" sizes="192x192">
 
-<title>The StreamsLifeCycle Intercepting Chain | Azkarra Streams</title><meta property="og:title" content="The StreamsLifeCycle Intercepting Chain" />
+<title>StreamsLifecycleInterceptor | Azkarra Streams</title><meta property="og:title" content="StreamsLifecycleInterceptor" />
 <meta property="og:description" content="How to execute operations before/after a KafkaStreams instance starts/stops?
 " />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/streamslifecycle-interceptors/" />
-<meta property="og:updated_time" content="2020-01-06T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
-<meta itemprop="name" content="The StreamsLifeCycle Intercepting Chain">
+<meta property="og:url" content="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/08_streamslifecycleinterceptor/" />
+<meta property="og:updated_time" content="2020-02-12T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta itemprop="name" content="StreamsLifecycleInterceptor">
 <meta itemprop="description" content="How to execute operations before/after a KafkaStreams instance starts/stops?
 "><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="The StreamsLifeCycle Intercepting Chain"/>
+<meta name="twitter:title" content="StreamsLifecycleInterceptor"/>
 <meta name="twitter:description" content="How to execute operations before/after a KafkaStreams instance starts/stops?
 "/>
 
@@ -50,7 +50,7 @@
   crossorigin="anonymous"></script>
 
 
-    <title>The StreamsLifeCycle Intercepting Chain | Azkarra Streams</title>
+    <title>StreamsLifecycleInterceptor | Azkarra Streams</title>
   </head>
   <body class="td-section">
     <header>
@@ -217,10 +217,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/concepts/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Concepts</a>
+    <a  href="/azkarra-streams/docs/developer-guide/03_configuration/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Configuration</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-concepts">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-03-configuration">
       
       
       
@@ -240,10 +240,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/configuration/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Configuration</a>
+    <a  href="/azkarra-streams/docs/developer-guide/01_topology/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">TopologyProvider</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-configuration">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-01-topology">
       
       
       
@@ -263,10 +263,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/dependency-injection/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Dependency Injection</a>
+    <a  href="/azkarra-streams/docs/developer-guide/02_streamsexecutionenvironment/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">StreamsExecutionEnvironment</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-dependency-injection">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-02-streamsexecutionenvironment">
       
       
       
@@ -286,10 +286,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/streamslifecycle-interceptors/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">The StreamsLifeCycle Intercepting Chain</a>
+    <a  href="/azkarra-streams/docs/developer-guide/04_azkarracontext/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">AzkarraContext</a>
   </li>
   <ul>
-    <li class="collapse show" id="azkarra-streams-docs-developer-guide-streamslifecycle-interceptors">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-04-azkarracontext">
       
       
       
@@ -309,10 +309,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/kafkastreams-factory/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">KafkaStreams Factory</a>
+    <a  href="/azkarra-streams/docs/developer-guide/05_azkarraapplication/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">AzkarraApplication</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-kafkastreams-factory">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-05-azkarraapplication">
       
       
       
@@ -332,10 +332,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/error-management/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Error Management</a>
+    <a  href="/azkarra-streams/docs/developer-guide/06_dependencyinjection/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Dependency Injection</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-error-management">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-06-dependencyinjection">
       
       
       
@@ -355,10 +355,10 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/rocksdb/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">RocksDB</a>
+    <a  href="/azkarra-streams/docs/developer-guide/08_streamslifecycleinterceptor/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">The StreamsLifecycle Intercepting Chain</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-rocksdb">
+    <li class="collapse show" id="azkarra-streams-docs-developer-guide-08-streamslifecycleinterceptor">
       
       
       
@@ -378,10 +378,56 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/security/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Security</a>
+    <a  href="/azkarra-streams/docs/developer-guide/07_errormanagement/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Error Management</a>
   </li>
   <ul>
-    <li class="collapse " id="azkarra-streams-docs-developer-guide-security">
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-07-errormanagement">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/09_security/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Security</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-09-security">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/10_rocksdb/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">RocksDB</a>
+  </li>
+  <ul>
+    <li class="collapse " id="azkarra-streams-docs-developer-guide-10-rocksdb">
       
       
       
@@ -600,8 +646,8 @@
 
 
 
-<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/docs/Developer%20Guide/StreamsLifecycle%20Interceptors/_index.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
-<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=The%20StreamsLifeCycle%20Intercepting%20Chain" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/docs/Developer%20Guide/08_StreamsLifecycleInterceptor/_index.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=StreamsLifecycleInterceptor" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
 
 
 <a href="https://github.com/streamthoughts/azkarra-streams/issues/new" target="_blank"><i class="fas fa-tasks fa-fw"></i> Create project issue</a>
@@ -615,14 +661,14 @@
 
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#the-streamslifecycleinterceptor-interface">The StreamsLifecycleInterceptor Interface</a></li>
-    <li><a href="#registering-an-interceptor">Registering an Interceptor</a></li>
-    <li><a href="#configuring-an-interceptor">Configuring an Interceptor</a></li>
-    <li><a href="#waitforsourcetopicsinterceptor">WaitForSourceTopicsInterceptor</a></li>
-    <li><a href="#autocreatetopicsinterceptor">AutoCreateTopicsInterceptor</a>
+    <li><a href="#81-the-streamslifecycleinterceptor-interface">8.1 The StreamsLifecycleInterceptor Interface</a></li>
+    <li><a href="#82-registering-an-interceptor">8.2 Registering an Interceptor</a></li>
+    <li><a href="#83-configuring-an-interceptor">8.3 Configuring an Interceptor</a></li>
+    <li><a href="#84-waitforsourcetopicsinterceptor">8.4 WaitForSourceTopicsInterceptor</a></li>
+    <li><a href="#85-autocreatetopicsinterceptor">8.5 AutoCreateTopicsInterceptor</a>
       <ul>
-        <li><a href="#defining-the-list-of-topics">Defining the list of Topics</a></li>
-        <li><a href="#automatically-deleting-topics">Automatically deleting topics</a></li>
+        <li><a href="#851-defining-the-list-of-topics">8.5.1 Defining the list of Topics</a></li>
+        <li><a href="#852-automatically-deleting-topics">8.5.2 Automatically deleting topics</a></li>
       </ul>
     </li>
   </ul>
@@ -660,7 +706,7 @@
 
 
 <li class="breadcrumb-item active" aria-current="page">
-	<a href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/streamslifecycle-interceptors/">The StreamsLifeCycle Intercepting Chain</a>
+	<a href="https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/08_streamslifecycleinterceptor/">The StreamsLifecycle Intercepting Chain</a>
 </li>
 
 	</ol>
@@ -668,12 +714,12 @@
 
             
 <div class="td-content">
-	<h1>The StreamsLifeCycle Intercepting Chain</h1>
+	<h1>StreamsLifecycleInterceptor</h1>
 	<div class="lead">How to execute operations before/after a KafkaStreams instance starts/stops?</div>
 	<p>Azkarra maintains an <em>intercepting filter chain</em> internally to easily perform operations while starting or stopping a Kafka Streams instances by implementing and registering
 <code>StreamsLifecycleInterceptor</code> instances.</p>
 <p>Azkarra provides built-in interceptors for common operations like waiting for topics to be created before starting a streams instance.</p>
-<h2 id="the-streamslifecycleinterceptor-interface">The StreamsLifecycleInterceptor Interface</h2>
+<h2 id="81-the-streamslifecycleinterceptor-interface">8.1 The StreamsLifecycleInterceptor Interface</h2>
 <p>The <code>StreamsLifecycleInterceptor</code> interface defines two methods <code>onStart</code> and <code>onStop</code> that are respectively invoked
 before the streams instance is started or before is stopped.</p>
 <p>You should always take care to call <code>chain.execute()</code> to not break the chain.</p>
@@ -699,10 +745,10 @@ before the streams instance is started or before is stopped.</p>
 <span style="color:#ce5c00;font-weight:bold">}</span>
 </code></pre></div><p>The information about the current streams application, such as the application ID or the topology description,  can be retrieved from the <code>StreamsLifecycleContext</code> argument.
 The <code>StreamsLifecycleContext</code> object can also be used for updating the current state of the Kafka Streams instance.</p>
-<h2 id="registering-an-interceptor">Registering an Interceptor</h2>
+<h2 id="82-registering-an-interceptor">8.2 Registering an Interceptor</h2>
 <p><code>StreamsLifecycleInterceptor</code> can be registered like any other components using the <code>registerComponent</code> methods that are exposed by
 the <code>AzkarraContext</code> class or dynamically using the component-scan mechanism.
-The <code>AzkarraContext</code> will be responsible to add the registered interceptors to the <code>StreamsExecutionEnvironment</code>s and topologies.  `</p>
+The <code>AzkarraContext</code> will be responsible to add the registered interceptors to the <code>StreamsExecutionEnvironment</code>s and topologies.</p>
 <p>The interceptors can also be directly add on a <code>StreamsExecutionEnvironment</code> level using the <code>addStreamsLifecycleInterceptor</code> method.
 When, an interceptor is add to an environment, then it will be executed for all topologies running in that environment.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addStreamsLifecycleInterceptor</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">MyCustomInterceptor</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
@@ -711,17 +757,17 @@ When, an interceptor is add to an environment, then it will be executed for all 
     <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">WordCountTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">,</span> 
     <span style="color:#000">Executed</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;wordcount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">withInterceptor</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">MyCustomInterceptor</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
 <span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><h2 id="configuring-an-interceptor">Configuring an Interceptor</h2>
+</code></pre></div><h2 id="83-configuring-an-interceptor">8.3 Configuring an Interceptor</h2>
 <p>Like any other component, a <code>StreamLifecycleInterceptor</code> can implement the <code>Configurable</code> interface.
 The <code>Conf</code> object passed to the <code>configure()</code> method corresponds to the topology configuration.</p>
-<h2 id="waitforsourcetopicsinterceptor">WaitForSourceTopicsInterceptor</h2>
+<h2 id="84-waitforsourcetopicsinterceptor">8.4 WaitForSourceTopicsInterceptor</h2>
 <p>When starting a new <code>KafkaStreams</code> instance, the application will fail while performing tasks assignment if one of the source topic is missing
 (error: INCOMPLETE_SOURCE_TOPIC_METADATA).</p>
 <p>To prevent from such error, Azkarra provides the built-in <code>WaitForSourceTopicsInterceptor</code> that block the KafkaStreams startup until all source topics are created.</p>
 <p>The <code>WaitForSourceTopicsInterceptor</code> can be enable by setting the global application property <code>azkarra.context.enable.wait.for.topics</code> to true in
 your <em>application.conf</em> file.</p>
 <p>In addition, you can enable that interceptor per environment using the <code>StreamsExecutionEnvironment#setWaitForTopicsToBeCreated</code> method.</p>
-<h2 id="autocreatetopicsinterceptor">AutoCreateTopicsInterceptor</h2>
+<h2 id="85-autocreatetopicsinterceptor">8.5 AutoCreateTopicsInterceptor</h2>
 <p>During the development phase, you may find yourself creating and deleting Kafka topics manually and before each run of your application.
 To ease this operation, Azkarra provides the built-in <code>AutoCreateTopicsInterceptor</code> which can be used to automatically create the source and sink topics
 before the streams application is started.</p>
@@ -767,7 +813,7 @@ Here is a simple example :</p>
     <span style="color:#000">interceptor</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setNumPartitions</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">6</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
     <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">interceptor</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#ce5c00;font-weight:bold">}</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><h3 id="defining-the-list-of-topics">Defining the list of Topics</h3>
+</code></pre></div><h3 id="851-defining-the-list-of-topics">8.5.1 Defining the list of Topics</h3>
 <p>By default, the <code>AutoCreateTopicsInterceptor</code> resolves the list of topics to be created from the <code>TopologyDescription</code> object.
 But, you can also specify your own list of <code>NewTopic</code> to be created.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addStreamsLifecycleInterceptor</span><span style="color:#ce5c00;font-weight:bold">(</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#ce5c00;font-weight:bold">{</span>
@@ -790,7 +836,7 @@ If you run multiple streams topologies (or environments) you can use the <code>@
         <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">NewTopic</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;my-source-topic&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">6</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">short</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#000">3</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
     <span style="color:#ce5c00;font-weight:bold">}</span>
 <span style="color:#ce5c00;font-weight:bold">}</span>
-</code></pre></div><h3 id="automatically-deleting-topics">Automatically deleting topics</h3>
+</code></pre></div><h3 id="852-automatically-deleting-topics">8.5.2 Automatically deleting topics</h3>
 <p>The <code>AutoCreateTopicsInterceptor</code> can also be used for automatically deleting any topics used by the topology when the streams instance is stopped.
 Note: This property should be used with care and not enable for production.</p>
 <table>
@@ -867,12 +913,16 @@ Note: This property should be used with care and not enable for production.</p>
         
             
         
+            
+        
+            
+        
     
 </div>
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified December 30, 2019: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/3a3bc13f2d277cbd9528183a52da0431a470aefb">docs(site): update site documentation for Azkarra v0.5.0 (3a3bc13)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified February 10, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/36e150422c998595a135216b4b83b2de0424d9a3">release(stream): bump maven version to 0.6.0 [update_api_docs] (36e1504)</a>
 </div>
 </div>
 
