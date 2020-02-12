@@ -3,32 +3,32 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/01_topology/</loc>
+    <lastmod>2020-02-12T23:15:07+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://streamthoughts.github.io/azkarra-streams/docs/overview/</loc>
     <lastmod>2020-01-21T13:39:26+07:00</lastmod>
   </url>
   
   <url>
-    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/</loc>
-    <lastmod>2020-02-10T16:46:35+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/01_topology/</loc>
-    <lastmod>2020-02-10T16:46:35+01:00</lastmod>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/02_streamsexecutionenvironment/</loc>
+    <lastmod>2020-02-12T23:15:07+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://streamthoughts.github.io/azkarra-streams/docs/getting-started/</loc>
-    <lastmod>2019-12-30T17:19:29+01:00</lastmod>
+    <lastmod>2020-02-12T23:15:07+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/</loc>
+    <lastmod>2020-02-12T23:15:07+01:00</lastmod>
   </url>
   
   <url>
     <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/</loc>
-    <lastmod>2020-02-10T16:46:35+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/02_streamsexecutionenvironment/</loc>
     <lastmod>2020-02-10T16:46:35+01:00</lastmod>
   </url>
   

@@ -217,29 +217,6 @@
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/azkarra-streams/docs/developer-guide/03_configuration/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">Configuration</a>
-  </li>
-  <ul>
-    <li class="collapse show" id="azkarra-streams-docs-developer-guide-03-configuration">
-      
-      
-      
-    </li>
-  </ul>
-</ul>
-
-      
-      
-      
-      
-
-
-
-
-
-
-<ul class="td-sidebar-nav__section pr-md-3">
-  <li class="td-sidebar-nav__section-title">
     <a  href="/azkarra-streams/docs/developer-guide/01_topology/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">TopologyProvider</a>
   </li>
   <ul>
@@ -267,6 +244,29 @@
   </li>
   <ul>
     <li class="collapse " id="azkarra-streams-docs-developer-guide-02-streamsexecutionenvironment">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/azkarra-streams/docs/developer-guide/03_configuration/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">Configuration</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="azkarra-streams-docs-developer-guide-03-configuration">
       
       
       
@@ -661,8 +661,8 @@
 
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#21-the-configurable-interface">2.1 The Configurable interface</a></li>
-    <li><a href="#23-the-conf-interface">2.3 The Conf interface</a></li>
+    <li><a href="#31-the-configurable-interface">3.1 The Configurable interface</a></li>
+    <li><a href="#32-the-conf-interface">3.2 The Conf interface</a></li>
   </ul>
 </nav>
 
@@ -709,7 +709,7 @@
 	<h1>Configuration</h1>
 	<div class="lead">How to configure your application ?</div>
 	<p>This section describes how you can configure an Azkarra Application.</p>
-<h2 id="21-the-configurable-interface">2.1 The <code>Configurable</code> interface</h2>
+<h2 id="31-the-configurable-interface">3.1 The <code>Configurable</code> interface</h2>
 <p>Azkarra allows any component registered into the <code>AzkarraContext</code> as well as the <code>TopologyProvider</code> to be configurable by implementing the interface <code>io.streamthoughts.azkarra.api.config.Configurable</code> :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">interface</span> <span style="color:#000">Configurable</span> <span style="color:#ce5c00;font-weight:bold">{</span>
     <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">configuration</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
@@ -717,7 +717,7 @@
 </code></pre></div><p>The <code>configure</code> method is automatically invoked after instantiating the <code>TopologyProvider</code>.
 The <code>Conf</code> instance passed as parameter contains the <code>StreamsExecutionEnvironment</code> configuration, in which the Topology has been registered, merged
 with the <code>Conf</code> provided through the <code>Executed</code> object.</p>
-<h2 id="23-the-conf-interface">2.3 The <code>Conf</code> interface</h2>
+<h2 id="32-the-conf-interface">3.2 The <code>Conf</code> interface</h2>
 <p>The Azkarra project provides some built-in <code>Conf</code> implementations which are used internally.</p>
 <ul>
 <li><strong>ArgsConf</strong> : A Conf implementation that can be created from an arguments array.</li>
@@ -793,7 +793,7 @@ with the <code>Conf</code> provided through the <code>Executed</code> object.</p
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified February 10, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/36e150422c998595a135216b4b83b2de0424d9a3">release(stream): bump maven version to 0.6.0 [update_api_docs] (36e1504)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified February 12, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/6bf2847c1ab2a61631d2fc91e215b8ea6e2889c6">docs(site): update README and site docs (6bf2847)</a>
 </div>
 </div>
 

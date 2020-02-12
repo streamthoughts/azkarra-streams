@@ -15,37 +15,6 @@
     
     
     <item>
-      <title>Docs: Configuration</title>
-      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/</link>
-      <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
-      
-      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/</guid>
-      <description>
-        
-        
-        &lt;p&gt;This section describes how you can configure an Azkarra Application.&lt;/p&gt;
-&lt;h2 id=&#34;21-the-configurable-interface&#34;&gt;2.1 The &lt;code&gt;Configurable&lt;/code&gt; interface&lt;/h2&gt;
-&lt;p&gt;Azkarra allows any component registered into the &lt;code&gt;AzkarraContext&lt;/code&gt; as well as the &lt;code&gt;TopologyProvider&lt;/code&gt; to be configurable by implementing the interface &lt;code&gt;io.streamthoughts.azkarra.api.config.Configurable&lt;/code&gt; :&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;interface&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Configurable&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;final&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Conf&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;configuration&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
-&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;configure&lt;/code&gt; method is automatically invoked after instantiating the &lt;code&gt;TopologyProvider&lt;/code&gt;.
-The &lt;code&gt;Conf&lt;/code&gt; instance passed as parameter contains the &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt; configuration, in which the Topology has been registered, merged
-with the &lt;code&gt;Conf&lt;/code&gt; provided through the &lt;code&gt;Executed&lt;/code&gt; object.&lt;/p&gt;
-&lt;h2 id=&#34;23-the-conf-interface&#34;&gt;2.3 The &lt;code&gt;Conf&lt;/code&gt; interface&lt;/h2&gt;
-&lt;p&gt;The Azkarra project provides some built-in &lt;code&gt;Conf&lt;/code&gt; implementations which are used internally.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;ArgsConf&lt;/strong&gt; : A Conf implementation that can be created from an arguments array.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;AzkarraConf&lt;/strong&gt; : A Conf implementation which is based on the Lightbend Config library.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;MapConf&lt;/strong&gt; : A Conf implementation that can be created from a Map.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Property&lt;/strong&gt; : A single key-value with configuration.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The &lt;code&gt;Conf&lt;/code&gt; interface define methods : &lt;code&gt;getConfAsMap&lt;/code&gt; and &lt;code&gt;getConfAsProperties&lt;/code&gt; which be can used to easily creating a Consumer/Producer/KafkaStreams instance.&lt;/p&gt;
-
-      </description>
-    </item>
-    
-    <item>
       <title>Docs: TopologyProvider</title>
       <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/01_topology/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
@@ -221,6 +190,37 @@ The generated application is in the form: &lt;code&gt;&amp;lt;env_name&amp;gt;-&
 &lt;p&gt;But you may have to integrate Azkarra with another framework (such as Spring, Micronaut). And, because this is usually done at the &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt; level it can be convenient to manually invoke the method bellow:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;env&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+      </description>
+    </item>
+    
+    <item>
+      <title>Docs: Configuration</title>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/</link>
+      <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/03_configuration/</guid>
+      <description>
+        
+        
+        &lt;p&gt;This section describes how you can configure an Azkarra Application.&lt;/p&gt;
+&lt;h2 id=&#34;31-the-configurable-interface&#34;&gt;3.1 The &lt;code&gt;Configurable&lt;/code&gt; interface&lt;/h2&gt;
+&lt;p&gt;Azkarra allows any component registered into the &lt;code&gt;AzkarraContext&lt;/code&gt; as well as the &lt;code&gt;TopologyProvider&lt;/code&gt; to be configurable by implementing the interface &lt;code&gt;io.streamthoughts.azkarra.api.config.Configurable&lt;/code&gt; :&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;interface&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Configurable&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;final&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Conf&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;configuration&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;configure&lt;/code&gt; method is automatically invoked after instantiating the &lt;code&gt;TopologyProvider&lt;/code&gt;.
+The &lt;code&gt;Conf&lt;/code&gt; instance passed as parameter contains the &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt; configuration, in which the Topology has been registered, merged
+with the &lt;code&gt;Conf&lt;/code&gt; provided through the &lt;code&gt;Executed&lt;/code&gt; object.&lt;/p&gt;
+&lt;h2 id=&#34;32-the-conf-interface&#34;&gt;3.2 The &lt;code&gt;Conf&lt;/code&gt; interface&lt;/h2&gt;
+&lt;p&gt;The Azkarra project provides some built-in &lt;code&gt;Conf&lt;/code&gt; implementations which are used internally.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;ArgsConf&lt;/strong&gt; : A Conf implementation that can be created from an arguments array.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AzkarraConf&lt;/strong&gt; : A Conf implementation which is based on the Lightbend Config library.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MapConf&lt;/strong&gt; : A Conf implementation that can be created from a Map.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Property&lt;/strong&gt; : A single key-value with configuration.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The &lt;code&gt;Conf&lt;/code&gt; interface define methods : &lt;code&gt;getConfAsMap&lt;/code&gt; and &lt;code&gt;getConfAsProperties&lt;/code&gt; which be can used to easily creating a Consumer/Producer/KafkaStreams instance.&lt;/p&gt;
+
       </description>
     </item>
     
