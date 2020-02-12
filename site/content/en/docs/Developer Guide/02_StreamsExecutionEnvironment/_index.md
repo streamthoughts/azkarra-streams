@@ -2,7 +2,7 @@
 date: 2020-02-12
 title: "StreamsExecutionEnvironment"
 linkTitle: "StreamsExecutionEnvironment"
-weight: 3
+weight: 2
 description: >
   The execution container that handles all the code logic to run and manage `KafkaStreams` instances.
 ---

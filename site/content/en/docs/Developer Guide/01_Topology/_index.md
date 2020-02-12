@@ -2,7 +2,7 @@
 date: 2020-02-12
 title: "TopologyProvider"
 linkTitle: "TopologyProvider"
-weight: 2
+weight: 1
 description: >
   The main interface to provide the Topology to be executed
 ---
