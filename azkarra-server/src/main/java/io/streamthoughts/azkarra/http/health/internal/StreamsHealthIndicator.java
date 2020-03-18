@@ -30,6 +30,7 @@ import io.streamthoughts.azkarra.http.health.StatusAggregator;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -75,13 +76,18 @@ public class StreamsHealthIndicator implements HealthIndicator, AzkarraContextAw
 
     private void setHealthStatus(final KafkaStreamsContainer container,
                                  final Health.Builder builder) {
-        State value = container.state().value();
+        final State value = container.state().value();
+        final Optional<Throwable> exception = container.exception();
         switch (value) {
             case RUNNING :
                 builder.up();
-            break;
+                break;
             case ERROR :
                 builder.down();
+                exception.ifPresent(builder::withException);
+                break;
+            case NOT_RUNNING:
+                exception.ifPresentOrElse(e -> builder.down().withException(e), builder::unknown);
                 break;
             default:
                 builder.unknown();
