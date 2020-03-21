@@ -30,6 +30,7 @@ import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.ContextAwareComponentFactory;
+import io.streamthoughts.azkarra.api.components.GettableComponent;
 import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.components.Restriction;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
@@ -42,6 +43,7 @@ import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
+import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
 import io.streamthoughts.azkarra.runtime.components.ClassComponentAliasesGenerator;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
@@ -50,6 +52,7 @@ import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareApplicatio
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareComponentSupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareKafkaStreamsFactorySupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareLifecycleInterceptorSupplier;
+import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareThreadExceptionHandlerSupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySupplier;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptor;
@@ -136,6 +139,8 @@ public class DefaultAzkarraContext implements AzkarraContext {
     private Supplier<KafkaStreamsFactory> globalKafkaStreamsFactory;
 
     private Supplier<ApplicationIdBuilder> globalApplicationIdBuilder;
+
+    private Supplier<StreamThreadExceptionHandler> globalStreamThreadExceptionHandler;
 
     /**
      * Creates a new {@link DefaultAzkarraContext} instance.
@@ -451,6 +456,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
             globalInterceptors = getLifecycleInterceptors(APPLICATION_SCOPE);
             globalKafkaStreamsFactory = getKafkaStreamsFactory(APPLICATION_SCOPE).orElse(null);
             globalApplicationIdBuilder = getApplicationIdBuilder(APPLICATION_SCOPE).orElse(null);
+            globalStreamThreadExceptionHandler = getStreamThreadExceptionHandler(APPLICATION_SCOPE).orElse(null);
 
             // Initialize and start all streams environments.
             for (StreamsExecutionEnvironment env : environments()) {
@@ -493,57 +499,67 @@ public class DefaultAzkarraContext implements AzkarraContext {
     }
 
     private void initializeEnvironment(final StreamsExecutionEnvironment env) {
+        final Restriction envRestriction = Restriction.env(env.name());
+
         // Inject all streams interceptors for each environment.
         globalInterceptors.forEach(env::addStreamsLifecycleInterceptor);
-        getLifecycleInterceptors(Restriction.env(env.name())).forEach(env::addStreamsLifecycleInterceptor);
 
-        // Inject environment KafkaStreamsFactory
-        final Supplier<KafkaStreamsFactory> kafkaStreamsFactory =
-                getKafkaStreamsFactory(Restriction.env(env.name())).orElse(globalKafkaStreamsFactory);
-        if (kafkaStreamsFactory != null)
-            env.setKafkaStreamsFactory(kafkaStreamsFactory);
+        getLifecycleInterceptors(envRestriction).forEach(env::addStreamsLifecycleInterceptor);
 
-        // Inject environment ApplicationIdBuilder
-        final Supplier<ApplicationIdBuilder> applicationIdBuilder =
-                getApplicationIdBuilder(Restriction.env(env.name())).orElse(globalApplicationIdBuilder);
-        if (applicationIdBuilder != null)
-            env.setApplicationIdBuilder(applicationIdBuilder);
+        // Inject environment or global KafkaStreamsFactory
+        getKafkaStreamsFactory(envRestriction)
+            .or(() ->  Optional.ofNullable(globalKafkaStreamsFactory))
+            .ifPresent(env::setKafkaStreamsFactory);
 
-        final boolean waitForTopicsEnable = new AzkarraContextConfig(env.getConfiguration())
-                .addConfiguration(getConfiguration())
-                .isWaitForTopicsEnable();
+        // Inject environment or global ApplicationIdBuilder
+        getApplicationIdBuilder(envRestriction)
+            .or(() -> Optional.ofNullable(globalApplicationIdBuilder))
+            .ifPresent(env::setApplicationIdBuilder);
 
-        env.setWaitForTopicsToBeCreated(waitForTopicsEnable);
+        final AzkarraContextConfig azkarraContextConfig = new AzkarraContextConfig(env.getConfiguration())
+            .addConfiguration(getConfiguration());
+
+        env.setWaitForTopicsToBeCreated(azkarraContextConfig.isWaitForTopicsEnable());
+
+        // Inject environment, global or default StreamsThreadExceptionHandler
+        if (env.getStreamThreadExceptionHandler() == null) {
+             getStreamThreadExceptionHandler(envRestriction)
+                .or(() -> Optional.ofNullable(globalStreamThreadExceptionHandler))
+                .or(() -> Optional.of(azkarraContextConfig::getDefaultStreamsThreadExceptionHandler))
+                .ifPresent(env::setStreamThreadExceptionHandler);
+        }
     }
 
     private Optional<Supplier<ApplicationIdBuilder>> getApplicationIdBuilder(final Restriction restriction) {
-        final Qualifier<ApplicationIdBuilder> qualifier = Qualifiers.byRestriction(restriction);
-        if (componentFactory.containsComponent(ApplicationIdBuilder.class, qualifier)) {
-            return Optional.of(new ContextAwareApplicationIdBuilderSupplier(
-                    this,
-                    componentFactory.getComponent(ApplicationIdBuilder.class, qualifier)
-            ));
-        }
-        return Optional.empty();
+        return mayGetComponentForRestriction(ApplicationIdBuilder.class, restriction)
+            .map(gettable -> new ContextAwareApplicationIdBuilderSupplier(this, gettable));
     }
 
     private Optional<Supplier<KafkaStreamsFactory>> getKafkaStreamsFactory(final Restriction restriction) {
-        final Qualifier<KafkaStreamsFactory> qualifier = Qualifiers.byRestriction(restriction);
-        if (componentFactory.containsComponent(KafkaStreamsFactory.class, qualifier)) {
-            return Optional.of(new ContextAwareKafkaStreamsFactorySupplier(
-                    this,
-                    componentFactory.getComponent(KafkaStreamsFactory.class, qualifier)
-            ));
-        }
-        return Optional.empty();
+        return mayGetComponentForRestriction(KafkaStreamsFactory.class, restriction)
+            .map(gettable -> new ContextAwareKafkaStreamsFactorySupplier(this, gettable));
+    }
+
+    private Optional<Supplier<StreamThreadExceptionHandler>> getStreamThreadExceptionHandler(final Restriction restriction) {
+        return mayGetComponentForRestriction(StreamThreadExceptionHandler.class, restriction)
+            .map(gettable -> new ContextAwareThreadExceptionHandlerSupplier(this, gettable));
+    }
+
+    private <T> Optional<GettableComponent<T>> mayGetComponentForRestriction(final Class<T> type,
+                                                                             final Restriction restriction) {
+
+        final Qualifier<T> qualifier = Qualifiers.byRestriction(restriction);
+        return componentFactory.containsComponent(type, qualifier) ?
+            Optional.of(componentFactory.getComponent(type, qualifier)) :
+            Optional.empty();
     }
 
     private List<Supplier<StreamsLifecycleInterceptor>> getLifecycleInterceptors(final Restriction restriction) {
         final Qualifier<StreamsLifecycleInterceptor> qualifier = Qualifiers.byRestriction(restriction);
         return componentFactory.getAllComponents(StreamsLifecycleInterceptor.class, qualifier)
-                .stream()
-                .map(gettable -> new ContextAwareLifecycleInterceptorSupplier(this, gettable))
-                .collect(Collectors.toList());
+            .stream()
+            .map(gettable -> new ContextAwareLifecycleInterceptorSupplier(this, gettable))
+            .collect(Collectors.toList());
     }
 
     private void checkIfEnvironmentExists(final String name, final String errorMessage) {

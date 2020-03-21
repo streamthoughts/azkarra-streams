@@ -19,6 +19,8 @@
 package io.streamthoughts.azkarra.runtime.config;
 
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
+import io.streamthoughts.azkarra.runtime.streams.errors.CloseKafkaStreamsOnThreadException;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,6 +36,7 @@ public class AzkarraContextConfig {
     public static String AUTO_CREATE_TOPICS_NUM_PARTITIONS_CONFIG = "auto.create.topics.num.partitions";
     public static String AUTO_CREATE_TOPICS_REPLICATION_FACTOR_CONFIG = "auto.create.topics.replication.factor";
     public static String AUTO_CREATE_TOPICS_CONFIGS_CONFIG = "auto.create.topics.configs";
+    public static String DEFAULT_STREAM_THREAD_EXCEPTION_HANDLER = "default.stream.thread.exception.handler";
 
     private Conf configs;
 
@@ -52,6 +55,12 @@ public class AzkarraContextConfig {
 
     public boolean isAutoCreateTopicsEnable() {
         return configs.getOptionalBoolean(AUTO_CREATE_TOPICS_ENABLE_CONFIG).orElse(false);
+    }
+
+    public StreamThreadExceptionHandler getDefaultStreamsThreadExceptionHandler() {
+        return configs.hasPath(DEFAULT_STREAM_THREAD_EXCEPTION_HANDLER) ?
+            configs.getClass(DEFAULT_STREAM_THREAD_EXCEPTION_HANDLER, StreamThreadExceptionHandler.class) :
+            new CloseKafkaStreamsOnThreadException();
     }
 
     public int getAutoCreateTopicsNumPartition() {

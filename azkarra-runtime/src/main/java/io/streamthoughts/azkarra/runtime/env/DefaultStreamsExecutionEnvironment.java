@@ -35,11 +35,13 @@ import io.streamthoughts.azkarra.api.streams.KafkaStreamContainerBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
+import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.runtime.env.internal.EnvironmentAwareComponentSupplier;
 import io.streamthoughts.azkarra.runtime.env.internal.TopologyContainerFactory;
 import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
+import io.streamthoughts.azkarra.runtime.streams.errors.CloseKafkaStreamsOnThreadException;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.processor.StateRestoreListener;
@@ -152,6 +154,8 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
 
     private boolean waitForTopicToBeCreated = false;
 
+    private Supplier<StreamThreadExceptionHandler> streamThreadExceptionHandler;
+
     /**
      * Creates a new {@link DefaultStreamsExecutionEnvironment} instance.
      *
@@ -224,6 +228,24 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             final Supplier<StreamsLifecycleInterceptor> interceptor) {
         this.interceptors.add(interceptor);
         return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StreamsExecutionEnvironment setStreamThreadExceptionHandler(
+            final Supplier<StreamThreadExceptionHandler> handler) {
+        streamThreadExceptionHandler = Objects.requireNonNull(handler, "handle cannot be null");
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Supplier<StreamThreadExceptionHandler> getStreamThreadExceptionHandler() {
+        return streamThreadExceptionHandler;
     }
 
     /**
@@ -323,13 +345,19 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
 
         checkStreamsIsAlreadyRunningFor(applicationId);
 
+        if (streamThreadExceptionHandler == null)
+            streamThreadExceptionHandler = CloseKafkaStreamsOnThreadException::new;
+
+        final Thread.UncaughtExceptionHandler exceptionHandler = new InternalKafkaStreamsUncaughtExceptionHandler(
+            applicationId,
+            new EnvironmentAwareComponentSupplier<>(streamThreadExceptionHandler)
+                .get(this, topologyContainer.streamsConfig())
+        );
         final KafkaStreamsContainer streamsContainer = KafkaStreamContainerBuilder.newBuilder()
             .withTopologyContainer(topologyContainer)
             .withStateListeners(stateListeners)
             .withRestoreListeners(restoreListeners)
-            .withUncaughtExceptionHandler(Collections.singletonList(
-                new CloseImmediatelyUncaughtExceptionHandler(applicationId))
-            )
+            .withUncaughtExceptionHandler(Collections.singletonList(exceptionHandler))
             .withKafkaStreamsFactory(topologyProvider.getKafkaStreamsFactory())
             .build();
 
@@ -366,18 +394,18 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      * {@inheritDoc}
      */
     @Override
-    public void stop(final ApplicationId id, final boolean cleanUp) {
+    public void stop(final ApplicationId id, final boolean cleanUp, final Duration timeout) {
         checkIsStarted();
-        closeStreamsContainer(id, cleanUp, Duration.ofMillis(Long.MAX_VALUE), false);
+        closeStreamsContainer(id, cleanUp, timeout, false);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void remove(final ApplicationId id) {
+    public void remove(final ApplicationId id, final Duration timeout) {
         checkIsStarted();
-        closeStreamsContainer(id, true, Duration.ofMillis(Long.MAX_VALUE), true);
+        closeStreamsContainer(id, true, timeout, true);
     }
 
     /**
@@ -547,17 +575,15 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         }
     }
 
-    private class CloseImmediatelyUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+    private class InternalKafkaStreamsUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-        private final ApplicationId applicationId;
+        private final ApplicationId id;
+        private final StreamThreadExceptionHandler delegate;
 
-        /**
-         * Creates a new {@link CloseImmediatelyUncaughtExceptionHandler} instance.
-         *
-         * @param applicationId the id of the application to close if an exception is uncaught.
-         */
-        private CloseImmediatelyUncaughtExceptionHandler(final ApplicationId applicationId) {
-            this.applicationId = Objects.requireNonNull(applicationId, "applicationId cannot be null");
+        InternalKafkaStreamsUncaughtExceptionHandler(final ApplicationId id,
+                                                     final StreamThreadExceptionHandler handler) {
+            this.id = Objects.requireNonNull(id, "id cannot be null");
+            this.delegate = Objects.requireNonNull(handler, "handler cannot be null");
         }
 
         /**
@@ -565,7 +591,9 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
          */
         @Override
         public void uncaughtException(final Thread t, final Throwable e) {
-            closeStreamsContainer(applicationId, false, Duration.ZERO, false);
+            LOG.debug("Catch uncaught exception, executing handler: {}", delegate.getClass());
+            final KafkaStreamsContainer container = activeStreams.get(id);
+            delegate.handle(container, t, e);
         }
     }
 }

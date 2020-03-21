@@ -25,9 +25,11 @@ import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
+import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.processor.StateRestoreListener;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.function.Supplier;
 
@@ -85,6 +87,24 @@ public interface StreamsExecutionEnvironment {
      * @return this {@link StreamsExecutionEnvironment} instance.
      */
     StreamsExecutionEnvironment addStreamsLifecycleInterceptor(final Supplier<StreamsLifecycleInterceptor> interceptor);
+
+    /**
+     * Sets the {@link StreamThreadExceptionHandler} invoked when a StreamThread abruptly terminates
+     * due to an uncaught exception.
+     *
+     * @param handler   the {@link StreamThreadExceptionHandler}.
+     * @return          this {@link StreamsExecutionEnvironment} instance.
+     *
+     * @see KafkaStreams#setUncaughtExceptionHandler(Thread.UncaughtExceptionHandler)
+     */
+    StreamsExecutionEnvironment setStreamThreadExceptionHandler(final Supplier<StreamThreadExceptionHandler> handler);
+
+    /**
+     * Gets the {@link StreamThreadExceptionHandler}.
+     *
+     * @return          the {@link Supplier<StreamThreadExceptionHandler>}, otherwise {@code null} if no handler is set.
+     */
+    Supplier<StreamThreadExceptionHandler> getStreamThreadExceptionHandler();
 
     /**
      * Returns all {@link KafkaStreams} started applications.
@@ -198,12 +218,29 @@ public interface StreamsExecutionEnvironment {
      *
      * @param id      the {@link ApplicationId} of the streams instance.
      * @param cleanUp if local states of each {@link KafkaStreams} instance must be cleanup.
+     *
      * @see KafkaStreams#cleanUp() .
      *
      * @throws IllegalStateException if the environment is not started.
      * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
      */
-    void stop(final ApplicationId id, boolean cleanUp);
+    default void stop(final ApplicationId id, boolean cleanUp) {
+        stop(id, cleanUp, Duration.ofMillis(Long.MAX_VALUE));
+    }
+
+    /**
+     * Stops the streams instance for the specified application id.
+     *
+     * @param id      the {@link ApplicationId} of the streams instance.
+     * @param cleanUp if local states of each {@link KafkaStreams} instance must be cleanup.
+     * @param timeout the duration to wait for the streams to shutdown.
+     *
+     * @see KafkaStreams#cleanUp() .
+     *
+     * @throws IllegalStateException if the environment is not started.
+     * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
+     */
+    void stop(final ApplicationId id, boolean cleanUp, Duration timeout);
 
     /**
      * Stops the streams instance for the specified application id and remove the associated topology from this
@@ -215,5 +252,20 @@ public interface StreamsExecutionEnvironment {
      * @throws IllegalStateException if the environment is not started.
      * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
      */
-    void remove(final ApplicationId id);
+    default void remove(final ApplicationId id) {
+        remove(id, Duration.ofMillis(Long.MAX_VALUE));
+    }
+
+    /**
+     * Stops the streams instance for the specified application id and remove the associated topology from this
+     * environment.
+     *
+     * @param id      the {@link ApplicationId} of the streams instance.
+     * @param timeout the duration to wait for the streams to shutdown.
+     * @see KafkaStreams#cleanUp() .
+     *
+     * @throws IllegalStateException if the environment is not started.
+     * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
+     */
+    void remove(final ApplicationId id, final Duration timeout);
 }
