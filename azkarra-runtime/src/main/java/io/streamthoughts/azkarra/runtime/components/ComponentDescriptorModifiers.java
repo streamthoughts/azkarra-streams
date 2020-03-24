@@ -23,18 +23,22 @@ import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 
 public class ComponentDescriptorModifiers {
 
+    public static ComponentDescriptorModifier asPrimary() {
+        return new ComponentDescriptorModifier() {
+            @Override
+            public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
+                return ComponentDescriptorBuilder.<T>create(descriptor)
+                    .isPrimary(true)
+                    .build();
+            }
+        };
+    }
+
     public static ComponentDescriptorModifier withOrder(final int order) {
         return new ComponentDescriptorModifier() {
             @Override
             public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
-                return ComponentDescriptorBuilder.<T>create()
-                    .name(descriptor.name())
-                    .version(descriptor.version().toString())
-                    .type(descriptor.type())
-                    .metadata(descriptor.metadata())
-                    .classLoader(descriptor.classLoader())
-                    .supplier(descriptor.supplier())
-                    .isSingleton(descriptor.isSingleton())
+                return ComponentDescriptorBuilder.<T>create(descriptor)
                     .order(order)
                     .build();
             }

@@ -16,21 +16,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+package io.streamthoughts.azkarra.api.components.qualifier;
 
-import io.streamthoughts.azkarra.api.config.Configurable;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.Qualifier;
 
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-/**
- * A configurable component supplier which has access to the {@link ComponentFactory}.
- *
- * @param <T>   the type of the component.
- */
-public abstract class ComponentModule<T> extends BaseComponentModule implements
-        ConfigurableComponentFactory,
-        ComponentFactoryAware,
-        Configurable,
-        Supplier<T> {
+public class PrimaryQualifier<T> implements Qualifier<T> {
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<ComponentDescriptor<T>> filter(final Class<T> componentType,
+                                                 final Stream<ComponentDescriptor<T>> candidates) {
+        return candidates.filter(ComponentDescriptor::isPrimary);
+    }
 }

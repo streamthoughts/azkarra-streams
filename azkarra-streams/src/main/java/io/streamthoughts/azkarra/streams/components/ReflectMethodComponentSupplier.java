@@ -51,9 +51,7 @@ public class ReflectMethodComponentSupplier implements Supplier<Object>, Configu
     public Object get() {
         try {
             return factory.invoke(target);
-        } catch (IllegalAccessException e) {
-            throw new AzkarraException(e);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new AzkarraException(e);
         }
     }

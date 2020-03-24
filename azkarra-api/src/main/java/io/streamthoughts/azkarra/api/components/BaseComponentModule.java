@@ -18,19 +18,49 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 
-import java.util.function.Supplier;
-
 /**
- * A configurable component supplier which has access to the {@link ComponentFactory}.
- *
- * @param <T>   the type of the component.
+ * An abstract base class that can be extended to supply configurable components.
  */
-public abstract class ComponentModule<T> extends BaseComponentModule implements
+public abstract class BaseComponentModule implements
         ConfigurableComponentFactory,
         ComponentFactoryAware,
-        Configurable,
-        Supplier<T> {
+        Configurable {
 
+    private Conf configuration;
+    private ComponentFactory factory;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setComponentFactory(final ComponentFactory factory) {
+        this.factory = factory;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void configure(final Conf configuration) {
+        this.configuration = configuration;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ComponentFactory getComponentFactory() {
+        return factory;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Conf getConfiguration() {
+        return configuration;
+    }
 }

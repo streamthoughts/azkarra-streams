@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.streams.components;
 import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.annotations.Factory;
 import io.streamthoughts.azkarra.api.annotations.Order;
+import io.streamthoughts.azkarra.api.annotations.Primary;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
@@ -50,6 +51,7 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -196,17 +198,13 @@ public class ComponentScanner {
 
         final String componentName = getNamedQualifierOrElse(method, method.getName());
 
-        final Integer order = getOrderOrNull(method);
-        if (order != null)
-            registerComponent(
-                componentName,
-                componentClass,
-                supplier,
-                isSingleton(method),
-                ComponentDescriptorModifiers.withOrder(order)
-            );
-        else
-            registerComponent(componentName, componentClass, supplier, isSingleton(method));
+        List<ComponentDescriptorModifier> modifiers = new ArrayList<>();
+
+        mayAddModifierForOrder(method, modifiers);
+        mayAddModifierForPrimary(method, modifiers);
+
+        final ComponentDescriptorModifier[] objects = modifiers.toArray(new ComponentDescriptorModifier[]{});
+        registerComponent(componentName, componentClass, supplier, isSingleton(method), objects);
     }
 
     @SuppressWarnings("unchecked")
@@ -224,8 +222,13 @@ public class ComponentScanner {
             type = cls;
         }
 
+        List<ComponentDescriptorModifier> modifiers = new ArrayList<>();
+        mayAddModifierForOrder(cls, modifiers);
+        mayAddModifierForPrimary(cls, modifiers);
+        final ComponentDescriptorModifier[] arrayModifiers = modifiers.toArray(new ComponentDescriptorModifier[]{});
+
         final String componentName = getNamedQualifierOrNull(cls);
-        registerComponent(componentName, type, supplier, isSingleton(cls));
+        registerComponent(componentName, type, supplier, isSingleton(cls), arrayModifiers);
     }
 
     private void registerComponent(final String componentName,
@@ -272,9 +275,30 @@ public class ComponentScanner {
         return annotation == null ? defaultName : annotation.value();
     }
 
-    private static Integer getOrderOrNull(final Method componentMethod) {
+    private static void mayAddModifierForOrder(final Method componentMethod,
+                                               final List<ComponentDescriptorModifier> modifiers) {
         Order annotation = componentMethod.getDeclaredAnnotation(Order.class);
-        return annotation == null ? null : annotation.value();
+        if (annotation != null)
+            modifiers.add(ComponentDescriptorModifiers.withOrder(annotation.value()));
+    }
+
+    private static void mayAddModifierForOrder(final Class<?> cls,
+                                               final List<ComponentDescriptorModifier> modifiers) {
+        List<Order> annotations = ClassUtils.getAllDeclaredAnnotationsByType(cls, Order.class);
+        if (!annotations.isEmpty())
+            modifiers.add(ComponentDescriptorModifiers.withOrder(annotations.get(0).value()));
+    }
+
+    private static void mayAddModifierForPrimary(final Class<?> componentClass,
+                                                 final List<ComponentDescriptorModifier> modifiers) {
+        if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Primary.class))
+            modifiers.add(ComponentDescriptorModifiers.asPrimary());
+    }
+
+    private static void mayAddModifierForPrimary(final Method method,
+                                                 final List<ComponentDescriptorModifier> modifiers) {
+        if (ClassUtils.isMethodAnnotatedWith(method, Primary.class))
+            modifiers.add(ComponentDescriptorModifiers.asPrimary());
     }
 
     // The Reflections class may throw a ReflectionsException when parallel executor

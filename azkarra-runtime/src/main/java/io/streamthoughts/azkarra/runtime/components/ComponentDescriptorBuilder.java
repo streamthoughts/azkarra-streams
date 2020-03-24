@@ -24,6 +24,7 @@ import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -36,6 +37,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
     private String version;
     private Supplier<T> supplier;
     private boolean isSingleton;
+    private boolean isPrimary;
     private Set<String> aliases = new HashSet<>();
     private int order;
 
@@ -47,6 +49,26 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
      */
     public static <T> ComponentDescriptorBuilder<T> create() {
         return new ComponentDescriptorBuilder<>();
+    }
+
+    /**
+     * Static helper method for creating a new {@link ComponentDescriptorBuilder} instance.
+     *
+     * @param descriptor the {@link ComponentDescriptor} instance.
+     * @param <T>        the component type.
+     * @return           the new {@link ComponentDescriptorBuilder} instance.
+     */
+    public static <T> ComponentDescriptorBuilder<T> create(final ComponentDescriptor<T> descriptor) {
+        return new ComponentDescriptorBuilder<T>()
+            .name(descriptor.name())
+            .version(Optional.ofNullable(descriptor.version()).map(Object::toString).orElse(null))
+            .type(descriptor.type())
+            .metadata(descriptor.metadata())
+            .classLoader(descriptor.classLoader())
+            .supplier(descriptor.supplier())
+            .isSingleton(descriptor.isSingleton())
+            .order(descriptor.order())
+            .isPrimary(descriptor.isPrimary());
     }
 
     /**
@@ -179,12 +201,30 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
         return this;
     }
 
+    public ComponentDescriptorBuilder<T> isSingleton(final boolean isSingleton) {
+        this.isSingleton = isSingleton;
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean isSingleton() {
         return isSingleton;
+    }
+
+    public ComponentDescriptorBuilder<T> isPrimary(final boolean isPrimary) {
+        this.isPrimary = isPrimary;
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isPrimary() {
+        return isPrimary;
     }
 
     /**
@@ -206,20 +246,16 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
         return order;
     }
 
-    public ComponentDescriptorBuilder<T> isSingleton(final boolean isSingleton) {
-        this.isSingleton = isSingleton;
-        return this;
-    }
-
     public ComponentDescriptor<T> build() {
         SimpleComponentDescriptor<T> descriptor = new SimpleComponentDescriptor<>(
-                name,
-                type,
-                classLoader,
-                supplier,
-                version,
-                isSingleton,
-                order
+            name,
+            type,
+            classLoader,
+            supplier,
+            version,
+            isSingleton,
+            isPrimary,
+            order
         );
         descriptor.metadata(metadata);
         descriptor.addAliases(aliases);

@@ -16,21 +16,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+package io.streamthoughts.azkarra.api.annotations;
 
-import io.streamthoughts.azkarra.api.config.Configurable;
-
-import java.util.function.Supplier;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * A configurable component supplier which has access to the {@link ComponentFactory}.
+ * Marker interface to indicate that a component must be selected
+ * in the case of multiple possible implementations.
  *
- * @param <T>   the type of the component.
+ * @see io.streamthoughts.azkarra.api.components.ComponentRegistry
+ * @see io.streamthoughts.azkarra.api.components.ComponentFactory
+ * @see io.streamthoughts.azkarra.api.annotations.Component
  */
-public abstract class ComponentModule<T> extends BaseComponentModule implements
-        ConfigurableComponentFactory,
-        ComponentFactoryAware,
-        Configurable,
-        Supplier<T> {
+@Documented
+@Inherited
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Primary {
 
 }

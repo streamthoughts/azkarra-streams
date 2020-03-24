@@ -28,8 +28,16 @@ public class Qualifiers {
         return new CompositeQualifier<>(qualifiers);
     }
 
+    public static <T> Qualifier<T> byPrimary() {
+        return new PrimaryQualifier<>();
+    }
+
     public static <T> Qualifier<T> byName(final String name) {
         return new NamedQualifier<>(name);
+    }
+
+    public static <T> Qualifier<T> excludeByName(final String name) {
+        return new NamedQualifier<>(name, false);
     }
 
     public static <T> Qualifier<T> byVersion(final String version) {

@@ -124,4 +124,12 @@ public interface ComponentDescriptor<T> extends Ordered {
      * @return {@code true } if is singleton, otherwise {@code false}.
      */
     boolean isSingleton();
+
+    /**
+     * Checks if the described component is the primary component
+     * that must be selected in the case of multiple possible implementations.
+     *
+     * @return {@code true } if is primary, otherwise {@code false}.
+     */
+    boolean isPrimary();
 }

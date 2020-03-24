@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 public class NamedQualifier<T> implements Qualifier<T> {
 
     private final String name;
+    private final boolean equals;
 
     /**
      * Creates a new {@link NamedQualifier} instance.
@@ -34,7 +35,17 @@ public class NamedQualifier<T> implements Qualifier<T> {
      * @param name  the component name.
      */
     NamedQualifier(final String name) {
+        this(name, true);
+    }
+
+    /**
+     * Creates a new {@link NamedQualifier} instance.
+     *
+     * @param name  the component name.
+     */
+    NamedQualifier(final String name, final Boolean equals) {
         this.name = Objects.requireNonNull(name, "name cannot be null");
+        this.equals = equals;
     }
 
     /**
@@ -43,7 +54,12 @@ public class NamedQualifier<T> implements Qualifier<T> {
     @Override
     public Stream<ComponentDescriptor<T>> filter(final Class<T> componentType,
                                                  final Stream<ComponentDescriptor<T>> candidates) {
-        return candidates.filter(descriptor -> descriptor.name().equalsIgnoreCase(name));
+        return candidates.filter(this::matches);
+    }
+
+    protected boolean matches(final ComponentDescriptor<T> descriptor) {
+        final String name = descriptor.name();
+        return equals == name.equalsIgnoreCase(this.name);
     }
 
     /**

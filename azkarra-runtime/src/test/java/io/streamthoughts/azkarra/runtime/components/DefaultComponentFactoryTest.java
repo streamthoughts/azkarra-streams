@@ -27,6 +27,7 @@ import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.util.Version;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,7 +65,7 @@ public class DefaultComponentFactoryTest {
     }
 
     @Test
-    public void shouldThrowNoUniqueComponentExceptionGivenInvalidType() {
+    public void shouldThrowNoUniqueComponentExceptionGivenTwoSameTypeComponents() {
         factory.registerComponent("componentOne", TestB.class);
         factory.registerComponent("componentTwo", TestB.class);
         NoUniqueComponentException e = assertThrows(
@@ -73,6 +75,17 @@ public class DefaultComponentFactoryTest {
             "Expected single matching component for type '" + TestB.class.getName() + "' but found 2",
             e.getMessage());
     }
+
+    @Test
+    public void shouldNotThrowNoUniqueComponentExceptionGivenTwoSameTypeComponentsUsingPrimary() {
+        factory.registerComponent("componentOne", TestB.class, TestB::new);
+        factory.registerComponent("componentTwo", TestB.class, TestB::new, asPrimary());
+
+        Optional<ComponentDescriptor<TestB>> descriptor = factory.findDescriptorByClass(TestB.class);
+        Assertions.assertTrue(descriptor.isPresent());
+        Assertions.assertEquals("componentTwo", descriptor.get().name());
+    }
+
 
     @Test
     public void shouldThrowConflictingComponentExceptionGivenTwoIdenticalComponents() {

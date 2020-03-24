@@ -344,9 +344,17 @@ public class DefaultComponentFactory implements ComponentFactory {
     private <T> Optional<ComponentDescriptor<T>> findUniqueDescriptor(final String type,
                                                                       final Stream<ComponentDescriptor<T>> candidates) {
         List<ComponentDescriptor<T>> descriptors = candidates.collect(Collectors.toList());
-        if (descriptors.size() > 1)
-            throw new NoUniqueComponentException("Expected single matching component for " +
-                    "type '" + type + "' but found " + descriptors.size());
+        if (descriptors.size() > 1) {
+            final int many = descriptors.size();
+            descriptors = Qualifiers
+                .<T>byPrimary()
+                .filter(null, descriptors.stream())
+                .collect(Collectors.toList());
+            if (descriptors.size() != 1)
+                throw new NoUniqueComponentException("Expected single matching component for " +
+                        "type '" + type + "' but found " + many);
+        }
+
 
         if (descriptors.isEmpty())
             return Optional.empty();
