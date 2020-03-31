@@ -18,7 +18,6 @@
  */
 package io.streamthoughts.azkarra.runtime.context;
 
-import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
@@ -39,14 +38,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DefaultAzkarraContextTest {
 
-    private AzkarraContext context;
+    private DefaultAzkarraContext context;
 
     private ArgumentCaptor<Executed> executedArgumentCaptor = ArgumentCaptor.forClass(Executed.class);
 
     @BeforeEach
     public void setUp() {
         // Create default context with empty configuration.
-        context = DefaultAzkarraContext.create();
+        context = (DefaultAzkarraContext)DefaultAzkarraContext.create();
     }
 
     @Test
@@ -57,11 +56,11 @@ public class DefaultAzkarraContextTest {
     }
 
     @Test
-    public void shouldRegisterTopologyToGivenEnvironment() {
+    public void shouldRegisterTopologyToGivenEnvironmentWhenStart() {
         StreamsExecutionEnvironment env = Mockito.spy(DefaultStreamsExecutionEnvironment.create("env"));
         context.addExecutionEnvironment(env);
         context.addTopology(TestTopologyProvider.class, "env", Executed.as("test"));
-
+        context.preStart();
         Mockito.verify(env, Mockito.times(1))
                .addTopology(Mockito.any(Supplier.class), executedArgumentCaptor.capture());
 
@@ -71,8 +70,9 @@ public class DefaultAzkarraContextTest {
 
     @Test
     public void shouldThrowExceptionWhenAddingTopologyGivenUnknownEnvironment() {
+        context.addTopology(TestTopologyProvider.class, "env", Executed.as("test"));
         AzkarraException exception = Assertions.assertThrows(AzkarraException.class, () -> {
-            context.addTopology(TestTopologyProvider.class, "env", Executed.as("test"));
+            context.start();
         });
 
         String errorMessage = exception.getMessage();

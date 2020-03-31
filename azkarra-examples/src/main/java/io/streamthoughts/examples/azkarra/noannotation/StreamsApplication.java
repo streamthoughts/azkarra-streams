@@ -20,17 +20,15 @@ package io.streamthoughts.examples.azkarra.noannotation;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.Executed;
-import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.ConfBuilder;
+import io.streamthoughts.azkarra.api.banner.Banner;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
+import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
+import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
+import io.streamthoughts.azkarra.streams.config.AzkarraConf;
 import io.streamthoughts.azkarra.streams.config.HttpServerConf;
 import io.streamthoughts.examples.azkarra.topology.BasicWordCountTopology;
 import io.streamthoughts.examples.azkarra.topology.ConfigurableWordCountTopology;
-
-import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
-import static org.apache.kafka.streams.StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG;
-import static org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG;
 
 /**
  * Example to manually register a topology.
@@ -39,15 +37,12 @@ public class StreamsApplication {
 
     public static void main(final String[] args) {
 
-        Conf streamsConf = ConfBuilder.newConf()
-        .with(BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
-        .with(DEFAULT_KEY_SERDE_CLASS_CONFIG, "org.apache.kafka.common.serialization.Serdes$StringSerde")
-        .with(DEFAULT_VALUE_SERDE_CLASS_CONFIG, "org.apache.kafka.common.serialization.Serdes$StringSerde")
-        .build();
+        BannerPrinterBuilder.newBuilder()
+                .setMode(Banner.Mode.CONSOLE)
+                .build()
+                .print(new AzkarraBanner());
 
-        Conf config = Conf.with("streams", streamsConf);
-
-        final AzkarraContext context = DefaultAzkarraContext.create(config);
+        final AzkarraContext context = DefaultAzkarraContext.create();
 
         // register and add the topology to the default environment.
         context.addTopology(BasicWordCountTopology.class, Executed.as("BasicWordCount"));
@@ -56,8 +51,12 @@ public class StreamsApplication {
         context.registerComponent(ConfigurableWordCountTopology.class);
 
         new AzkarraApplication()
+            .setConfiguration(AzkarraConf.create())
+            .setBannerMode(Banner.Mode.OFF)
             .setContext(context)
             .enableHttpServer(true, HttpServerConf.with("localhost", 8082))
+            .setAutoStart(true) // mandatory for auto-starting ConfigurableWordCountTopology.
+            .setEnableComponentScan(false)
             .run(args);
     }
 }

@@ -25,6 +25,7 @@ import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
+import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
@@ -67,6 +68,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -141,6 +143,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
     private Supplier<ApplicationIdBuilder> globalApplicationIdBuilder;
 
     private Supplier<StreamThreadExceptionHandler> globalStreamThreadExceptionHandler;
+
+    // contains the list of topologies to register when starting.
+    private final List<TopologyRegistration> topologyRegistrations = new LinkedList<>();
 
     /**
      * Creates a new {@link DefaultAzkarraContext} instance.
@@ -226,7 +231,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     public AzkarraContext addExecutionEnvironment(final StreamsExecutionEnvironment env)
             throws AlreadyExistsException {
         Objects.requireNonNull(env, "env cannot be null.");
-        LOG.info("Creating new streams environment for name '{}'", env.name());
+        LOG.debug("Adding new streams environment for name '{}'", env.name());
         if (!environments.containsKey(env.name())) {
             environments.put(env.name(), env);
             Map<String, Object> confAsMap = new TreeMap<>(env.getConfiguration().getConfAsMap());
@@ -298,44 +303,65 @@ public class DefaultAzkarraContext implements AzkarraContext {
                                      final String version,
                                      final String environment,
                                      final Executed executed) {
-        initializeDefaultEnvironment();
-        checkIfEnvironmentExists(environment, String.format(
-            "Error while adding topology '%s', environment '%s' not found", type, environment
+
+        final TopologyRegistration registration = new TopologyRegistration(type, version, environment, executed);
+
+        ApplicationId res = null;
+        if (state == State.STARTED)
+           res = mayAddTopologyToEnvironment(registration);
+        else
+            topologyRegistrations.add(registration);
+        return res;
+    }
+
+    public void setState(final State state) {
+        this.state = state;
+    }
+
+    /**
+     * Build and add a {@link TopologyProvider} to a target {@link StreamsExecutionEnvironment}.
+     *
+     * @param registration  the {@link TopologyRegistration}
+     * @return              the {@link ApplicationId} instance if the environment is already started,
+     *                      otherwise {@code null}.
+     *
+     * @throws AzkarraContextException if no component is registered for the topology to register.
+     *                                 if target environment doesn't exists.
+     */
+    private ApplicationId mayAddTopologyToEnvironment(final TopologyRegistration registration) {
+        Objects.requireNonNull(registration, "registration cannot be null");
+        checkIfEnvironmentExists(
+            registration.environment,
+            String.format(
+                "Error while adding topology '%s', environment '%s' not found",
+                registration.type,
+                registration.environment
         ));
 
-        if (!componentFactory.containsComponent(type)) {
+        if (!componentFactory.containsComponent(registration.type)) {
             try {
-                registerComponent(Class.forName(type));
+                registerComponent(Class.forName(registration.type));
             } catch (final AzkarraException | ClassNotFoundException e) {
                 /* can ignore this exception for now, initialization will fail later */
             }
         }
-        return mayAddTopologyToEnvironment(type, version, environment, executed);
-    }
 
-    public void setState(final State started) {
-        state = started;
-    }
+        final StreamsExecutionEnvironment env = environments.get(registration.environment);
 
-    private ApplicationId mayAddTopologyToEnvironment(final String type,
-                                                      final String version,
-                                                      final String environmentName,
-                                                      final Executed executed) {
-        final StreamsExecutionEnvironment env = environments.get(environmentName);
-
-        final Optional<ComponentDescriptor<TopologyProvider>> opt = version == null ?
-            componentFactory.findDescriptorByAlias(type, Qualifiers.byLatestVersion()) :
-            componentFactory.findDescriptorByAlias(type, Qualifiers.byVersion(version));
+        final Optional<ComponentDescriptor<TopologyProvider>> opt = registration.version == null ?
+            componentFactory.findDescriptorByAlias(registration.type, Qualifiers.byLatestVersion()) :
+            componentFactory.findDescriptorByAlias(registration.type, Qualifiers.byVersion(registration.version));
 
         if (opt.isPresent()) {
             final TopologyDescriptor descriptor = new TopologyDescriptor<>(opt.get());
-            return addTopologyToEnvironment(descriptor, env, new InternalExecuted(executed));
+            return addTopologyToEnvironment(descriptor, env, registration.executed);
 
         } else {
-            final String loggedVersion = version != null ? version : "latest";
+            final String loggedVersion = registration.version != null ? registration.version : "latest";
             throw new AzkarraContextException(
-               "Failed to register topology to environment '" + environmentName + "'." +
-                " Cannot find any topology provider for type='" + type + "', version='" + loggedVersion +" '."
+               "Failed to register topology to environment '" + registration.environment + "'."
+               + " Cannot find any topology provider for type='" + registration.type
+               + "', version='" + loggedVersion +" '."
             );
         }
     }
@@ -378,8 +404,13 @@ public class DefaultAzkarraContext implements AzkarraContext {
             completedExecuted = completedExecuted.withInterceptor(new AutoCreateTopicsInterceptorSupplier(name));
         }
 
-        LOG.info("Registered new topology to environment '" + env.name() + "' " +
-                " for type='" + descriptor.className() + "', version='" + descriptor.version() +" '.");
+        LOG.info(
+            "Registered new topology to environment '{}' for type='{}', version='{}', name='{}'.",
+            env.name(),
+            descriptor.className() ,
+            descriptor.version(),
+            name
+        );
 
         final ContextAwareTopologySupplier supplier = new ContextAwareTopologySupplier(this, descriptor);
         return env.addTopology(supplier, completedExecuted);
@@ -448,7 +479,8 @@ public class DefaultAzkarraContext implements AzkarraContext {
             throw new IllegalStateException(
                 "The context is either already started or already stopped, cannot re-start");
         }
-        initializeDefaultEnvironment();
+        LOG.info("Starting AzkarraContext");
+        preStart();
         try {
             listeners.forEach(listeners -> listeners.onContextStart(this));
             registerShutdownHook();
@@ -464,11 +496,19 @@ public class DefaultAzkarraContext implements AzkarraContext {
                 LOG.info("Starting streams environment: {}", env.name());
                 env.start();
             }
-
             setState(State.STARTED);
         } catch (Exception e) {
             LOG.error("Unexpected error happens while starting AzkarraContext", e);
             stop(); // stop properly to close potentially open resources.
+        }
+    }
+
+    @VisibleForTesting
+    void preStart() {
+        initializeDefaultEnvironment();
+        if (!topologyRegistrations.isEmpty()) {
+            LOG.info("Adding all registered topologies to declared streams environments");
+            topologyRegistrations.forEach(this::mayAddTopologyToEnvironment);
         }
     }
 
@@ -663,6 +703,50 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
         Collection<NewTopic> newTopics(final Conf configs) {
             return componentFactory.getAllComponents(NewTopic.class, configs, Qualifiers.byRestriction(restriction));
+        }
+    }
+
+    /**
+     * This class represents a topology identified by a type/version/executed
+     * to register to a target streams environment.
+     */
+    private static class TopologyRegistration {
+
+        final String type;
+        final String version;
+        final String environment;
+        final InternalExecuted executed;
+
+        TopologyRegistration(final String type,
+                             final String version,
+                             final String environment,
+                             final Executed executed) {
+            this.type = type;
+            this.version = version;
+            this.environment = environment;
+            this.executed = new InternalExecuted(executed);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof TopologyRegistration)) return false;
+            TopologyRegistration that = (TopologyRegistration) o;
+            return Objects.equals(type, that.type) &&
+                    Objects.equals(version, that.version) &&
+                    Objects.equals(environment, that.environment) &&
+                    Objects.equals(executed, that.executed);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, version, environment, executed);
         }
     }
 }

@@ -461,7 +461,7 @@ public class DefaultComponentFactory implements ComponentFactory {
     @Override
     public <T> void registerDescriptor(final ComponentDescriptor<T> descriptor) {
         Objects.requireNonNull(descriptor, "descriptor can't be null");
-        LOG.info("Registering component descriptor for: name='{}' type='{}', version='{}'",
+        LOG.info("Registering component descriptor for name='{}', type='{}', version='{}'",
                 descriptor.name(),
                 descriptor.type(),
                 descriptor.version());
