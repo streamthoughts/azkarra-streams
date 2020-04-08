@@ -55,6 +55,16 @@ Any feedback, bug reports and PRs are greatly appreciated!
 - Source Code: [https://github.com/streamthoughts/azkarra-streams](https://github.com/streamthoughts/azkarra-streams)
 - Issue Tracker: [https://github.com/streamthoughts/azkarra-streams/issues](https://github.com/streamthoughts/azkarra-streams/issues)
 
+## Community
+
+* [Slack Channel](https://communityinviter.com/apps/azkarra-streams/azkarra-streams-community)
+
+## Who Uses?
+
+**Want to appear on this page?** 
+
+Open an [issue](https://github.com/streamthoughts/azkarra-streams/issues) with a quick description of your organization and usage or send us a message to the [Slack Channel](https://communityinviter.com/apps/azkarra-streams/azkarra-streams-community).
+
 ## Licence
 
 Copyright 2019 StreamThoughts.

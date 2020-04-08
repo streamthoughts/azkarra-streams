@@ -125,7 +125,11 @@ no = 'Sorry to hear that. Please <a href="https://github.com/streamthoughts/azka
 	url = "https://github.com/streamthoughts/azkarra-streams"
 	icon = "fab fa-github"
         desc = "Development takes place here!"
-
+[[params.links.developer]]
+	name = "Slack"
+	url = "https://communityinviter.com/apps/azkarra-streams/azkarra-streams-community"
+	icon = "fab fa-slack"
+        desc = "Chat with other project developers"
 # As of Hugo 0.60
 [markup]
   [markup.goldmark]
