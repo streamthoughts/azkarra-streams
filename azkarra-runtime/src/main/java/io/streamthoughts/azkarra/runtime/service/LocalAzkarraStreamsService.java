@@ -46,6 +46,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import org.apache.kafka.common.MetricName;
@@ -201,6 +202,15 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
                 .stream()
                 .map(e -> new MetricGroup(e.getKey(), e.getValue()))
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ConsumerGroupOffsets getStreamsConsumerOffsetsById(final String applicationId) {
+        final KafkaStreamsContainer container = getStreamsById(applicationId);
+        return container.offsets();
     }
 
     /**

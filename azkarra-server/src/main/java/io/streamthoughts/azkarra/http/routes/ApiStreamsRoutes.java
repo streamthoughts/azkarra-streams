@@ -25,6 +25,7 @@ import io.streamthoughts.azkarra.http.handler.StreamsGetConfigHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsGetDetailsHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsGetListHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsGetMetricsHandler;
+import io.streamthoughts.azkarra.http.handler.StreamsGetOffsetsHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsGetStatusHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsPostHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsRestartHandler;
@@ -45,6 +46,8 @@ public class ApiStreamsRoutes implements RoutingHandlerProvider {
             = "/streams/{id}";
     private static final String PATH_STREAMS_STATUS
             = "/streams/{id}/status";
+    private static final String PATH_STREAMS_OFFSETS
+            = "/streams/{id}/offsets";
     private static final String PATH_STREAMS_CONFIG
             = "/streams/{id}/config";
     private static final String PATH_STREAMS_METRICS
@@ -91,6 +94,8 @@ public class ApiStreamsRoutes implements RoutingHandlerProvider {
                 new BlockingHandler(new StreamsStopHandler(service)))
             .delete(APIVersions.PATH_V1 + PATH_STREAMS_ID,
                 new StreamsDeleteHandler(service))
+            .get(APIVersions.PATH_V1 + PATH_STREAMS_OFFSETS,
+                new StreamsGetOffsetsHandler(service))
             .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS, metricsHandler)
             .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS_GROUP, metricsHandler)
             .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS_GROUP_METRIC, metricsHandler)

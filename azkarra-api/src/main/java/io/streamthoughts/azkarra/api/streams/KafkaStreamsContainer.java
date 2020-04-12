@@ -24,12 +24,22 @@ import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
+import io.streamthoughts.azkarra.api.streams.consumer.ConsumerClientOffsets;
+import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
+import io.streamthoughts.azkarra.api.streams.consumer.ConsumerLogOffsets;
+import io.streamthoughts.azkarra.api.streams.consumer.GlobalConsumerOffsetsRegistry;
+import io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -51,16 +61,21 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
+
+import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
 
 public class KafkaStreamsContainer {
 
@@ -84,6 +99,10 @@ public class KafkaStreamsContainer {
 
     private final LinkedBlockingQueue<StateChangeWatcher> stateChangeWatchers = new LinkedBlockingQueue<>();
 
+    private Admin adminClient;
+
+    private KafkaConsumer<byte[], byte[]> consumer;
+
     /**
      * The {@link Executor} which is used top start/stop the internal streams in a non-blocking way.
      */
@@ -102,7 +121,6 @@ public class KafkaStreamsContainer {
         setState(State.NOT_CREATED);
         this.streamsFactory = streamsFactory;
         this.topologyContainer = topologyContainer;
-
         this.applicationServer = streamsConfig()
             .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
             .orElse(null);
@@ -265,6 +283,67 @@ public class KafkaStreamsContainer {
        return kafkaStreams.metrics();
     }
 
+    public ConsumerGroupOffsets offsets() {
+
+        final ConsumerGroupOffsets consumerGroupOffsets = GlobalConsumerOffsetsRegistry
+            .getInstance()
+            .offsetsFor(applicationId())
+            .snapshot();
+
+        final Set<TopicPartition> activeTopicPartitions = threadMetadata()
+            .stream()
+            .flatMap(t -> t.activeTasks().stream())
+            .flatMap(t -> t.topicPartitions().stream())
+            .collect(Collectors.toSet());
+
+        final Map<TopicPartition, Long> logEndOffsetsFor = LogOffsetsFetcher.fetchLogEndOffsetsFor(
+            getConsumer(),
+            activeTopicPartitions
+        );
+
+        final Set<ConsumerClientOffsets> consumerAndOffsets = consumerGroupOffsets.consumers()
+            .stream()
+            .map(client -> {
+                Set<ConsumerLogOffsets> offsets = client.positions()
+                    .stream()
+                    .map(logOffsets -> {
+                        Long logEndOffset = logEndOffsetsFor.get(logOffsets.topicPartition());
+                        return logEndOffset != null ? logOffsets.logEndOffset(logEndOffset) : null;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+                return new ConsumerClientOffsets(
+                    client.clientId(),
+                    client.streamThread(),
+                    offsets
+                );
+            })
+            .collect(Collectors.toSet());
+        return new ConsumerGroupOffsets(consumerGroupOffsets.group(), consumerAndOffsets);
+    }
+
+    /**
+     * Gets an {@link Consumer} instance for this {@link KafkaStreams} instance.
+     *
+     * @return a {@link Consumer} instance.
+     */
+    private synchronized Consumer<byte[], byte[]> getConsumer() {
+        if (consumer == null) {
+            final UUID containerId = UUID.randomUUID();
+            final String clientId = streamsConfig()
+                    .getOptionalString(StreamsConfig.CLIENT_ID_CONFIG)
+                    .orElse(applicationId());
+            final String consumerClientId = clientId + "-" + containerId + "-consumer";
+            Map<String, Object> props = getConsumerConfigs(streamsConfig().getConfAsMap());
+            props.put(BOOTSTRAP_SERVERS_CONFIG, streamsConfig().getString(BOOTSTRAP_SERVERS_CONFIG));
+            props.put(CLIENT_ID_CONFIG, consumerClientId);
+            // no need to set group id for a internal consumer
+            props.remove(ConsumerConfig.GROUP_ID_CONFIG);
+            consumer = new KafkaConsumer<>(props, new ByteArrayDeserializer(), new ByteArrayDeserializer());
+        }
+        return consumer;
+    }
+
     /**
      * Closes this {@link KafkaStreams} instance.
      */
@@ -405,8 +484,8 @@ public class KafkaStreamsContainer {
         return getLocalStoreAccess(storeName, QueryableStoreTypes.sessionStore());
     }
 
-    public <T> LocalStoreAccessor<T> getLocalStoreAccess(final String storeName,
-                                                         final QueryableStoreType<T> storeType) {
+    private <T> LocalStoreAccessor<T> getLocalStoreAccess(final String storeName,
+                                                          final QueryableStoreType<T> storeType) {
         return new LocalStoreAccessor<>(() -> kafkaStreams.store(storeName, storeType));
     }
 
@@ -521,5 +600,16 @@ public class KafkaStreamsContainer {
         public void setState(final State state) {
             KafkaStreamsContainer.this.setState(state);
         }
+    }
+
+
+    private static Map<String, Object> getConsumerConfigs(final Map<String, Object> configs) {
+        final Map<String, Object> parsed = new HashMap<>();
+        for (final String configName: ConsumerConfig.configNames()) {
+            if (configs.containsKey(configName)) {
+                parsed.put(configName, configs.get(configName));
+            }
+        }
+        return parsed;
     }
 }

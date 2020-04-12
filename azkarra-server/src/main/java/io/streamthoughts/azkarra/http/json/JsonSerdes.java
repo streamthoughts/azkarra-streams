@@ -25,9 +25,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
+import io.streamthoughts.azkarra.api.streams.consumer.OffsetAndTimestamp;
 import io.streamthoughts.azkarra.http.error.SerializationException;
 import io.streamthoughts.azkarra.http.json.serializers.ConfSerializer;
 import io.streamthoughts.azkarra.http.json.serializers.GenericRecordSerializer;
+import io.streamthoughts.azkarra.http.json.serializers.OffsetAndTimestampSerializer;
 import io.streamthoughts.azkarra.http.json.serializers.TaskMetadataSerializer;
 import io.streamthoughts.azkarra.http.json.serializers.ThreadMetadataSerializer;
 import io.streamthoughts.azkarra.http.json.serializers.TopicPartitionSerializer;
@@ -58,7 +60,8 @@ public class JsonSerdes {
               .addSerializer(TopologyDescriptor.class, new TopologyDescriptorSerializer())
               .addSerializer(TaskMetadata.class, new TaskMetadataSerializer())
               .addSerializer(ThreadMetadata.class, new ThreadMetadataSerializer())
-              .addSerializer(GenericRecord.class, new GenericRecordSerializer());
+              .addSerializer(GenericRecord.class, new GenericRecordSerializer())
+              .addSerializer(OffsetAndTimestamp.class, new OffsetAndTimestampSerializer());
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         OBJECT_MAPPER.registerModule(module);
     }

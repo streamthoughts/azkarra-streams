@@ -22,23 +22,23 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.util.NameTransformer;
-import org.apache.kafka.common.TopicPartition;
+import io.streamthoughts.azkarra.api.streams.consumer.OffsetAndTimestamp;
 
 import java.io.IOException;
 
 /**
- * The {@link JsonSerializer} to serialize {@link TopicPartition} instance.
+ * The {@link JsonSerializer} to serialize {@link OffsetAndTimestamp} instance.
  */
-public class TopicPartitionSerializer extends JsonSerializer<TopicPartition> {
+public class OffsetAndTimestampSerializer extends JsonSerializer<OffsetAndTimestamp> {
 
-    private final JsonSerializer<TopicPartition> delegate
-            = new UnwrappingTopicPartitionSerializer(NameTransformer.NOP);
+    private final JsonSerializer<OffsetAndTimestamp> delegate
+            = new UnwrappingOffsetAndTimestampSerializer(NameTransformer.NOP);
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void serialize(final TopicPartition value,
+    public void serialize(final OffsetAndTimestamp value,
                           final JsonGenerator gen,
                           final SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
@@ -51,15 +51,15 @@ public class TopicPartitionSerializer extends JsonSerializer<TopicPartition> {
      * {@inheritDoc}
      */
     @Override
-    public JsonSerializer<TopicPartition> unwrappingSerializer(final NameTransformer nameTransformer) {
-        return new UnwrappingTopicPartitionSerializer(nameTransformer);
+    public JsonSerializer<OffsetAndTimestamp> unwrappingSerializer(final NameTransformer nameTransformer) {
+        return new UnwrappingOffsetAndTimestampSerializer(nameTransformer);
     }
 
-    static class UnwrappingTopicPartitionSerializer extends JsonSerializer<TopicPartition> {
+    static class UnwrappingOffsetAndTimestampSerializer extends JsonSerializer<OffsetAndTimestamp> {
 
         private final NameTransformer nameTransformer;
 
-        UnwrappingTopicPartitionSerializer(final NameTransformer nameTransformer) {
+        UnwrappingOffsetAndTimestampSerializer(final NameTransformer nameTransformer) {
             this.nameTransformer = nameTransformer;
         }
 
@@ -68,12 +68,12 @@ public class TopicPartitionSerializer extends JsonSerializer<TopicPartition> {
          */
         @Override
         public void serialize(
-                final TopicPartition value,
+                final OffsetAndTimestamp value,
                 final JsonGenerator gen,
                 final SerializerProvider serializers
         ) throws IOException {
-            gen.writeStringField(nameTransformer.transform("topic"), value.topic());
-            gen.writeNumberField(nameTransformer.transform("partition"), value.partition());
+            gen.writeNumberField(nameTransformer.transform("_offset"), value.offset());
+            gen.writeNumberField(nameTransformer.transform("_timestamp"), value.timestamp());
         }
 
         /**
@@ -85,3 +85,4 @@ public class TopicPartitionSerializer extends JsonSerializer<TopicPartition> {
         }
     }
 }
+

@@ -28,13 +28,14 @@ import io.streamthoughts.azkarra.api.model.StreamsStatus;
 import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
 import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
+import io.streamthoughts.azkarra.api.query.Queried;
+import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.internal.Query;
+import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
-import io.streamthoughts.azkarra.api.query.QueryParams;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.result.QueryResult;
+import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import org.apache.kafka.streams.StreamsConfig;
 
 import java.util.Collection;
@@ -138,6 +139,14 @@ public interface AzkarraStreamsService {
      * @return              a set of {@link MetricGroup} instance.
      */
     Set<MetricGroup> getStreamsMetricsById(final String applicationId, final Predicate<Tuple<String, Metric>> filter);
+
+    /**
+     * Gets the topic/partitions offsets for the specified streams application.
+     *
+     * @param applicationId the streams application id.
+     * @return              the {@link ConsumerGroupOffsets}.
+     */
+    ConsumerGroupOffsets getStreamsConsumerOffsetsById(final String applicationId);
 
     Conf getContextConfig();
 
