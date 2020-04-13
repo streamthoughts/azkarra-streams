@@ -40,7 +40,7 @@ public class MonitorOffsetsConsumerInterceptor<K, V> implements ConsumerIntercep
 
     private ConsumerGroupOffsetsState consumerGroupOffsets;
 
-    private ConsumerThreadKey consumerThreadKey;
+    private String clientId;
 
     /**
      * Creates a new {@link MonitorOffsetsConsumerInterceptor} instance.
@@ -55,12 +55,8 @@ public class MonitorOffsetsConsumerInterceptor<K, V> implements ConsumerIntercep
     @Override
     public void configure(final Map<String, ?> configs) {
         final String groupId = (String) configs.get(ConsumerConfig.GROUP_ID_CONFIG);
-        final String clientId = (String) configs.get(ConsumerConfig.CLIENT_ID_CONFIG);
-        final String streamThread = Thread.currentThread().getName();
-
+        clientId = (String) configs.get(ConsumerConfig.CLIENT_ID_CONFIG);
         consumerGroupOffsets = registry.offsetsFor(groupId);
-        consumerThreadKey = new ConsumerThreadKey(clientId, streamThread);
-
     }
 
     /**
@@ -71,7 +67,7 @@ public class MonitorOffsetsConsumerInterceptor<K, V> implements ConsumerIntercep
         for (TopicPartition tp : records.partitions()) {
             for (ConsumerRecord<K, V>  record : records.records(tp)) {
                 final OffsetAndTimestamp ot = new OffsetAndTimestamp(record.offset(), record.timestamp());
-                consumerGroupOffsets.update(tp, consumerThreadKey, current -> current.consumedOffset(ot));
+                consumerGroupOffsets.update(tp, consumerThreadKey(), current -> current.consumedOffset(ot));
             }
         }
         return records;
@@ -87,8 +83,12 @@ public class MonitorOffsetsConsumerInterceptor<K, V> implements ConsumerIntercep
             final TopicPartition tp = elem.getKey();
             final OffsetAndMetadata oam = elem.getValue();
             final OffsetAndTimestamp ot = new OffsetAndTimestamp(oam.offset(), now);
-            consumerGroupOffsets.update(tp, consumerThreadKey, current -> current.committedOffset(ot));
+            consumerGroupOffsets.update(tp, consumerThreadKey(), current -> current.committedOffset(ot));
         }
+    }
+
+    private  ConsumerThreadKey consumerThreadKey() {
+        return new ConsumerThreadKey(Thread.currentThread().getName(), clientId);
     }
 
     /**

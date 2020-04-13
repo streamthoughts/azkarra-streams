@@ -233,7 +233,8 @@ export default {
             var nodesKeyedByName = objectTopology.nodes();
 
             var div = d3.select("body").append("div")
-                .attr("class", "tooltip")
+                .classed("tooltip", true)
+                .classed("tooltip-topology-dag", true)
                 .style("opacity", 0);
 
             var gSubTopologies = g
@@ -534,6 +535,7 @@ class TopicNode extends TopologyNode {
   width: 100%;
   min-height:100%;
 }
+
 #streams-topology-graph {
     padding-left: 15px;
 }
@@ -573,7 +575,7 @@ text.topology-node {
   fill: none;
 }
 
-div.tooltip {
+div.tooltip-topology-dag {
     position: absolute;
     text-align: center;
     padding: 10px;

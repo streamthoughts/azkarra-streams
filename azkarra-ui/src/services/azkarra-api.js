@@ -144,6 +144,14 @@ class AzkarraApi {
        })
     }
 
+    fetchLocalActiveStreamsOffsets(instance) {
+     var that = this
+     return this.client.get(apiBasePath + '/streams/' + instance.id + "/offsets")
+       .then(function (response) {
+            return response.data;
+       })
+    }
+
     fetchApplicationMetadata(instance) {
      var that = this
      return this.client.get(apiBasePath + '/applications/' + instance.id)

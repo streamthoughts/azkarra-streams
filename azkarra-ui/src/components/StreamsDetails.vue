@@ -33,8 +33,8 @@
               </li>
            </ul>
         </div>
-        <div class="col-3 justify-content-end">
-            <div class="dropdown action-btn-right">
+        <div class="col-3">
+            <div class="dropdown fl-right">
               <button class="btn btn-dark dropdown-toggle"
                 type="button"
                 id="dropdownMenuButton" data-toggle="dropdown"
@@ -99,6 +99,15 @@
                     aria-controls="nav-streams-metrics"
                     aria-selected="false">
                     Metrics
+                 </a>
+                 <a class="nav-item nav-link"
+                    id="nav-streams-offsets-tab"
+                    data-toggle="tab"
+                    href="#nav-streams-offsets"
+                    role="tab"
+                    aria-controls="nav-streams-offsets"
+                    aria-selected="false">
+                    Consumers/Offsets
                  </a>
                  <template v-if="streams.exception">
                  <a class="nav-item nav-link"
@@ -226,6 +235,9 @@
                     <streams-metrics v-bind:id="id"></streams-metrics>
                 </div>
               </div>
+              <div class="tab-pane fade" id="nav-streams-offsets" role="tabpanel" aria-labelledby="nav-streams-offsets-tab">
+                 <streams-offsets v-bind:id="id"></streams-offsets>
+              </div>
               <div class="tab-pane fade" id="nav-streams-error-trace" role="tabpanel" aria-labelledby="nav-streams-metrics-tab">
                 <div class="tab-pane-content bg-white rounded box-shadow bordered">
                     {{ streams.exception }}
@@ -284,6 +296,7 @@ import azkarra from '../services/azkarra-api.js'
 import StreamsTopology from './StreamsTopology.vue'
 import StreamsMetrics from './StreamsMetrics.vue'
 import StreamsConfig from './StreamsConfig.vue'
+import StreamsOffsets from './StreamsOffsets.vue'
 import VueModal from './VueModal.vue'
 import VueJsonPretty from 'vue-json-pretty';
 
@@ -295,6 +308,7 @@ export default {
     'streams-topology': StreamsTopology,
     'streams-metrics': StreamsMetrics,
     'streams-config': StreamsConfig,
+    'streams-offsets': StreamsOffsets,
     'vue-json-pretty': VueJsonPretty,
     'vue-modal': VueModal,
   },
@@ -304,6 +318,7 @@ export default {
       streams : {},
       instances : [],
       status : {},
+      offsets : {},
       openConfirmModal : false,
       formConfirmStop : {
         cleanup: false,

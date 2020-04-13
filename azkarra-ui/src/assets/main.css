@@ -174,10 +174,6 @@ body {
   border-radius: 0;
 }
 
-.action-btn-right {
- float: right;
-}
-
 /**
 Login Modal
 **/
@@ -232,4 +228,8 @@ Login Modal
     border:0;
     border-bottom: 3px solid #343A40;
     background-color: transparent;
+}
+
+.fl-right {
+    float: right;
 }
