@@ -51,28 +51,36 @@ public class ConsumerLogOffsets implements Comparable<ConsumerLogOffsets> {
      */
     private Long logEndOffset;
 
+    /**
+     * The log start offset.
+     */
+    private Long logStartOffset;
+
     ConsumerLogOffsets(final String topic, final int partition) {
         this(
             new TopicPartition(topic, partition),
             EMPTY_OFFSET_AND_TIMESTAMP,
             EMPTY_OFFSET_AND_TIMESTAMP,
-            -1L
+            -1L,
+            0L
         );
     }
 
 
     ConsumerLogOffsets(final TopicPartition topicPartition) {
-        this(topicPartition, EMPTY_OFFSET_AND_TIMESTAMP, EMPTY_OFFSET_AND_TIMESTAMP, -1L);
+        this(topicPartition, EMPTY_OFFSET_AND_TIMESTAMP, EMPTY_OFFSET_AND_TIMESTAMP, -1L, 0L);
     }
 
     private ConsumerLogOffsets(final TopicPartition topicPartition,
                                final OffsetAndTimestamp consumedOffset,
                                final OffsetAndTimestamp committedOffset,
-                               final Long endLogOffset) {
+                               final Long logEndOffset,
+                               final Long logStartOffset) {
         this.topicPartition = topicPartition;
         this.consumedOffset = consumedOffset;
         this.committedOffset = committedOffset;
-        this.logEndOffset = endLogOffset;
+        this.logEndOffset = logEndOffset;
+        this.logStartOffset = logStartOffset;
     }
 
     @JsonUnwrapped
@@ -84,6 +92,11 @@ public class ConsumerLogOffsets implements Comparable<ConsumerLogOffsets> {
     @JsonProperty
     public Long logEndOffset() {
         return logEndOffset;
+    }
+
+    @JsonProperty
+    public Long logStartOffset() {
+        return logStartOffset;
     }
 
     @JsonProperty
@@ -108,15 +121,19 @@ public class ConsumerLogOffsets implements Comparable<ConsumerLogOffsets> {
     }
 
     public ConsumerLogOffsets consumedOffset(final OffsetAndTimestamp consumedOffset) {
-        return new ConsumerLogOffsets(topicPartition, consumedOffset, committedOffset, logEndOffset);
+        return new ConsumerLogOffsets(topicPartition, consumedOffset, committedOffset, logEndOffset, logStartOffset);
     }
 
     public ConsumerLogOffsets committedOffset(final OffsetAndTimestamp committedOffset) {
-        return new ConsumerLogOffsets(topicPartition, consumedOffset, committedOffset, logEndOffset);
+        return new ConsumerLogOffsets(topicPartition, consumedOffset, committedOffset, logEndOffset, logStartOffset);
     }
 
     public ConsumerLogOffsets logEndOffset(final Long logEndOffset) {
-        return new ConsumerLogOffsets(topicPartition, consumedOffset, committedOffset, logEndOffset);
+        return new ConsumerLogOffsets(topicPartition, consumedOffset, committedOffset, logEndOffset, logStartOffset);
+    }
+
+    public ConsumerLogOffsets logStartOffset(final Long logStartOffset) {
+        return new ConsumerLogOffsets(topicPartition, consumedOffset, committedOffset, logEndOffset, logStartOffset);
     }
 
     /**
@@ -130,7 +147,8 @@ public class ConsumerLogOffsets implements Comparable<ConsumerLogOffsets> {
         return Objects.equals(topicPartition, that.topicPartition) &&
                 Objects.equals(consumedOffset, that.consumedOffset) &&
                 Objects.equals(committedOffset, that.committedOffset) &&
-                Objects.equals(logEndOffset, that.logEndOffset);
+                Objects.equals(logEndOffset, that.logEndOffset) &&
+                Objects.equals(logStartOffset, that.logStartOffset);
     }
 
     /**
@@ -138,7 +156,7 @@ public class ConsumerLogOffsets implements Comparable<ConsumerLogOffsets> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(topicPartition, consumedOffset, committedOffset, logEndOffset);
+        return Objects.hash(topicPartition, consumedOffset, committedOffset, logEndOffset, logStartOffset);
     }
 
     /**
@@ -151,6 +169,7 @@ public class ConsumerLogOffsets implements Comparable<ConsumerLogOffsets> {
                 ", consumedOffset=" + consumedOffset +
                 ", committedOffset=" + committedOffset +
                 ", logEndOffset=" + logEndOffset +
+                ", logStartOffset=" + logStartOffset +
                 '}';
     }
 

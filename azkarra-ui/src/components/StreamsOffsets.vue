@@ -40,40 +40,46 @@
         <div class="tab-pane-content bg-white rounded box-shadow bordered">
           <table class="table">
             <thead>
-              <tr>
-                <th scope="col">Consumer Id</th>
-                <th scope="col">Partition</th>
-                <th scope="col">
-                    <a data-toggle="tooltip" data-placement="top" title="The offset of the last message consumed by the consumer for a specific partition.">
-                        Current Offset
-                        <i class="fas fa-info-circle"></i>
-                    </a/>
+              <tr class="d-flex">
+                <th class="col-md-2">Consumer Id</th>
+                <th class="col-md-1">Partition</th>
+                <th class="col-md-2">
+                  <a data-toggle="tooltip" data-placement="top" title="The offset of the last message consumed by the consumer for a specific partition.">
+                    Current Offset <i class="fas fa-info-circle"></i>
+                  </a/>
                 </th>
-                <th scope="col">
-                    <a data-toggle="tooltip" data-placement="top" title="The last offset committed by the consumer for a specific partition.">
-                        Committed Offset
-                        <i class="fas fa-info-circle"></i>
-                    </a/>
+                <th class="col-md-2">
+                  <a data-toggle="tooltip" data-placement="top" title="The last offset committed by the consumer for a specific partition.">
+                    Committed Offset <i class="fas fa-info-circle"></i>
+                  </a/>
                 </th>
-                <th scope="col">End Offset</th>
-                <th scope="col">
-                    <a data-toggle="tooltip" data-placement="top" title="The number of messages the consumer lags behind the producer by for a specific partition (i.e : EndOffset - CurrentOffset - 1)  ">
-                        Lag
-                        <i class="fas fa-info-circle"></i>
-                    </a/>
+                <th class="col-md-2">End Offset</th>
+                <th class="col-md-3">
+                  <a data-toggle="tooltip" data-placement="top" title="The number of messages the consumer lags behind the producer by for a specific partition (i.e : EndOffset - CurrentOffset - 1)  ">
+                    Lag <i class="fas fa-info-circle"></i>
+                  </a/>
                 </th>
               </tr>
             </thead>
             <tbody>
               <template v-for="offset in topic.offsets" :key="offset.id">
-                <tr>
-                  <td>{{ offset.client_id }}</td>
-                  <td>{{ offset.partition }}</td>
-                  <td>{{ offset.consumed_offset }}</td>
-                  <td>{{ offset.committed_offset }}</td>
-                  <td>{{ offset.log_end_offset }}</td>
-                  <td>
-                    {{ offset.lag }} <span v-if="offset.lag > 0">(Estimated Lag Time : {{ offset.lag_time}})</span>
+                <tr class="d-flex">
+                  <td class="col-md-2">{{ offset.client_id }}</td>
+                  <td class="col-md-1"><span class="badge badge-square badge-light">{{ offset.partition }}</span></td>
+                  <td class="col-md-2">{{ offset.consumed_offset }}</td>
+                  <td class="col-md-2">{{ offset.committed_offset }}</td>
+                  <td class="col-md-2">{{ offset.log_end_offset }}</td>
+                  <td class="col-md-3">
+                    <div style="text-align:center">{{ offset.lag }} <span v-if="offset.lag > 0">(Estimated Lag Time : {{ offset.lag_time}})</span></div>
+                    <div class="progress" style="height: 15px;">
+                      <div class="progress-bar"
+                        role="progressbar"
+                        v-bind:style="{ width: offset.progress + '%' }"
+                        :aria-valuenow="offset.consumed_offset"
+                        :aria-valuemax="offset.log_end_offset"
+                        :aria-valuemin="offset.log_start_offset">
+                       </div>
+                    </div
                    </td>
                 <tr>
               </template>
@@ -117,6 +123,7 @@ export default {
             pos['client_id'] = consumer['client_id'];
             pos['stream_thread'] = consumer['stream_thread'];
             pos['id'] = consumer['stream_thread'] + '-' + pos['partition'];
+            pos['progress'] = pos['consumed_offset'] / pos['log_end_offset'] * 100;
             let consumed = moment.duration(pos['consumed_timestamp'], 'x');
             pos['lag_time'] = moment.duration(moment().subtract(consumed)).humanize();
             return pos;

@@ -233,3 +233,10 @@ Login Modal
 .fl-right {
     float: right;
 }
+
+.badge-square {
+    padding: 8px 15px 8px 15px;
+    border: 1px solid #495057;;
+    font-size: 14px;
+    color: #495057;
+}

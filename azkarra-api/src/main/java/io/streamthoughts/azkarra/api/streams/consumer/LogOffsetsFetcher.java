@@ -38,7 +38,17 @@ public class LogOffsetsFetcher {
         try {
             return consumer.endOffsets(partitions);
         } catch (final KafkaException e) {
-            LOG.warn("Unexpected error while fetching offsets for topic/partitions", e);
+            LOG.warn("Unexpected error while fetching end offsets for topic/partitions", e);
+            return Collections.emptyMap();
+        }
+    }
+
+    public static <K, V> Map<TopicPartition, Long> fetchLogStartOffsetsFor(final Consumer<K, V> consumer,
+                                                                           final Collection<TopicPartition> partitions) {
+        try {
+            return consumer.beginningOffsets(partitions);
+        } catch (final KafkaException e) {
+            LOG.warn("Unexpected error while fetching start offsets for topic/partitions", e);
             return Collections.emptyMap();
         }
     }

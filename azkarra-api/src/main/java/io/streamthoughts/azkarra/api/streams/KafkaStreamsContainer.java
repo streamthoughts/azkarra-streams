@@ -32,7 +32,6 @@ import io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
-import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -98,8 +97,6 @@ public class KafkaStreamsContainer {
     private final String applicationServer;
 
     private final LinkedBlockingQueue<StateChangeWatcher> stateChangeWatchers = new LinkedBlockingQueue<>();
-
-    private Admin adminClient;
 
     private KafkaConsumer<byte[], byte[]> consumer;
 
@@ -296,7 +293,12 @@ public class KafkaStreamsContainer {
             .flatMap(t -> t.topicPartitions().stream())
             .collect(Collectors.toSet());
 
-        final Map<TopicPartition, Long> logEndOffsetsFor = LogOffsetsFetcher.fetchLogEndOffsetsFor(
+        final Map<TopicPartition, Long> logEndOffsets = LogOffsetsFetcher.fetchLogEndOffsetsFor(
+            getConsumer(),
+            activeTopicPartitions
+        );
+
+        final Map<TopicPartition, Long> logStartOffsets = LogOffsetsFetcher.fetchLogStartOffsetsFor(
             getConsumer(),
             activeTopicPartitions
         );
@@ -307,16 +309,15 @@ public class KafkaStreamsContainer {
                 Set<ConsumerLogOffsets> offsets = client.positions()
                     .stream()
                     .map(logOffsets -> {
-                        Long logEndOffset = logEndOffsetsFor.get(logOffsets.topicPartition());
-                        return logEndOffset != null ? logOffsets.logEndOffset(logEndOffset) : null;
+                        if (!activeTopicPartitions.contains(logOffsets.topicPartition()))
+                            return null;
+                        return logOffsets
+                            .logEndOffset(logEndOffsets.get(logOffsets.topicPartition()))
+                            .logStartOffset(logStartOffsets.get(logOffsets.topicPartition()));
                     })
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
-                return new ConsumerClientOffsets(
-                    client.clientId(),
-                    client.streamThread(),
-                    offsets
-                );
+                return new ConsumerClientOffsets(client.clientId(), client.streamThread(), offsets);
             })
             .collect(Collectors.toSet());
         return new ConsumerGroupOffsets(consumerGroupOffsets.group(), consumerAndOffsets);
