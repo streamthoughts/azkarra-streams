@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.error;
+package io.streamthoughts.azkarra.serialization;
 
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 
@@ -24,6 +24,7 @@ public class SerializationException extends AzkarraException {
 
     /**
      * Creates a new {@link SerializationException} instance.
+     *
      * @param message   the error message.
      * @param cause     the {@link Throwable} cause.
      */

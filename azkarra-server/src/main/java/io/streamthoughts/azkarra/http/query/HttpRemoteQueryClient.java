@@ -28,7 +28,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
-import io.streamthoughts.azkarra.http.json.JsonSerdes;
+import io.streamthoughts.azkarra.serialization.json.Json;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -48,7 +48,9 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
 
     private static Logger LOG = LoggerFactory.getLogger(HttpRemoteQueryClient.class);
 
-    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private static final Json JSON = new Json();
+
+    private static final MediaType JSON_MEDIA_TYPE = MediaType.get("application/json; charset=utf-8");
 
     private OkHttpClient client;
 
@@ -85,7 +87,7 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
                 .url(path)
                 .addHeader("Accept", "application/json")
                 .addHeader("Content-type", "application/json")
-                .post(RequestBody.create(json, JSON))
+                .post(RequestBody.create(json, JSON_MEDIA_TYPE))
                 .build();
 
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.<K, V>newBuilder()
@@ -139,7 +141,7 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
                    String payload = new String(responseBody.bytes());
                     int code = response.code();
                     if (code >= 200 && code < 300) {
-                        completableFuture.complete(JsonSerdes.deserialize(payload, QueryResult.class));
+                        completableFuture.complete(JSON.deserialize(payload, QueryResult.class));
                     } else {
                         completableFuture.complete(buildQueryResultFor(
                             remoteServerName,

@@ -20,7 +20,7 @@ package io.streamthoughts.azkarra.http.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import io.streamthoughts.azkarra.http.json.serializers.TimestampSerializer;
+import io.streamthoughts.azkarra.serialization.json.TimestampSerializer;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class StreamsInstanceResponse {
@@ -124,7 +124,6 @@ public class StreamsInstanceResponse {
             this.id = id;
             return this;
         }
-
 
         public Builder setSince(final long since) {
             this.since = since;

@@ -16,35 +16,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.json.serializers;
+package io.streamthoughts.azkarra.serialization.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.apache.kafka.streams.kstream.Windowed;
+import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 
 import java.io.IOException;
 
 /**
- * The {@link JsonSerializer} to serialize {@link org.apache.kafka.streams.kstream.Windowed} instance.
+ * The {@link JsonSerializer} to serialize {@link TopologyDescriptor} instance.
  */
-public class WindowedSerializer extends JsonSerializer<Windowed> {
+public class TopologyDescriptorSerializer extends JsonSerializer<TopologyDescriptor> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void serialize(final Windowed windowed,
+    public void serialize(final TopologyDescriptor descriptor,
                           final JsonGenerator gen,
                           final SerializerProvider serializers) throws IOException {
-
         gen.writeStartObject();
-        gen.writeFieldName("key");
-        gen.writeObject(windowed.key());
-        gen.writeFieldName("windowStart");
-        gen.writeNumber(windowed.window().start());
-        gen.writeFieldName("windowEnd");
-        gen.writeNumber(windowed.window().end());
+        gen.writeFieldName("name");
+        gen.writeString(descriptor.className());
+        gen.writeFieldName("version");
+        gen.writeString(descriptor.version().toString());
+        gen.writeFieldName("description");
+        gen.writeString(descriptor.description());
+        gen.writeFieldName("aliases");
+        gen.writeObject(descriptor.aliases());
+        gen.writeFieldName("config");
+        gen.writeObject(descriptor.streamsConfigs());
         gen.writeEndObject();
     }
 }

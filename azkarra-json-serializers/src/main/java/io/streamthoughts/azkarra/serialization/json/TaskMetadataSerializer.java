@@ -16,24 +16,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.json.serializers;
+package io.streamthoughts.azkarra.serialization.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import io.streamthoughts.azkarra.api.time.Time;
+import org.apache.kafka.streams.processor.TaskMetadata;
 
 import java.io.IOException;
 
-public class TimestampSerializer extends JsonSerializer<Long> {
+public class TaskMetadataSerializer extends JsonSerializer<TaskMetadata> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void serialize(final Long value,
+    public void serialize(final TaskMetadata metadata,
                           final JsonGenerator gen,
                           final SerializerProvider serializers) throws IOException {
-        gen.writeObject(Time.toISODate(value));
+
+        gen.writeStartObject();
+        gen.writeFieldName("task_id");
+        gen.writeString(metadata.taskId());
+        gen.writeFieldName("topic_partitions");
+        gen.writeObject(metadata.topicPartitions());
+        gen.writeEndObject();
+
     }
 }

@@ -19,17 +19,16 @@
 package io.streamthoughts.azkarra.http.query;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.query.StoreOperation;
-import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.QueryInfo;
+import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.http.data.QueryOptionsRequest;
 import io.streamthoughts.azkarra.http.error.InvalidStateStoreQueryException;
-import io.streamthoughts.azkarra.http.error.SerializationException;
-import io.streamthoughts.azkarra.http.json.JsonSerdes;
+import io.streamthoughts.azkarra.serialization.SerializationException;
+import io.streamthoughts.azkarra.serialization.json.Json;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -53,10 +52,12 @@ public class JsonQuerySerde {
     private static final String QUERY_TYPE_JSON_FIELD = "type";
     private static final String SET_OPTIONS_JSON_FIELD = "set_options";
 
+    private static final Json JSON = new Json();
+
     public static Tuple<QueryInfo, Queried> deserialize(final String storeName, final byte[] data) {
 
         try {
-            JsonNode jsonNode = JsonSerdes.deserialize(data);
+            JsonNode jsonNode = JSON.deserialize(data);
 
             if (!jsonNode.has(QUERY_TYPE_JSON_FIELD)) {
                 throw new InvalidStateStoreQueryException("Invalid JSON query: missing 'type' field");
@@ -101,7 +102,7 @@ public class JsonQuerySerde {
 
             final QueryOptionsRequest options = optionNode == null ?
                 null :
-                JsonSerdes.deserialize(optionNode, QueryOptionsRequest.class);
+                    JSON.deserialize(optionNode, QueryOptionsRequest.class);
 
             final QueryInfo queryInfo = new QueryInfo(
                 storeName,
@@ -143,7 +144,7 @@ public class JsonQuerySerde {
                 options.remoteAccessAllowed(),
                 options.limit()
         ));
-        return JsonSerdes.serialize(json);
+        return JSON.serialize(json);
     }
 
     private static Queried newQueried(final QueryOptionsRequest options) {

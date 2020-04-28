@@ -16,31 +16,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.json.serializers;
+package io.streamthoughts.azkarra.serialization.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.apache.kafka.streams.processor.TaskMetadata;
+import org.apache.kafka.streams.processor.ThreadMetadata;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class TaskMetadataSerializer extends JsonSerializer<TaskMetadata> {
-
-    /**
-     * {@inheritDoc}
-     */
+public class ThreadMetadataSerializer extends JsonSerializer<ThreadMetadata> {
     @Override
-    public void serialize(final TaskMetadata metadata,
+    public void serialize(final ThreadMetadata metadata,
                           final JsonGenerator gen,
                           final SerializerProvider serializers) throws IOException {
 
         gen.writeStartObject();
-        gen.writeFieldName("task_id");
-        gen.writeString(metadata.taskId());
-        gen.writeFieldName("topic_partitions");
-        gen.writeObject(metadata.topicPartitions());
-        gen.writeEndObject();
+        gen.writeFieldName("name");
+        gen.writeString(metadata.threadName());
+        gen.writeFieldName("state");
+        gen.writeString(metadata.threadState());
+        gen.writeFieldName("active_tasks");
+        gen.writeObject(metadata.activeTasks());
+        gen.writeFieldName("standby_tasks");
+        gen.writeObject(metadata.standbyTasks());
 
+        Map<String, Object> clients = new HashMap<>();
+        clients.put("admin_client_id", metadata.adminClientId());
+        clients.put("consumer_client_id", metadata.consumerClientId());
+        clients.put("producer_client_ids", metadata.producerClientIds());
+        clients.put("restore_consumer_client_id", metadata.restoreConsumerClientId());
+        gen.writeFieldName("clients");
+        gen.writeObject(clients);
+        gen.writeEndObject();
     }
 }

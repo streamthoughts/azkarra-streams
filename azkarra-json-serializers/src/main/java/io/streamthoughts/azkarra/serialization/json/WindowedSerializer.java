@@ -16,40 +16,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.json.serializers;
+package io.streamthoughts.azkarra.serialization.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.apache.kafka.streams.processor.ThreadMetadata;
+import org.apache.kafka.streams.kstream.Windowed;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-public class ThreadMetadataSerializer extends JsonSerializer<ThreadMetadata> {
+/**
+ * The {@link JsonSerializer} to serialize {@link org.apache.kafka.streams.kstream.Windowed} instance.
+ */
+public class WindowedSerializer extends JsonSerializer<Windowed> {
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void serialize(final ThreadMetadata metadata,
+    public void serialize(final Windowed windowed,
                           final JsonGenerator gen,
                           final SerializerProvider serializers) throws IOException {
 
         gen.writeStartObject();
-        gen.writeFieldName("name");
-        gen.writeString(metadata.threadName());
-        gen.writeFieldName("state");
-        gen.writeString(metadata.threadState());
-        gen.writeFieldName("active_tasks");
-        gen.writeObject(metadata.activeTasks());
-        gen.writeFieldName("standby_tasks");
-        gen.writeObject(metadata.standbyTasks());
-
-        Map<String, Object> clients = new HashMap<>();
-        clients.put("admin_client_id", metadata.adminClientId());
-        clients.put("consumer_client_id", metadata.consumerClientId());
-        clients.put("producer_client_ids", metadata.producerClientIds());
-        clients.put("restore_consumer_client_id", metadata.restoreConsumerClientId());
-        gen.writeFieldName("clients");
-        gen.writeObject(clients);
+        gen.writeFieldName("key");
+        gen.writeObject(windowed.key());
+        gen.writeFieldName("windowStart");
+        gen.writeNumber(windowed.window().start());
+        gen.writeFieldName("windowEnd");
+        gen.writeNumber(windowed.window().end());
         gen.writeEndObject();
     }
 }

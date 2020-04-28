@@ -37,6 +37,7 @@
         <module>azkarra-commons</module>
         <module>azkarra-worker</module>
         <module>azkarra-examples</module>
+        <module>azkarra-json-serializers</module>
     </modules>
 
     <name>Azkarra Streams</name>

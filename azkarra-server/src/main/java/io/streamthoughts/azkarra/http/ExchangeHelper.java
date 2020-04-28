@@ -18,13 +18,19 @@
  */
 package io.streamthoughts.azkarra.http;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.streamthoughts.azkarra.http.error.InvalidHttpQueryParamException;
-import io.streamthoughts.azkarra.http.error.SerializationException;
-import io.streamthoughts.azkarra.http.json.JsonSerdes;
+import io.streamthoughts.azkarra.http.json.serializers.GenericRecordSerializer;
+import io.streamthoughts.azkarra.serialization.SerializationException;
+import io.streamthoughts.azkarra.serialization.json.AzkarraSimpleModule;
+import io.streamthoughts.azkarra.serialization.json.Json;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import io.undertow.util.StatusCodes;
+import org.apache.avro.generic.GenericRecord;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
@@ -35,6 +41,18 @@ import java.util.Optional;
  * Simple class to wrap {@link HttpServerExchange} instance.
  */
 public class ExchangeHelper {
+
+    private static final Json JSON = new Json(new ObjectMapper());
+
+    static {
+        JSON.configure(objectMapper -> {
+            objectMapper.registerModule(new AzkarraSimpleModule());
+            SimpleModule module = new SimpleModule()
+                    .addSerializer(GenericRecord.class, new GenericRecordSerializer());
+            objectMapper.registerModule(module);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        });
+    }
 
     /**
      * Static helper that can be used to get an optional param from query for the specified name.
@@ -74,7 +92,7 @@ public class ExchangeHelper {
      * @throws SerializationException if an error happens while de-serializing.
      */
     public static JsonNode readJsonRequest(final HttpServerExchange exchange) throws SerializationException {
-        return JsonSerdes.deserialize(exchange.getInputStream());
+        return JSON.deserialize(exchange.getInputStream());
     }
 
     /**
@@ -88,7 +106,7 @@ public class ExchangeHelper {
      */
     public static <T> T readJsonRequest(final HttpServerExchange exchange,
                                         final Class<T> type) throws SerializationException {
-        return JsonSerdes.deserialize(exchange.getInputStream(), type);
+        return JSON.deserialize(exchange.getInputStream(), type);
     }
 
     /**
@@ -112,14 +130,13 @@ public class ExchangeHelper {
                                                 final Object response,
                                                 final int statusCode) {
         exchange.setStatusCode(statusCode);
-        String httpResponse = JsonSerdes.serialize(response);
+        String httpResponse = JSON.serialize(response);
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
         exchange.getResponseSender().send(httpResponse, StandardCharsets.UTF_8);
     }
 
     private static Optional<String> getFirst(final String name,
                                              final Map<String, Deque<String>> parameters) {
-
         Deque<String> parameter = parameters.get(name);
         return Optional.ofNullable(parameter).map(Deque::getFirst);
     }

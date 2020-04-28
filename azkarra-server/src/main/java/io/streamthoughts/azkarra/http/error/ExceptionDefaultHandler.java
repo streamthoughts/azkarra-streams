@@ -24,6 +24,7 @@ import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.data.ErrorMessage;
 import io.streamthoughts.azkarra.http.security.UnauthorizedAccessException;
+import io.streamthoughts.azkarra.serialization.SerializationException;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.ExceptionHandler;

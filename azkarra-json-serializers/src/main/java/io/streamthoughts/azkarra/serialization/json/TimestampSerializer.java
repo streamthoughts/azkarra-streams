@@ -16,38 +16,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.json.serializers;
+package io.streamthoughts.azkarra.serialization.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
+import io.streamthoughts.azkarra.api.time.Time;
 
 import java.io.IOException;
 
-/**
- * The {@link JsonSerializer} to serialize {@link TopologyDescriptor} instance.
- */
-public class TopologyDescriptorSerializer extends JsonSerializer<TopologyDescriptor> {
+public class TimestampSerializer extends JsonSerializer<Long> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void serialize(final TopologyDescriptor descriptor,
+    public void serialize(final Long value,
                           final JsonGenerator gen,
                           final SerializerProvider serializers) throws IOException {
-        gen.writeStartObject();
-        gen.writeFieldName("name");
-        gen.writeString(descriptor.className());
-        gen.writeFieldName("version");
-        gen.writeString(descriptor.version().toString());
-        gen.writeFieldName("description");
-        gen.writeString(descriptor.description());
-        gen.writeFieldName("aliases");
-        gen.writeObject(descriptor.aliases());
-        gen.writeFieldName("config");
-        gen.writeObject(descriptor.streamsConfigs());
-        gen.writeEndObject();
+        gen.writeObject(Time.toISODate(value));
     }
 }

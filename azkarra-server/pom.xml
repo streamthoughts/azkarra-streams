@@ -119,6 +119,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.streamthoughts</groupId>
+            <artifactId>azkarra-json-serializers</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.2.0</version>
