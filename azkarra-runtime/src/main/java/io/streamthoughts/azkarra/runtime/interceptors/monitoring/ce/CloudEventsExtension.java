@@ -16,15 +16,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.runtime.interceptors.monitoring.ce;
 
-public enum StreamsState {
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-    CREATED,
-    RECOVERING,
-    REBALANCING,
-    RUNNING,
-    PENDING_SHUTDOWN,
-    SHUTDOWN,
-    FAILED;
+public interface CloudEventsExtension {
+
+    Map<String, Object> toAttributesExtensions();
+
+    static CloudEventsExtension of(final String key, final Object value) {
+        return () -> Collections.singletonMap(key, value);
+    }
+
+    static Map<String, Object> marshal(final Collection<CloudEventsExtension> extensions) {
+        return extensions.stream()
+            .map(CloudEventsExtension::toAttributesExtensions)
+            .flatMap(t -> t.entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 }

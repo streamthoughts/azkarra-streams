@@ -37,6 +37,7 @@ public class AzkarraContextConfig {
     public static String AUTO_CREATE_TOPICS_REPLICATION_FACTOR_CONFIG = "auto.create.topics.replication.factor";
     public static String AUTO_CREATE_TOPICS_CONFIGS_CONFIG = "auto.create.topics.configs";
     public static String DEFAULT_STREAM_THREAD_EXCEPTION_HANDLER = "default.stream.thread.exception.handler";
+    public static String MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG = "monitoring.streams.interceptor.enable";
 
     private Conf configs;
 
@@ -55,6 +56,10 @@ public class AzkarraContextConfig {
 
     public boolean isAutoCreateTopicsEnable() {
         return configs.getOptionalBoolean(AUTO_CREATE_TOPICS_ENABLE_CONFIG).orElse(false);
+    }
+
+    public boolean isMonitoringStreamsInterceptorEnable() {
+        return configs.getOptionalBoolean(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG).orElse(false);
     }
 
     public StreamThreadExceptionHandler getDefaultStreamsThreadExceptionHandler() {

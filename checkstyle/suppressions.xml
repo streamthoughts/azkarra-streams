@@ -29,6 +29,7 @@
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.http.UndertowEmbeddedServer"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
+    <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.streams.components.ComponentResolver"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher" />
     <suppress checks="NPathComplexity" files="io.streamthoughts.azkarra.commons.error.SafeDeserializerConfig"/>

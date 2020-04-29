@@ -61,8 +61,19 @@
         </dependency>
 
         <dependency>
+            <groupId>io.streamthoughts</groupId>
+            <artifactId>azkarra-json-serializers</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
         <dependency>

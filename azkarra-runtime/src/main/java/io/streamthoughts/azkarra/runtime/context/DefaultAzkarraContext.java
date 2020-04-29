@@ -58,6 +58,7 @@ import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySu
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
+import io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.util.ShutdownHook;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -395,12 +396,17 @@ public class DefaultAzkarraContext implements AzkarraContext {
             completedExecuted = completedExecuted.withInterceptor(interceptor);
         }
 
-        // Register StreamsLifeCycleInterceptor for AUTO_CREATE_TOPICS
-        boolean autoCreateTopicsEnable = new AzkarraContextConfig(env.getConfiguration())
-                .addConfiguration(getConfiguration())
-                .isAutoCreateTopicsEnable();
+        AzkarraContextConfig envConfig = new AzkarraContextConfig(env.getConfiguration())
+                .addConfiguration(getConfiguration());
 
-        if (autoCreateTopicsEnable) {
+        // Register StreamsLifeCycleInterceptor for MONITORING_STREAMS
+        if (envConfig.isMonitoringStreamsInterceptorEnable()) {
+            // MonitoringStreamsInterceptor will be configured by the StreamsExecutionEnvironment.
+            completedExecuted = completedExecuted.withInterceptor(MonitoringStreamsInterceptor::new);
+        }
+
+        // Register StreamsLifeCycleInterceptor for AUTO_CREATE_TOPICS
+        if (envConfig.isAutoCreateTopicsEnable()) {
             completedExecuted = completedExecuted.withInterceptor(new AutoCreateTopicsInterceptorSupplier(name));
         }
 

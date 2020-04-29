@@ -154,8 +154,12 @@ public class KafkaStreamContainerBuilder {
 
             final CompositeStateListener compositeStateListener = new CompositeStateListener(stateListeners);
             compositeStateListener.addListener((newState, oldState) -> {
-                final long now = Time.SYSTEM.milliseconds();
-                container.stateChanges(now, newState, oldState);
+                final StateChangeEvent event = new StateChangeEvent(
+                    Time.SYSTEM.milliseconds(),
+                    State.valueOf(newState.name()),
+                    State.valueOf(oldState.name())
+                );
+                container.stateChanges(event);
             });
 
             final CompositeUncaughtExceptionHandler handler = new CompositeUncaughtExceptionHandler();

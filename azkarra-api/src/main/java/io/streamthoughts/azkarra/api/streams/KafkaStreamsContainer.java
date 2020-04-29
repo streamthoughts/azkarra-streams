@@ -19,7 +19,6 @@
 package io.streamthoughts.azkarra.api.streams;
 
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
-import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
@@ -29,16 +28,21 @@ import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerLogOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.GlobalConsumerOffsetsRegistry;
 import io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher;
+import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleContext;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -92,7 +96,7 @@ public class KafkaStreamsContainer {
 
     private final TopologyContainer topologyContainer;
 
-    private volatile Set<ThreadMetadata> threadMetadata;
+    private volatile Set<ThreadMetadata> threadMetadata = Collections.emptySet();
 
     private final String applicationServer;
 
@@ -145,7 +149,7 @@ public class KafkaStreamsContainer {
             LOG.info("Initializing KafkaStreams container (application.id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
-                (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifeCycleContext(), chain),
+                (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifeCycleContext(this), chain),
                 () -> {
                     try {
                         LOG.info("Starting KafkaStreams (application.id={})", applicationId());
@@ -172,7 +176,7 @@ public class KafkaStreamsContainer {
         lastObservedException = null;
     }
 
-    private void setState(final State state) {
+    public void setState(final State state) {
         this.state = new TimestampedValue<>(state);
     }
 
@@ -324,6 +328,27 @@ public class KafkaStreamsContainer {
     }
 
     /**
+     * Creates a new {@link Producer} instance using the same configs that the Kafka Streams instance.
+     *
+     * @param overrides the producer configs to overrides.
+     */
+    public Producer<byte[], byte[]> getProducer(final Map<String, Object> overrides) {
+        String producerClientId = (String) overrides.get(ProducerConfig.CLIENT_ID_CONFIG);
+        if (producerClientId == null) {
+            final UUID containerId = UUID.randomUUID();
+            final String clientId = streamsConfig()
+                    .getOptionalString(StreamsConfig.CLIENT_ID_CONFIG)
+                    .orElse(applicationId());
+            producerClientId = clientId + "-" + containerId + "-producer";
+        }
+        Map<String, Object> props = getProducerConfigs(streamsConfig().getConfAsMap());
+        props.putAll(overrides);
+        props.put(BOOTSTRAP_SERVERS_CONFIG, streamsConfig().getString(BOOTSTRAP_SERVERS_CONFIG));
+        props.put(CLIENT_ID_CONFIG, producerClientId);
+        return new KafkaProducer<>(props, new ByteArraySerializer(), new ByteArraySerializer());
+    }
+
+    /**
      * Gets an {@link Consumer} instance for this {@link KafkaStreams} instance.
      *
      * @return a {@link Consumer} instance.
@@ -369,7 +394,7 @@ public class KafkaStreamsContainer {
             LOG.info("Closing KafkaStreams container (application.id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
-                (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifeCycleContext(), chain),
+                (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifeCycleContext(this), chain),
                 () -> {
                     kafkaStreams.close();
                     if (cleanUp) {
@@ -402,12 +427,12 @@ public class KafkaStreamsContainer {
             // Register a watcher that will restart the streams as soon as the state is NOT_RUNNING.
             stateChangeWatchers.add(new StateChangeWatcher() {
                 @Override
-                public boolean accept(final KafkaStreams.State state) {
-                    return state == KafkaStreams.State.NOT_RUNNING;
+                public boolean accept(final State state) {
+                    return state == State.NOT_RUNNING;
                 }
 
                 @Override
-                public void apply() {
+                public void onChange(final StateChangeEvent event) {
                     restartNow();
                 }
             });
@@ -498,11 +523,19 @@ public class KafkaStreamsContainer {
         return !kafkaStreams.state().isRunning();
     }
 
-    void stateChanges(final long now,
-                      final KafkaStreams.State newState,
-                      final KafkaStreams.State oldstate) {
-        state = new TimestampedValue<>(now, State.valueOf(newState.name()));
-        if (newState == KafkaStreams.State.RUNNING) {
+    /**
+     * Register a watcher to be notified of {@link KafkaStreams.State} change event.
+     *
+     * @param watcher   the {@link StateChangeWatcher} to be registered.
+     */
+    public void addStateChangeWatcher(final StateChangeWatcher watcher) {
+        Objects.requireNonNull(watcher, "Cannot register null watcher");
+        stateChangeWatchers.add(watcher);
+    }
+
+    void stateChanges(final StateChangeEvent stateChangeEvent) {
+        state = new TimestampedValue<>(stateChangeEvent.timestamp(), stateChangeEvent.newState());
+        if (state.value() == State.RUNNING) {
             threadMetadata = kafkaStreams.localThreadsMetadata();
         } else {
             threadMetadata = Collections.emptySet();
@@ -511,11 +544,11 @@ public class KafkaStreamsContainer {
         if (!stateChangeWatchers.isEmpty()) {
             List<StateChangeWatcher> watchers = new ArrayList<>(stateChangeWatchers.size());
             stateChangeWatchers.drainTo(watchers);
-            for (StateChangeWatcher listener : watchers) {
-                if (listener.accept(newState)) {
-                    listener.apply();
+            for (StateChangeWatcher watcher : watchers) {
+                if (watcher.accept(stateChangeEvent.newState())) {
+                    watcher.onChange(stateChangeEvent);
                 } else {
-                    stateChangeWatchers.add(listener);
+                    stateChangeWatchers.add(watcher);
                 }
             }
         }
@@ -553,57 +586,6 @@ public class KafkaStreamsContainer {
             ).collect(Collectors.toSet());
     }
 
-    private interface StateChangeWatcher {
-
-        boolean accept(final KafkaStreams.State state);
-
-        void apply();
-    }
-
-    public class InternalStreamsLifeCycleContext implements StreamsLifecycleContext {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String getApplicationId() {
-            return applicationId();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public TopologyDescription getTopology() {
-            return topologyContainer.description();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Conf getStreamConfig() {
-            return topologyContainer.streamsConfig();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public State getState() {
-            return state().value();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void setState(final State state) {
-            KafkaStreamsContainer.this.setState(state);
-        }
-    }
-
-
     private static Map<String, Object> getConsumerConfigs(final Map<String, Object> configs) {
         final Map<String, Object> parsed = new HashMap<>();
         for (final String configName: ConsumerConfig.configNames()) {
@@ -613,4 +595,41 @@ public class KafkaStreamsContainer {
         }
         return parsed;
     }
+
+    private static Map<String, Object> getProducerConfigs(final Map<String, Object> configs) {
+        final Map<String, Object> parsed = new HashMap<>();
+        for (final String configName: ProducerConfig.configNames()) {
+            if (configs.containsKey(configName)) {
+                parsed.put(configName, configs.get(configName));
+            }
+        }
+        return parsed;
+    }
+
+    /**
+     * Watch a {@link KafkaStreams} instance for {@link KafkaStreams.State} change.
+     *
+     * By default, a {@link StateChangeWatcher} is one time called, i.e. once it is triggered,
+     * it has to re-register itself to watch for further changes.
+     */
+    public interface StateChangeWatcher {
+
+        /**
+         * Should this watcher be called for the given {@link State}.
+         *
+         * @param newState  the new state of the {@link KafkaStreams} instance.
+         * @return          {@code true} if this watcher must be called, {@code false} otherwise.
+         */
+        default boolean accept(final State newState) {
+            return true;
+        }
+
+        /**
+         * Called when state changes. This method should not be blocking.
+         *
+         * @param event the {@link StateChangeEvent}
+         */
+        void onChange(final StateChangeEvent event);
+    }
+
 }
