@@ -28,7 +28,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
-import io.streamthoughts.azkarra.serialization.json.Json;
+import io.streamthoughts.azkarra.serialization.Serdes;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -48,13 +49,13 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
 
     private static Logger LOG = LoggerFactory.getLogger(HttpRemoteQueryClient.class);
 
-    private static final Json JSON = new Json();
-
-    private static final MediaType JSON_MEDIA_TYPE = MediaType.get("application/json; charset=utf-8");
-
     private OkHttpClient client;
 
     private final QueryURLBuilder queryURLBuilder;
+
+    private final Serdes<QueryResult> serdes;
+
+    private final MediaType mediaType;
 
     /**
      * Creates a new {@link HttpRemoteQueryClient} instance.
@@ -63,11 +64,12 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
      * @param queryURLBuilder   the {@link QueryURLBuilder} instance.
      */
     public HttpRemoteQueryClient(final OkHttpClient httpClient,
-                                 final QueryURLBuilder queryURLBuilder) {
-        Objects.requireNonNull(httpClient, "httpClient cannot be null");
-        Objects.requireNonNull(queryURLBuilder, "queryURLBuilder cannot be null");
-        this.client = httpClient;
-        this.queryURLBuilder = queryURLBuilder;
+                                 final QueryURLBuilder queryURLBuilder,
+                                 final Serdes<QueryResult> serdes) {
+        this.client =  Objects.requireNonNull(httpClient, "httpClient cannot be null");
+        this.queryURLBuilder = Objects.requireNonNull(queryURLBuilder, "queryURLBuilder cannot be null");
+        this.serdes = Objects.requireNonNull(serdes, "serdes cannot be null");
+        this.mediaType = MediaType.get(serdes.contentType());
     }
 
     /**
@@ -85,9 +87,9 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
 
         Request request = new Request.Builder()
                 .url(path)
-                .addHeader("Accept", "application/json")
-                .addHeader("Content-type", "application/json")
-                .post(RequestBody.create(json, JSON_MEDIA_TYPE))
+                .addHeader("Accept", mediaType.toString())
+                .addHeader("Content-type", mediaType.toString())
+                .post(RequestBody.create(json, mediaType))
                 .build();
 
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.<K, V>newBuilder()
@@ -98,7 +100,7 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
         final CompletableFuture<QueryResult<K, V>> future = new CompletableFuture<>();
 
         LOG.debug("Forwarding state store query to remote server {}", server);
-        client.newCall(request).enqueue(new AsyncQueryCallback<>(server, future, builder));
+        client.newCall(request).enqueue(new AsyncQueryCallback<>(server, future, builder, serdes));
         return future;
     }
 
@@ -107,6 +109,7 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
         private final String remoteServerName;
         private final QueryResultBuilder<K, V> builder;
         private final CompletableFuture<QueryResult<K, V>> completableFuture;
+        private final Serdes<QueryResult> serdes;
 
         /**
          * Creates a new {@link AsyncQueryCallback} instance.
@@ -116,10 +119,13 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
          */
         AsyncQueryCallback(final String remoteServerName,
                            final CompletableFuture<QueryResult<K, V>> completableFuture,
-                           final QueryResultBuilder<K, V> builder) {
+                           final QueryResultBuilder<K, V> builder,
+                           final Serdes<QueryResult> serdes) {
             this.remoteServerName = remoteServerName;
             this.completableFuture = completableFuture;
             this.builder = builder;
+            this.serdes = serdes;
+
         }
 
         /**
@@ -135,17 +141,20 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
          * {@inheritDoc}
          */
         @Override
+        @SuppressWarnings("unchecked")
         public void onResponse(final Call call, final Response response) {
             try (ResponseBody responseBody = response.body()) {
                 try {
-                   String payload = new String(responseBody.bytes());
+                    final byte[] payload = responseBody.bytes();
                     int code = response.code();
                     if (code >= 200 && code < 300) {
-                        completableFuture.complete(JSON.deserialize(payload, QueryResult.class));
+                        completableFuture.complete(serdes.deserialize(payload));
                     } else {
-                        completableFuture.complete(buildQueryResultFor(
-                            remoteServerName,
-                            new QueryError("Invalid response from remote server (code:'" + code + "') : " + payload)));
+                        final QueryError error = new QueryError(
+                            "Invalid response from remote server (code:'" + code + "') : "
+                            + Arrays.toString(payload));
+                        final QueryResult<K, V> result = buildQueryResultFor(remoteServerName, error);
+                        completableFuture.complete(result);
                     }
                 } catch (final Exception e) {
                     completableFuture.complete(buildQueryResultFor(remoteServerName, QueryError.of(e)));

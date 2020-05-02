@@ -24,6 +24,7 @@ import io.streamthoughts.azkarra.api.model.KV;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 public class SuccessResultSet<K, V> extends AbstractResultSet implements Serializable {
 
@@ -54,4 +55,17 @@ public class SuccessResultSet<K, V> extends AbstractResultSet implements Seriali
         return records;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SuccessResultSet)) return false;
+        SuccessResultSet<?, ?> that = (SuccessResultSet<?, ?>) o;
+        return total == that.total &&
+                Objects.equals(records, that.records);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(total, records);
+    }
 }

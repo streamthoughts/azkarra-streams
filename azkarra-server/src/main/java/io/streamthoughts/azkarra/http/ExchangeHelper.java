@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.streamthoughts.azkarra.http.error.InvalidHttpQueryParamException;
-import io.streamthoughts.azkarra.http.json.serializers.GenericRecordSerializer;
+import io.streamthoughts.azkarra.http.serialization.json.GenericRecordSerializer;
 import io.streamthoughts.azkarra.serialization.SerializationException;
 import io.streamthoughts.azkarra.serialization.json.AzkarraSimpleModule;
 import io.streamthoughts.azkarra.serialization.json.Json;
@@ -42,16 +42,16 @@ import java.util.Optional;
  */
 public class ExchangeHelper {
 
-    private static final Json JSON = new Json(new ObjectMapper());
+    private static final String CONTENT_TYPE = "application/json; charset=utf-8";
+
+    static final Json JSON = new Json(new ObjectMapper());
 
     static {
-        JSON.configure(objectMapper -> {
-            objectMapper.registerModule(new AzkarraSimpleModule());
-            SimpleModule module = new SimpleModule()
-                    .addSerializer(GenericRecord.class, new GenericRecordSerializer());
-            objectMapper.registerModule(module);
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        });
+        final SimpleModule module = new SimpleModule();
+        module.addSerializer(GenericRecord.class, new GenericRecordSerializer());
+        JSON.registerModule(module);
+        JSON.registerModule(new AzkarraSimpleModule());
+        JSON.configure(om -> om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
     }
 
     /**
@@ -130,9 +130,8 @@ public class ExchangeHelper {
                                                 final Object response,
                                                 final int statusCode) {
         exchange.setStatusCode(statusCode);
-        String httpResponse = JSON.serialize(response);
-        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
-        exchange.getResponseSender().send(httpResponse, StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, CONTENT_TYPE);
+        exchange.getResponseSender().send(JSON.serialize(response), StandardCharsets.UTF_8);
     }
 
     private static Optional<String> getFirst(final String name,

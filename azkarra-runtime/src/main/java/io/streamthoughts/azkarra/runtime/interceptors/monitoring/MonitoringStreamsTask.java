@@ -55,11 +55,9 @@ public final class MonitoringStreamsTask extends Thread {
     private static final String CE_SPEC_VERSION = "1.0";
 
     static {
-        JSON.configure(objectMapper -> {
-            objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
-            objectMapper.registerModule(new AzkarraSimpleModule());
-            objectMapper.registerModule(new JavaTimeModule());
-        });
+        JSON.registerModule(new AzkarraSimpleModule());
+        JSON.registerModule(new JavaTimeModule());
+        JSON.configure(o -> o.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true));
     }
 
     private final CountDownLatch isShutdownLatch;

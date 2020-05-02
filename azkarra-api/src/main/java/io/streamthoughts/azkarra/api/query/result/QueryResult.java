@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class QueryResult<K, V> implements Serializable {
@@ -132,5 +133,39 @@ public class QueryResult<K, V> implements Serializable {
                 status,
                 result
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof QueryResult)) return false;
+        QueryResult<?, ?> that = (QueryResult<?, ?>) o;
+        return took == that.took &&
+                timeout == that.timeout &&
+                Objects.equals(server, that.server) &&
+                status == that.status &&
+                Objects.equals(result, that.result);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(took, timeout, server, status, result);
+    }
+
+    @Override
+    public String toString() {
+        return "QueryResult{" +
+                "took=" + took +
+                ", timeout=" + timeout +
+                ", server='" + server + '\'' +
+                ", status=" + status +
+                ", result=" + result +
+                '}';
     }
 }

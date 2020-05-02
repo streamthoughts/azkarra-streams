@@ -52,7 +52,7 @@ public class JsonQuerySerde {
     private static final String QUERY_TYPE_JSON_FIELD = "type";
     private static final String SET_OPTIONS_JSON_FIELD = "set_options";
 
-    private static final Json JSON = new Json();
+    private static final Json JSON = Json.getDefault();
 
     public static Tuple<QueryInfo, Queried> deserialize(final String storeName, final byte[] data) {
 
@@ -71,7 +71,6 @@ public class JsonQuerySerde {
             }
 
             final StoreType storeType = optionalStoreType.get();
-
 
             JsonNode jsonQuery = jsonNode.get(QUERY_JSON_FIELD);
             if (jsonQuery == null) {
@@ -117,7 +116,7 @@ public class JsonQuerySerde {
         }
     }
 
-    public static Object getJsonNodeValue(final JsonNode jsonNode) {
+    private static Object getJsonNodeValue(final JsonNode jsonNode) {
         if (jsonNode.isBoolean())
             return jsonNode.asBoolean();
         if (jsonNode.isLong())

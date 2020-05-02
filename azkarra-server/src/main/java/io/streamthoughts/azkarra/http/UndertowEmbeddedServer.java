@@ -18,12 +18,14 @@
  */
 package io.streamthoughts.azkarra.http;
 
+import com.fasterxml.jackson.databind.Module;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
+import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
 import io.streamthoughts.azkarra.api.server.ServerInfo;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultHandler;
@@ -36,6 +38,7 @@ import io.streamthoughts.azkarra.http.security.SecurityConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandler;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandlerFactory;
+import io.streamthoughts.azkarra.http.serialization.json.SpecificJsonSerdes;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.streamthoughts.azkarra.runtime.service.LocalAzkarraStreamsService;
 import io.undertow.Handlers;
@@ -49,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import org.xnio.Options;
 import org.xnio.SslClientAuthMode;
 
+import java.util.Collection;
 import java.util.ServiceLoader;
 
 public class UndertowEmbeddedServer implements EmbeddedHttpServer {
@@ -98,8 +102,13 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
             securityConfig.isSslEnable()
         );
 
+        // Find and register all user-specified Jackson modules
+        Collection<Module> jacksonModules = context.getAllComponents(Module.class);
+        ExchangeHelper.JSON.registerModules(jacksonModules);
+
         HttpRemoteQueryBuilder httpRemoteQueryBuilder = new HttpRemoteQueryBuilder()
-            .setBasePath(APIVersions.PATH_V1);
+            .setBasePath(APIVersions.PATH_V1)
+            .setSerdes(new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class));
 
         final Undertow.Builder sb = Undertow.builder()
             .setServerOption(UndertowOptions.ENABLE_HTTP2, true);

@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.serialization.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.streamthoughts.azkarra.serialization.SerializationException;
 
@@ -33,17 +34,14 @@ import java.util.function.Consumer;
 /**
  * Helper class for wrapping {@link ObjectMapper}.
  */
-public class Json {
+public final class Json {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private ObjectMapper objectMapper;
 
-    /**
-     * Creates a new {@link Json} instance.
-     */
-    public Json() {
-        this(OBJECT_MAPPER);
+    public static Json getDefault() {
+        return new Json(OBJECT_MAPPER);
     }
 
     /**
@@ -57,6 +55,14 @@ public class Json {
 
     public void configure(final Consumer<ObjectMapper> configure) {
         configure.accept(objectMapper);
+    }
+
+    public void registerModules(final Iterable<? extends Module> modules) {
+        objectMapper.registerModules(modules);
+    }
+
+    public void registerModule(final Module module) {
+        objectMapper.registerModule(module);
     }
 
     /**
@@ -162,5 +168,9 @@ public class Json {
         } catch (JsonProcessingException e) {
             throw new SerializationException("Error happens while serializing object '" + data + "'", e);
         }
+    }
+
+    public ObjectMapper unwrap() {
+        return objectMapper;
     }
 }

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class ErrorResultSet extends AbstractResultSet {
 
@@ -44,5 +45,25 @@ public class ErrorResultSet extends AbstractResultSet {
 
     public List<QueryError> getErrors() {
         return errors;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ErrorResultSet)) return false;
+        if (!super.equals(o)) return false;
+        ErrorResultSet that = (ErrorResultSet) o;
+        return Objects.equals(errors, that.errors);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), errors);
     }
 }

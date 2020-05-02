@@ -30,6 +30,7 @@
         <undertow.version>2.0.26.Final</undertow.version>
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>
         <rest.assured.version>4.1.2</rest.assured.version>
+        <okhttp.version>4.2.0</okhttp.version>
     </properties>
 
     <artifactId>azkarra-server</artifactId>
@@ -127,9 +128,8 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.2.0</version>
+            <version>${okhttp.version}</version>
         </dependency>
-
         <dependency>
             <groupId>io.undertow</groupId>
             <artifactId>undertow-servlet</artifactId>
@@ -177,6 +177,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <version>${okhttp.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${rest.assured.version}</version>
@@ -194,6 +201,7 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>
+
         <!-- END dependencies for testing-->
     </dependencies>
 </project>

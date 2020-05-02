@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -151,5 +152,35 @@ public class GlobalResultSet<K, V> implements Serializable {
         return success.stream()
                 .map(Either::<SuccessResultSet<K, V>, ErrorResultSet>left)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GlobalResultSet)) return false;
+        GlobalResultSet<?, ?> that = (GlobalResultSet<?, ?>) o;
+        return Objects.equals(store, that.store) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(total, that.total) &&
+                Objects.equals(error, that.error) &&
+                Objects.equals(failure, that.failure) &&
+                Objects.equals(success, that.success);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(store, type, total, error, failure, success);
+    }
+
+    @Override
+    public String toString() {
+        return "GlobalResultSet{" +
+                "store='" + store + '\'' +
+                ", type='" + type + '\'' +
+                ", total=" + total +
+                ", error='" + error + '\'' +
+                ", failure=" + failure +
+                ", success=" + success +
+                '}';
     }
 }

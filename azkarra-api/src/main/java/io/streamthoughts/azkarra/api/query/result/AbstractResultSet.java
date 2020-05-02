@@ -20,6 +20,8 @@ package io.streamthoughts.azkarra.api.query.result;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 public class AbstractResultSet {
     /**
      * Indicates if the query has been executed on remote instance.
@@ -44,5 +46,25 @@ public class AbstractResultSet {
     @JsonProperty("server")
     public String getServer() {
         return server;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractResultSet)) return false;
+        AbstractResultSet that = (AbstractResultSet) o;
+        return remote == that.remote &&
+                Objects.equals(server, that.server);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(remote, server);
     }
 }

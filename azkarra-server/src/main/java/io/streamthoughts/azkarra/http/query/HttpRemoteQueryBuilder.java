@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.http.query;
 
+import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.http.security.AllowAllHostNameVerifier;
 import io.streamthoughts.azkarra.http.security.SSLContextFactory;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
@@ -25,6 +26,7 @@ import io.streamthoughts.azkarra.http.security.auth.Authentication;
 import io.streamthoughts.azkarra.http.security.auth.AuthenticationContext;
 import io.streamthoughts.azkarra.http.security.auth.AuthenticationContextHolder;
 import io.streamthoughts.azkarra.http.security.auth.PasswordCredentials;
+import io.streamthoughts.azkarra.serialization.Serdes;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
@@ -47,6 +49,13 @@ public class HttpRemoteQueryBuilder {
     private boolean ignoreHostnameVerification = false;
 
     private boolean enablePasswordAuthentication;
+
+    private Serdes<QueryResult> serdes;
+
+    public HttpRemoteQueryBuilder setSerdes(final Serdes<QueryResult> serdes) {
+        this.serdes = serdes;
+        return this;
+    }
 
     /**
      * Sets the {@link SSLContextFactory} which is used for initializing HTTP client with SSL.
@@ -117,7 +126,7 @@ public class HttpRemoteQueryBuilder {
             builder.authenticator(getPasswordAuthenticator());
         }
         OkHttpClient httpClient = builder.build();
-        return new HttpRemoteQueryClient(httpClient, new DefaultQueryURLBuilder(schema, basePath));
+        return new HttpRemoteQueryClient(httpClient, new DefaultQueryURLBuilder(schema, basePath), serdes);
     }
 
     private Authenticator getPasswordAuthenticator() {
