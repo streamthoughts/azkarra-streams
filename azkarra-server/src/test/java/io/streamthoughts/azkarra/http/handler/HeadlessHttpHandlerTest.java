@@ -36,46 +36,35 @@ public class HeadlessHttpHandlerTest {
 
     @Test
     public void shouldAllowAccessForPostRequestWhenHeadlessEnable() throws Exception {
-        assertRequestStatusCode(true, Methods.POST, "/info", StatusCodes.OK);
+        assertRequestStatusCode(Methods.POST, "/info", StatusCodes.OK);
     }
 
     @Test
     public void shouldAllowAccessForApiPostStoresRequestWhenHeadlessEnable() throws Exception {
-        assertRequestStatusCode(true, Methods.POST, "/api/applications/42/stores/", StatusCodes.OK);
+        assertRequestStatusCode(Methods.POST, "/api/applications/42/stores/", StatusCodes.OK);
     }
 
     @Test
     public void shouldAllowAccessForApiGetRequestWhenHeadlessEnable() throws Exception {
-        assertRequestStatusCode(true, Methods.GET, API_BASE_PATH, StatusCodes.OK);
+        assertRequestStatusCode(Methods.GET, API_BASE_PATH, StatusCodes.OK);
     }
 
     @Test
     public void shouldDenyAccessForApiPostRequestWhenHeadlessEnable() throws Exception {
-        assertRequestStatusCode(true, Methods.POST, API_BASE_PATH, StatusCodes.FORBIDDEN);
+        assertRequestStatusCode(Methods.POST, API_BASE_PATH, StatusCodes.FORBIDDEN);
     }
 
     @Test
     public void shouldDenyAccessForApiDeleteRequestWhenHeadlessEnable() throws Exception {
-        assertRequestStatusCode(true, Methods.DELETE, API_BASE_PATH, StatusCodes.FORBIDDEN);
+        assertRequestStatusCode(Methods.DELETE, API_BASE_PATH, StatusCodes.FORBIDDEN);
     }
 
-    @Test
-    public void shouldAllowAccessForApiDeleteRequestWhenHeadlessDisable() throws Exception {
-        assertRequestStatusCode(false, Methods.DELETE, API_BASE_PATH, StatusCodes.OK);
-    }
-
-    @Test
-    public void shouldAllowAccessForApiPostRequestWhenHeadlessDisable() throws Exception {
-        assertRequestStatusCode(false, Methods.POST, API_BASE_PATH, StatusCodes.OK);
-    }
-
-    private void assertRequestStatusCode(final boolean headless,
-                                         final HttpString method,
+    private void assertRequestStatusCode(final HttpString method,
                                          final String relativePath,
                                          final int statusCode) throws Exception {
 
         final HttpHandler mkHandler = mock(HttpHandler.class);
-        final HeadlessHttpHandler handler = new HeadlessHttpHandler(headless, mkHandler);
+        final HeadlessHttpHandler handler = new HeadlessHttpHandler(mkHandler);
 
         final HttpServerExchange exchange = new HttpServerExchange(
             mock(ServerConnection.class),
