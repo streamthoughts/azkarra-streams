@@ -18,24 +18,13 @@
  */
 package io.streamthoughts.azkarra.http.error;
 
-import io.streamthoughts.azkarra.api.errors.AzkarraException;
-import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
-import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.data.ErrorMessage;
-import io.streamthoughts.azkarra.http.security.UnauthorizedAccessException;
-import io.streamthoughts.azkarra.serialization.SerializationException;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.undertow.util.StatusCodes.BAD_REQUEST;
-import static io.undertow.util.StatusCodes.INTERNAL_SERVER_ERROR;
-import static io.undertow.util.StatusCodes.NOT_FOUND;
-import static io.undertow.util.StatusCodes.SERVICE_UNAVAILABLE;
-import static io.undertow.util.StatusCodes.UNAUTHORIZED;
 
 /**
  * An {@link HttpHandler} which used for catching any exception thrown during request execution.
@@ -54,38 +43,12 @@ public class ExceptionDefaultHandler implements HttpHandler {
     }
 
     public static void sendErrorMessage(final HttpServerExchange exchange, final Throwable throwable) {
-        final String exceptionMessage = throwable.getMessage();
-        final String exception = throwable.getClass().getName();
-        final String path = exchange.getRelativePath();
-        ErrorMessage error;
-        if (throwable instanceof NotFoundException) {
-            error = new ErrorMessage(NOT_FOUND, exceptionMessage, exception, path);
-        } else if (throwable instanceof MetricNotFoundException) {
-            error = new ErrorMessage(NOT_FOUND, exceptionMessage, exception, path);
-        } else if (throwable instanceof BadRequestException) {
-            error = new ErrorMessage(BAD_REQUEST, exceptionMessage, exception, path);
-        } else if (throwable instanceof SerializationException) {
-            error = new ErrorMessage(BAD_REQUEST, exceptionMessage, exception, path);
-        } else if (throwable instanceof UnauthorizedAccessException) {
-            error = new ErrorMessage(UNAUTHORIZED, exceptionMessage, exception, path);
-        } else if (throwable instanceof InvalidStreamsStateException) {
-            error = new ErrorMessage(SERVICE_UNAVAILABLE, exceptionMessage, exception, path);
-        } else if (throwable instanceof AzkarraException) {
-            error = internalServerError("Internal Azkarra Streams API Error : "
-                    + exceptionMessage, exception, path);
-        } else {
-            error = internalServerError("Unexpected internal server error: "
-                    + exceptionMessage, exception, path);
-        }
+        final ErrorMessage error = ErrorMessage.of(throwable, exchange.getRelativePath());
         if (error.getErrorCode() == 500) {
-            LOG.error("Uncaught server exception", throwable);
+            LOG.error("Uncaught server exception in REST call to /{}", exchange.getRelativePath(), throwable);
         }
         ExchangeHelper.sendJsonResponseWithCode(exchange, error, error.getErrorCode());
     }
 
-    private static ErrorMessage internalServerError(final String message,
-                                                    final String exception,
-                                                    final String path) {
-        return new ErrorMessage(INTERNAL_SERVER_ERROR, message, exception, path);
-    }
+
 }

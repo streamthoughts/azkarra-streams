@@ -31,16 +31,12 @@ import java.util.List;
 
 public class HeadlessHttpHandler implements HttpHandler {
 
-    private boolean headless;
     private final HttpHandler next;
 
     /**
      * Creates a new {@link HeadlessHttpHandler} instance.
-     *
-     * @param enable    is headless mode enable.
      */
-    public HeadlessHttpHandler(final boolean enable, final HttpHandler next) {
-        this.headless = enable;
+    public HeadlessHttpHandler(final HttpHandler next) {
         this.next = next;
     }
 
@@ -51,7 +47,7 @@ public class HeadlessHttpHandler implements HttpHandler {
     public void handleRequest(final HttpServerExchange exchange) throws Exception {
         final HttpString method = exchange.getRequestMethod();
         final String path = exchange.getRelativePath();
-        if (headless && isOperationRestricted(path, method) && isNotQueryStore(path, method)) {
+        if (isOperationRestricted(path, method) && isNotQueryStore(path, method)) {
             ErrorMessage error = new ErrorMessage(
                 StatusCodes.FORBIDDEN,
                 "Server is running in headless mode -" +

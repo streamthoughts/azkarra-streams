@@ -34,6 +34,7 @@ public class ServerConfBuilder {
     public static final String HTTP_PORT_CONFIG                    = "port";
     public static final String HTTP_LISTENER_LISTER_CONFIG         = "listener";
     public static final String HTTP_ENABLE_UI                      = "enable.ui";
+    public static final String HTTP_REST_EXTENSIONS_ENABLE         = "rest.extensions.enable";
 
     private final Map<String, Object> configs;
 
@@ -297,6 +298,28 @@ public class ServerConfBuilder {
      */
     public ServerConfBuilder disableHeadlessMode() {
         configs.put(SecurityConfig.HTTP_HEADLESS_CONFIG, false);
+        return this;
+    }
+
+    /**
+     * Enables support for rest extensions.
+     * @see io.streamthoughts.azkarra.api.server.AzkarraRestExtension
+     *
+     * @return  {@code this}
+     */
+    public ServerConfBuilder enableRestExtensions() {
+        configs.put(HTTP_REST_EXTENSIONS_ENABLE, true);
+        return this;
+    }
+
+    /**
+     * Disables support for rest extensions.
+     * @see io.streamthoughts.azkarra.api.server.AzkarraRestExtension
+     *
+     * @return  {@code this}
+     */
+    public ServerConfBuilder disableRestExtensions() {
+        configs.put(HTTP_REST_EXTENSIONS_ENABLE, false);
         return this;
     }
 

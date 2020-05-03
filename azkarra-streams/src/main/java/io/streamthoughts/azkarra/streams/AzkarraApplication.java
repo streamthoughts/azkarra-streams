@@ -419,7 +419,6 @@ public class AzkarraApplication {
             final String server = info.getHost() + ":" + info.getPort();
             final Conf serverConfig = Conf.with(StreamsConfig.APPLICATION_SERVER_CONFIG, server);
             context.addConfiguration(Conf.with("streams", serverConfig));
-            LOG.info("Embedded server start listening on {}", info);
         }
 
         /**

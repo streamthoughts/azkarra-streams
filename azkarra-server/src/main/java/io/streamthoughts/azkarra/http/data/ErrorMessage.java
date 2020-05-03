@@ -19,7 +19,17 @@
 package io.streamthoughts.azkarra.http.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
+import io.streamthoughts.azkarra.api.errors.NotFoundException;
+import io.streamthoughts.azkarra.http.error.BadRequestException;
+import io.streamthoughts.azkarra.http.error.MetricNotFoundException;
+import io.streamthoughts.azkarra.http.security.UnauthorizedAccessException;
+import io.streamthoughts.azkarra.serialization.SerializationException;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.io.Serializable;
 
 /**
@@ -34,6 +44,20 @@ public class ErrorMessage implements Serializable {
     private final String exception;
 
     private final String path;
+
+    /**
+     * Creates a new {@link ErrorMessage} instance.
+     *
+     * @param errorCode the error code.
+     * @param exception the error exception cause.
+     * @param path      the uri relative path.
+     */
+    public ErrorMessage(final int errorCode,
+                        final Throwable exception,
+                        final String path) {
+        this(errorCode, exception.getMessage(), exception.getClass().getName(), path);
+    }
+
 
     /**
      * Creates a new {@link ErrorMessage} instance.
@@ -99,5 +123,59 @@ public class ErrorMessage implements Serializable {
     @JsonProperty(value = "path")
     public String getPath() {
         return path;
+    }
+
+    /**
+     * Static helper method for mapping an given exception to a new {@link ErrorMessage}.
+     *
+     * @param exception the exception.
+     * @param path      the rest call path.
+     *
+     * @return  the {@link ErrorMessage}; cannot return {@code null}.
+     */
+    public static ErrorMessage of(final Throwable exception, final String path) {
+
+        if (exception instanceof NotFoundException) {
+           return new ErrorMessage(Status.NOT_FOUND.getStatusCode(), exception, path);
+        }
+
+        else if (exception instanceof MetricNotFoundException) {
+            return new ErrorMessage(Status.NOT_FOUND.getStatusCode(), exception, path);
+        }
+
+        else if (exception instanceof BadRequestException) {
+            return new ErrorMessage(Status.BAD_REQUEST.getStatusCode(), exception, path);
+        }
+
+        else if (exception instanceof SerializationException) {
+            return new ErrorMessage(Status.BAD_REQUEST.getStatusCode(), exception, path);
+        }
+
+        else if (exception instanceof UnauthorizedAccessException) {
+            return new ErrorMessage(Status.UNAUTHORIZED.getStatusCode(), exception, path);
+        }
+
+        else if (exception instanceof InvalidStreamsStateException) {
+            return new ErrorMessage(Status.SERVICE_UNAVAILABLE.getStatusCode(), exception, path);
+        }
+
+        else if (exception instanceof WebApplicationException) {
+            Response.StatusType statusInfo = ((WebApplicationException) exception).getResponse().getStatusInfo();
+            return new ErrorMessage(statusInfo.getStatusCode(), exception, path);
+        }
+
+        else if (exception instanceof AzkarraException) {
+            return new ErrorMessage(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                "Internal Azkarra Streams API Error: " + exception.getMessage(),
+                exception,
+                path
+            );
+        }
+
+        return new ErrorMessage(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+            "Uncaught internal server error: " + exception.getMessage(),
+            exception,
+            path
+        );
     }
 }

@@ -60,7 +60,7 @@ public class UndertowEmbeddedServerIT {
             .assertThat()
             .statusCode(500)
             .contentType("application/json")
-            .body("message", response -> equalTo("Internal Azkarra Streams API Error : Testing error"))
+            .body("message", response -> equalTo("Internal Azkarra Streams API Error: Testing error"))
             .body("error_code", response -> equalTo(500));
     }
 }
