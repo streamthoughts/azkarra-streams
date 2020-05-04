@@ -559,9 +559,7 @@ public class DefaultComponentFactory implements ComponentFactory {
             try {
                 Supplier<T> factory = descriptor.supplier();
 
-                if (factory instanceof ComponentFactoryAware) {
-                    ((ComponentFactoryAware)factory).setComponentFactory(DefaultComponentFactory.this);
-                }
+                maySetComponentFactoryAware(factory);
 
                 Configurable.mayConfigure(factory, conf);
 
@@ -571,6 +569,7 @@ public class DefaultComponentFactory implements ComponentFactory {
                     instances.add(instance);
                 }
 
+                maySetComponentFactoryAware(instance);
                 Configurable.mayConfigure(instance, conf);
 
                 return instance;
@@ -606,6 +605,12 @@ public class DefaultComponentFactory implements ComponentFactory {
         @Override
         public int compareTo(final InternalGettableComponent<T> that) {
             return this.descriptor.compareTo(that.descriptor);
+        }
+    }
+
+    private void maySetComponentFactoryAware(final Object o) {
+        if (o instanceof ComponentFactoryAware) {
+            ((ComponentFactoryAware)o).setComponentFactory(DefaultComponentFactory.this);
         }
     }
 

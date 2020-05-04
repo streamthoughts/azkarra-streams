@@ -73,9 +73,9 @@ public class ComponentScanner {
 
     private static final Predicate<Method> GET_METHOD = ReflectionUtils.withName("get")::apply;
 
-    private final ComponentRegistry registry;
+    private static final FilterBuilder DEFAULT_FILTER_BY = new FilterBuilder();
 
-    private FilterBuilder filterBuilder;
+    private final ComponentRegistry registry;
 
     /**
      * Creates a new {@link ComponentScanner} instance.
@@ -85,7 +85,6 @@ public class ComponentScanner {
     public ComponentScanner(final ComponentRegistry registry) {
         Objects.requireNonNull(registry, "registry cannot be null");
         this.registry = registry;
-        this.filterBuilder = new FilterBuilder();
     }
 
     /**
@@ -134,26 +133,43 @@ public class ComponentScanner {
                 ComponentScanner.class.getClassLoader()
             );
             LOG.info("Initialized new ClassLoader: {}", classLoader);
-            scanUrlsForComponents(component.resources(), classLoader);
+            scanUrlsForComponents(component.resources(), classLoader, DEFAULT_FILTER_BY);
         }
     }
 
-    public void scan(final Package source) {
-        Objects.requireNonNull(source);
-        final URL[] urls = ClasspathHelper.forPackage(source.getName()).toArray(new URL[0]);
-        filterBuilder.includePackage(source.getName());
-        scanUrlsForComponents(urls, ComponentScanner.class.getClassLoader());
+    /**
+     * Scans the specified package for components.
+     *
+     * @param source    the {@link Package} to be scanned; must not be {@code null}.
+     */
+    public void scanForPackage(final Package source) {
+        Objects.requireNonNull(source, "source package cannot be null");
+        scanForPackage(source.getName());
+    }
+
+    /**
+     * Scans the specified package for components.
+     *
+     * @param source    the package to be scanned; must not be {@code null}.
+     */
+    public void scanForPackage(final String source) {
+        Objects.requireNonNull(source, "source package cannot be null");
+        LOG.info("Looking for paths to scan from source package {}", source);
+        final URL[] urls = ClasspathHelper.forPackage(source).toArray(new URL[0]);
+        final FilterBuilder filterBy =  new FilterBuilder().includePackage(source);
+        scanUrlsForComponents(urls, ComponentScanner.class.getClassLoader(), filterBy);
     }
 
     private void scanUrlsForComponents(final URL[] urls,
-                                       final ClassLoader classLoader) {
+                                       final ClassLoader classLoader,
+                                       final com.google.common.base.Predicate<String> filterBy) {
         LOG.info("Scanning components from paths : {}",
-            Arrays.stream(urls).map(URL::getPath).collect(Collectors.joining("", "\n\t", "")));
+            Arrays.stream(urls).map(URL::getPath).collect(Collectors.joining("\n\t", "\n\t", "")));
 
         ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.setClassLoaders(new ClassLoader[]{classLoader});
         builder.addUrls(urls);
-        builder.filterInputsBy(filterBuilder);
+        builder.filterInputsBy(filterBy);
         builder.setScanners(new SubTypesScanner(), new TypeAnnotationsScanner());
         builder.useParallelExecutor();
 

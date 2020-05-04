@@ -65,7 +65,7 @@ public class ComponentScannerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredComponents() {
-        scanner.scan(TestAnnotatedComponent.class.getPackage());
+        scanner.scanForPackage(TestAnnotatedComponent.class.getPackage());
 
         Mockito.verify(factory).registerComponent(
             Matchers.isNull(String.class),
@@ -76,7 +76,7 @@ public class ComponentScannerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredSupplier() {
-        scanner.scan(TestSupplier.class.getPackage());
+        scanner.scanForPackage(TestSupplier.class.getPackage());
         Mockito.verify(factory).registerComponent(
                 Matchers.isNull(String.class),
                 Mockito.argThat(new ClassMatcher(MockTopologyProvider.class)),
@@ -86,7 +86,7 @@ public class ComponentScannerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredAllComponentFactory() {
-        scanner.scan(TestAnnotatedFactory.class.getPackage());
+        scanner.scanForPackage(TestAnnotatedFactory.class.getPackage());
 
         Mockito.verify(factory, Mockito.times(2)).registerComponent(
             Mockito.anyString(),
@@ -102,7 +102,7 @@ public class ComponentScannerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredComponentFactory() {
-        scanner.scan(TestAnnotatedFactory.class.getPackage());
+        scanner.scanForPackage(TestAnnotatedFactory.class.getPackage());
 
         Mockito.verify(factory).registerComponent(
             Mockito.eq("testComponent"),
@@ -113,7 +113,7 @@ public class ComponentScannerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredSingletonFactory() {
-        scanner.scan(TestAnnotatedFactory.class.getPackage());
+        scanner.scanForPackage(TestAnnotatedFactory.class.getPackage());
 
         Mockito.verify(factory).registerSingleton(
                 Mockito.eq("testSingleton"),
@@ -124,7 +124,7 @@ public class ComponentScannerTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldScanAndRegisterDeclaredNamedComponentFactory() {
-        scanner.scan(TestAnnotatedFactory.class.getPackage());
+        scanner.scanForPackage(TestAnnotatedFactory.class.getPackage());
         Mockito.verify(factory).registerComponent(
             Mockito.eq("namedComponent"),
             Mockito.argThat(new ClassMatcher(TestAnnotatedFactory.DummyComponent.class)),

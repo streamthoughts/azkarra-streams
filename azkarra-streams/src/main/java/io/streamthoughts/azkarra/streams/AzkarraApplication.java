@@ -280,11 +280,14 @@ public class AzkarraApplication {
         if (enableComponentScan) {
             ComponentScanner scanner = new ComponentScanner(context.getComponentFactory());
 
+            // Scan all sub-packages of the root package of Azkarra for declared components.
+            scanner.scanForPackage("io.streamthoughts.azkarra");
+
             final Optional<String> componentPaths = configuration.getOptionalString(COMPONENT_PATHS_CONFIG);
             componentPaths.ifPresent(scanner::scan);
 
             for (Class source : sources) {
-                scanner.scan(source.getPackage());
+                scanner.scanForPackage(source.getPackage());
             }
         }
 
