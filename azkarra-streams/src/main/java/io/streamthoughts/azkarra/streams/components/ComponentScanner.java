@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.annotations.Factory;
 import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.annotations.Primary;
+import io.streamthoughts.azkarra.api.annotations.Secondary;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
@@ -218,6 +219,7 @@ public class ComponentScanner {
 
         mayAddModifierForOrder(method, modifiers);
         mayAddModifierForPrimary(method, modifiers);
+        mayAddModifierForSecondary(method, modifiers);
 
         final ComponentDescriptorModifier[] objects = modifiers.toArray(new ComponentDescriptorModifier[]{});
         registerComponent(componentName, componentClass, supplier, isSingleton(method), objects);
@@ -241,6 +243,7 @@ public class ComponentScanner {
         List<ComponentDescriptorModifier> modifiers = new ArrayList<>();
         mayAddModifierForOrder(cls, modifiers);
         mayAddModifierForPrimary(cls, modifiers);
+        mayAddModifierForSecondary(cls, modifiers);
         final ComponentDescriptorModifier[] arrayModifiers = modifiers.toArray(new ComponentDescriptorModifier[]{});
 
         final String componentName = getNamedQualifierOrNull(cls);
@@ -315,6 +318,18 @@ public class ComponentScanner {
                                                  final List<ComponentDescriptorModifier> modifiers) {
         if (ClassUtils.isMethodAnnotatedWith(method, Primary.class))
             modifiers.add(ComponentDescriptorModifiers.asPrimary());
+    }
+
+    private static void mayAddModifierForSecondary(final Method method,
+                                                   final List<ComponentDescriptorModifier> modifiers) {
+        if (ClassUtils.isMethodAnnotatedWith(method, Secondary.class))
+            modifiers.add(ComponentDescriptorModifiers.asSecondary());
+    }
+
+    private static void mayAddModifierForSecondary(final Class<?> componentClass,
+                                                   final List<ComponentDescriptorModifier> modifiers) {
+        if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Secondary.class))
+            modifiers.add(ComponentDescriptorModifiers.asSecondary());
     }
 
     // The Reflections class may throw a ReflectionsException when parallel executor

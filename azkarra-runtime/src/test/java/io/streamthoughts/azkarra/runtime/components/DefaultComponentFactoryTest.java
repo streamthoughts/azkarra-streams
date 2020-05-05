@@ -86,6 +86,16 @@ public class DefaultComponentFactoryTest {
         Assertions.assertEquals("componentTwo", descriptor.get().name());
     }
 
+    @Test
+    public void shouldNotThrowNoUniqueComponentExceptionGivenTwoSameTypeComponentsUsingSecondary() {
+        factory.registerComponent("componentOne", TestB.class, TestB::new);
+        factory.registerComponent("componentTwo", TestB.class, TestB::new, asSecondary());
+
+        Optional<ComponentDescriptor<TestB>> descriptor = factory.findDescriptorByClass(TestB.class);
+        Assertions.assertTrue(descriptor.isPresent());
+        Assertions.assertEquals("componentOne", descriptor.get().name());
+    }
+
 
     @Test
     public void shouldThrowConflictingComponentExceptionGivenTwoIdenticalComponents() {

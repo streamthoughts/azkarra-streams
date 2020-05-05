@@ -50,6 +50,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
 
     private final boolean isPrimary;
 
+    private final boolean isSecondary;
+
     private final int order;
 
     /**
@@ -64,7 +66,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final Class<T> type,
                                      final Supplier<T> supplier,
                                      final boolean isSingleton) {
-        this(name, type, type.getClassLoader(), supplier, null, isSingleton, false, Ordered.LOWEST_ORDER);
+        this(name, type, type.getClassLoader(), supplier, null, isSingleton, false, false, Ordered.LOWEST_ORDER);
     }
 
     /**
@@ -81,7 +83,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final Supplier<T> supplier,
                                      final String version,
                                      final boolean isSingleton) {
-        this(name, type, type.getClassLoader(), supplier, version, isSingleton, false, Ordered.LOWEST_ORDER);
+        this(name, type, type.getClassLoader(), supplier, version, isSingleton, false, false, Ordered.LOWEST_ORDER);
     }
 
     /**
@@ -101,6 +103,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final String version,
                                      final boolean isSingleton,
                                      final boolean isPrimary,
+                                     final boolean isSecondary,
                                      final int order) {
         Objects.requireNonNull(type, "type can't be null");
         Objects.requireNonNull(supplier, "supplier can't be null");
@@ -113,6 +116,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
         this.metadata = new ComponentMetadata();
         this.isSingleton = isSingleton;
         this.isPrimary = isPrimary;
+        this.isSecondary = isSecondary;
         this.order = order;
     }
 
@@ -130,6 +134,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
             descriptor.version().toString(),
             descriptor.isSingleton(),
             descriptor.isPrimary(),
+            descriptor.isSecondary(),
             descriptor.order()
         );
         metadata = descriptor.metadata();
@@ -226,6 +231,14 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
     @Override
     public boolean isPrimary() {
         return isPrimary;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isSecondary() {
+        return isSecondary;
     }
 
     /**

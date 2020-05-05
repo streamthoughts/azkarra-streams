@@ -89,6 +89,7 @@ public class ComponentDescriptorTest {
                 null,
                 true,
                 false,
+                false,
                 order
         );
     }
@@ -101,6 +102,7 @@ public class ComponentDescriptorTest {
             () -> null,
             version,
             true,
+            false,
             false,
             Ordered.LOWEST_ORDER
         );
