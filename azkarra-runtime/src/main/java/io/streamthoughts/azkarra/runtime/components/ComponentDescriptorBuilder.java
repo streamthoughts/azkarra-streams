@@ -38,6 +38,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
     private Supplier<T> supplier;
     private boolean isSingleton;
     private boolean isPrimary;
+    private boolean isSecondary;
     private Set<String> aliases = new HashSet<>();
     private int order;
 
@@ -219,12 +220,22 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
         return this;
     }
 
+    public ComponentDescriptorBuilder<T> isSecondary(final boolean isSecondary) {
+        this.isSecondary = isSecondary;
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean isPrimary() {
         return isPrimary;
+    }
+
+    @Override
+    public boolean isSecondary() {
+        return false;
     }
 
     /**
@@ -255,6 +266,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
             version,
             isSingleton,
             isPrimary,
+            isSecondary,
             order
         );
         descriptor.metadata(metadata);

@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.io.Closeable;
@@ -129,7 +130,17 @@ public interface ComponentDescriptor<T> extends Ordered {
      * Checks if the described component is the primary component
      * that must be selected in the case of multiple possible implementations.
      *
+     * @see Qualifiers#byPrimary()
+     *
      * @return {@code true } if is primary, otherwise {@code false}.
      */
     boolean isPrimary();
+
+    /**
+     * Checks if the described component is a secondary component that
+     * must be  de-prioritize in the case of multiple possible implementations.
+     *
+     * @return {@code true } if is secondary, otherwise {@code false}.
+     */
+    boolean isSecondary();
 }

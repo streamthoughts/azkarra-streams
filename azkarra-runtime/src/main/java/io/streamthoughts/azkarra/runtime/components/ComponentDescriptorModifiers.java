@@ -23,6 +23,11 @@ import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 
 public class ComponentDescriptorModifiers {
 
+    /**
+     * Gets a modifier implementation that will set a component as primary.
+     *
+     * @return  a new {@link ComponentDescriptorModifier} instance.
+     */
     public static ComponentDescriptorModifier asPrimary() {
         return new ComponentDescriptorModifier() {
             @Override
@@ -34,6 +39,28 @@ public class ComponentDescriptorModifiers {
         };
     }
 
+    /**
+     * Gets a modifier implementation that will set a component as secondary.
+     *
+     * @return  a new {@link ComponentDescriptorModifier} instance.
+     */
+    public static ComponentDescriptorModifier asSecondary() {
+        return new ComponentDescriptorModifier() {
+            @Override
+            public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
+                return ComponentDescriptorBuilder.<T>create(descriptor)
+                    .isSecondary(true)
+                    .build();
+            }
+        };
+    }
+
+    /**
+     * Gets a modifier implementation that will set the given order of the component.
+     *
+     * @param order the component order to set.
+     * @return      a new {@link ComponentDescriptorModifier} instance.
+     */
     public static ComponentDescriptorModifier withOrder(final int order) {
         return new ComponentDescriptorModifier() {
             @Override

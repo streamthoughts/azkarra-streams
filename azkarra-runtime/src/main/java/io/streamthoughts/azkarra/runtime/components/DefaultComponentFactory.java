@@ -344,22 +344,27 @@ public class DefaultComponentFactory implements ComponentFactory {
     private <T> Optional<ComponentDescriptor<T>> findUniqueDescriptor(final String type,
                                                                       final Stream<ComponentDescriptor<T>> candidates) {
         List<ComponentDescriptor<T>> descriptors = candidates.collect(Collectors.toList());
-        if (descriptors.size() > 1) {
-            final int many = descriptors.size();
-            descriptors = Qualifiers
-                .<T>byPrimary()
+        if (descriptors.size() <=1 )
+            return descriptors.stream().findFirst();
+
+        final int numMatchingComponents = descriptors.size();
+
+        var filteredByPrimary = Qualifiers.<T>byPrimary()
                 .filter(null, descriptors.stream())
                 .collect(Collectors.toList());
-            if (descriptors.size() != 1)
-                throw new NoUniqueComponentException("Expected single matching component for " +
-                        "type '" + type + "' but found " + many);
-        }
 
+        if (filteredByPrimary.size() == 1)
+            return Optional.of(filteredByPrimary.get(0));
 
-        if (descriptors.isEmpty())
-            return Optional.empty();
+        var filterBySecondary = Qualifiers.<T>excludeSecondary()
+               .filter(null, descriptors.stream())
+               .collect(Collectors.toList());
 
-        return Optional.of(descriptors.get(0));
+        if (filterBySecondary.size() == 1)
+            return Optional.of(filterBySecondary.get(0));
+
+        throw new NoUniqueComponentException("Expected single matching component for " +
+                "type '" + type + "' but found " + numMatchingComponents);
     }
 
     @SuppressWarnings("unchecked")

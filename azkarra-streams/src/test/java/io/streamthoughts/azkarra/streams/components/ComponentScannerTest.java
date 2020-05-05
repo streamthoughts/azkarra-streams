@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.streams.components;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.Version;
@@ -28,6 +29,7 @@ import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.streams.MockTopologyProvider;
 import io.streamthoughts.azkarra.streams.components.scan.component.TestAnnotatedComponent;
 import io.streamthoughts.azkarra.streams.components.scan.factory.TestAnnotatedFactory;
+import io.streamthoughts.azkarra.streams.components.scan.secondary.TestSecondaryComponent;
 import io.streamthoughts.azkarra.streams.components.scan.supplier.TestSupplier;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.annotation.AnnotationDescription;
@@ -129,6 +131,17 @@ public class ComponentScannerTest {
             Mockito.eq("namedComponent"),
             Mockito.argThat(new ClassMatcher(TestAnnotatedFactory.DummyComponent.class)),
             Mockito.any(Supplier.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldScanAndRegisterDeclaredSecondaryComponent() {
+        scanner.scanForPackage(TestSecondaryComponent.class.getPackage());
+        Mockito.verify(factory).registerComponent(
+            Matchers.isNull(String.class),
+            Mockito.argThat(new ClassMatcher(TestSecondaryComponent.class)),
+            Mockito.any(Supplier.class),
+            Mockito.any(ComponentDescriptorModifier.class));
     }
 
     @Test

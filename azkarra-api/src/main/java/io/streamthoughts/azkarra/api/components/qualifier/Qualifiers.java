@@ -32,6 +32,14 @@ public class Qualifiers {
         return new PrimaryQualifier<>();
     }
 
+    public static <T> Qualifier<T> bySecondary() {
+        return new SecondaryQualifier<>(false);
+    }
+
+    public static <T> Qualifier<T> excludeSecondary() {
+        return new SecondaryQualifier<>(true);
+    }
+
     public static <T> Qualifier<T> byName(final String name) {
         return new NamedQualifier<>(name);
     }
