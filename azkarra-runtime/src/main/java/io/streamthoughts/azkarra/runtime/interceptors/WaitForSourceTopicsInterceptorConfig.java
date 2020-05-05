@@ -16,18 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+package io.streamthoughts.azkarra.runtime.interceptors;
 
-import io.streamthoughts.azkarra.api.errors.AzkarraException;
+/**
+ * The configuration class for {@link WaitForSourceTopicsInterceptor}.
+ */
+public class WaitForSourceTopicsInterceptorConfig {
 
-public class ConflictingBeanDefinitionException extends AzkarraException {
+    public static String WAIT_FOR_TOPICS_ENABLE_CONFIG    = "enable.wait.for.topics";
 
-    /**
-     * Creates a new {@link ConflictingBeanDefinitionException} instance.
-     *
-     * @param message   the error message.
-     */
-    public ConflictingBeanDefinitionException(final String message) {
-        super(message);
-    }
 }

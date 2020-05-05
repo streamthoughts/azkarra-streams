@@ -20,6 +20,8 @@ package io.streamthoughts.azkarra.runtime.config;
 
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
+import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptorConfig;
+import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptorConfig;
 import io.streamthoughts.azkarra.runtime.streams.errors.CloseKafkaStreamsOnThreadException;
 
 import java.util.Collections;
@@ -30,14 +32,49 @@ import java.util.stream.Collectors;
 
 public class AzkarraContextConfig {
 
+    /**
+     * This static field will be removed in a future version.
+     * @deprecated use {@link WaitForSourceTopicsInterceptorConfig#WAIT_FOR_TOPICS_ENABLE_CONFIG}
+     */
+    @Deprecated
     public static String WAIT_FOR_TOPICS_ENABLE_CONFIG    = "enable.wait.for.topics";
+
+    /**
+     * This static field will be removed in a future version.
+     * @deprecated use {@link AutoCreateTopicsInterceptorConfig#AUTO_CREATE_TOPICS_ENABLE_CONFIG}
+     */
+    @Deprecated
     public static String AUTO_CREATE_TOPICS_ENABLE_CONFIG = "auto.create.topics.enable";
+
+    /**
+     * This static field will be removed in a future version.
+     * @deprecated use {@link AutoCreateTopicsInterceptorConfig#AUTO_DELETE_TOPICS_ENABLE_CONFIG}
+     */
+    @Deprecated
     public static String AUTO_DELETE_TOPICS_ENABLE_CONFIG = "auto.delete.topics.enable";
+
+    /**
+     * This static field will be removed in a future version.
+     * @deprecated use {@link AutoCreateTopicsInterceptorConfig#AUTO_CREATE_TOPICS_NUM_PARTITIONS_CONFIG}
+     */
+    @Deprecated
     public static String AUTO_CREATE_TOPICS_NUM_PARTITIONS_CONFIG = "auto.create.topics.num.partitions";
+
+    /**
+     * This static field will be removed in a future version.
+     * @deprecated use {@link AutoCreateTopicsInterceptorConfig#AUTO_CREATE_TOPICS_REPLICATION_FACTOR_CONFIG}
+     */
+    @Deprecated
     public static String AUTO_CREATE_TOPICS_REPLICATION_FACTOR_CONFIG = "auto.create.topics.replication.factor";
+
+    /**
+     * This static field will be removed in a future version.
+     * @deprecated use {@link AutoCreateTopicsInterceptorConfig#AUTO_CREATE_TOPICS_CONFIGS_CONFIG}
+     */
+    @Deprecated
     public static String AUTO_CREATE_TOPICS_CONFIGS_CONFIG = "auto.create.topics.configs";
+
     public static String DEFAULT_STREAM_THREAD_EXCEPTION_HANDLER = "default.stream.thread.exception.handler";
-    public static String MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG = "monitoring.streams.interceptor.enable";
 
     private Conf configs;
 
@@ -56,10 +93,6 @@ public class AzkarraContextConfig {
 
     public boolean isAutoCreateTopicsEnable() {
         return configs.getOptionalBoolean(AUTO_CREATE_TOPICS_ENABLE_CONFIG).orElse(false);
-    }
-
-    public boolean isMonitoringStreamsInterceptorEnable() {
-        return configs.getOptionalBoolean(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG).orElse(false);
     }
 
     public StreamThreadExceptionHandler getDefaultStreamsThreadExceptionHandler() {

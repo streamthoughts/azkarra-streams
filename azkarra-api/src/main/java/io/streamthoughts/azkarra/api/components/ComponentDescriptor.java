@@ -18,11 +18,13 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.io.Closeable;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -132,15 +134,26 @@ public interface ComponentDescriptor<T> extends Ordered {
      *
      * @see Qualifiers#byPrimary()
      *
-     * @return {@code true } if is primary, otherwise {@code false}.
+     * @return {@code true} if is primary, otherwise {@code false}.
      */
     boolean isPrimary();
 
     /**
      * Checks if the described component is a secondary component that
-     * must be  de-prioritize in the case of multiple possible implementations.
+     * must be de-prioritize in the case of multiple possible implementations.
      *
-     * @return {@code true } if is secondary, otherwise {@code false}.
+     * @see Qualifiers#bySecondary()
+     * @see Qualifiers#excludeSecondary()
+     *
+     * @return {@code true} if is secondary, otherwise {@code false}.
      */
     boolean isSecondary();
+
+    /**
+     * Gets the {@link Condition}  that need to be fulfilled for
+     * this component to be eligible for use in the application.
+     *
+     * @return  the {@link Condition}s.
+     */
+    Optional<Condition> condition();
 }

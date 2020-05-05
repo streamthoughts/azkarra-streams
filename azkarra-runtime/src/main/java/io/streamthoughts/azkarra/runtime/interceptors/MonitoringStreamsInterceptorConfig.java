@@ -36,6 +36,9 @@ import java.util.Set;
  */
 public class MonitoringStreamsInterceptorConfig {
 
+    /** {@code monitoring.streams.interceptor.enable} */
+    public static String MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG = "monitoring.streams.interceptor.enable";
+
     /**
      * Prefix used to isolate {@link KafkaProducer producer} configs from other client configs.
      * It is recommended to use {@link #producerPrefix(String)} to add this prefix to {@link ProducerConfig producer

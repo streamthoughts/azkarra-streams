@@ -22,20 +22,24 @@ import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.State;
+import io.streamthoughts.azkarra.api.util.Version;
 import org.apache.kafka.streams.TopologyDescription;
 
 import java.util.Objects;
 
-public class InternalStreamsLifeCycleContext implements StreamsLifecycleContext {
+/**
+ * Internal {@link StreamsLifecycleContext} implementation.
+ */
+public class InternalStreamsLifecycleContext implements StreamsLifecycleContext {
 
     private final KafkaStreamsContainer container;
 
     /**
-     * Creates a new {@link InternalStreamsLifeCycleContext} instance.
+     * Creates a new {@link InternalStreamsLifecycleContext} instance.
      *
      * @param container the {@link KafkaStreamsContainer} instance
      */
-    public InternalStreamsLifeCycleContext(final KafkaStreamsContainer container) {
+    public InternalStreamsLifecycleContext(final KafkaStreamsContainer container) {
         this.container = Objects.requireNonNull(container, "container cannot be null");
     }
 
@@ -43,7 +47,23 @@ public class InternalStreamsLifeCycleContext implements StreamsLifecycleContext 
      * {@inheritDoc}
      */
     @Override
-    public String getApplicationId() {
+    public String topologyName() {
+        return container.topologyMetadata().name();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Version topologyVersion() {
+        return Version.parse(container.topologyMetadata().version());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String applicationId() {
         return container.applicationId();
     }
 
@@ -51,7 +71,7 @@ public class InternalStreamsLifeCycleContext implements StreamsLifecycleContext 
      * {@inheritDoc}
      */
     @Override
-    public TopologyDescription getTopology() {
+    public TopologyDescription topologyDescription() {
         return container.topologyDescription();
     }
 
@@ -59,7 +79,7 @@ public class InternalStreamsLifeCycleContext implements StreamsLifecycleContext 
      * {@inheritDoc}
      */
     @Override
-    public Conf getStreamConfig() {
+    public Conf streamsConfig() {
         return container.streamsConfig();
     }
 
@@ -67,7 +87,7 @@ public class InternalStreamsLifeCycleContext implements StreamsLifecycleContext 
      * {@inheritDoc}
      */
     @Override
-    public State getState() {
+    public State streamsState() {
         return container.state().value();
     }
 
@@ -79,6 +99,18 @@ public class InternalStreamsLifeCycleContext implements StreamsLifecycleContext 
        container.setState(state);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addStateChangeWatcher(final KafkaStreamsContainer.StateChangeWatcher watcher) {
+        container.addStateChangeWatcher(watcher);
+    }
+
+    /**
+     * Return the container that is running the current {@link org.apache.kafka.streams.KafkaStreams} instance.
+     * @return  the {@link KafkaStreamsContainer}; cannot be {@code null}.
+     */
     public KafkaStreamsContainer container() {
         return container;
     }

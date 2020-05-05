@@ -68,8 +68,8 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
      */
     @Override
     public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
-        if (context.getState() == State.CREATED) {
-            final Set<String> sourceTopics = getSourceTopics(context.getTopology())
+        if (context.streamsState() == State.CREATED) {
+            final Set<String> sourceTopics = getSourceTopics(context.topologyDescription())
                 .stream()
                 .filter(Predicate.not(TopologyUtils::isInternalTopic))
                 .collect(Collectors.toSet());
@@ -94,7 +94,7 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
     private void apply(final StreamsLifecycleContext context, final Consumer<AdminClient> consumer) {
         // use a one-shot AdminClient if no one is provided.
         if (adminClient == null) {
-            try (final AdminClient client = AdminClientUtils.newAdminClient(context.getStreamConfig())) {
+            try (final AdminClient client = AdminClientUtils.newAdminClient(context.streamsConfig())) {
                 consumer.accept(client);
             }
         } else {

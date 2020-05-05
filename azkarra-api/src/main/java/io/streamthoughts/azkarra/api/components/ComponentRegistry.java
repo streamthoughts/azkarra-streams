@@ -33,7 +33,7 @@ public interface ComponentRegistry {
      * @param modifiers         the component descriptor modifiers.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     default <T> void registerComponent(final Class<T> componentClass,
                                        final Supplier<T> supplier,
@@ -50,7 +50,7 @@ public interface ComponentRegistry {
      * @param modifiers         the component descriptor modifiers.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     <T> void registerComponent(final String componentName,
                                final Class<T> componentClass,
@@ -63,7 +63,7 @@ public interface ComponentRegistry {
      * @param componentClass    the class-type of the component.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     default <T> void registerComponent(final Class<T> componentClass,
                                        final ComponentDescriptorModifier... modifiers) {
@@ -77,7 +77,7 @@ public interface ComponentRegistry {
      * @param componentClass    the class-type of the component.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     <T> void registerComponent(final String componentName,
                                final Class<T> componentClass,
@@ -91,7 +91,7 @@ public interface ComponentRegistry {
      * @param singleton         the supplier of the component.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     default <T> void registerSingleton(final Class<T> componentClass,
                                        final Supplier<T> singleton,
@@ -108,7 +108,7 @@ public interface ComponentRegistry {
      * @param singleton         the supplier of the component.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     <T> void registerSingleton(final String componentName,
                                final Class<T> componentClass,
@@ -121,7 +121,7 @@ public interface ComponentRegistry {
      * @param componentClass    the class-type of the component.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     default <T> void registerSingleton(final Class<T> componentClass,
                                        final ComponentDescriptorModifier... modifiers) {
@@ -135,7 +135,7 @@ public interface ComponentRegistry {
      * @param componentClass    the class-type of the component.
      * @param <T>               the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     <T> void registerSingleton(final String componentName,
                                final Class<T> componentClass,
@@ -147,7 +147,7 @@ public interface ComponentRegistry {
      * @param singleton the singleton component instance.
      * @param <T>       the component-type.
      *
-     * @throws ConflictingBeanDefinitionException if a component is already register for that descriptor.
+     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
      */
     <T> void registerSingleton(final T singleton);
 }

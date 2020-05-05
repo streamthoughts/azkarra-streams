@@ -18,9 +18,11 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
@@ -52,6 +54,10 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
 
     private final boolean isSecondary;
 
+    private final Condition condition;
+
+    private final boolean isConditional;
+
     private final int order;
 
     /**
@@ -66,7 +72,18 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final Class<T> type,
                                      final Supplier<T> supplier,
                                      final boolean isSingleton) {
-        this(name, type, type.getClassLoader(), supplier, null, isSingleton, false, false, Ordered.LOWEST_ORDER);
+        this(
+            name,
+            type,
+            type.getClassLoader(),
+            supplier,
+            null,
+            isSingleton,
+            false,
+            false,
+            null,
+            Ordered.LOWEST_ORDER
+        );
     }
 
     /**
@@ -83,7 +100,18 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final Supplier<T> supplier,
                                      final String version,
                                      final boolean isSingleton) {
-        this(name, type, type.getClassLoader(), supplier, version, isSingleton, false, false, Ordered.LOWEST_ORDER);
+        this(
+            name,
+            type,
+            type.getClassLoader(),
+            supplier,
+            version,
+            isSingleton,
+            false,
+            false,
+            null,
+            Ordered.LOWEST_ORDER
+        );
     }
 
     /**
@@ -104,6 +132,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final boolean isSingleton,
                                      final boolean isPrimary,
                                      final boolean isSecondary,
+                                     final Condition condition,
                                      final int order) {
         Objects.requireNonNull(type, "type can't be null");
         Objects.requireNonNull(supplier, "supplier can't be null");
@@ -117,6 +146,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
         this.isSingleton = isSingleton;
         this.isPrimary = isPrimary;
         this.isSecondary = isSecondary;
+        this.isConditional = condition != null;
+        this.condition = condition;
         this.order = order;
     }
 
@@ -135,6 +166,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
             descriptor.isSingleton(),
             descriptor.isPrimary(),
             descriptor.isSecondary(),
+            descriptor.condition().orElse(null),
             descriptor.order()
         );
         metadata = descriptor.metadata();
@@ -245,6 +277,14 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
      * {@inheritDoc}
      */
     @Override
+    public Optional<Condition> condition() {
+        return Optional.ofNullable(condition);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int order() {
         return order;
     }
@@ -261,6 +301,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                 ", aliases=" + aliases +
                 ", isSingleton=" + isSingleton +
                 ", isPrimary=" + isPrimary +
+                ", isSecondary=" + isSecondary +
+                ", isConditional=" + isConditional +
                 ", metadata=" + metadata +
                 ", order=" + order +
                 ']';

@@ -20,13 +20,15 @@ package io.streamthoughts.azkarra.runtime.components;
 
 import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
-import io.streamthoughts.azkarra.api.components.ConflictingBeanDefinitionException;
+import io.streamthoughts.azkarra.api.components.ConflictingComponentDefinitionException;
 import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.components.NoUniqueComponentException;
 import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.condition.Conditions;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.util.Version;
+import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,7 +102,7 @@ public class DefaultComponentFactoryTest {
     @Test
     public void shouldThrowConflictingComponentExceptionGivenTwoIdenticalComponents() {
         factory.registerComponent(TestB.class);
-        ConflictingBeanDefinitionException e = assertThrows(ConflictingBeanDefinitionException.class,
+        ConflictingComponentDefinitionException e = assertThrows(ConflictingComponentDefinitionException.class,
             () -> factory.registerComponent(TestB.class));
         assertEquals("Failed to resister ComponentDescriptor, component already exists for key: [type="
                         + TestB.class.getName() + ", qualifier=@Named(testB)]",
@@ -181,6 +183,13 @@ public class DefaultComponentFactoryTest {
         factory.registerDescriptor(new SimpleComponentDescriptor<>(COMPONENT_NAME, TestB.class, TestB::new, false));
         Optional<ComponentDescriptor<Object>> descriptor = factory.findDescriptorByAlias("TestB");
         assertTrue(descriptor.isPresent());
+    }
+
+    @Test
+    public void shouldNotReturnConditionalComponentGivenNotMatchingContext() {
+        factory.registerComponent("condComponent", TestB.class, TestB::new, withConditions(Conditions.onPropertyExist("component.enable")));
+        Assertions.assertTrue(factory.findDescriptorByClass(TestB.class).isPresent());
+        Assertions.assertTrue(factory.findDescriptorByClass(TestB.class, new ConfigConditionalContext(Conf.empty())).isEmpty());
     }
 
     @Test

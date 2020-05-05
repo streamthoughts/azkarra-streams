@@ -306,7 +306,7 @@ public class AzkarraApplication {
 
         if (autoStart.isEnable()) {
             StreamsExecutionEnvironment target = context.getEnvironmentForNameOrCreate(autoStart.targetEnvironment());
-            context.topologyProviders().forEach(desc ->
+            context.topologyProviders(target).forEach(desc ->
                 context.addTopology(
                     desc.className(),
                     desc.version().toString(),

@@ -20,9 +20,6 @@ package io.streamthoughts.azkarra.streams.autoconfigure;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
-import io.streamthoughts.azkarra.runtime.components.ClassComponentAliasesGenerator;
-import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
-import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.autoconfigure.annotations.AzkarraStreamsApplication;
@@ -62,7 +59,7 @@ public class AutoConfigure {
 
         if (context == null) {
             LOG.info("No AzkarraContext provided, initializing default provided implementation");
-            initializeApplicationContext(application);
+            application.setContext(DefaultAzkarraContext.create());
         }
 
         final Class<?> mainApplicationClass = application.getMainApplicationClass();
@@ -79,17 +76,6 @@ public class AutoConfigure {
 
         isComponentScanEnable(mainApplicationClass)
             .ifPresent(application::setEnableComponentScan);
-    }
-
-    private void initializeApplicationContext(final AzkarraApplication application) {
-        final DefaultComponentFactory factory = new DefaultComponentFactory(
-                new DefaultComponentDescriptorFactory());
-        factory.setComponentAliasesGenerator(new ClassComponentAliasesGenerator());
-
-        // Create a default context with empty configuration
-        final AzkarraContext context = DefaultAzkarraContext.create(factory);
-
-        application.setContext(context);
     }
 
     private Optional<Boolean> isComponentScanEnable(final Class<?> source) {

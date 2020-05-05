@@ -26,7 +26,7 @@ import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
-import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleContext;
+import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifecycleContext;
 import io.streamthoughts.azkarra.runtime.interceptors.monitoring.KafkaStreamsMetadata;
 import io.streamthoughts.azkarra.runtime.interceptors.monitoring.MonitoringStreamsTask;
 import org.apache.kafka.clients.producer.Producer;
@@ -73,11 +73,11 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
     @Override
     public void onStart(final StreamsLifecycleContext context,
                         final StreamsLifecycleChain chain) {
-        LOG.info("Starting the MonitoringStreamsInterceptor for application = {}.", context.getApplicationId());
-        container = ((InternalStreamsLifeCycleContext) context).container();
+        LOG.info("Starting the MonitoringStreamsInterceptor for application = {}.", context.applicationId());
+        container = ((InternalStreamsLifecycleContext) context).container();
         container.addStateChangeWatcher(new ReporterStateChangeWatcher());
 
-        final String clientId = context.getApplicationId() + PRODUCER_CLIENT_ID_SUFFIX;
+        final String clientId = context.applicationId() + PRODUCER_CLIENT_ID_SUFFIX;
         final Map<String, Object> producerConfigs = config.getProducerConfigs(clientId);
         producer = container.getProducer(producerConfigs);
 

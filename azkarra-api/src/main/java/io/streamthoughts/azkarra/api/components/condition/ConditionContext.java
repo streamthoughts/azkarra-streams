@@ -16,41 +16,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+package io.streamthoughts.azkarra.api.components.condition;
 
-import io.streamthoughts.azkarra.api.components.condition.ComponentConditionalContext;
+import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
+import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.Configurable;
 
 /**
- * Class for getting a configurable component.
- *
- * @param <T>   the component-type.
+ * The context information for use by a {@link Condition} matching a {@link ComponentDescriptor}.
+ * 
+ * @see Condition#matches(ConditionContext).
  */
-public interface GettableComponent<T> extends AutoCloseable {
+public interface ConditionContext<T extends ComponentDescriptor> {
 
     /**
-     * Gets the instance of type {@link T}, which may be shared or independent.
+     * Get the {@link ComponentFactory} that holds the component descriptor should the condition match.
+     * The returned registry should not be used to register a new component descriptor.
      *
-     * @param conf  the configuration to be used if the component implement {@link Configurable}.
-     *
-     * @return  the component of type {@link T}.
+     * @return  the {@link ComponentFactory}; cannot be {@code null}.
      */
-    T get(final Conf conf);
-
-    boolean isEnable(final ComponentConditionalContext<ComponentDescriptor<T>> conditionalContext);
-
-    boolean isUnique();
+    ComponentFactory getComponentFactory();
 
     /**
-     * Gets the descriptor for the component.
+     * Get the configuration that was passed to get the component instance.
      *
-     * @return  the {@link ComponentDescriptor}.
+     * @return  the {@link Conf} object; cannot be {@code null}.
      */
-    ComponentDescriptor<T> descriptor();
+    Conf getConfig();
 
     /**
-     * Closes the created component.
+     * @return the component that should match the condition.
      */
-    void close();
+    T getComponent();
+
 }

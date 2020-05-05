@@ -22,17 +22,13 @@ import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.config.Conf;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class ContextAwareComponentFactory implements ComponentFactory {
+public class ContextAwareComponentFactory extends DelegatingComponentFactory {
 
     private final AzkarraContext context;
-
-    private final ComponentFactory factory;
 
     /**
      * Creates a new {@link ContextAwareComponentFactory} instance.
@@ -41,41 +37,10 @@ public class ContextAwareComponentFactory implements ComponentFactory {
      */
     public ContextAwareComponentFactory(final AzkarraContext context,
                                         final ComponentFactory factory) {
-        this.context = context;
-        this.factory = factory;
+        super(factory);
+        this.context = Objects.requireNonNull(context, "context cannot be null");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean containsComponent(final String alias) {
-        return factory.containsComponent(alias);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> boolean containsComponent(final String alias, final Qualifier<T> qualifier) {
-        return factory.containsComponent(alias, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> boolean containsComponent(final Class<T> type) {
-        return factory.containsComponent(type);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> boolean containsComponent(final Class<T> type, final Qualifier<T> qualifier) {
-        return factory.containsComponent(type, qualifier);
-    }
 
     /**
      * {@inheritDoc}
@@ -93,13 +58,6 @@ public class ContextAwareComponentFactory implements ComponentFactory {
         return maySetContextAndGet(factory.getComponent(type, conf, qualifier));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> GettableComponent<T> getComponent(final Class<T> type, final Qualifier<T> qualifier) {
-        return factory.getComponent(type, qualifier);
-    }
 
     /**
      * {@inheritDoc}
@@ -153,148 +111,6 @@ public class ContextAwareComponentFactory implements ComponentFactory {
                                               final Qualifier<T> qualifier) {
         Collection<T> components = factory.getAllComponents(type, conf);
         return components.stream().map(this::maySetContextAndGet).collect(Collectors.toList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Collection<GettableComponent<T>> getAllComponents(final Class<T> type, final Qualifier<T> qualifier) {
-        return factory.getAllComponents(type, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> void registerComponent(final String componentName,
-                                      final Class<T> componentClass,
-                                      final Supplier<T> supplier,
-                                      final ComponentDescriptorModifier... modifiers) {
-        factory.registerSingleton(componentName, componentClass, supplier, modifiers);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> void registerComponent(final String componentName,
-                                      final Class<T> componentClass,
-                                      final ComponentDescriptorModifier... modifiers) {
-        factory.registerComponent(componentName, componentClass, modifiers);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> void registerSingleton(final String componentName,
-                                      final Class<T> componentClass,
-                                      final Supplier<T> singleton,
-                                      final ComponentDescriptorModifier... modifiers) {
-        factory.registerSingleton(componentName, componentClass, singleton, modifiers);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> void registerSingleton(final String componentName,
-                                      final Class<T> componentClass,
-                                      final ComponentDescriptorModifier... modifiers) {
-        factory.registerSingleton(componentName, componentClass, modifiers);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> void registerSingleton(final T singleton) {
-        factory.registerSingleton(singleton);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() throws IOException {
-        factory.close();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type) {
-        return factory.findAllDescriptorsByClass(type);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type,
-                                                                            final Qualifier<T> qualifier) {
-        return factory.findAllDescriptorsByClass(type, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias) {
-        return factory.findAllDescriptorsByAlias(alias);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias,
-                                                                            final Qualifier<T> qualifier) {
-        return factory.findAllDescriptorsByAlias(alias, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias) {
-        return factory.findDescriptorByAlias(alias);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias,
-                                                                      final Qualifier<T> qualifier) {
-        return factory.findDescriptorByAlias(alias, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type) {
-        return factory.findDescriptorByClass(type);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type,
-                                                                      final Qualifier<T> qualifier) {
-        return factory.findDescriptorByClass(type, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> void registerDescriptor(final ComponentDescriptor<T> descriptor) {
-        factory.registerDescriptor(descriptor);
     }
 
     private <T> T maySetContextAndGet(final T component) {
