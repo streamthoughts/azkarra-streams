@@ -37,18 +37,11 @@ import java.util.Set;
 public interface AzkarraContext extends ConfigurableComponentFactory, ComponentRegistry {
 
     /**
-     * Sets the internal the {@link ComponentFactory} which is used for registering components to this context.
-     *
-     * @param factory  the {@link ComponentFactory} instance to be used.
-     * @return         this {@link AzkarraContext} instance.
-     */
-    AzkarraContext setComponentFactory(final ComponentFactory factory);
-
-    /**
      * Gets the internal {@link ComponentFactory}.
      *
      * @return  the {@link ComponentFactory} instance to be used.
      */
+    @Override
     ComponentFactory getComponentFactory();
 
     /**
@@ -74,6 +67,7 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      *
      * @return a {@link Conf} instance.
      */
+    @Override
     Conf getConfiguration();
 
     /**
@@ -170,12 +164,19 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
                               final Executed executed);
 
     /**
-     * Gets all topologies registered into this {@link AzkarraContext}.
-     * Note, if provider scan is enable then topologies will be scan when this {@link AzkarraContext} will be started.
+     * Gets all topologies registered into this {@link AzkarraContext} even those ones which are not enable.
      *
      * @return a set of {@link TopologyDescriptor}.
      */
     Set<TopologyDescriptor> topologyProviders();
+
+    /**
+     * Gets all topologies registered into this {@link AzkarraContext} which are available for the given environment.
+     *
+     * @param env the {@link StreamsExecutionEnvironment}
+     * @return    a set of {@link TopologyDescriptor}.
+     */
+    Set<TopologyDescriptor> topologyProviders(final StreamsExecutionEnvironment env);
 
     /**
      * Gets all {@link StreamsExecutionEnvironment} registered to this context.

@@ -16,24 +16,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+
+package io.streamthoughts.azkarra.api.components.condition;
 
 /**
- * @see io.streamthoughts.azkarra.api.annotations.Order
+ * Returns {@code true}.
  */
-public interface Ordered extends Comparable<Ordered> {
-
-    int HIGHEST_ORDER = Integer.MIN_VALUE;
-
-    int LOWEST_ORDER = Integer.MAX_VALUE;
-
-    int order();
+public class TrueCondition implements Condition {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    default int compareTo(final Ordered that) {
-        return Integer.compare(this.order(), that.order());
+    public boolean matches(final ConditionContext context) {
+        return true;
     }
 }

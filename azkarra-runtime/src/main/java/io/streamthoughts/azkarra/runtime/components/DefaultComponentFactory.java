@@ -26,11 +26,13 @@ import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentFactoryAware;
 import io.streamthoughts.azkarra.api.components.ComponentRegistrationException;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
-import io.streamthoughts.azkarra.api.components.ConflictingBeanDefinitionException;
+import io.streamthoughts.azkarra.api.components.ConflictingComponentDefinitionException;
 import io.streamthoughts.azkarra.api.components.GettableComponent;
 import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.components.NoUniqueComponentException;
 import io.streamthoughts.azkarra.api.components.Qualifier;
+import io.streamthoughts.azkarra.api.components.condition.ComponentConditionalContext;
+import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
@@ -59,8 +61,9 @@ import java.util.stream.Stream;
 public class DefaultComponentFactory implements ComponentFactory {
 
     protected static final Logger LOG = LoggerFactory.getLogger(DefaultComponentFactory.class);
+    private  static final TrueComponentConditionalContext TRUE_CONDITIONAL_CONTEXT = new TrueComponentConditionalContext();
 
-    private final Map<ComponentKey, GettableComponent> componentObjects;
+    private final Map<ComponentKey, InternalGettableComponent> componentObjects;
 
     private final Map<Class, List<ComponentDescriptor>> descriptorsByType;
 
@@ -120,12 +123,12 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> T getComponent(final Class<T> type, final Conf conf) {
-        Optional<ComponentDescriptor<T>> optional = findDescriptorByClass(type);
+       var optional = findDescriptorByClass(type, new ConfigConditionalContext(conf));
         if (optional.isEmpty())
             throw new NoSuchComponentException("No component registered for type '" + type.getName() + "'");
 
         ComponentDescriptor<T> descriptor = optional.get();
-        return getComponent(descriptor).get(conf);
+        return getComponentProvider(descriptor).get(conf);
     }
 
     /**
@@ -133,16 +136,16 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> T getComponent(final Class<T> type, final Conf conf, final Qualifier<T> qualifier) {
-        Optional<ComponentDescriptor<T>> optional = findDescriptorByClass(type, qualifier);
+        var optional = findDescriptorByClass(type, new ConfigConditionalContext(conf), qualifier);
         if (optional.isEmpty())
             throw new NoSuchComponentException("No component registered for type '" + type.getName() + "'");
 
         ComponentDescriptor<T> descriptor = optional.get();
-        return getComponent(descriptor).get(conf);
+        return getComponentProvider(descriptor).get(conf);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> GettableComponent<T> getComponent(final ComponentDescriptor<T> descriptor) {
+    private <T> InternalGettableComponent<T> getComponentProvider(final ComponentDescriptor<T> descriptor) {
         return componentObjects.get(getComponentKey(descriptor));
     }
 
@@ -152,7 +155,7 @@ public class DefaultComponentFactory implements ComponentFactory {
     @Override
     public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type) {
         Objects.requireNonNull(type, "type cannot be null");
-        return findDescriptorCandidatesByType(type).collect(Collectors.toList());
+        return findAllDescriptorsByClass(type, TRUE_CONDITIONAL_CONTEXT);
     }
 
     /**
@@ -163,24 +166,24 @@ public class DefaultComponentFactory implements ComponentFactory {
                                                                             final Qualifier<T> qualifier) {
         Objects.requireNonNull(type, "type cannot be null");
         Objects.requireNonNull(qualifier, "qualifier cannot be null");
-        Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type);
-        return qualifier.filter(type, candidates).collect(Collectors.toList());
+        return findAllDescriptorsByClass(type, TRUE_CONDITIONAL_CONTEXT, qualifier);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> GettableComponent<T> getComponent(final Class<T> type, final Qualifier<T> qualifier) {
+    public <T> GettableComponent<T> getComponentProvider(final Class<T> type,
+                                                         final Qualifier<T> qualifier) {
         Objects.requireNonNull(type, "type cannot be null");
         Objects.requireNonNull(qualifier, "qualifier cannot be null");
 
-        Optional<ComponentDescriptor<T>> optional = findDescriptorByClass(type, qualifier);
-        if (optional.isEmpty())
+        Collection<ComponentDescriptor<T>> descriptors = findAllDescriptorsByClass(type, qualifier);
+        if (descriptors.isEmpty()) {
             throw new NoSuchComponentException("No component registered for type '" + type + "'");
-
-        ComponentDescriptor<T> descriptor = optional.get();
-        return getComponent(descriptor);
+        }
+        ComponentDescriptor<T> descriptor = descriptors.stream().findFirst().get();
+        return getComponentProvider(descriptor).unique(descriptors.size() == 1);
     }
 
     /**
@@ -188,12 +191,7 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> T getComponent(final String alias, final Conf conf) {
-        Optional<ComponentDescriptor<T>> optional = findDescriptorByAlias(alias);
-        if (optional.isEmpty())
-            throw new NoSuchComponentException("No component registered for type '" + alias + "'");
-
-        ComponentDescriptor<T> descriptor = optional.get();
-        return getComponent(descriptor).get(conf);
+        return getComponent(alias, conf, null);
     }
 
     /**
@@ -201,16 +199,13 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> T getComponent(final String alias, final Conf conf, final Qualifier<T> qualifier) {
-        Optional<ComponentDescriptor<T>> optional = findUniqueDescriptor(
-            alias,
-            findDescriptorByAlias(alias, qualifier).stream()
-        );
 
+        var optional = findDescriptorByAlias(alias, new ConfigConditionalContext(conf), qualifier);
         if (optional.isEmpty())
             throw new NoSuchComponentException("No component registered for type '" + alias + "'");
 
         ComponentDescriptor<T> descriptor = optional.get();
-        return getComponent(descriptor).get(conf);
+        return getComponentProvider(descriptor).get(conf);
     }
 
     /**
@@ -225,11 +220,14 @@ public class DefaultComponentFactory implements ComponentFactory {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf, final Qualifier<T> qualifier) {
+    public <T> Collection<T> getAllComponents(final Class<T> type,
+                                              final Conf conf,
+                                              final Qualifier<T> qualifier) {
         Objects.requireNonNull(type, "type cannot be null");
-        return getAllComponents(type, qualifier)
+        return getAllComponentProviders(type, qualifier)
             .stream()
-            .map(gettable -> gettable.get(conf))
+            .filter(provider -> provider.isEnable(new ConfigConditionalContext(conf)))
+            .map(provider -> provider.get(conf))
             .collect(Collectors.toList());
     }
 
@@ -237,9 +235,10 @@ public class DefaultComponentFactory implements ComponentFactory {
      * {@inheritDoc}
      */
     @Override
-    public <T> Collection<GettableComponent<T>> getAllComponents(final Class<T> type, final Qualifier<T> qualifier) {
+    public <T> Collection<GettableComponent<T>> getAllComponentProviders(final Class<T> type,
+                                                                         final Qualifier<T> qualifier) {
         Collection<ComponentDescriptor<T>> descriptors = findAllDescriptorsByClass(type, qualifier);
-        return descriptors.stream().map(this::getComponent).collect(Collectors.toList());
+        return descriptors.stream().map(this::getComponentProvider).collect(Collectors.toList());
     }
 
     /**
@@ -249,9 +248,9 @@ public class DefaultComponentFactory implements ComponentFactory {
     public <T> Collection<T> getAllComponents(final String alias,
                                               final Conf conf,
                                               final Qualifier<T> qualifier) {
-        Collection<ComponentDescriptor<T>> descriptors = findAllDescriptorsByAlias(alias, qualifier);
+        var descriptors = findAllDescriptorsByAlias(alias, new ConfigConditionalContext(conf), qualifier);
         return descriptors.stream()
-            .map(this::getComponent)
+            .map(this::getComponentProvider)
             .map(gettable -> gettable.get(conf))
             .collect(Collectors.toList());
     }
@@ -261,9 +260,9 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> Collection<T> getAllComponents(final Class<T> type, final Conf conf) {
-        Collection<ComponentDescriptor<T>> descriptors = findAllDescriptorsByClass(type);
+        var descriptors = findAllDescriptorsByClass(type);
         return descriptors.stream()
-            .map(this::getComponent)
+            .map(this::getComponentProvider)
             .map(gettable -> gettable.get(conf))
             .collect(Collectors.toList());
     }
@@ -282,26 +281,7 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias) {
-        return findAllDescriptorsByAlias(alias, null);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias,
-                                                                            final Qualifier<T> qualifier) {
-        Objects.requireNonNull(alias, "alias cannot be null");
-        List<Class> types = componentTypesByAlias.get(alias);
-        if (types == null)
-            return Collections.emptyList();
-
-        Stream<ComponentDescriptor<T>> candidates = types.stream().flatMap(type -> {
-            Stream<ComponentDescriptor<T>> stream = findDescriptorCandidatesByType(type);
-            return (qualifier == null) ? stream : qualifier.filter(type, stream);
-        });
-        return candidates.sorted(ComponentDescriptor.ORDER_BY_ORDER).collect(Collectors.toList());
+        return findAllDescriptorsByAlias(alias, TRUE_CONDITIONAL_CONTEXT);
     }
 
     /**
@@ -309,7 +289,7 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias) {
-        return findDescriptorByAlias(alias, null);
+        return findDescriptorByAlias(alias, TRUE_CONDITIONAL_CONTEXT);
     }
 
     /**
@@ -318,7 +298,16 @@ public class DefaultComponentFactory implements ComponentFactory {
     @Override
     public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias,
                                                                       final Qualifier<T> qualifier) {
-        return findUniqueDescriptor(alias, findAllDescriptorsByAlias(alias, qualifier).stream());
+        return findDescriptorByAlias(alias, TRUE_CONDITIONAL_CONTEXT, qualifier);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias,
+                                                                            final Qualifier<T> qualifier) {
+        return findAllDescriptorsByAlias(alias, TRUE_CONDITIONAL_CONTEXT, qualifier);
     }
 
     /**
@@ -326,8 +315,7 @@ public class DefaultComponentFactory implements ComponentFactory {
      */
     @Override
     public <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type) {
-        Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type);
-        return findUniqueDescriptor(type.getName(), candidates);
+        return findDescriptorByClass(type, TRUE_CONDITIONAL_CONTEXT);
     }
 
     /**
@@ -336,9 +324,7 @@ public class DefaultComponentFactory implements ComponentFactory {
     @Override
     public <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type,
                                                                       final Qualifier<T> qualifier) {
-        Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type);
-        Stream<ComponentDescriptor<T>> filtered = qualifier.filter(type, candidates);
-        return findUniqueDescriptor(type.getName(), filtered);
+        return findDescriptorByClass(type, TRUE_CONDITIONAL_CONTEXT, qualifier);
     }
 
     private <T> Optional<ComponentDescriptor<T>> findUniqueDescriptor(final String type,
@@ -368,10 +354,12 @@ public class DefaultComponentFactory implements ComponentFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Stream<ComponentDescriptor<T>> findDescriptorCandidatesByType(final Class<T> type) {
-        List<ComponentDescriptor> candidates = descriptorsByType.getOrDefault(type, Collections.emptyList());
-        return candidates.stream()
+    private <T> Stream<ComponentDescriptor<T>> findDescriptorCandidatesByType(final Class<T> type,
+                                                                              final ComponentConditionalContext conditionalContext) {
+        return descriptorsByType.getOrDefault(type, Collections.emptyList())
+            .stream()
             .map(d -> (ComponentDescriptor<T>)d)
+            .filter(d -> conditionalContext.isEnable(this, d))
             .sorted(ComponentDescriptor.ORDER_BY_ORDER);
     }
 
@@ -422,7 +410,7 @@ public class DefaultComponentFactory implements ComponentFactory {
                                       final ComponentDescriptorModifier... modifiers) {
         Objects.requireNonNull(componentClass, "componentClass can't be null");
         Objects.requireNonNull(singleton, "singleton can't be null");
-        ComponentDescriptor<T> descriptor = descriptorFactory.make(
+        var descriptor = descriptorFactory.make(
             componentName,
             componentClass,
             singleton,
@@ -485,7 +473,7 @@ public class DefaultComponentFactory implements ComponentFactory {
         final ComponentKey<T> key = getComponentKey(descriptor);
 
         if (componentObjects.put(key, new InternalGettableComponent<>(descriptor)) != null) {
-            throw new ConflictingBeanDefinitionException(
+            throw new ConflictingComponentDefinitionException(
                 "Failed to resister ComponentDescriptor, component already exists for key: " + key);
         }
     }
@@ -528,6 +516,106 @@ public class DefaultComponentFactory implements ComponentFactory {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type,
+                                                                            final ComponentConditionalContext context) {
+        Objects.requireNonNull(type, "type cannot be null");
+        Objects.requireNonNull(context, "context cannot be null");
+        return findDescriptorCandidatesByType(type, context).collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type,
+                                                                            final ComponentConditionalContext context,
+                                                                            final Qualifier<T> qualifier) {
+        Objects.requireNonNull(type, "type cannot be null");
+        Objects.requireNonNull(context, "context cannot be null");
+        Objects.requireNonNull(qualifier, "qualifier cannot be null");
+        Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type, context);
+        return qualifier.filter(type, candidates).collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias,
+                                                                            final ComponentConditionalContext context) {
+        return findAllDescriptorsByAlias(alias, context, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias,
+                                                                            final ComponentConditionalContext context,
+                                                                            final Qualifier<T> qualifier) {
+        Objects.requireNonNull(alias, "alias cannot be null");
+        Objects.requireNonNull(context, "context cannot be null");
+
+        List<Class> types = componentTypesByAlias.get(alias);
+        if (types == null)
+            return Collections.emptyList();
+
+        Stream<ComponentDescriptor<T>> qualified = types
+            .stream()
+            .flatMap(type -> {
+                Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type, context);
+                return qualifier != null ? qualifier.filter(type, candidates) : candidates;
+            })
+            .sorted(ComponentDescriptor.ORDER_BY_ORDER);
+        return qualified.collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias,
+                                                                      final ComponentConditionalContext context) {
+        return findDescriptorByAlias(alias, context, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias,
+                                                                      final ComponentConditionalContext context,
+                                                                      final Qualifier<T> qualifier) {
+        return findUniqueDescriptor(alias, findAllDescriptorsByAlias(alias, context, qualifier).stream());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type,
+                                                                      final ComponentConditionalContext context) {
+        Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type, context);
+        return findUniqueDescriptor(type.getName(), candidates);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type,
+                                                                      final ComponentConditionalContext context,
+                                                                      final Qualifier<T> qualifier) {
+        Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type, context);
+        Stream<ComponentDescriptor<T>> qualified = qualifier.filter(type, candidates);
+        return findUniqueDescriptor(type.getName(), qualified);
+    }
+
+    /**
      * Simple class for holding a pair of component descriptor and factory.
      *
      * @param <T>   the component-type.
@@ -538,6 +626,7 @@ public class DefaultComponentFactory implements ComponentFactory {
 
         private final ComponentDescriptor<T> descriptor;
         private final List<T> instances;
+        private boolean isUnique = true;
 
         /**
          * Creates a new {@link InternalGettableComponent} instance.
@@ -581,6 +670,27 @@ public class DefaultComponentFactory implements ComponentFactory {
             } finally {
                 ClassUtils.compareAndSwapLoaders(classLoader);
             }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isEnable(ComponentConditionalContext<ComponentDescriptor<T>> conditionalContext) {
+            return conditionalContext.isEnable(DefaultComponentFactory.this, descriptor);
+        }
+
+        GettableComponent<T> unique(final boolean isUnique) {
+            this.isUnique = isUnique;
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isUnique() {
+            return isUnique;
         }
 
         public ComponentDescriptor<T> descriptor() {
@@ -663,6 +773,18 @@ public class DefaultComponentFactory implements ComponentFactory {
                     "type=" + componentType.getName() +
                     ", qualifier=" + qualifier +
                     ']';
+        }
+    }
+
+    private static class TrueComponentConditionalContext implements ComponentConditionalContext {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isEnable(final ComponentFactory factory,
+                                final ComponentDescriptor descriptor) {
+            return true;
         }
     }
 }

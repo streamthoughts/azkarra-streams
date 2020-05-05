@@ -16,24 +16,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+
+package io.streamthoughts.azkarra.api.annotations;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @see io.streamthoughts.azkarra.api.annotations.Order
+ * This annotation can be used to indicate all the conditions that need to be fulfilled for a component to be eligible
+ * for use in the application.
  */
-public interface Ordered extends Comparable<Ordered> {
-
-    int HIGHEST_ORDER = Integer.MIN_VALUE;
-
-    int LOWEST_ORDER = Integer.MAX_VALUE;
-
-    int order();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    default int compareTo(final Ordered that) {
-        return Integer.compare(this.order(), that.order());
-    }
+@Documented
+@Inherited
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Conditionals {
+    ConditionalOn[] value();
 }

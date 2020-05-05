@@ -16,24 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.components;
+package io.streamthoughts.azkarra.api.components.condition;
+
+import java.util.function.Predicate;
 
 /**
- * @see io.streamthoughts.azkarra.api.annotations.Order
+ * Define a single condition that need to be fulfilled for a component to be eligible for use in the application.
  */
-public interface Ordered extends Comparable<Ordered> {
+@FunctionalInterface
+public interface Condition extends Predicate<ConditionContext> {
 
-    int HIGHEST_ORDER = Integer.MIN_VALUE;
-
-    int LOWEST_ORDER = Integer.MAX_VALUE;
-
-    int order();
+    Condition True = new TrueCondition();
 
     /**
-     * {@inheritDoc}
+     * Verifies if the condition matches.
+     *
+     * @param context    the {@link ConditionContext}.
+     *
+     * @return           {@code true} if the component matches this condition, {@code false} otherwise.
      */
+    boolean matches(final ConditionContext context);
+
     @Override
-    default int compareTo(final Ordered that) {
-        return Integer.compare(this.order(), that.order());
+    default boolean test(final ConditionContext context) {
+        return matches(context);
     }
 }

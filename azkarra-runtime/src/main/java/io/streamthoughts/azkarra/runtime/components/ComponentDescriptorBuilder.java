@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.runtime.components;
 
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentMetadata;
+import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.util.Version;
 
@@ -39,6 +40,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
     private boolean isSingleton;
     private boolean isPrimary;
     private boolean isSecondary;
+    private Condition condition;
     private Set<String> aliases = new HashSet<>();
     private int order;
 
@@ -220,6 +222,14 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isPrimary() {
+        return isPrimary;
+    }
+
     public ComponentDescriptorBuilder<T> isSecondary(final boolean isSecondary) {
         this.isSecondary = isSecondary;
         return this;
@@ -229,13 +239,21 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
      * {@inheritDoc}
      */
     @Override
-    public boolean isPrimary() {
-        return isPrimary;
+    public boolean isSecondary() {
+        return isSecondary;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean isSecondary() {
-        return false;
+    public Optional<Condition> condition() {
+        return Optional.ofNullable(condition);
+    }
+
+    public ComponentDescriptorBuilder<T> condition(final Condition condition) {
+        this.condition = condition;
+        return this;
     }
 
     /**
@@ -267,6 +285,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
             isSingleton,
             isPrimary,
             isSecondary,
+            condition,
             order
         );
         descriptor.metadata(metadata);

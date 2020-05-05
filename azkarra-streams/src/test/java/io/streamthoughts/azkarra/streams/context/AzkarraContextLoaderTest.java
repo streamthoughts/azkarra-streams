@@ -41,8 +41,7 @@ public class AzkarraContextLoaderTest {
 
     @BeforeEach
     public void setUp() {
-        context = create();
-        context.setComponentFactory(new DefaultComponentFactory(new DefaultComponentDescriptorFactory()));
+        context = create(new DefaultComponentFactory(new DefaultComponentDescriptorFactory()));
     }
 
     @Test

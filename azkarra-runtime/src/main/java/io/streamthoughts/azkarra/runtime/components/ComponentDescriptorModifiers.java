@@ -20,6 +20,10 @@ package io.streamthoughts.azkarra.runtime.components;
 
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
+import io.streamthoughts.azkarra.api.components.condition.Condition;
+import io.streamthoughts.azkarra.api.components.condition.Conditions;
+
+import java.util.List;
 
 public class ComponentDescriptorModifiers {
 
@@ -67,6 +71,35 @@ public class ComponentDescriptorModifiers {
             public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
                 return ComponentDescriptorBuilder.<T>create(descriptor)
                     .order(order)
+                    .build();
+            }
+        };
+    }
+
+    /**
+     * Gets a modifier implementation that will set the conditions that conditions that need to be
+     * fulfilled for the component to be eligible for use in the application.
+     *
+     * @param conditions the {@link Condition}s to add.
+     * @return           a new {@link ComponentDescriptorModifier} instance.
+     */
+    public static ComponentDescriptorModifier withConditions(final Condition... conditions) {
+        return withConditions(List.of(conditions));
+    }
+
+    /**
+     * Gets a modifier implementation that will set the conditions that conditions that need to be
+     * fulfilled for the component to be eligible for use in the application.
+     *
+     * @param conditions the {@link Condition}s to add.
+     * @return           a new {@link ComponentDescriptorModifier} instance.
+     */
+    public static ComponentDescriptorModifier withConditions(final List<Condition> conditions) {
+        return new ComponentDescriptorModifier() {
+            @Override
+            public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
+                return ComponentDescriptorBuilder.<T>create(descriptor)
+                    .condition(Conditions.compose(conditions))
                     .build();
             }
         };

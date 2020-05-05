@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 
@@ -25,18 +26,20 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 
-public interface ComponentFactory extends ComponentRegistry, ComponentDescriptorRegistry, Closeable {
+public interface ComponentFactory extends
+        ComponentRegistry, ComponentDescriptorRegistry, ConditionalDescriptorRegistry, Closeable {
 
     /**
-     * Checks whether the specified components class or alias is already registered.
+     * Checks if at least one component is registered for the given type.
      *
      * @param type   the fully qualified class name or an alias of the component.
+     *
      * @return       {@code true} if a provider exist, {@code false} otherwise.
      */
     boolean containsComponent(final String type);
 
     /**
-     * Checks whether a components is already registered for the specified type and scope.
+     * Checks if at least one component is registered for the given type and qualifier.
      *
      * @param type       the component type.
      * @param qualifier  the options to qualified the component.
@@ -45,7 +48,7 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
     <T> boolean containsComponent(final String type, final Qualifier<T> qualifier);
 
     /**
-     * Checks whether a components is already registered for the specified class.
+     * Checks if at least one component is registered for the given type.
      *
      * @param type  the component type.
      * @return      {@code true} if a provider exist, {@code false} otherwise.
@@ -53,7 +56,7 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
     <T> boolean containsComponent(final Class<T> type) ;
 
     /**
-     * Checks whether a components is already registered for the specified type and scope.
+     * Checks if at least one component is registered for the given type and qualifier.
      *
      * @param type       the component type.
      * @param qualifier  the options to qualified the component.
@@ -102,10 +105,15 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      * @throws NoSuchComponentException     if no component is registered for the given type.
      */
-    <T> GettableComponent<T> getComponent(final Class<T> type, final Qualifier<T> qualifier);
+    <T> GettableComponent<T> getComponentProvider(final Class<T> type,
+                                                  final Qualifier<T> qualifier);
 
     /**
      * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * If the object, returned from that method, implements the {@link Configurable} interface, then the
+     * factory will invoke the method {@link Configurable#configure(Conf)} with the given {@link Conf}.
+     * For a shared object, the method will be invoked only the first time it is returned.
      *
      * @param type   the fully qualified class name or an alias of the component.
      * @param conf   the configuration used if the component implement {@link Configurable}.
@@ -120,6 +128,10 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
 
     /**
      * Gets an instance, which may be shared or independent, for the specified type.
+     *
+     * If the object, returned from that method, implements the {@link Configurable} interface, then the
+     * factory will invoke the method {@link Configurable#configure(Conf)} with the given {@link Conf}.
+     * For a shared object, the method will be invoked only the first time it is returned.
      *
      * @param type       the fully qualified class name or an alias of the component.
      * @param conf       the configuration used if the component implement {@link Configurable}.
@@ -136,16 +148,24 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
     /**
      * Gets all instances, which may be shared or independent, for the specified type.
      *
+     * If one of the objects, returned from that method, implements the {@link Configurable} interface,
+     * then the factory will invoke the method {@link Configurable#configure(Conf)} with the given {@link Conf}.
+     * For a shared object, the method will be invoked only the first time it is returned.
+     *
      * @param type   the fully qualified class name or an alias of the component.
      * @param conf   the configuration used if the component implement {@link Configurable}.
      * @param <T>    the component-type.
      *
-     * @return       all instances of type {@link T}.
+     * @return        all instances of type {@link T}.
      */
     <T> Collection<T> getAllComponents(final String type, final Conf conf);
 
     /**
      * Gets all instances, which may be shared or independent, for the specified type.
+     *
+     * If one of the objects, returned from that method, implements the {@link Configurable} interface,
+     * then the factory will invoke the method {@link Configurable#configure(Conf)} with the given {@link Conf}.
+     * For a shared object, the method will be invoked only the first time it is returned.
      *
      * @param type       the fully qualified class name or an alias of the component.
      * @param conf       the configuration used if the component implement {@link Configurable}.
@@ -159,6 +179,10 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
     /**
      * Gets all instances, which may be shared or independent, for the specified type.
      *
+     * If one of the objects, returned from that method, implements the {@link Configurable} interface,
+     * then the factory will invoke the method {@link Configurable#configure(Conf)} with the given {@link Conf}.
+     * For a shared object, the method will be invoked only the first time it is returned.
+     *
      * @param type    the component class.
      * @param conf    the configuration used if the component implement {@link Configurable}.
      * @param <T>     the component-type.
@@ -170,8 +194,13 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
     /**
      * Gets all instances, which may be shared or independent, for the specified type.
      *
+     * If one of the objects, returned from that method, implements the {@link Configurable} interface,
+     * then the factory will invoke the method {@link Configurable#configure(Conf)} with the given {@link Conf}.
+     * For a shared object, the method will be invoked only the first time it is returned.
+     *
      * @param type       the component class.
      * @param conf       the configuration used if the component implement {@link Configurable}.
+     * @param conf       the {@link Conf} that may be used to match components {@link Condition}.
      * @param qualifier  the options used to qualify the component.
      * @param <T>        the component-type.
      *
@@ -188,7 +217,8 @@ public interface ComponentFactory extends ComponentRegistry, ComponentDescriptor
      *
      * @return           all instances of type {@link T}.
      */
-    <T> Collection<GettableComponent<T>> getAllComponents(final Class<T> type, final Qualifier<T> qualifier);
+    <T> Collection<GettableComponent<T>> getAllComponentProviders(final Class<T> type,
+                                                                  final Qualifier<T> qualifier);
 
     @Override
     void close() throws IOException;

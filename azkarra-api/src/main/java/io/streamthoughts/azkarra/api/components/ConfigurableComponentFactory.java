@@ -49,7 +49,7 @@ public interface ConfigurableComponentFactory {
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      * @throws NoSuchComponentException     if no component is registered for the given type.
      */
-    default <T> T  getComponent(final Class<T> type) {
+    default <T> T getComponent(final Class<T> type) {
         return getComponentFactory().getComponent(type, getConfiguration());
     }
 

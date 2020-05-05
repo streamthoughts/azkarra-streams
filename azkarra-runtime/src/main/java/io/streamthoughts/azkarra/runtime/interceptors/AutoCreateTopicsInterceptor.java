@@ -21,6 +21,12 @@ package io.streamthoughts.azkarra.runtime.interceptors;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
+import io.streamthoughts.azkarra.api.components.BaseComponentModule;
+import io.streamthoughts.azkarra.api.components.Qualifier;
+import io.streamthoughts.azkarra.api.components.Restriction;
+import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
+import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.admin.AdminClientUtils;
 import io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils;
@@ -56,29 +62,31 @@ import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.g
  *
  * This interceptor is state-full and thus a new instance must be created for each topology.
  */
-public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor {
+public class AutoCreateTopicsInterceptor
+        extends BaseComponentModule
+        implements StreamsLifecycleInterceptor, Configurable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AutoCreateTopicsInterceptor.class);
 
     /**
      * The default replication factor for creating topics.
      */
-    private short replicationFactor = 1;
+    private Short replicationFactor;
 
     /**
      * The default number of partitions for creating topics.
      */
-    private int numPartitions = 1;
+    private Integer numPartitions;
 
     /**
      * Flag to indicate if topics should be automatically deleted once the streams is closed.
      */
-    private boolean delete = false;
+    private Boolean deleteTopicsOnClose;
 
     /**
      * The default configuration for creating topics.
      */
-    private Map<String, String> configs = new HashMap<>();
+    private Map<String, String> topicConfigs = new HashMap<>();
 
     /**
      * The list of new topics to create.
@@ -93,6 +101,8 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
     private AtomicBoolean topicListed = new AtomicBoolean(false);
 
     private final AdminClient adminClient;
+
+    private AutoCreateTopicsInterceptorConfig interceptorConfig;
 
     /**
      * Creates a new {@link AutoCreateTopicsInterceptor} instance.
@@ -114,17 +124,45 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
      * {@inheritDoc}
      */
     @Override
+    public void configure(final Conf configuration) {
+        super.configure(configuration);
+        interceptorConfig = new AutoCreateTopicsInterceptorConfig(configuration);
+
+        if (deleteTopicsOnClose == null)
+            setDeleteTopicsOnStreamsClosed(interceptorConfig.isAutoDeleteTopicsEnable());
+
+        if (numPartitions == null)
+            setNumPartitions(interceptorConfig.getAutoCreateTopicsNumPartition());
+
+        if (replicationFactor == null)
+            setReplicationFactor(interceptorConfig.getAutoCreateTopicsReplicationFactor());
+
+        Map<String, String> autoCreateTopicsConfigs = interceptorConfig.getAutoCreateTopicsConfigs();
+        autoCreateTopicsConfigs.putAll(topicConfigs);
+        topicConfigs = autoCreateTopicsConfigs;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void onStart(final StreamsLifecycleContext context,
                         final StreamsLifecycleChain chain) {
-        if (context.getState() == State.CREATED) {
+        checkState();
+        mayInitializeNewTopicsFromContext(context.topologyName());
 
-            final Set<String> userDeclaredTopics = getUserDeclaredTopics(context.getTopology());
+        if (context.streamsState() == State.CREATED) {
+
+            final Set<String> userDeclaredTopics = getUserDeclaredTopics(context.topologyDescription());
 
             List<String> topicNames = getTopicNames();
 
             userDeclaredTopics.stream()
                 .filter(Predicate.not(topicNames::contains))
-                .forEach(name -> newTopics.add(new NewTopic(name, numPartitions, replicationFactor).configs(configs)));
+                .forEach(name -> {
+                    var topic = new NewTopic(name, numPartitions, replicationFactor).configs(topicConfigs);
+                    newTopics.add(topic);
+                });
 
             // Only create source, sink and intermediate topics.
             apply(this::createTopics, context);
@@ -133,8 +171,19 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
         chain.execute();
 
         // List all topics (i.e user-topics, change-log, repartition) only if streams application is running.
-        if (context.getState() == State.RUNNING) {
+        if (context.streamsState() == State.RUNNING) {
             apply(this::listTopics, context);
+        }
+    }
+
+    private void mayInitializeNewTopicsFromContext(final String topologyName) {
+        if (getComponentFactory() != null) {
+            if (newTopics.isEmpty()) {
+                final Qualifier<NewTopic> qualifier = Qualifiers.byRestriction(Restriction.streams(topologyName));
+                newTopics = getAllComponents(NewTopic.class, qualifier);
+            }
+        } else {
+            LOG.debug("Unable to discover topics to be created; no component factory configured");
         }
     }
 
@@ -145,7 +194,7 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
     public void onStop(final StreamsLifecycleContext context,
                        final StreamsLifecycleChain chain) {
         chain.execute();
-        if (delete) {
+        if (deleteTopicsOnClose) {
             apply(this::deleteTopics, context);
         }
     }
@@ -154,7 +203,7 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
                        final StreamsLifecycleContext context) {
         // use a one-shot AdminClient if no one is provided.
         if (adminClient == null) {
-            try (final AdminClient client = AdminClientUtils.newAdminClient(context.getStreamConfig())) {
+            try (final AdminClient client = AdminClientUtils.newAdminClient(context.streamsConfig())) {
                 consumer.accept(client, context);
             }
         } else {
@@ -164,13 +213,13 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
 
     private void listTopics(final AdminClient client, final StreamsLifecycleContext context) {
         try {
-            LOG.info("Listing all topics created by the streams application: {}", context.getApplicationId());
+            LOG.info("Listing all topics created by the streams application: {}", context.applicationId());
             CompletableFuture<Collection<TopicListing>> future = AdminClientUtils.listTopics(client);
             try {
                 final Collection<TopicListing> topics = future.get();
                 createdTopics.addAll(topics.stream()
                     .map(TopicListing::name)
-                    .filter(name -> TopologyUtils.isInternalTopic(context.getApplicationId(), name))
+                    .filter(name -> TopologyUtils.isInternalTopic(context.applicationId(), name))
                     .collect(Collectors.toSet())
                 );
                 topicListed.set(true);
@@ -222,6 +271,13 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
             .collect(Collectors.toList());
     }
 
+    private void checkState() {
+        if (this.interceptorConfig == null) {
+            throw new IllegalStateException(
+                AutoCreateTopicsInterceptor.class.getName() + " must be configured before being started");
+        }
+    }
+
     /**
      * Sets the default replication factor uses for creating topics.
      *
@@ -248,8 +304,8 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
         this.newTopics = topics;
     }
 
-    public void setConfigs(final Map<String, String> configs) {
-        this.configs = configs;
+    public void setTopicConfigs(final Map<String, String> topicConfigs) {
+        this.topicConfigs = topicConfigs;
     }
 
     /**
@@ -258,6 +314,6 @@ public class AutoCreateTopicsInterceptor implements StreamsLifecycleInterceptor 
      * @param delete    {@code true} to enable, otherwise {@code false}.
      */
     public void setDeleteTopicsOnStreamsClosed(final boolean delete) {
-        this.delete = delete;
+        this.deleteTopicsOnClose = delete;
     }
 }

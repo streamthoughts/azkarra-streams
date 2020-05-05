@@ -28,7 +28,7 @@ import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerLogOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.GlobalConsumerOffsetsRegistry;
 import io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher;
-import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleContext;
+import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
@@ -149,7 +149,7 @@ public class KafkaStreamsContainer {
             LOG.info("Initializing KafkaStreams container (application.id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
-                (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifeCycleContext(this), chain),
+                (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifecycleContext(this), chain),
                 () -> {
                     try {
                         LOG.info("Starting KafkaStreams (application.id={})", applicationId());
@@ -394,7 +394,7 @@ public class KafkaStreamsContainer {
             LOG.info("Closing KafkaStreams container (application.id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
-                (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifeCycleContext(this), chain),
+                (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifecycleContext(this), chain),
                 () -> {
                     kafkaStreams.close();
                     if (cleanUp) {
@@ -529,8 +529,7 @@ public class KafkaStreamsContainer {
      * @param watcher   the {@link StateChangeWatcher} to be registered.
      */
     public void addStateChangeWatcher(final StateChangeWatcher watcher) {
-        Objects.requireNonNull(watcher, "Cannot register null watcher");
-        stateChangeWatchers.add(watcher);
+        stateChangeWatchers.add(Objects.requireNonNull(watcher, "Cannot register null watcher"));
     }
 
     void stateChanges(final StateChangeEvent stateChangeEvent) {

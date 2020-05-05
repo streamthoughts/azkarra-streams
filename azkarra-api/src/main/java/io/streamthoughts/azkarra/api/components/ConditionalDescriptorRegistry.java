@@ -18,20 +18,18 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.components.condition.ComponentConditionalContext;
+
 import java.util.Collection;
 import java.util.Optional;
 
-public interface ComponentDescriptorRegistry {
-
-    /**
-     * Finds all {@link ComponentDescriptor} registered for the specified type.
-     *
-     * @param type      the component class.
-     * @param <T>       the component type.
-     *
-     * @return          the collection of {@link ComponentDescriptor}.
-     */
-    <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type);
+/**
+ * The main interface that defines methods to find registered {@link ComponentDescriptor} for
+ * enable components.
+ *
+ * @see io.streamthoughts.azkarra.api.components.condition.Condition
+ */
+public interface ConditionalDescriptorRegistry {
 
     /**
      * Finds all {@link ComponentDescriptor} registered for the specified type.
@@ -42,6 +40,18 @@ public interface ComponentDescriptorRegistry {
      * @return          the collection of {@link ComponentDescriptor}.
      */
     <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type,
+                                                                     final ComponentConditionalContext context);
+
+    /**
+     * Finds all {@link ComponentDescriptor} registered for the specified type.
+     *
+     * @param type      the component class.
+     * @param <T>       the component type.
+     *
+     * @return          the collection of {@link ComponentDescriptor}.
+     */
+    <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByClass(final Class<T> type,
+                                                                     final ComponentConditionalContext context,
                                                                      final Qualifier<T> qualifier);
 
     /**
@@ -53,7 +63,8 @@ public interface ComponentDescriptorRegistry {
      * @return          the collection of {@link ComponentDescriptor}.
      *
      */
-    <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias);
+    <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias,
+                                                                     final ComponentConditionalContext context);
 
     /**
      * Finds all {@link ComponentDescriptor} registered for the specified alias.
@@ -65,6 +76,7 @@ public interface ComponentDescriptorRegistry {
      *
      */
     <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias,
+                                                                     final ComponentConditionalContext context,
                                                                      final Qualifier<T> qualifier);
 
     /**
@@ -78,7 +90,8 @@ public interface ComponentDescriptorRegistry {
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      *
      */
-    <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias) ;
+    <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias,
+                                                               final ComponentConditionalContext context) ;
 
     /**
      * Finds a {@link ComponentDescriptor} for the specified type and options.
@@ -91,6 +104,7 @@ public interface ComponentDescriptorRegistry {
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      */
     <T> Optional<ComponentDescriptor<T>> findDescriptorByAlias(final String alias,
+                                                               final ComponentConditionalContext context,
                                                                final Qualifier<T> qualifier);
 
     /**
@@ -102,7 +116,8 @@ public interface ComponentDescriptorRegistry {
      * @return           the optional {@link ComponentDescriptor} instance.
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      */
-    <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type);
+    <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type,
+                                                               final ComponentConditionalContext context);
 
     /**
      * Finds a {@link ComponentDescriptor} for the specified type and options.
@@ -115,15 +130,6 @@ public interface ComponentDescriptorRegistry {
      * @throws NoUniqueComponentException   if more than one component is registered for the given type.
      */
     <T> Optional<ComponentDescriptor<T>> findDescriptorByClass(final Class<T> type,
+                                                               final ComponentConditionalContext context,
                                                                final Qualifier<T> qualifier);
-
-    /**
-     * Registers the specified {@link ComponentDescriptor} to this {@link ComponentRegistry}.
-     *
-     * @param descriptor    the {@link ComponentDescriptor} instance to be registered.
-     * @param <T>           the component type.
-     *
-     * @throws ConflictingComponentDefinitionException if a component is already register for that descriptor.
-     */
-    <T> void registerDescriptor(final ComponentDescriptor<T> descriptor);
 }

@@ -18,22 +18,16 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
-/**
- * @see io.streamthoughts.azkarra.api.annotations.Order
- */
-public interface Ordered extends Comparable<Ordered> {
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
 
-    int HIGHEST_ORDER = Integer.MIN_VALUE;
-
-    int LOWEST_ORDER = Integer.MAX_VALUE;
-
-    int order();
+public class ConflictingComponentDefinitionException extends AzkarraException {
 
     /**
-     * {@inheritDoc}
+     * Creates a new {@link ConflictingComponentDefinitionException} instance.
+     *
+     * @param message   the error message.
      */
-    @Override
-    default int compareTo(final Ordered that) {
-        return Integer.compare(this.order(), that.order());
+    public ConflictingComponentDefinitionException(final String message) {
+        super(message);
     }
 }

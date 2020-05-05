@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.streams.components;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
+import io.streamthoughts.azkarra.api.annotations.ConditionalOn;
 import io.streamthoughts.azkarra.api.annotations.Factory;
 import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.annotations.Primary;
@@ -26,10 +27,10 @@ import io.streamthoughts.azkarra.api.annotations.Secondary;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
+import io.streamthoughts.azkarra.api.components.condition.Conditions;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import io.streamthoughts.azkarra.runtime.components.BasicComponentFactory;
-import io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentClassLoader;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentResolver;
 import io.streamthoughts.azkarra.streams.components.isolation.ExternalComponent;
@@ -61,6 +62,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asPrimary;
+import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asSecondary;
+import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withConditions;
+import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withOrder;
 import static org.reflections.ReflectionUtils.getAllMethods;
 import static org.reflections.ReflectionUtils.withAnnotation;
 
@@ -220,6 +225,7 @@ public class ComponentScanner {
         mayAddModifierForOrder(method, modifiers);
         mayAddModifierForPrimary(method, modifiers);
         mayAddModifierForSecondary(method, modifiers);
+        mayAddModifierForCondition(method, modifiers);
 
         final ComponentDescriptorModifier[] objects = modifiers.toArray(new ComponentDescriptorModifier[]{});
         registerComponent(componentName, componentClass, supplier, isSingleton(method), objects);
@@ -244,6 +250,8 @@ public class ComponentScanner {
         mayAddModifierForOrder(cls, modifiers);
         mayAddModifierForPrimary(cls, modifiers);
         mayAddModifierForSecondary(cls, modifiers);
+        mayAddModifierForCondition(cls, modifiers);
+
         final ComponentDescriptorModifier[] arrayModifiers = modifiers.toArray(new ComponentDescriptorModifier[]{});
 
         final String componentName = getNamedQualifierOrNull(cls);
@@ -298,38 +306,62 @@ public class ComponentScanner {
                                                final List<ComponentDescriptorModifier> modifiers) {
         Order annotation = componentMethod.getDeclaredAnnotation(Order.class);
         if (annotation != null)
-            modifiers.add(ComponentDescriptorModifiers.withOrder(annotation.value()));
+            modifiers.add(withOrder(annotation.value()));
     }
 
     private static void mayAddModifierForOrder(final Class<?> cls,
                                                final List<ComponentDescriptorModifier> modifiers) {
         List<Order> annotations = ClassUtils.getAllDeclaredAnnotationsByType(cls, Order.class);
         if (!annotations.isEmpty())
-            modifiers.add(ComponentDescriptorModifiers.withOrder(annotations.get(0).value()));
+            modifiers.add(withOrder(annotations.get(0).value()));
     }
 
     private static void mayAddModifierForPrimary(final Class<?> componentClass,
                                                  final List<ComponentDescriptorModifier> modifiers) {
         if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Primary.class))
-            modifiers.add(ComponentDescriptorModifiers.asPrimary());
+            modifiers.add(asPrimary());
     }
 
     private static void mayAddModifierForPrimary(final Method method,
                                                  final List<ComponentDescriptorModifier> modifiers) {
         if (ClassUtils.isMethodAnnotatedWith(method, Primary.class))
-            modifiers.add(ComponentDescriptorModifiers.asPrimary());
+            modifiers.add(asPrimary());
     }
 
     private static void mayAddModifierForSecondary(final Method method,
                                                    final List<ComponentDescriptorModifier> modifiers) {
         if (ClassUtils.isMethodAnnotatedWith(method, Secondary.class))
-            modifiers.add(ComponentDescriptorModifiers.asSecondary());
+            modifiers.add(asSecondary());
     }
 
     private static void mayAddModifierForSecondary(final Class<?> componentClass,
                                                    final List<ComponentDescriptorModifier> modifiers) {
         if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Secondary.class))
-            modifiers.add(ComponentDescriptorModifiers.asSecondary());
+            modifiers.add(asSecondary());
+    }
+
+    private static void mayAddModifierForCondition(final Method componentMethod,
+                                               final List<ComponentDescriptorModifier> modifiers) {
+        mayAddModifiersForConditions(
+            modifiers,
+            Arrays.asList(componentMethod.getDeclaredAnnotationsByType(ConditionalOn.class))
+        );
+    }
+
+    private static void mayAddModifierForCondition(final Class<?> cld,
+                                                   final List<ComponentDescriptorModifier> modifiers) {
+        mayAddModifiersForConditions(
+            modifiers,
+            ClassUtils.getAllDeclaredAnnotationsByType(cld, ConditionalOn.class)
+        );
+    }
+
+    private static void mayAddModifiersForConditions(final List<ComponentDescriptorModifier> modifiers,
+                                                     final List<ConditionalOn> annotations) {
+        var conditions = Conditions.buildConditionsForAnnotation(annotations);
+        if (!conditions.isEmpty()) {
+            modifiers.add(withConditions(conditions));
+        }
     }
 
     // The Reflections class may throw a ReflectionsException when parallel executor

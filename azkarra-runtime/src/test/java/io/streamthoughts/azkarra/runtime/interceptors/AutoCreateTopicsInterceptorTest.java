@@ -21,7 +21,9 @@ package io.streamthoughts.azkarra.runtime.interceptors;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.State;
+import io.streamthoughts.azkarra.api.util.Version;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
@@ -98,6 +100,7 @@ public class AutoCreateTopicsInterceptorTest {
         when(mkClient.deleteTopics(anyCollection())).thenReturn(mkDeleteResult);
 
         interceptor = new AutoCreateTopicsInterceptor(mkClient);
+        interceptor.configure(Conf.empty());
     }
 
     @Test
@@ -160,28 +163,43 @@ public class AutoCreateTopicsInterceptorTest {
             State state = State.CREATED;
 
             @Override
-            public String getApplicationId() {
+            public String applicationId() {
                 return "test";
             }
 
             @Override
-            public TopologyDescription getTopology() {
+            public TopologyDescription topologyDescription() {
                 return topology();
             }
 
             @Override
-            public Conf getStreamConfig() {
+            public String topologyName() {
+                return "test";
+            }
+
+            @Override
+            public Version topologyVersion() {
+                return Version.parse("1.0");
+            }
+
+            @Override
+            public Conf streamsConfig() {
                 return Conf.empty();
             }
 
             @Override
-            public State getState() {
+            public State streamsState() {
                 return state;
             }
 
             @Override
             public void setState(State state) {
                 this.state = state;
+            }
+
+            @Override
+            public void addStateChangeWatcher(KafkaStreamsContainer.StateChangeWatcher watcher) {
+
             }
         };
     }
