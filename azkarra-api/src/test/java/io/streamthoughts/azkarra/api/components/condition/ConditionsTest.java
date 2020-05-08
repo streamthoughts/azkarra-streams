@@ -21,13 +21,13 @@ package io.streamthoughts.azkarra.api.components.condition;
 
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
+import io.streamthoughts.azkarra.api.components.Ordered;
 import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Collections;
 import java.util.List;
 
 public class ConditionsTest {
@@ -122,55 +122,84 @@ public class ConditionsTest {
 
     @Test
     public void shouldReturnTrueWhenConditionOnComponentGivenRegistered() {
+        Condition condition = Conditions.onComponents(List.of(ConditionsTest.class));
+        ComponentDescriptor<ConditionsTest> descriptorA = createDescriptor("A", ConditionsTest.class, condition);
+        ComponentDescriptor<ConditionsTest> descriptorB = createDescriptor("B", ConditionsTest.class, null);
+
+        // Mock
         ComponentFactory mkFactory = Mockito.mock(ComponentFactory.class);
-        ComponentDescriptor<ConditionsTest> descriptor = new SimpleComponentDescriptor<>("any", ConditionsTest.class, () -> null, true);
-        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class))).thenReturn(List.of(descriptor));
-        Assertions.assertTrue(Conditions
-            .onComponents(List.of(ConditionsTest.class))
-            .matches(contextWith(mkFactory))
-        );
+        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class)))
+               .thenReturn(List.of(descriptorA, descriptorB));
+        // Assert
+        Assertions.assertTrue(condition.matches(contextWith(mkFactory, descriptorA)));
     }
 
     @Test
     public void shouldReturnFalseWhenConditionOnComponentGivenEmpty() {
+        Condition condition = Conditions.onComponents(List.of(ConditionsTest.class));
+        ComponentDescriptor<ConditionsTest> descriptorA = createDescriptor("A", ConditionsTest.class, condition);
+        // Mock
         ComponentFactory mkFactory = Mockito.mock(ComponentFactory.class);
-        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class))).thenReturn(Collections.emptyList());
-        Assertions.assertFalse(Conditions
-                .onComponents(List.of(ConditionsTest.class))
-                .matches(contextWith(mkFactory))
-        );
+        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class)))
+               .thenReturn(List.of(descriptorA)); // we should always return the component it-self.
+        // Assert
+        Assertions.assertFalse(condition.matches(contextWith(mkFactory, descriptorA)));
     }
 
     @Test
     public void shouldReturnFalseWhenConditionOnMissingComponentGivenRegistered() {
+        Condition condition = Conditions.onMissingComponent(List.of(ConditionsTest.class));
+        ComponentDescriptor<ConditionsTest> descriptorA = createDescriptor("A", ConditionsTest.class, condition);
+        ComponentDescriptor<ConditionsTest> descriptorB = createDescriptor("B", ConditionsTest.class, null);
+        // Mock
         ComponentFactory mkFactory = Mockito.mock(ComponentFactory.class);
-        ComponentDescriptor<ConditionsTest> descriptor = new SimpleComponentDescriptor<>("any", ConditionsTest.class, () -> null, true);
-        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class))).thenReturn(List.of(descriptor));
-        Assertions.assertFalse(Conditions
-                .onMissingComponent(List.of(ConditionsTest.class))
-                .matches(contextWith(mkFactory))
-        );
+        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class)))
+               .thenReturn(List.of(descriptorA, descriptorB));
+        // Assert
+        Assertions.assertFalse(condition.matches(contextWith(mkFactory, descriptorA)));
     }
 
     @Test
     public void shouldReturnTrueWhenConditionOnMissingComponentGivenEmpty() {
+        Condition condition = Conditions.onMissingComponent(List.of(ConditionsTest.class));
+        ComponentDescriptor<ConditionsTest> descriptorA = createDescriptor("A", ConditionsTest.class, condition);
+        // Mock
         ComponentFactory mkFactory = Mockito.mock(ComponentFactory.class);
-        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class))).thenReturn(Collections.emptyList());
-        Assertions.assertTrue(Conditions
-                .onMissingComponent(List.of(ConditionsTest.class))
-                .matches(contextWith(mkFactory))
+        Mockito.when(mkFactory.findAllDescriptorsByClass(Mockito.same(ConditionsTest.class)))
+               .thenReturn(List.of(descriptorA)); // we should always return the component it-self.
+        // Assert
+        Assertions.assertTrue(condition.matches(contextWith(mkFactory, descriptorA)));
+    }
+
+    private <T> ComponentDescriptor<T> createDescriptor(final String name,
+                                                        final Class<T> type,
+                                                        final Condition condition) {
+        return new SimpleComponentDescriptor<>(
+                name,
+                type,
+                null,
+                () -> null,
+                "1.0",
+                true,
+                false,
+                false,
+                condition,
+                Ordered.HIGHEST_ORDER
         );
     }
 
-    private ConditionContext contextWith(final ComponentFactory factory) {
-        return contextWith(null, factory);
+    private ConditionContext contextWith(final ComponentFactory factory,
+                                         final ComponentDescriptor descriptor) {
+        return contextWith(null, factory, descriptor);
     }
 
     private ConditionContext contextWith(final Conf conf) {
-        return contextWith(conf, null);
+        return contextWith(conf, null, null);
     }
 
-    private ConditionContext contextWith(final Conf conf, final ComponentFactory factory) {
+    private ConditionContext contextWith(final Conf conf,
+                                         final ComponentFactory factory,
+                                         final ComponentDescriptor descriptor) {
         return new ConditionContext() {
             @Override
             public ComponentFactory getComponentFactory() {
@@ -184,7 +213,7 @@ public class ConditionsTest {
 
             @Override
             public ComponentDescriptor getComponent() {
-                return null;
+                return descriptor;
             }
         };
     }

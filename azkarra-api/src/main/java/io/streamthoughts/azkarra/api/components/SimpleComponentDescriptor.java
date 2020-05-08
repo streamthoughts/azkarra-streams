@@ -293,6 +293,28 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
      * {@inheritDoc}
      */
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SimpleComponentDescriptor)) return false;
+        SimpleComponentDescriptor<?> that = (SimpleComponentDescriptor<?>) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(version, that.version) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(supplier, that.supplier);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, version, type, supplier);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return "[" +
                 "name=" + name +
