@@ -191,7 +191,7 @@ public class DelegatingComponentFactory implements ComponentFactory {
                                       final Class<T> componentClass,
                                       final Supplier<T> singleton,
                                       final ComponentDescriptorModifier... modifiers) {
-        factory.registerComponent(componentName, componentClass, singleton, modifiers);
+        factory.registerSingleton(componentName, componentClass, singleton, modifiers);
     }
 
     @Override

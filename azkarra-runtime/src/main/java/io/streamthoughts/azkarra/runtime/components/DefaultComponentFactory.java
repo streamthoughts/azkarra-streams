@@ -258,6 +258,7 @@ public class DefaultComponentFactory implements ComponentFactory {
             .flatMap(List::stream)
             .filter(ComponentDescriptor::isSingleton)
             .filter(ComponentDescriptor::isEager)
+            .distinct()
             .filter(descriptor -> conditionalContext.isEnable(this, descriptor))
             .collect(Collectors.toList());
 

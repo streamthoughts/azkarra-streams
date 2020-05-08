@@ -19,6 +19,13 @@
 
 package io.streamthoughts.azkarra.api.annotations;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Annotation that can be used on any class or method directly or indirectly annotated with {@link Component}.
  * to indicate that a component is to be eagerly initialized.
@@ -27,6 +34,10 @@ package io.streamthoughts.azkarra.api.annotations;
  * Generally, this is the behavior desired by users because the contextual configuration of a
  * component cannot be resolved at context startup.
  */
+@Documented
+@Inherited
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Eager {
 
     boolean value() default true;

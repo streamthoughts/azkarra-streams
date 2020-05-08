@@ -679,7 +679,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
                                       final Class<T> componentClass,
                                       final Supplier<T> singleton,
                                       final ComponentDescriptorModifier... modifiers) {
-        componentFactory.registerComponent(componentName, componentClass, singleton, modifiers);
+        componentFactory.registerSingleton(componentName, componentClass, singleton, modifiers);
     }
 
     /**
@@ -689,7 +689,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     public <T> void registerSingleton(final String componentName,
                                       final Class<T> componentClass,
                                       final ComponentDescriptorModifier... modifiers) {
-        componentFactory.registerComponent(componentName, componentClass, modifiers);
+        componentFactory.registerSingleton(componentName, componentClass, modifiers);
     }
 
     /**
