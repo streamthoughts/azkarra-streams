@@ -28,6 +28,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/**
+ * Describes a single component managed by a {@link ComponentFactory}.
+ *
+ * @param <T>   the component type.
+ */
 public interface ComponentDescriptor<T> extends Ordered {
 
     Comparator<ComponentDescriptor<?>> ORDER_BY_VERSION = (c1, c2) -> {
@@ -148,6 +153,15 @@ public interface ComponentDescriptor<T> extends Ordered {
      * @return {@code true} if is secondary, otherwise {@code false}.
      */
     boolean isSecondary();
+
+    /**
+     * Checks if the described component should be create and configure eagerly.
+     *
+     * @see io.streamthoughts.azkarra.api.annotations.Eager
+     *
+     * @return {@code true} if it s an eager component, otherwise {@code false}.
+     */
+    boolean isEager();
 
     /**
      * Gets the {@link Condition}  that need to be fulfilled for

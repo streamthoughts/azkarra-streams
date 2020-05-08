@@ -113,6 +113,11 @@ public class DelegatingComponentFactory implements ComponentFactory {
     }
 
     @Override
+    public void init(final Conf conf) {
+        this.factory.init(conf);
+    }
+
+    @Override
     public void close() throws IOException {
         this.factory.close();
     }

@@ -27,6 +27,7 @@ import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.condition.Conditions;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.util.ClassUtils;
 import io.streamthoughts.azkarra.api.util.Version;
 import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
 import org.junit.jupiter.api.Assertions;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -203,6 +205,32 @@ public class DefaultComponentFactoryTest {
         assertEquals(1, components.get(0).value());
         assertEquals(2, components.get(1).value());
         assertEquals(3, components.get(2).value());
+    }
+
+    @Test
+    public void shouldInitializedEagerComponentOnInit() {
+        var supplier = new SpySupplier<>(TestB::new);
+        factory.registerSingleton(TestB.class, supplier, asEager());
+        Assertions.assertFalse(supplier.initialized);
+        factory.init(Conf.empty());
+        Assertions.assertTrue(supplier.initialized);
+    }
+
+    private static class SpySupplier<T extends TestA> implements Supplier<T> {
+
+        boolean initialized = false;
+
+        final Supplier<T> supplier;
+
+        private SpySupplier(final Supplier<T> supplier) {
+            this.supplier = supplier;
+        }
+
+        @Override
+        public T get() {
+            initialized = true;
+            return supplier.get();
+        }
     }
 
     interface TestA {

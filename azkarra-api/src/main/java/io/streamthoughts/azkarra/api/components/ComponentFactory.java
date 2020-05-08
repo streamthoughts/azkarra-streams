@@ -220,6 +220,13 @@ public interface ComponentFactory extends
     <T> Collection<GettableComponent<T>> getAllComponentProviders(final Class<T> type,
                                                                   final Qualifier<T> qualifier);
 
+    /**
+     * Initialize the component factory for the given configuration.
+     *
+     * @param conf  the configuration.
+     */
+    void init(final Conf conf);
+
     @Override
     void close() throws IOException;
 }

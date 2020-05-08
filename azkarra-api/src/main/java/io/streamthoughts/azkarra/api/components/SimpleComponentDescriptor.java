@@ -54,6 +54,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
 
     private final boolean isSecondary;
 
+    private final boolean isEager;
+
     private final Condition condition;
 
     private final boolean isConditional;
@@ -79,6 +81,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
             supplier,
             null,
             isSingleton,
+            false,
             false,
             false,
             null,
@@ -109,6 +112,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
             isSingleton,
             false,
             false,
+            false,
             null,
             Ordered.LOWEST_ORDER
         );
@@ -123,6 +127,11 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
      * @param supplier      the supplier of the component.
      * @param version       the version of the component.
      * @param isSingleton   is the component singleton.
+     * @param isPrimary     is a primary component.
+     * @param isSecondary   is a secondary component.
+     * @param isEager       is the component should be eagerly initialized
+     * @param condition     is the component should be conditionally enabled.
+     * @param order         the priority of the component.
      */
     public SimpleComponentDescriptor(final String name,
                                      final Class<T> type,
@@ -132,6 +141,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                                      final boolean isSingleton,
                                      final boolean isPrimary,
                                      final boolean isSecondary,
+                                     final boolean isEager,
                                      final Condition condition,
                                      final int order) {
         Objects.requireNonNull(type, "type can't be null");
@@ -146,6 +156,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
         this.isSingleton = isSingleton;
         this.isPrimary = isPrimary;
         this.isSecondary = isSecondary;
+        this.isEager = isEager;
         this.isConditional = condition != null;
         this.condition = condition;
         this.order = order;
@@ -165,6 +176,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
             descriptor.version().toString(),
             descriptor.isSingleton(),
             descriptor.isPrimary(),
+            descriptor.isEager(),
             descriptor.isSecondary(),
             descriptor.condition().orElse(null),
             descriptor.order()
@@ -277,6 +289,14 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
      * {@inheritDoc}
      */
     @Override
+    public boolean isEager() {
+        return isEager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Optional<Condition> condition() {
         return Optional.ofNullable(condition);
     }
@@ -324,6 +344,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                 ", isSingleton=" + isSingleton +
                 ", isPrimary=" + isPrimary +
                 ", isSecondary=" + isSecondary +
+                ", isEager=" + isEager +
                 ", isConditional=" + isConditional +
                 ", metadata=" + metadata +
                 ", order=" + order +
