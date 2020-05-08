@@ -90,6 +90,7 @@ public class ComponentDescriptorTest {
                 true,
                 false,
                 false,
+                false,
                 null,
                 order
         );
@@ -103,6 +104,7 @@ public class ComponentDescriptorTest {
             () -> null,
             version,
             true,
+            false,
             false,
             false,
             null,

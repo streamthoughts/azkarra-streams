@@ -74,6 +74,8 @@ public class DefaultComponentFactory implements ComponentFactory {
 
     private ComponentDescriptorFactory descriptorFactory;
 
+    private volatile boolean initialized = false;
+
     /**
      * Creates a new {@link DefaultComponentFactory} instance.
      */
@@ -226,7 +228,7 @@ public class DefaultComponentFactory implements ComponentFactory {
         Objects.requireNonNull(type, "type cannot be null");
         return getAllComponentProviders(type, qualifier)
             .stream()
-            .filter(provider -> provider.isEnable(new ConfigConditionalContext(conf)))
+            .filter(provider -> provider.isEnable(new ConfigConditionalContext<>(conf)))
             .map(provider -> provider.get(conf))
             .collect(Collectors.toList());
     }
@@ -239,6 +241,33 @@ public class DefaultComponentFactory implements ComponentFactory {
                                                                          final Qualifier<T> qualifier) {
         Collection<ComponentDescriptor<T>> descriptors = findAllDescriptorsByClass(type, qualifier);
         return descriptors.stream().map(this::getComponentProvider).collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public synchronized void init(final Conf conf) {
+        LOG.info("Initializing component factory.");
+        if (initialized) {
+            throw new IllegalStateException("Component factory cannot be initialized twice");
+        }
+        ConfigConditionalContext conditionalContext = new ConfigConditionalContext(conf);
+        final var allEnableEagerDescriptors = descriptorsByType.values().stream()
+            .flatMap(List::stream)
+            .filter(ComponentDescriptor::isSingleton)
+            .filter(ComponentDescriptor::isEager)
+            .filter(descriptor -> conditionalContext.isEnable(this, descriptor))
+            .collect(Collectors.toList());
+
+        for (ComponentDescriptor descriptor : allEnableEagerDescriptors) {
+            InternalGettableComponent provider = getComponentProvider(descriptor);
+            provider.get(conf); // force creation and initialization
+            LOG.info("Created component : {}", descriptor);
+        }
+        initialized = true;
+        LOG.info("Component factory initialized.");
     }
 
     /**
@@ -654,7 +683,6 @@ public class DefaultComponentFactory implements ComponentFactory {
                 Supplier<T> factory = descriptor.supplier();
 
                 maySetComponentFactoryAware(factory);
-
                 Configurable.mayConfigure(factory, conf);
 
                 T instance = factory.get();

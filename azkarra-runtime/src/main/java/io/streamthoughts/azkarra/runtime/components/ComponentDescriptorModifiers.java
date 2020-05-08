@@ -28,6 +28,22 @@ import java.util.List;
 public class ComponentDescriptorModifiers {
 
     /**
+     * Gets a modifier implementation that will set a component as eager.
+     *
+     * @return  a new {@link ComponentDescriptorModifier} instance.
+     */
+    public static ComponentDescriptorModifier asEager() {
+        return new ComponentDescriptorModifier() {
+            @Override
+            public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
+                return ComponentDescriptorBuilder.<T>create(descriptor)
+                        .isEager(true)
+                        .build();
+            }
+        };
+    }
+
+    /**
      * Gets a modifier implementation that will set a component as primary.
      *
      * @return  a new {@link ComponentDescriptorModifier} instance.

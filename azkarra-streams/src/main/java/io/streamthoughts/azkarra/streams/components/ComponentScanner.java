@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.streams.components;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.annotations.ConditionalOn;
+import io.streamthoughts.azkarra.api.annotations.Eager;
 import io.streamthoughts.azkarra.api.annotations.Factory;
 import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.annotations.Primary;
@@ -62,6 +63,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asEager;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asPrimary;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asSecondary;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withConditions;
@@ -226,6 +228,7 @@ public class ComponentScanner {
         mayAddModifierForPrimary(method, modifiers);
         mayAddModifierForSecondary(method, modifiers);
         mayAddModifierForCondition(method, modifiers);
+        mayAddModifierForEagerlyInitialization(method, modifiers);
 
         final ComponentDescriptorModifier[] objects = modifiers.toArray(new ComponentDescriptorModifier[]{});
         registerComponent(componentName, componentClass, supplier, isSingleton(method), objects);
@@ -251,6 +254,7 @@ public class ComponentScanner {
         mayAddModifierForPrimary(cls, modifiers);
         mayAddModifierForSecondary(cls, modifiers);
         mayAddModifierForCondition(cls, modifiers);
+        mayAddModifierForEagerlyInitialization(cls, modifiers);
 
         final ComponentDescriptorModifier[] arrayModifiers = modifiers.toArray(new ComponentDescriptorModifier[]{});
 
@@ -348,11 +352,11 @@ public class ComponentScanner {
         );
     }
 
-    private static void mayAddModifierForCondition(final Class<?> cld,
+    private static void mayAddModifierForCondition(final Class<?> componentClass,
                                                    final List<ComponentDescriptorModifier> modifiers) {
         mayAddModifiersForConditions(
             modifiers,
-            ClassUtils.getAllDeclaredAnnotationsByType(cld, ConditionalOn.class)
+            ClassUtils.getAllDeclaredAnnotationsByType(componentClass, ConditionalOn.class)
         );
     }
 
@@ -362,6 +366,18 @@ public class ComponentScanner {
         if (!conditions.isEmpty()) {
             modifiers.add(withConditions(conditions));
         }
+    }
+
+    private static void mayAddModifierForEagerlyInitialization(final Method method,
+                                                               final List<ComponentDescriptorModifier> modifiers) {
+        if (ClassUtils.isMethodAnnotatedWith(method, Eager.class))
+            modifiers.add(asEager());
+    }
+
+    private static void mayAddModifierForEagerlyInitialization(final Class<?> componentClass,
+                                                               final List<ComponentDescriptorModifier> modifiers) {
+        if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Eager.class))
+            modifiers.add(asEager());
     }
 
     // The Reflections class may throw a ReflectionsException when parallel executor

@@ -41,6 +41,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
     private boolean isPrimary;
     private boolean isSecondary;
     private Condition condition;
+    private boolean isEager = false;
     private Set<String> aliases = new HashSet<>();
     private int order;
 
@@ -247,6 +248,19 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
      * {@inheritDoc}
      */
     @Override
+    public boolean isEager() {
+        return isEager;
+    }
+
+    public ComponentDescriptorBuilder<T> isEager(final boolean isEager) {
+        this.isEager = isEager;
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Optional<Condition> condition() {
         return Optional.ofNullable(condition);
     }
@@ -285,6 +299,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
             isSingleton,
             isPrimary,
             isSecondary,
+            isEager,
             condition,
             order
         );

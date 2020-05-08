@@ -509,6 +509,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
         }
         LOG.info("Starting AzkarraContext");
         preStart();
+        componentFactory.init(getConfiguration());
         try {
             listeners.forEach(listeners -> listeners.onContextStart(this));
             registerShutdownHook();
