@@ -2,7 +2,7 @@
 date: 2020-01-06
 title: "Azkarra Worker"
 linkTitle: "Azkarra Worker"
-weight: 5
+weight: 50
 description: >
   How to run Azkarra Worker ?
 ---

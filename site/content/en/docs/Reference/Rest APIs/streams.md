@@ -107,6 +107,54 @@ Host: localhost:8080
 }
 ```
 
+## GET /api/v1/streams/(string: applicationId)/offsets
+
+Get the consumers offsets positition for the streams application.
+
+**Example Request**
+```
+GET /api/v1/streams/word-count-topology/config
+Host: localhost:8080
+```
+
+**Example Response**
+```json
+{
+  "group": "word-count-topology",
+  "consumers": [
+    {
+      "client_id": "word-count-topology-babe9079-fc6e-4b9e-a518-3067c899e692-StreamThread-1-consumer",
+      "stream_thread": "word-count-topology-babe9079-fc6e-4b9e-a518-3067c899e692-StreamThread-1",
+      "positions": [
+        {
+          "topic": "streams-plaintext-input",
+          "partition": 0,
+          "consumed_offset": 5,
+          "consumed_timestamp": 1589230351903,
+          "committed_offset": 6,
+          "committed_timestamp": 1589230354458,
+          "log_end_offset": 6,
+          "log_start_offset": 0,
+          "lag": 0
+        },
+        {
+          "topic": "word-count-topology-count-repartition",
+          "partition": 0,
+          "consumed_offset": 11,
+          "consumed_timestamp": 1589230351903,
+          "committed_offset": 12,
+          "committed_timestamp": 1589230354525,
+          "log_end_offset": 12,
+          "log_start_offset": 12,
+          "lag": 0
+        }
+      ]
+    }
+  ]
+}
+```
+
+
 ## GET /api/v1/streams/(string: applicationId)/metrics
 
 Get current metrics for the streams application.

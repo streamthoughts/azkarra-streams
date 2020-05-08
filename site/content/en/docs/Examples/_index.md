@@ -2,7 +2,7 @@
 date: 2019-11-29
 title: "Examples"
 linkTitle: "Examples"
-weight: 4
+weight: 60
 description: >
   Demo applications and code examples for Azkarra Streams API
 ---

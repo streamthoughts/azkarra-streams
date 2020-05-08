@@ -1,106 +1,167 @@
 ---
 title: "Azkarra Streams"
-resources:
-- src: "logo.png"
-  title: "logo"
-
 ---
 
-<style>
-	.imagesizing {
-		width:auto;
-		text-align:center;
-		padding:10px;
-	}
-	img {
-		max-width:100%;
-		height:auto;
-	}
-</style>
+{{% blocks/cover title="Azkarra Streams" image_anchor="top" height="full" color="blue" %}}
+<div class="mx-auto">
+    <p class="lead mt-5">Create streaming microservices, based on Apache Kafka Streams&trade;, faster than ever before!</p>
+	<a class="btn btn-lg btn-secondary mr-3 mb-4" 
+	   href="docs/getting-started/">
+		Get Started  <i class="fas fa-arrow-alt-circle-right ml-2"></i>
+	</a>
+    <a class="btn btn-lg btn-github mr-3 mb-4" 
+       href="https://github.com/streamthoughts/azkarra-streams">
+	    Get the code <i class="fab fa-github ml-2 "> </i>
+    </a>
+    <div class="mx-auto mt-5">{{% blocks/link-down color="light" %}}</div>
+</div>
+{{% /blocks/cover %}}
+
 
 <!-- Welcome to azkarra -->
-<section class="row td-box td-box--white position-relative td-box--gradient td-box--height-auto">
-	<div class="container td-arrow-down">
-		<div class="row">
-			<div class="col-sm-8">
-				<h1>Welcome to Azkarra Streams!</h1>
-				<p class="lead mt-5" style="text: nowrap">Create Kafka Streams applications faster than ever before!</p>
-				<a class="btn btn-lg btn-primary mr-3 mb-4" href="docs/getting-started/">
-					Get Started <i class="fas fa-arrow-alt-circle-right ml-2"></i>
- 				</a>
-  			    <a class="btn btn-lg btn-secondary mr-3 mb-4" href="https://github.com/streamthoughts/azkarra-streams">
-				    View Repository <i class="fab fa-github ml-2 "></i>
-                </a>
-			</div>
-			<div class="col">
-				{{< imgproc "logo" Fit "520x275" >}}{{< /imgproc >}}
+{{< blocks/lead color="white">}}
+<div id="whatis">
+    <h2 class="section-head">What is Azkarra Streams ?</h2>
+    <p>
+		The <strong>Azkarra Streams</strong> project is dedicated to making development of streaming microservices based on Apache Kafka Streams simple and fast. Our goal is not to recreate yet another full-stack framework (e.g : Quarkus or Micronaut), but to provide a straightforward way to build and deploy Kafka Streams applications by leveraging the best-of-breed ideas and proven practices from the open-source community <i>(Azkarra is Basque word for "Fast")</i>.
+    </p>
+</div>
+{{< /blocks/lead >}}
+
+<div class="container-fuild">
+	<div class="row">
+		<div class="col">
+			<h2 class="section-head">Streaming 'Word Count'</h2>
+			<div id="word-count">
+			{{< highlight java >}}
+			@AzkarraStreamsApplication
+			public class StreamsApplication {
+			    public static void main(final String[] args) {
+			        AzkarraApplication.run(StreamsApplication.class, args);
+			    }
+				@Component
+				@TopologyInfo( description = "A basic WordCount topology example", aliases = {"Word"} )
+				public class BasicWordCountTopology implements TopologyProvider {
+				    @Override
+				    public String version() {
+				        return Version.getVersion();
+				    }
+				    @Override
+				    public Topology get() {
+				        final StreamsBuilder builder = new StreamsBuilder();
+				        final KStream<String, String> words = builder.stream("streams-plaintext-input");
+				        words.flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\s")))
+				            .groupBy((key, value) -> value)
+				            .count(Materialized.as("count"))
+				            .toStream().to(
+			            		"streams-word-count-output",
+			            		 Produced.with(Serdes.String(), Serdes.Long())
+			            	);
+				        return builder.build();
+				    }
+				}
+			}
+			{{< / highlight >}}
 			</div>
 		</div>
+		<div class="col">
+			<h2 class="section-head">With Azkarra Streams!</h2>
+			<img width="100%" src="images/azkarra-streams-overview.gif"></img>
+		</div>	
+	</div>
+</div>
+
+<section id="main-features" class="container">
+	<h2 class="section-head">Features</h2>
+	<div class="features-list">
+			<div class="feature-item br-radius br-top-4 br-top-green box-shadow p-y-35 p-x-25">
+				<div class="feature-item-icon-box"><i class="fas fa-code"></i></div>
+				<div class="feature-item-content-box">
+					<h5 class="feature-item-title-box">Easy to use</h5>
+					<div class="feature-item-text-box">
+						Anyone with Java knowledge can easily build a streaming microservice based on Apache Kafka Streams. The Azkarra API offers advanced features on top of Kafka Streams to make you app production-ready in a just few lines of code. 
+					</div>
+				</div>
+			</div>
+			<div class="feature-item br-radius br-top-4 br-top-green box-shadow p-y-35 p-x-25"">
+				<div class="feature-item-icon-box"><i class="fas fa-desktop"></i></div>
+				<div class="feature-item-content-box">
+					<h5 class="feature-item-title-box">Useful UI</h5>
+					<div class="feature-item-text-box">
+						Monitor, deploy and manage lifecycle of your KafkaStreams instances using web application.
+						Get quick insights from the exposed metrics and visualize topology DAGs to find optimization paths.
+					</div>
+				</div>
+			</div>
+			<div class="feature-item br-radius br-top-4 br-top-green box-shadow p-y-35 p-x-25"">
+				<div class="feature-item-icon-box"><i class="fas fa-cogs"></i></div>
+				<div class="feature-item-content-box">
+					<h5 class="feature-item-title-box">Designed for producton</h5>
+					<div class="feature-item-text-box">
+						Azkarra offers many features to make your Kafka Streams topologies run smoothly in production (e.g : Healthcheck, Metrics, Dead Letter Topic). Monitor your application via REST endpoints giving you access to tandard metrics exposed either in JSON or Prometheus format.
+					</div>
+				</div>
+			</div>
+			<div class="feature-item br-radius br-top-4 br-top-green box-shadow p-y-35 p-x-25"">
+				<div class="feature-item-icon-box"><i class="fas fa-shield-alt"></i></div>
+				<div class="feature-item-content-box">
+					<h5 class="feature-item-title-box">Secured</h5>
+					<div class="feature-item-text-box">
+						Azkarra supports different security mechanisms (SSL/TLL, Basic Authentication) to secure access to your data and to REST endpoints.
+					</div>
+				</div>
+
+			</div>
+			<div class="feature-item br-radius br-top-4 br-top-green box-shadow p-y-35 p-x-25"">
+				<div class="feature-item-icon-box"><i class="fas fa-users"></i></div>
+				<div class="feature-item-content-box">
+					<h5 class="feature-item-title-box">Open source</h5>
+					<div class="feature-item-text-box">
+						The Azkarra Streams project is an open initiative to enrich the Apache Kafka Streams open-source ecosystem. 
+						The project is released under the <strong>Apache License 2.0</strong>. Anyone can contribute to the Azkarra project by opening an issue, a pull request or just by discussing with other users on the Slack Channel.
+					</div>
+				</div>
+			</div>
+	</div>
+</section>	
+
+<section id="main-integrations" class="container-fluid">
+	<h2 class="section-head">Integrations</h2>
+	<div class="cards-list">
+		<a title="Micrometer" class="card-item" target="_blank" href="https://micrometer.io">
+			<img alt="micrometer_software" src="images/micrometer_software_logo.svg">
+		</a>
+		<a title="Prometheus" class="card-item" target="_blank" href="https://prometheus.io/">
+			<img alt="prometheus_software" src="images/prometheus_software_logo.svg">
+		</a>
 	</div>
 </section>
 
-{{< blocks/lead >}}
-
-<div class="container">
-	<h2>Easy to use API.</h2>
-	Azkarra Streams is a lightweight Java framework which makes easy to develop and operate Kafka Streams applications (Azkarra is Basque word for "Fast")
-	    <div class = "imagesizing">
-		<img src="screenshot-code.png"/>
-	    </div>
-	<h3>Highlights</h3>
-	<ul class="fa-ul">
-		<li><i class="fas fa-check"></i> No more boilerplate code for running Kafka Streams.</li>
-		<li><i class="fas fa-check"></i> Easy externalization of configurations (using Typesafe Config).</li>
-		<li><i class="fas fa-check"></i> Web UI for topologies visualization.</li>
-		<li><i class="fas fa-check"></i> Provides REST endpoints for managing and monitoring local streams instances.</li>
-		<li><i class="fas fa-check"></i> Provides REST endpoints for Interactive Queries.</li>
-		<li><i class="fas fa-check"></i> Encryption and Authentication with SSL or Basic Auth.</li>
-	</ul>
-</div>
-
-
-
-{{< /blocks/lead >}}
-
-
-{{< blocks/section color="white" >}}
-{{% blocks/feature icon="fa-code" title="Developer-friendly features" %}}
-- REST API for Interactive Queries
-- Embedded Web UI (DAG visualization)
-- Auto create topics
-{{% /blocks/feature %}}
-
-{{% blocks/feature icon="fa-cogs" title="Operations" %}}
-- Healthcheck
-- Metrics (Prometheus, JSON)
-- Dead Letter Topic
-- RocksDB Tuning
-{{% /blocks/feature %}}
-
-{{% blocks/feature icon="fa-shield-alt" title="Security" %}}
-- Headless Mode
-- TLS/SSL Encryption 
-- Basic Authentication
-- Client Certification Authentication
-{{% /blocks/feature %}}
-{{< /blocks/section >}}
-
 {{< blocks/section color="dark" >}}
 
-{{% blocks/feature icon="fab fa-github" title="Contributions welcome" %}}
-  <a class="text-white" href="docs/contribution-guidelines/">
-    <button type="button" class="btn btn-secondary" style="width:150px; margin-top: 12px;">Contribute</button>
-  </a>
 
+{{% blocks/feature icon="fab fa-slack" title="Join us on Slack" %}}
+Join the Azkarra Streams community on Slack
+
+  <a class="text-white" href="https://communityinviter.com/apps/azkarra-streams/azkarra-streams-community">
+    <button type="button" class="btn btn-github" style="width:150px; margin-top: 12px;">Joins Us</button>
+  </a>
+{{% /blocks/feature %}}
+
+{{% blocks/feature icon="fab fa-github" title="Contributions welcome" %}}
 Want to join the fun on Github? New users are always welcome!
+
+  <a class="text-white" href="docs/contribution-guidelines/">
+    <button type="button" class="btn btn-github" style="width:150px; margin-top: 12px;">Contribute</button>
+  </a>
 {{% /blocks/feature %}}
 
 {{% blocks/feature icon="fas fa-star" title="Support Azkarra Team" %}}
- <a class="text-white" href="https://github.com/streamthoughts/azkarra-streams">
-    <button type="button" class="btn btn-secondary" style="width:150px; margin-top: 12px;">Star</button>
- </a>
+Add a star to the GitHub project, it only takes 5 seconds!
 
-Want to support the development team? Add a star to the GitHub project, it only takes 5 seconds!
+ <a class="text-white" href="https://github.com/streamthoughts/azkarra-streams">
+    <button type="button" class="btn btn-github" style="width:150px; margin-top: 12px;">Star</button>
+ </a>
 {{% /blocks/feature %}}
 
 {{< /blocks/section >}}

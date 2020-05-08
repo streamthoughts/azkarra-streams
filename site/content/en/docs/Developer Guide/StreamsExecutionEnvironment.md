@@ -2,12 +2,12 @@
 date: 2020-02-12
 title: "StreamsExecutionEnvironment"
 linkTitle: "StreamsExecutionEnvironment"
-weight: 2
+weight: 20
 description: >
   The execution container that handles all the code logic to run and manage `KafkaStreams` instances.
 ---
 
-## 2.1 Creating a new `StreamsExecutionEnvironment`
+## 1 Creating a new `StreamsExecutionEnvironment`
 
 A `StreamExecutionEnvironment` is the interface for creating, configuring and starting new `KafkaStreams` instances. Basically, a `StreamExecutionEnvironment` is an execution container that handles all the code logic to run and manage your `Topology` objects.
 
@@ -21,7 +21,7 @@ StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create()
 Using Azkarra Streams, you no longer need to call the `KafkaStreams#start()` method.
 {{% /alert %}}
 
-## 2.2 Configuring a `StreamsExecutionEnvironment`
+## 2 Configuring a `StreamsExecutionEnvironment`
 
 Each `StreamsExecutionEnvironment` can be configured with any property of your choice.
 The configuration can be passed direcly while creating a new instance: 
@@ -49,7 +49,7 @@ env.setConfiguration(Conf.with("streams", props)) (4)
 4. Optionally, the configuration is setted using the `setConfiguration` method.
 
 
-## 2.3 Registering `TopologyProvider`
+## 3 Registering `TopologyProvider`
 
 You can register multiple `TopologyProvider` to an `StreamsExecutionEnvironment` using the `addTopology` method.
 
@@ -74,7 +74,7 @@ env.addTopology(
     );
 ``` 
 
-## 2.4 Using multiple environments
+## 4 Using multiple environments
 
 A `StreamsExecutionEnvironment` allows setting common configuration properties, listeners and behaviors to a set of `KafkaStreams` instances.
 
@@ -95,7 +95,7 @@ StreamsExecutionEnvironment env2 = DefaultStreamsExecutionEnvironment.create(
 Azkarra uses the environment name to auto-generate the `application.id` property of `KafkaStreams` instance when no one is configured.
 {{% /alert %}}
 
-## 2.5 Automatically generating the `application.id` property
+## 5 Automatically generating the `application.id` property
 
 The `ApplicationIdBuilder` is the interface that can be used to automatically generate the `application.id` property to be set to a `KafkaStreams` instance.
 
@@ -113,7 +113,7 @@ env.setApplicationIdBuilder(() -> new ApplicationIdBuilder() {
 });
 ```
 
-## 2.6 Customizing `KafkaStreams` instance
+## 6 Customizing `KafkaStreams` instance
 
 By default, Azkarra is responsible for creating a new `KafkaStreams` instance for each provided `Topology`. 
 
@@ -145,7 +145,7 @@ env.setKafkaStreamsFactory(() -> new KafkaStreamsFactory() {
 });
 ```
 
-## 2.7 The `StreamsExecutionEnvironmentAware` interface
+## 7 The `StreamsExecutionEnvironmentAware` interface
 
 Azkarra provides the `StreamsExecutionEnvironmentAware` interface that components can implement to be notified of the `StreamsExecutionEnvironment` that it runs in.
 
@@ -156,7 +156,7 @@ Below are the list of components that currenlty support the `StreamsExecutionEnv
 * `KafkaStreamsFactory`
 * `StreamsLifecycleInterceptor`
 
-## 2.9 Starting an environment
+## 8 Starting an environment
 
 Most of the time, you will never have to start an environment directly because this will be managed by the `AzkarraContext` or `AzkarraApplication` classes.
 

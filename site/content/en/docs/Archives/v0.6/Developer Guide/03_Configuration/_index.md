@@ -2,14 +2,14 @@
 date: 2020-02-12
 title: "Configuration"
 linkTitle: "Configuration"
-weight: 3
+weight: 2
 description: >
   How to configure your application ?
 ---
 
 This section describes how you can configure an Azkarra Application.
 
-## 3.1 The `Configurable` interface
+## 2.1 The `Configurable` interface
 
 Azkarra allows any component registered into the `AzkarraContext` as well as the `TopologyProvider` to be configurable by implementing the interface `io.streamthoughts.azkarra.api.config.Configurable` : 
 
@@ -23,7 +23,7 @@ The `configure` method is automatically invoked after instantiating the `Topolog
 The `Conf` instance passed as parameter contains the `StreamsExecutionEnvironment` configuration, in which the Topology has been registered, merged
 with the `Conf` provided through the `Executed` object.
 
-## 3.2 The `Conf` interface
+## 2.3 The `Conf` interface
 
 The Azkarra project provides some built-in `Conf` implementations which are used internally.
 

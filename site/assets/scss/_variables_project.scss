@@ -1,117 +1,60 @@
 /*
-
 Add styles or override variables from the theme here.
-
 */
-$dark: #343A40 !default;
-$blue: #72A1E5 !default;
-$orange: #BA5A31 !default;
-$gray-100: #f8f9fa !default;
-$gray-200: #eee !default;
-$gray-300: #dee2e6 !default;
-$gray-400: #ccc !default;
-$gray-500: #adb5bd !default;
-$gray-600: #888 !default;
-$gray-700: #495057 !default;
-$gray-800: #333 !default;
-$gray-900: #222 !default;
-$black: #000 !default;
+@import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
 
-$dark: #343A40 !default;
-$black: #000 !default;
-$white: #fff !default;
+// Custom colors
+$dark-grey: #343A40 !default;
+$green-light: #26b793;
+$indigo: #502198;
+
+$dark: #121b28 !default;
+$blue: #141440ff !default;
+$blue-light: #2880c1 !default;
+
 $gray: #6C757D !default;
 $gray-light: #F8F9FA !default;
 
-$az-dark: #2880c1;
-$az-light: #26b793;
+$primary: $blue-light;
+$primary-light: lighten($primary, 75%) !default;
+$secondary: $green-light;
+$success: #3772FF !default;
+$info: $blue-light !default;
+$warning: #ED6A5A !default;
+$danger: #ED6A5A !default;
+$white: #fff !default;
+$light: $white !default;
 
-$primary: #343A40;
-$secondary: #26b793;
+.td-box, .td-content {
+    a {
+        color: $blue-light;
+        text-decoration: none;
+        background-color: transparent;
+        -webkit-text-decoration-skip: objects;
+
+        &:hover {
+            color: $blue;
+        }
+    }
+}
+
+.td-box--1 {
+    background-color: $blue-light !important;
+}
+
+.indigo {
+   color: $indigo !important;
+}
 
 // Navigation bar
-$navbar-dark-color: $az-dark;
-$navbar-dark-hover-color: $az-light !default;
-$navbar-dark-active-color: $primary !default;
+$navbar-dark-color: $white;
+$navbar-dark-hover-color: $green-light !default;
+$navbar-dark-active-color: $white !default;
 $navbar-dark-disabled-color: rgba($white, 0.25) !default;
-.td-navbar {
-    background: $white !important;
-    border-bottom: 1px solid $az-light;
-
-    a.navbar-brand {
-        color: $gray-900 !important;
-    }
-    span.text-uppercase {
-        text-transform: none !important;
-    }
-}
-
-// Inline images (e.g Azkarra Logo)
-div.card.rounded {
-    border: none;
-}
-
-// Welcome to minikube! box
-.td-box--white:nth-child(1) {
-
-    // News
-    ul {
-        margin-top: 1rem;
-        list-style: none;
-        color: $gray-700;
-        padding-left: 0;
-    }
-}
-
-// Highlights
-.td-box--1 {
-    background-color: $az-dark !important;
-
-    // Increase from 1.25 for improved readability
-    .h4 {
-        line-height: 1.6 !important;
-    }
-
-    // Control the presentation of the screenshot
-    .p-2 {
-        padding: 0 !important;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .card {
-        border-radius: 0 !important;
-        border: 2px solid $az-dark !important;
-    }
-    .card-img-top {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-    }
-
-    .td-arrow-down::before {
-        border-color: $az-dark transparent transparent transparent !important;
-    }
-
-    .text-center {
-        text-align: left !important;
-    }
-}
-
-// Features box
-.td-box--white {
-    // Center-aligned bullets look bad.
-    .text-center ul {
-        text-align: left;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 20em;
-    }
-    div.mb-5:nth-child(3) ul {
-        max-width: 20em;
-    }
-}
 
 footer.bg-dark {
-    background-color: #000 !important;
+    border-top: 1px solid $white;
+    background-color: $dark !important;
     padding-top: 1rem !important;
     min-height: 4rem !important;
     div.py-2 { 
@@ -121,4 +64,137 @@ footer.bg-dark {
 
 .td-box .row {
     justify-content: space-around !important;
+}
+
+#whatis {
+    padding: 6em 1.5em 3em;
+    text-align: center;
+    margin: 0;
+    p {
+        font-size: 1em;
+    }
+}
+
+.section-head {
+    font-family: 'Montserrat', sans-serif;
+    color: $blue;
+    font-weight: 700;
+    padding: 0 0 1em;
+    text-align: center;
+}
+
+
+.br-radius {
+  border-radius: 4px !important;
+}
+
+.box-shadow {
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.1) !important;
+}
+
+.br-top-4 {
+  border-top: 2px solid $primary !important;
+}
+
+.br-top-green {
+  border-top-color: $green-light !important;
+}
+
+.p-y-35 {
+  padding-top: 35px;
+  padding-bottom: 35px;
+}
+
+.p-x-25 {
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+#main-integrations {
+  .cards-list {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: flex-start;
+    margin: 0 20px;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: center;
+    -ms-flex-pack: justify;
+    justify-content: center; 
+
+    .card-item {
+      position: relative;
+      display: flex;
+      max-width: 100px;
+      flex-direction: row;
+      align-content: flex-start;
+      margin-top: 44px;
+      margin: 42px 40px 0;
+
+      img {
+        max-width: 120px;
+      }
+    }
+  }
+}
+
+#main-features {
+    .features-list {
+          position: relative;
+          display: flex;
+          flex-wrap: wrap;
+          flex-direction: row;
+          align-content: flex-start;
+          margin: 0 20px;
+          -webkit-box-pack: justify;
+          -webkit-justify-content: space-between;
+          -ms-flex-pack: justify;
+          justify-content: space-between;
+
+        .feature-item {
+          position: relative;
+          display: flex;
+          flex: 1 0 320px;
+          flex-direction: column;
+          overflow: hidden;
+          min-height: 220px;
+          border: 1px solid rgba(168,200,200,0.25);
+          background-color: #F8F9FA;
+          max-width: 340px;
+          margin-top: 44px;
+          margin: 42px auto 0;
+
+          .feature-item {
+
+            &-icon-box {
+                width: 100%;
+                display: flex;
+                height: fit-content;
+                justify-content: center;
+
+                img {
+                  height: 76px;
+                }
+
+                i {
+                   font-size: 3.2em; 
+                   color: $blue;
+                   margin-bottom: 20px;
+                }
+            }
+            &-title-box {
+                font-size: 24px!important;
+                font-weight: 500;
+                line-height: 1.5!important;
+                font-family: 'Montserrat', sans-serif;
+                color: $dark;
+            }
+            &-content-box {
+                margin-left: 0;
+                text-align: center;
+            }
+          }
+        }    
+    }
 }

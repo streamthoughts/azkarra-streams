@@ -2,7 +2,7 @@
 date: 2020-02-12
 title: "Developer Guide"
 linkTitle: "Developer Guide"
-weight: 3
+weight: 20
 description: >
   Learn about the concepts and the functionalities of the Azkarra Streams Framework.
 ---

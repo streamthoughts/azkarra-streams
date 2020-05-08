@@ -1,7 +1,6 @@
-
 ---
 title: "Release v0.4"
-linkTitle: "Release Notes - Azkarra Streams - Version 0.4"
+linkTitle: "Release Notes - v0.4"
 date: 2019-12-02
 ---
 
