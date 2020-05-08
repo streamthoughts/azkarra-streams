@@ -73,14 +73,17 @@ public class OnComponentCondition implements Condition {
                            final boolean exists) {
         Collection<ComponentDescriptor> descriptors  = context.getComponentFactory().findAllDescriptorsByClass(type);
         for (ComponentDescriptor descriptor : descriptors) {
-            Optional<Condition> optionalCond = descriptor.condition();
-            if (optionalCond.isPresent()) {
-                Condition condition = optionalCond.get();
-                if (condition.matches(context)) {
+            // don't re-evaluate the component it-self
+            if (!context.getComponent().equals(descriptor)) {
+                Optional<Condition> optionalCond = descriptor.condition();
+                if (optionalCond.isPresent()) {
+                    Condition condition = optionalCond.get();
+                    if (condition.matches(context)) {
+                        return exists;
+                    }
+                } else {
                     return exists;
                 }
-            } else {
-                return exists;
             }
         }
         return !exists;
