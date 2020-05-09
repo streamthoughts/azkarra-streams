@@ -40,6 +40,7 @@ import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.errors.AzkarraContextException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
@@ -633,7 +634,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
     private void checkIfEnvironmentExists(final String name, final String errorMessage) {
         if (!environments.containsKey(name)) {
-            throw new AzkarraContextException(errorMessage);
+            throw new InvalidStreamsEnvironmentException(errorMessage);
         }
     }
 

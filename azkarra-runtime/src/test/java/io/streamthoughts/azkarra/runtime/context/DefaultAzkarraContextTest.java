@@ -20,7 +20,7 @@ package io.streamthoughts.azkarra.runtime.context;
 
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
-import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
@@ -45,7 +45,7 @@ public class DefaultAzkarraContextTest {
     @BeforeEach
     public void setUp() {
         // Create default context with empty configuration.
-        context = (DefaultAzkarraContext)DefaultAzkarraContext.create();
+        context = (DefaultAzkarraContext) DefaultAzkarraContext.create();
     }
 
     @Test
@@ -62,7 +62,7 @@ public class DefaultAzkarraContextTest {
         context.addTopology(TestTopologyProvider.class, "env", Executed.as("test"));
         context.preStart();
         Mockito.verify(env, Mockito.times(1))
-               .addTopology(Mockito.any(Supplier.class), executedArgumentCaptor.capture());
+                .addTopology(Mockito.any(Supplier.class), executedArgumentCaptor.capture());
 
         InternalExecuted executed = new InternalExecuted(executedArgumentCaptor.getValue());
         assertEquals("test", executed.name());
@@ -71,13 +71,13 @@ public class DefaultAzkarraContextTest {
     @Test
     public void shouldThrowExceptionWhenAddingTopologyGivenUnknownEnvironment() {
         context.addTopology(TestTopologyProvider.class, "env", Executed.as("test"));
-        AzkarraException exception = Assertions.assertThrows(AzkarraException.class, () -> {
+        InvalidStreamsEnvironmentException exception = Assertions.assertThrows(InvalidStreamsEnvironmentException.class, () -> {
             context.start();
         });
 
         String errorMessage = exception.getMessage();
         assertEquals("Error while adding topology '"
-            + TestTopologyProvider.class.getName() + "', environment 'env' not found", errorMessage);
+                + TestTopologyProvider.class.getName() + "', environment 'env' not found", errorMessage);
     }
 
 
