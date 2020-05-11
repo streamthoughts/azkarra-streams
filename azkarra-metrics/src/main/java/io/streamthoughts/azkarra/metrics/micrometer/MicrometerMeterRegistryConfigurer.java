@@ -24,6 +24,10 @@ import io.micrometer.core.instrument.config.MeterFilter;
 
 import java.util.Collection;
 
+/**
+ * The default {@link MeterRegistryConfigurer} implementation to register a collection of
+ * {@link MeterBinder} and {@link MeterFilter} on any {@link MeterRegistry}.
+ */
 public class MicrometerMeterRegistryConfigurer implements MeterRegistryConfigurer<MeterRegistry> {
 
     private final Collection<MeterBinder> binders;
@@ -54,13 +58,5 @@ public class MicrometerMeterRegistryConfigurer implements MeterRegistryConfigure
 
         if (binders != null && !binders.isEmpty())
             binders.forEach(binder -> binder.bindTo(meterRegistry));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean supports(final MeterRegistry meterRegistry) {
-        return true;
     }
 }

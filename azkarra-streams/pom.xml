@@ -28,6 +28,8 @@
 
     <artifactId>azkarra-streams</artifactId>
 
+    <description>Azkarra Streams</description>
+
     <properties>
         <undertow.version>2.0.26.Final</undertow.version>
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>

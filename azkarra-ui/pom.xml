@@ -28,6 +28,8 @@
 
     <artifactId>azkarra-ui</artifactId>
 
+    <description>Azkarra Streams Dashboard.</description>
+
     <properties>
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>
         <maven.deploy.skip>true</maven.deploy.skip>

@@ -30,6 +30,8 @@
 
     <artifactId>azkarra-runtime</artifactId>
 
+    <description>Azkarra Streams Runtime</description>
+
     <properties>
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>
     </properties>

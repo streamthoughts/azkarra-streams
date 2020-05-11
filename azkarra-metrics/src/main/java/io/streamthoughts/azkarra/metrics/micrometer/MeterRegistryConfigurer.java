@@ -21,10 +21,17 @@ package io.streamthoughts.azkarra.metrics.micrometer;
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**
- * Interfaces that is used to configure a specific type of {@link MeterRegistry}.
+ * Interface that is used to configure a specific type of {@link MeterRegistry}.
  *
- * @param <T>   the meter registry type.
+ * Any component that implements this interface will be applied on the supported {@link MeterRegistry} during
+ * the {@link io.streamthoughts.azkarra.api.components.ComponentFactory} initialization.
+ *
+ * @see MeterRegistryFactory
+ * @see MicrometerMeterRegistryConfigurer
+ *
+ * @param <T>   the registry type to configure.
  */
+@FunctionalInterface
 public interface MeterRegistryConfigurer<T extends MeterRegistry> {
 
     /**
@@ -32,7 +39,7 @@ public interface MeterRegistryConfigurer<T extends MeterRegistry> {
      *
      * @param meterRegistry the {@link MeterRegistry} to configure.
      */
-    void apply(T meterRegistry);
+    void apply(final T meterRegistry);
 
     /**
      * Checks whether this configurer supports the given meter registry type.
@@ -40,5 +47,7 @@ public interface MeterRegistryConfigurer<T extends MeterRegistry> {
      * @param meterRegistry a {@link MeterRegistry}.
      * @return boolean      {@code true} if the meter registry is supported.
      */
-    boolean supports(T meterRegistry);
+    default boolean supports(final T meterRegistry) {
+        return true;
+    }
 }
