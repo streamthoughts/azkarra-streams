@@ -113,6 +113,13 @@
 
         <dependency>
             <groupId>io.streamthoughts</groupId>
+            <artifactId>azkarra-metrics</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.streamthoughts</groupId>
             <artifactId>azkarra-streams</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>

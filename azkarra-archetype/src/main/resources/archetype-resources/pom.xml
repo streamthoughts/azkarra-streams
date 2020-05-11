@@ -20,9 +20,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.streamthoughts</groupId>
-    <artifactId>azkarra-quickstart-java</artifactId>
-    <version>${project.version}</version>
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
     <packaging>jar</packaging>
 
     <name>azkarra-quickstart-java</name>
@@ -41,8 +41,9 @@
     </licenses>
 
     <properties>
-        <kafka.streams.version>2.5.0</kafka.streams.version>
-        <log4j.version>2.12.1</log4j.version>
+        <azkarra.streams.version>@project.version@</azkarra.streams.version>
+        <kafka.streams.version>@kafka.streams.version@</kafka.streams.version>
+        <log4j.version>@log4j.version@</log4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>11</maven.compiler.source>
@@ -111,6 +112,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
+            <version>${kafka.streams.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -120,12 +122,21 @@
             </exclusions>
         </dependency>
 
+        <!-- START dependencies for Azkarra Streams -->
+        <dependency>
+            <groupId>io.streamthoughts</groupId>
+            <artifactId>azkarra-metrics</artifactId>
+            <version>${azkarra.streams.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>io.streamthoughts</groupId>
             <artifactId>azkarra-streams</artifactId>
-            <version>${project.version}</version>
+            <version>${azkarra.streams.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- END dependencies for Azkarra Streams -->
 
         <!-- START dependencies for logging -->
         <dependency>
@@ -137,19 +148,19 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.12.1</version>
+            <version>${log4j.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.12.1</version>
+            <version>${log4j.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.12.1</version>
+            <version>${log4j.version}</version>
         </dependency>
         <!-- END dependencies for logging -->
     </dependencies>

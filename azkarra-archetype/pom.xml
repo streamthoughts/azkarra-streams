@@ -46,6 +46,35 @@
     <description>Default Maven Archetype for creating a simple Azkarra Streams project</description>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                    <delimiters>
+                        <!-- use alternative delimiter for filtering resources -->
+                        <delimiter>@</delimiter>
+                    </delimiters>
+                </configuration>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>archetype-resources/src/main/resources/**</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>archetype-resources/src/main/resources/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <extensions>
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
