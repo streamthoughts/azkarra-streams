@@ -228,6 +228,12 @@
             <artifactId>mockito-all</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- END dependencies for testing-->
     </dependencies>
 </project>

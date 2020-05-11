@@ -519,8 +519,14 @@ public class KafkaStreamsContainer {
         return LOG;
     }
 
+    /**
+     * Checks if the {@link KafkaStreams} is neither RUNNING nor REBALANCING.
+     */
     public boolean isNotRunning() {
-        return !kafkaStreams.state().isRunning();
+        // This is equivalent to the KafkaStreams methods :
+        // State.isRunning() <= 2.4 or State.isRunningOrRebalancing() >= 2.5
+        final KafkaStreams.State state = kafkaStreams.state();
+        return !(state.equals(KafkaStreams.State.RUNNING) || state.equals(KafkaStreams.State.REBALANCING));
     }
 
     /**

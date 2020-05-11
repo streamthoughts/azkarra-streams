@@ -41,7 +41,7 @@
     </licenses>
 
     <properties>
-        <kafka.streams.version>2.4.0</kafka.streams.version>
+        <kafka.streams.version>2.5.0</kafka.streams.version>
         <log4j.version>2.12.1</log4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -111,8 +111,13 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
-            <version>2.3.0</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

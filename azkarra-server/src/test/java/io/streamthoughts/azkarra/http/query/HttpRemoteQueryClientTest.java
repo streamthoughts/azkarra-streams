@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -105,13 +106,14 @@ public class HttpRemoteQueryClientTest {
     }
 
     private QueryResult<String, String> newQueryResult() {
+        List<KV<String, String>> kv = singletonList(KV.of("k1", "v1"));
         return QueryResultBuilder.<String, String>newBuilder()
             .setServer(SERVER_INFO.hostAndPort())
             .setStatus(QueryStatus.SUCCESS)
             .setStoreName(TEST_STORE_NAME)
             .setSuccessResultSet(
                 singletonList(
-                    new SuccessResultSet<>(SERVER_INFO.hostAndPort(), true, singletonList(KV.of("k1", "v1")))
+                    new SuccessResultSet<>(SERVER_INFO.hostAndPort(), true, kv)
                 )
             )
             .setTook(0)
