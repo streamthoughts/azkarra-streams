@@ -123,7 +123,7 @@ export default {
             pos['client_id'] = consumer['client_id'];
             pos['stream_thread'] = consumer['stream_thread'];
             pos['id'] = consumer['stream_thread'] + '-' + pos['partition'];
-            pos['progress'] = pos['consumed_offset'] / pos['log_end_offset'] * 100;
+            pos['progress'] = pos['consumed_offset'] / (pos['log_end_offset'] - 1) * 100;
             let consumed = moment.duration(pos['consumed_timestamp'], 'x');
             pos['lag_time'] = moment.duration(moment().subtract(consumed)).humanize();
             return pos;
