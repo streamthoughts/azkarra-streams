@@ -83,7 +83,8 @@ Azkarra defines several JSON serializers that are provided by the module `azkarr
 </dependency>
 ``` 
 
-While these serializers are sufficient in most of the cases, you may need to provide your own custom serializers in order to use the interactive queries.
+While these serializers are sufficient in most of the cases, you may have the need to provide your own custom 
+serializers in order to use the interactive queries.
 
 Therefore, Azkarra will automatically register all components that implements the `Module` interface into the internal `ObjectMapper` instance used for JSON serializaton. This allows you to register custom record serializers for interactive queries.
 
@@ -114,7 +115,7 @@ public class JacksonModuleFactory {
 
 ## 4 REST Extensions
 
-Azkarra already exposes several REST endpoints that you can used to monitor and manage lifecycle of Kafka Streams instances.
+Azkarra already exposes several REST endpoints that you can use to monitor and manage lifecycle of Kafka Streams instances.
 But sometimes, you may want to expose additional REST endpoints to extend Azkarra capabilities.
 
 Azkarra provides a mechanism, called REST extensions, that allows you to register JAX-RS resources that will be loaded and initialized by the Undertow server.

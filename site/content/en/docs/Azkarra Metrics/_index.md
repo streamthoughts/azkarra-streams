@@ -23,7 +23,7 @@ For using Azkarra Metrics, you will first have to include the `azkarra-metrics` 
 ```xml
 <dependency>
     <groupId>io.streamthoughts</groupId>
-    <artifactId>azkarra-streams</artifactId>
+    <artifactId>azkarra-metrics</artifactId>
     <version>0.7.0</version>
 </dependency>
 ```

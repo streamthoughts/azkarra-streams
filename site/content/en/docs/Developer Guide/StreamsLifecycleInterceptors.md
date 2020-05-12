@@ -167,7 +167,7 @@ your *application.conf* file
 
 Azkarra emits the state of `KafkaStreams` instances in the form of events that adhere to the [CloudEvents](https://cloudevents.io/) specification.
 
-The CloudEvent specification is developped under the [Cloud Native Computing Foundation](https://cncf.io/) with the aim to describe a standardized and protocol-agnostic definition of the structure and metadata description of events. 
+The CloudEvent specification is developed under the [Cloud Native Computing Foundation](https://cncf.io/) with the aim to describe a standardized and protocol-agnostic definition of the structure and metadata description of events. 
 
 Currently, Azkarra only supports the [Structuted Content](https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md#33-structured-content-mode) mode for mapping CloudEvents to Kafka message. That means that the message-value contains event metadata and data together in a single envelope, encoded in JSON.
 
