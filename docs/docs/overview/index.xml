@@ -1,18 +1,91 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Overview</title>
-    <link>https://streamthoughts.github.io/azkarra-streams/docs/overview/</link>
+    <link>http://www.azkarrastreams.io/docs/overview/</link>
     <description>Recent content in Overview on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Fri, 29 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 09 May 2020 00:00:00 +0000</lastBuildDate>
     
-	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/docs/overview/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="http://www.azkarrastreams.io/docs/overview/index.xml" rel="self" type="application/rss+xml" />
     
     
       
         
       
     
+    
+    <item>
+      <title>Docs: What is Azkarra ?</title>
+      <link>http://www.azkarrastreams.io/docs/overview/azkarra/</link>
+      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/docs/overview/azkarra/</guid>
+      <description>
+        
+        
+        &lt;h2 id=&#34;what-is-it&#34;&gt;What is it?&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Azkarra Streams&lt;/strong&gt; is a lightweight java framework to make it easy to develop, deploy and manage streaming microservices based on Apache Kafka Streams.(Azkarra is Basque words meaning &lt;em&gt;&amp;ldquo;Fast&amp;rdquo;&lt;/em&gt;).&lt;/p&gt;
+
+
+&lt;div class=&#34;alert alert-info&#34; role=&#34;alert&#34;&gt;
+&lt;h4 class=&#34;alert-heading&#34;&gt;About Kafka Streams&lt;/h4&gt;
+&lt;strong&gt;&lt;a href=&#34;https://kafka.apache.org/documentation/streams/&#34;&gt;Kafka Streams&lt;/a&gt;&lt;/strong&gt; is a client library for building applications and microservices, where the input and output data are stored in Kafka clusters.
+It combines the simplicity of writing and deploying standard Java and Scala applications on the client side  with the benefits of Kafka&#39;s server-side cluster technology (source: &lt;a href=&#34;https://kafka.apache.org/documentation/streams/&#34;&gt;Apache documentation&lt;/a&gt;).
+&lt;/div&gt;
+
+&lt;h3 id=&#34;key-features&#34;&gt;Key Features&lt;/h3&gt;
+&lt;p&gt;Azkarra Streams provides a set of features to quickly debug and build production-ready Kafka Streams applications. This includes, among other things:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Lifecycle management of Kafka Streams instances (no more KafkaStreams#start()).&lt;/li&gt;
+&lt;li&gt;Easy externalization of configurations (using Typesafe Config).&lt;/li&gt;
+&lt;li&gt;Embedded HTTP server to execute interactive queries.&lt;/li&gt;
+&lt;li&gt;HTTP endpoints to monitor streams application metrics (e.g : JSON, Prometheus).&lt;/li&gt;
+&lt;li&gt;Embedded Web user interface for the visualization of DAGs of topologies&lt;/li&gt;
+&lt;li&gt;Encryption and Authentication with SSL or Basic Auth.&lt;/li&gt;
+&lt;li&gt;Etc.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;why-do-i-want-it&#34;&gt;Why do I want it?&lt;/h2&gt;
+&lt;p&gt;Azkarra helps you build Kafka Streams applications using best pratices developped by the industry.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;What is it good for?&lt;/strong&gt;: Azkarra lets you focus on writing Kafka Streams topologies code, not boilerplate code necessary for executing them.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;What is it not good for?&lt;/strong&gt;: Azkarra is not attented to be used for operating a fleet of Kafka Streams applications.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;What is it &lt;em&gt;not yet&lt;/em&gt; good for?&lt;/strong&gt;: Azkarra cannot be used for managing a distributed Kafka Streams application.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;where-should-i-go-next&#34;&gt;Where should I go next?&lt;/h2&gt;
+&lt;p&gt;Give your users next steps from the Overview. For example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Getting Started&lt;/strong&gt;: &lt;a href=&#34;http://www.azkarrastreams.io/azkarra-streams/docs/getting-started/&#34;&gt;Get started with Azkarra Streams&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Examples&lt;/strong&gt;: &lt;a href=&#34;http://www.azkarrastreams.io/azkarra-streams/docs/examples/&#34;&gt;Check out some example code!&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title>Docs: Contribution Guidelines</title>
+      <link>http://www.azkarrastreams.io/docs/overview/contribution-guidelines/</link>
+      <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/docs/overview/contribution-guidelines/</guid>
+      <description>
+        
+        
+        &lt;h2 id=&#34;contributing&#34;&gt;Contributing&lt;/h2&gt;
+&lt;p&gt;Any feedback, bug reports and PRs are greatly appreciated!&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Source Code: &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams&#34;&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams&#34;&gt;https://github.com/streamthoughts/azkarra-streams&lt;/a&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Issue Tracker: &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues&#34;&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues&#34;&gt;https://github.com/streamthoughts/azkarra-streams/issues&lt;/a&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Coding Guidelines: &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/blob/master/CONTRIBUTING.md&#34;&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/blob/master/CONTRIBUTING.md&#34;&gt;https://github.com/streamthoughts/azkarra-streams/blob/master/CONTRIBUTING.md&lt;/a&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+      </description>
+    </item>
     
   </channel>
 </rss>

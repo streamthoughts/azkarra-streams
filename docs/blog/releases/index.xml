@@ -1,11 +1,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – New Releases</title>
-    <link>https://streamthoughts.github.io/azkarra-streams/blog/releases/</link>
+    <link>http://www.azkarrastreams.io/blog/releases/</link>
     <description>Recent content in New Releases on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     
-	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/blog/releases/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="http://www.azkarrastreams.io/blog/releases/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -14,11 +14,55 @@
     
     
     <item>
+      <title>Blog: Release v0.7.0</title>
+      <link>http://www.azkarrastreams.io/blog/2020/05/11/release-v0.7.0/</link>
+      <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/blog/2020/05/11/release-v0.7.0/</guid>
+      <description>
+        
+        
+        &lt;p&gt;&lt;strong&gt;Azkarra Streams v0.7.0 is now available!&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Below is a summary of the issues addressed in the 0.7.0 release of Azkarra Streams.&lt;/p&gt;
+&lt;h2 id=&#34;new-features&#34;&gt;New Features&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/6e9e199&#34;&gt;6e9e199&lt;/a&gt; feat(metrics): add built-in support for Micrometer framework &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/50&#34;&gt;#50&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/2891108&#34;&gt;2891108&lt;/a&gt; feat(api): add the capability to eagerly initialize a component&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/d6c8eef&#34;&gt;d6c8eef&lt;/a&gt; feat(api): add support for conditional component.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/899ecc8&#34;&gt;899ecc8&lt;/a&gt; feat(api): add support for Secondary component qualifier&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/1c6b7d4&#34;&gt;1c6b7d4&lt;/a&gt; feat(server): add support to register REST extensions &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/63&#34;&gt;#63&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/76146ee&#34;&gt;76146ee&lt;/a&gt; feat(server): add support to register custom jackson modules for KV records &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/61&#34;&gt;#61&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/22d1545&#34;&gt;22d1545&lt;/a&gt; feat(runtime): add new built-in interceptor MonitoringStreamsInterceptor &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/52&#34;&gt;#52&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/d9a12aa&#34;&gt;d9a12aa&lt;/a&gt; feat(ui): add Kafka Streams consumers progression bar &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/58&#34;&gt;#58&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/1b888e4&#34;&gt;1b888e4&lt;/a&gt; feat(ui): add new tabs to display consumer-lags &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/58&#34;&gt;#58&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/6cc3da7&#34;&gt;6cc3da7&lt;/a&gt; feat(api): add a default ConsumerInterceptor to track consumer consumed/committed offsets &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/58&#34;&gt;#58&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/22f4fba&#34;&gt;22f4fba&lt;/a&gt; feat(api): add new Primary annotation to qualify component&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/ac4d5c5&#34;&gt;ac4d5c5&lt;/a&gt; feat(runtime): allow to specify custom UncaughtExceptionHandler strategy &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/55&#34;&gt;#55&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;improvements-and-bug-fixes&#34;&gt;Improvements and Bug fixes&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/6dbed7c&#34;&gt;6dbed7c&lt;/a&gt; refactor(metrics): make MeterRegistryConfigurer interface functional&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/beb0b65&#34;&gt;beb0b65&lt;/a&gt; refactor(runtime): add InvalidStreamsEnvironmentException when environment not found &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/68&#34;&gt;#60&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/f96426c&#34;&gt;f96426c&lt;/a&gt; fix(streams): fix some issues regarding components scan and creation&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/02ebc36&#34;&gt;02ebc36&lt;/a&gt; fix(runtime): fix bad delegating methods&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/b7ddf29&#34;&gt;b7ddf29&lt;/a&gt; fix(runtime): prevent topology to start twice when auto.start is enable &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/59&#34;&gt;#59&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/26e589a&#34;&gt;26e589a&lt;/a&gt; fix(server): health status must return DOWN when streams instance stop on failure &lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/issues/54&#34;&gt;#54&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;subtasks&#34;&gt;Sub-Tasks&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/eb9d558&#34;&gt;eb9d558&lt;/a&gt; add support for Kafka Streams v2.5.0&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/streamthoughts/azkarra-streams/commit/ab47b99&#34;&gt;ab47b99&lt;/a&gt; refactor(server): externalize jackson serializers into dedicated module&lt;/li&gt;
+&lt;/ul&gt;
+
+      </description>
+    </item>
+    
+    <item>
       <title>Blog: Release v0.4</title>
-      <link>https://streamthoughts.github.io/azkarra-streams/blog/2019/12/02/release-v0.4/</link>
+      <link>http://www.azkarrastreams.io/blog/2019/12/02/release-v0.4/</link>
       <pubDate>Mon, 02 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2019/12/02/release-v0.4/</guid>
+      <guid>http://www.azkarrastreams.io/blog/2019/12/02/release-v0.4/</guid>
       <description>
         
         
@@ -62,10 +106,10 @@
     
     <item>
       <title>Blog: Release v0.3</title>
-      <link>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/21/release-v0.3/</link>
+      <link>http://www.azkarrastreams.io/blog/2019/11/21/release-v0.3/</link>
       <pubDate>Thu, 21 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/21/release-v0.3/</guid>
+      <guid>http://www.azkarrastreams.io/blog/2019/11/21/release-v0.3/</guid>
       <description>
         
         

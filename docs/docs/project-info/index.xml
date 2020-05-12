@@ -1,0 +1,102 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Azkarra Streams – Project Info</title>
+    <link>http://www.azkarrastreams.io/docs/project-info/</link>
+    <description>Recent content in Project Info on Azkarra Streams</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Sat, 09 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	  <atom:link href="http://www.azkarrastreams.io/docs/project-info/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>Docs: Getting the code</title>
+      <link>http://www.azkarrastreams.io/docs/project-info/getting_the_code/</link>
+      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/docs/project-info/getting_the_code/</guid>
+      <description>
+        
+        
+        &lt;h2 id=&#34;prerequisites-for-building-azkarra&#34;&gt;Prerequisites for building Azkarra:**&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Git&lt;/li&gt;
+&lt;li&gt;Maven (we recommend version 3.5.3)&lt;/li&gt;
+&lt;li&gt;Java 11&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;building-azkarra-streams&#34;&gt;Building Azkarra Streams&lt;/h2&gt;
+&lt;p&gt;The code of Azkarra Streams is kept in GitHub. You can check it out like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ git clone https://github.com/streamthoughts/azkarra-streams.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The project uses Maven, you can build it like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ &lt;span style=&#34;color:#204a87&#34;&gt;cd&lt;/span&gt; azkarra-streams
+$ mvn clean package -DskipTests
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;building-azkarra-website&#34;&gt;Building Azkarra Website&lt;/h2&gt;
+&lt;p&gt;The source code for Azkarra website is kept in directory &lt;code&gt;./site&lt;/code&gt; of the project.&lt;/p&gt;
+&lt;p&gt;Azkarra uses the open-source static site generators &lt;a href=&#34;https://gohugo.io/&#34;&gt;Hugo&lt;/a&gt;. Hugo Extended must be installed locally to build the website. In addition, Azkarra website is based on theme &lt;a href=&#34;https://www.docsy.dev/&#34;&gt;Docsy&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To build and deploy the website locally, you can run the following commands:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ git submodule update --remote
+$ &lt;span style=&#34;color:#204a87&#34;&gt;cd&lt;/span&gt; site 
+$ git submodule sync &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; git submodule update --init --recursive
+$ npm install
+$ hugo server --watch --verbose --disableFastRender
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The website is accessible at address : &lt;a href=&#34;http://localhost:1313/azkarra-streams/&#34;&gt;http://localhost:1313/azkarra-streams/&lt;/a&gt;&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title>Docs: Maven modules</title>
+      <link>http://www.azkarrastreams.io/docs/project-info/maven_modules/</link>
+      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/docs/project-info/maven_modules/</guid>
+      <description>
+        
+        
+        &lt;p&gt;The Azkarra Sterams projects is organized around multiple maven modules:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-api&lt;/strong&gt; : The Azkarra Streams core API. This project contains the main Java interfaces and annotations (e.g &lt;code&gt;AzkarraContext&lt;/code&gt;, &lt;code&gt;StreamsExecutionEnvironment&lt;/code&gt;, &lt;code&gt;StreamsLifecicleInterceptor&lt;/code&gt;, etc).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-archetype&lt;/strong&gt; : The archetype project for Azkarra Streams.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-commons&lt;/strong&gt; :  This project provides miscellaneous reusable codes for Kafka Streams applications (i.e &lt;code&gt;DeserializationExceptionHandler&lt;/code&gt;, &lt;code&gt;Serializer&lt;/code&gt;, &lt;code&gt;Serdes&lt;/code&gt;, etc). Azkarra Commons does not depend on other modules and can therefore be used directly by any Kafka Streams project.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-examples&lt;/strong&gt; : This project contains demo applications and code samples for Azkarra Streams API.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-json-serializers&lt;/strong&gt; : This project provides general JSON serializers for Azkarra Streams API, using Jackson API.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-metrics&lt;/strong&gt; : Azkarra Metrics. This project integrates Azkarra and Micrometer allowing metrics collection for Azkarra applications.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-runtime&lt;/strong&gt; : Azkarra Runtime. This project implements Azkarra API.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-server&lt;/strong&gt; : The Azkarra Streams embedded web server.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-streams&lt;/strong&gt; :	The main dependency for bootstrapping a new Azkarra Streams application. Azkarra Streams provides capabilities like component-scan, auto-configuration, etc.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-ui&lt;/strong&gt; : The Azkarra Dashboard. This module contains all the source code for main user interface of Azkarra Streams.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;azkarra-worker&lt;/strong&gt; : The main distribution to install and deploy a single Azkarra Streams application as a standalone worker.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

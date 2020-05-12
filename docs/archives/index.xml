@@ -1,0 +1,31 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Azkarra Streams – Archives</title>
+    <link>http://www.azkarrastreams.io/archives/</link>
+    <description>Recent content in Archives on Azkarra Streams</description>
+    <generator>Hugo -- gohugo.io</generator>
+    
+	  <atom:link href="http://www.azkarrastreams.io/archives/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>Docs: Docs Release v0.6</title>
+      <link>http://www.azkarrastreams.io/v0-6/docs/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/v0-6/docs/</guid>
+      <description>
+        
+        
+        &lt;p&gt;This section is where the user documentation for Azkrarra Streams lives - all the information that users need to understand and successfully use Azkarra Streams.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

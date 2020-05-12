@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Reference</title>
-    <link>https://streamthoughts.github.io/azkarra-streams/docs/reference/</link>
+    <link>http://www.azkarrastreams.io/docs/reference/</link>
     <description>Recent content in Reference on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Fri, 29 Nov 2019 00:00:00 +0000</lastBuildDate>
     
-	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/docs/reference/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="http://www.azkarrastreams.io/docs/reference/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -16,25 +16,25 @@
     
     <item>
       <title>Docs: Azkarra Streams API Docs</title>
-      <link>https://streamthoughts.github.io/azkarra-streams/docs/reference/api-docs/</link>
-      <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
+      <link>http://www.azkarrastreams.io/docs/reference/api-docs/</link>
+      <pubDate>Tue, 12 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://streamthoughts.github.io/azkarra-streams/docs/reference/api-docs/</guid>
+      <guid>http://www.azkarrastreams.io/docs/reference/api-docs/</guid>
       <description>
         
         
-        &lt;p&gt;The latest Azkarra Streams API (0.6.0) documentation can be found on &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/apidocs/0.6.0&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Prior releases : &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/apidocs/0.3&#34;&gt;0.3&lt;/a&gt;, &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/apidocs/0.4&#34;&gt;0.4&lt;/a&gt;, &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/apidocs/0.5.0&#34;&gt;0.5.0&lt;/a&gt;, &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/apidocs/0.6.0&#34;&gt;0.6.0&lt;/a&gt;&lt;/p&gt;
+        &lt;p&gt;The latest Azkarra Streams API (0.7.0) documentation can be found on &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.7.0&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Prior releases : &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.3&#34;&gt;0.3&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/azkarra-streams/apidocs/0.4&#34;&gt;0.4&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.5.0&#34;&gt;0.5.0&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.6.0&#34;&gt;0.6.0&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.7.0&#34;&gt;0.7.0&lt;/a&gt;&lt;/p&gt;
 
       </description>
     </item>
     
     <item>
       <title>Docs: Azkarra Streams REST Interface</title>
-      <link>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/</link>
+      <link>http://www.azkarrastreams.io/docs/reference/rest-apis/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/</guid>
+      <guid>http://www.azkarrastreams.io/docs/reference/rest-apis/</guid>
       <description>
         
         

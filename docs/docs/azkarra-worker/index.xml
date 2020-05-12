@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Azkarra Worker</title>
-    <link>https://streamthoughts.github.io/azkarra-streams/docs/azkarra-worker/</link>
+    <link>http://www.azkarrastreams.io/docs/azkarra-worker/</link>
     <description>Recent content in Azkarra Worker on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Mon, 06 Jan 2020 00:00:00 +0000</lastBuildDate>
     
-	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/docs/azkarra-worker/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="http://www.azkarrastreams.io/docs/azkarra-worker/index.xml" rel="self" type="application/rss+xml" />
     
     
       
