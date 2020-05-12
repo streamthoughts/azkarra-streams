@@ -18,7 +18,7 @@ It combines the simplicity of writing and deploying standard Java and Scala appl
 
 ## Quickstart 
 
-Azkarra is available in [Maven Central](https://mvnrepository.com/artifact/io.streamthoughts/azkarra-streams-reactor/0.5.0). You can add Azkarra Streams to the dependency of the pom.xml of your project.
+Azkarra is available in [Maven Central](https://mvnrepository.com/artifact/io.streamthoughts/azkarra-streams-reactor/0.7.0). You can add Azkarra Streams to the dependency of the pom.xml of your project.
 
 ```xml
 <dependency>
@@ -46,7 +46,7 @@ $ mvn clean package -DskipTests
     
 ## Documentation
 
-If you want to read more about using **Azkarra Streams**, the documentation can be found on [GitHub Page](https://streamthoughts.github.io/azkarra-streams/)
+If you want to read more about using **Azkarra Streams**, the documentation can be found on [www.azkarrastreams.io](https://www.azkarrastreams.io/)
 
 ## Contributions
 
