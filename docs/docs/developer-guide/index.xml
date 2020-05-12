@@ -902,7 +902,7 @@ Note: This property should be used with care and not enable for production.&lt;/
 your &lt;em&gt;application.conf&lt;/em&gt; file&lt;/p&gt;
 &lt;h3 id=&#34;61-the-event-format&#34;&gt;6.1 The event format&lt;/h3&gt;
 &lt;p&gt;Azkarra emits the state of &lt;code&gt;KafkaStreams&lt;/code&gt; instances in the form of events that adhere to the &lt;a href=&#34;https://cloudevents.io/&#34;&gt;CloudEvents&lt;/a&gt; specification.&lt;/p&gt;
-&lt;p&gt;The CloudEvent specification is developped under the &lt;a href=&#34;https://cncf.io/&#34;&gt;Cloud Native Computing Foundation&lt;/a&gt; with the aim to describe a standardized and protocol-agnostic definition of the structure and metadata description of events.&lt;/p&gt;
+&lt;p&gt;The CloudEvent specification is developed under the &lt;a href=&#34;https://cncf.io/&#34;&gt;Cloud Native Computing Foundation&lt;/a&gt; with the aim to describe a standardized and protocol-agnostic definition of the structure and metadata description of events.&lt;/p&gt;
 &lt;p&gt;Currently, Azkarra only supports the &lt;a href=&#34;https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md#33-structured-content-mode&#34;&gt;Structuted Content&lt;/a&gt; mode for mapping CloudEvents to Kafka message. That means that the message-value contains event metadata and data together in a single envelope, encoded in JSON.&lt;/p&gt;
 &lt;p&gt;The following example shows a CloudEvent published by the &lt;code&gt;MonitoringStreamsInterceptor&lt;/code&gt; using default configuration.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;
@@ -1226,7 +1226,8 @@ Records are returned in JSON format, using the &lt;a href=&#34;https://github.co
 	&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;artifactId&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;azkarra-json-serializers&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
 	&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;version&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;${azkarra.version}
 &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;While these serializers are sufficient in most of the cases, you may need to provide your own custom serializers in order to use the interactive queries.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;While these serializers are sufficient in most of the cases, you may have the need to provide your own custom
+serializers in order to use the interactive queries.&lt;/p&gt;
 &lt;p&gt;Therefore, Azkarra will automatically register all components that implements the &lt;code&gt;Module&lt;/code&gt; interface into the internal &lt;code&gt;ObjectMapper&lt;/code&gt; instance used for JSON serializaton. This allows you to register custom record serializers for interactive queries.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Example using &lt;code&gt;@Component&lt;/code&gt;&lt;/strong&gt;:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#5c35cc;font-weight:bold&#34;&gt;@Factory&lt;/span&gt;
@@ -1246,7 +1247,7 @@ Records are returned in JSON format, using the &lt;a href=&#34;https://github.co
         &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;module&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;4-rest-extensions&#34;&gt;4 REST Extensions&lt;/h2&gt;
-&lt;p&gt;Azkarra already exposes several REST endpoints that you can used to monitor and manage lifecycle of Kafka Streams instances.
+&lt;p&gt;Azkarra already exposes several REST endpoints that you can use to monitor and manage lifecycle of Kafka Streams instances.
 But sometimes, you may want to expose additional REST endpoints to extend Azkarra capabilities.&lt;/p&gt;
 &lt;p&gt;Azkarra provides a mechanism, called REST extensions, that allows you to register JAX-RS resources that will be loaded and initialized by the Undertow server.&lt;/p&gt;
 &lt;p&gt;For adding REST extensions, you will first have to set the &lt;code&gt;server.rest.extensions&lt;/code&gt; property to &lt;code&gt;true&lt;/code&gt;. Then, you will have to implement the &lt;code&gt;AzkarraRestExtension&lt;/code&gt; interface.&lt;/p&gt;

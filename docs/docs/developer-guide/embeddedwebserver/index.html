@@ -26,13 +26,13 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/" />
 <meta property="article:published_time" content="2020-05-11T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-09T00:43:49+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:modified_time" content="2020-05-12T17:33:25+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Embedded Web Server">
 <meta itemprop="description" content="Configuring Azkarra embedded web server
 ">
 <meta itemprop="datePublished" content="2020-05-11T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-09T00:43:49&#43;02:00" />
-<meta itemprop="wordCount" content="806">
+<meta itemprop="dateModified" content="2020-05-12T17:33:25&#43;02:00" />
+<meta itemprop="wordCount" content="808">
 
 
 
@@ -1292,7 +1292,8 @@ Records are returned in JSON format, using the <a href="https://github.com/Faste
 	<span style="color:#204a87;font-weight:bold">&lt;artifactId</span><span style="color:#204a87;font-weight:bold">&gt;</span>azkarra-json-serializers<span style="color:#204a87;font-weight:bold">&lt;/artifactId&gt;</span>
 	<span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>${azkarra.version}
 <span style="color:#204a87;font-weight:bold">&lt;/dependency&gt;</span>
-</code></pre></div><p>While these serializers are sufficient in most of the cases, you may need to provide your own custom serializers in order to use the interactive queries.</p>
+</code></pre></div><p>While these serializers are sufficient in most of the cases, you may have the need to provide your own custom
+serializers in order to use the interactive queries.</p>
 <p>Therefore, Azkarra will automatically register all components that implements the <code>Module</code> interface into the internal <code>ObjectMapper</code> instance used for JSON serializaton. This allows you to register custom record serializers for interactive queries.</p>
 <p><strong>Example using <code>@Component</code></strong>:</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Factory</span>
@@ -1312,7 +1313,7 @@ Records are returned in JSON format, using the <a href="https://github.com/Faste
         <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">module</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#ce5c00;font-weight:bold">}</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 </code></pre></div><h2 id="4-rest-extensions">4 REST Extensions</h2>
-<p>Azkarra already exposes several REST endpoints that you can used to monitor and manage lifecycle of Kafka Streams instances.
+<p>Azkarra already exposes several REST endpoints that you can use to monitor and manage lifecycle of Kafka Streams instances.
 But sometimes, you may want to expose additional REST endpoints to extend Azkarra capabilities.</p>
 <p>Azkarra provides a mechanism, called REST extensions, that allows you to register JAX-RS resources that will be loaded and initialized by the Undertow server.</p>
 <p>For adding REST extensions, you will first have to set the <code>server.rest.extensions</code> property to <code>true</code>. Then, you will have to implement the <code>AzkarraRestExtension</code> interface.</p>
@@ -1408,7 +1409,7 @@ The <code>AzkarraRestExtension</code> interface extends the <code>Configurable</
 </code></pre>
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 9, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/0b26ef6365dfa6a71542b67ae96b4261e0bbb735">docs(site): update Azkarra website for release 0.7.0 (0b26ef6)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified May 12, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/bde9eb946af4372c20db45faa7d2b3694589900e">fix(site): fix some typos (bde9eb9)</a>
 </div>
 </div>
 

@@ -26,12 +26,12 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/" />
 <meta property="article:published_time" content="2020-05-09T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-09T00:43:49+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:modified_time" content="2020-05-12T17:33:25+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="StreamsLifecycleInterceptor">
 <meta itemprop="description" content="How to execute operations before/after a KafkaStreams instance starts/stops?
 ">
 <meta itemprop="datePublished" content="2020-05-09T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-09T00:43:49&#43;02:00" />
+<meta itemprop="dateModified" content="2020-05-12T17:33:25&#43;02:00" />
 <meta itemprop="wordCount" content="1288">
 
 
@@ -1394,7 +1394,7 @@ Note: This property should be used with care and not enable for production.</p>
 your <em>application.conf</em> file</p>
 <h3 id="61-the-event-format">6.1 The event format</h3>
 <p>Azkarra emits the state of <code>KafkaStreams</code> instances in the form of events that adhere to the <a href="https://cloudevents.io/">CloudEvents</a> specification.</p>
-<p>The CloudEvent specification is developped under the <a href="https://cncf.io/">Cloud Native Computing Foundation</a> with the aim to describe a standardized and protocol-agnostic definition of the structure and metadata description of events.</p>
+<p>The CloudEvent specification is developed under the <a href="https://cncf.io/">Cloud Native Computing Foundation</a> with the aim to describe a standardized and protocol-agnostic definition of the structure and metadata description of events.</p>
 <p>Currently, Azkarra only supports the <a href="https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md#33-structured-content-mode">Structuted Content</a> mode for mapping CloudEvents to Kafka message. That means that the message-value contains event metadata and data together in a single envelope, encoded in JSON.</p>
 <p>The following example shows a CloudEvent published by the <code>MonitoringStreamsInterceptor</code> using default configuration.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#000;font-weight:bold">{</span>
@@ -1542,7 +1542,7 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 9, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/0b26ef6365dfa6a71542b67ae96b4261e0bbb735">docs(site): update Azkarra website for release 0.7.0 (0b26ef6)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified May 12, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/bde9eb946af4372c20db45faa7d2b3694589900e">fix(site): fix some typos (bde9eb9)</a>
 </div>
 </div>
 
