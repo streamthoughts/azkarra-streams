@@ -18,8 +18,7 @@
  */
 package io.streamthoughts.examples.azkarra.security;
 
-import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.http.ServerConfBuilder;
+import io.streamthoughts.azkarra.http.ServerConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.autoconfigure.annotations.ComponentScan;
@@ -39,7 +38,7 @@ public class SSLAuthenticationExample {
 
     public static void main(final String[] args) {
 
-        final Conf securedServer = ServerConfBuilder.newBuilder()
+        final ServerConfig securedServer = ServerConfig.newBuilder()
             .setListener("localhost")
             .setPort(8080)
             // Disable interactive mode

@@ -49,7 +49,7 @@ public class UndertowEmbeddedWithServletContainerIT {
                 true
         );
         // Enable REST_EXTENSIONS to configure undertow with servlet handler
-        Conf serverConfig = ServerConfBuilder.newBuilder().enableRestExtensions().build();
+        Conf serverConfig = ServerConfig.newBuilder().enableRestExtensions().build();
         SERVER.configure(serverConfig);
         SERVER.start();
     }

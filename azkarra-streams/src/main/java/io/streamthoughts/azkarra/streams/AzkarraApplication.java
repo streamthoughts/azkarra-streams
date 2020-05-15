@@ -30,13 +30,12 @@ import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
 import io.streamthoughts.azkarra.api.server.ServerInfo;
 import io.streamthoughts.azkarra.api.spi.EmbeddedHttpServerProvider;
 import io.streamthoughts.azkarra.api.util.Network;
+import io.streamthoughts.azkarra.http.ServerConfig;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.streams.autoconfigure.AutoConfigure;
 import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
 import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
 import io.streamthoughts.azkarra.streams.components.ComponentScanner;
-import io.streamthoughts.azkarra.streams.config.HttpServerConf;
-import io.streamthoughts.azkarra.streams.config.internal.InternalHttpServerConf;
 import io.streamthoughts.azkarra.streams.context.AzkarraContextLoader;
 import org.apache.kafka.streams.StreamsConfig;
 import org.slf4j.Logger;
@@ -129,17 +128,12 @@ public class AzkarraApplication {
         this.bannerMode =  Banner.Mode.CONSOLE;
         this.mainApplicationClass = deduceMainApplicationClass();
         this.configuration = Conf.empty();
-        this.httpServerConf = new InternalHttpServerConf(Network.HOSTNAME, 8080).getConf();
+        this.httpServerConf = ServerConfig.newBuilder().setListener(Network.HOSTNAME).build();
     }
 
     public AzkarraApplication enableHttpServer(final boolean enableHttpServer) {
         this.enableHttpServer = enableHttpServer;
         return this;
-    }
-
-    public AzkarraApplication enableHttpServer(final boolean enableHttpServer,
-                                               final HttpServerConf httpServerConf) {
-        return enableHttpServer(enableHttpServer, new InternalHttpServerConf(httpServerConf).getConf());
     }
 
     public AzkarraApplication enableHttpServer(final boolean enableHttpServer,

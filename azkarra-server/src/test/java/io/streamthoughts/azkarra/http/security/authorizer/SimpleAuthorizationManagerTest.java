@@ -19,7 +19,7 @@
 package io.streamthoughts.azkarra.http.security.authorizer;
 
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.http.ServerConfBuilder;
+import io.streamthoughts.azkarra.http.ServerConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
 import io.streamthoughts.azkarra.http.security.auth.BasicUserPrincipal;
 import io.streamthoughts.azkarra.http.security.auth.GrantedAuthority;
@@ -44,7 +44,7 @@ public class SimpleAuthorizationManagerTest {
 
     @Test
     public void shouldAuthorizeAnyRoleGivenWildcard() {
-        Conf conf = ServerConfBuilder.newBuilder()
+        Conf conf = ServerConfig.newBuilder()
             .setAuthenticationRoles("*")
             .setAuthenticationRestricted("")
             .build();
@@ -57,7 +57,7 @@ public class SimpleAuthorizationManagerTest {
 
     @Test
     public void shouldAuthorizeUserGivenKnownPrincipal() {
-        Conf conf = ServerConfBuilder.newBuilder()
+        Conf conf = ServerConfig.newBuilder()
                 .setAuthenticationRoles("user")
                 .setAuthenticationRestricted("")
                 .build();
@@ -70,7 +70,7 @@ public class SimpleAuthorizationManagerTest {
 
     @Test
     public void shouldAuthorizeUserGivenKnownRole() {
-        Conf conf = ServerConfBuilder.newBuilder()
+        Conf conf = ServerConfig.newBuilder()
                 .setAuthenticationRoles("Dev")
                 .setAuthenticationRestricted("")
                 .build();
@@ -83,7 +83,7 @@ public class SimpleAuthorizationManagerTest {
 
     @Test
     public void shouldNotAuthorizeUserGivenUnknownRole() {
-        Conf conf = ServerConfBuilder.newBuilder()
+        Conf conf = ServerConfig.newBuilder()
                 .setAuthenticationRoles("Admin")
                 .build();
         manager.configure(conf);
@@ -96,7 +96,7 @@ public class SimpleAuthorizationManagerTest {
 
     @Test
     public void shouldNotAuthorizeUserGivenRestrictedRole() {
-        Conf conf = ServerConfBuilder.newBuilder()
+        Conf conf = ServerConfig.newBuilder()
                 .setAuthenticationRoles("Dev")
                 .setAuthenticationRestricted("Dev")
                 .build();

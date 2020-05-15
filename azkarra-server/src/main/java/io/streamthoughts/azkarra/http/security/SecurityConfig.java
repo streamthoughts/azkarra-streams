@@ -21,14 +21,16 @@ package io.streamthoughts.azkarra.http.security;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.config.Configurable;
+import io.streamthoughts.azkarra.api.config.DelegatingConf;
 import io.streamthoughts.azkarra.http.security.auth.AzkarraPrincipalBuilder;
 import io.streamthoughts.azkarra.http.security.auth.UsersIdentityManager;
 import io.streamthoughts.azkarra.http.security.authorizer.AuthorizationManager;
 import io.streamthoughts.azkarra.http.security.authorizer.SimpleAuthorizationManager;
 
-import java.util.Objects;
-
-public class SecurityConfig {
+/**
+ * The server security confiugration.
+ */
+public class SecurityConfig extends DelegatingConf {
 
     public static final String REST_AUTHENTICATION_MECHANISM_CONFIG     = "rest.authentication.mechanism";
     public static final String REST_AUTHENTICATION_REALM_CONFIG         = "rest.authentication.realm";
@@ -61,104 +63,101 @@ public class SecurityConfig {
         .with(SSL_TRUSTSTORE_TYPE, "PKCS12")
         .build();
 
-    private final Conf conf;
-
     /**
      * Creates a new {@link SecurityConfig} instance.
      *
      * @param conf  the {@link Conf} instance, cannot be {@code null}.
      */
     public SecurityConfig(final Conf conf) {
-        Objects.requireNonNull(conf, "conf cannot be null");
-        this.conf = conf.withFallback(DEFAULT_CONF);
+        super(conf.withFallback(DEFAULT_CONF));
     }
 
     public boolean isHostnameVerificationIgnored() {
-        return conf.getOptionalBoolean(SSL_IGNORE_HOSTNAME_VERIFICATION).orElse(false);
+        return getOptionalBoolean(SSL_IGNORE_HOSTNAME_VERIFICATION).orElse(false);
     }
 
     public boolean isBasicAuthenticationSilent() {
-        return conf.getOptionalBoolean(REST_AUTHENTICATION_BASIC_SILENT_CONFIG).orElse(false);
+        return getOptionalBoolean(REST_AUTHENTICATION_BASIC_SILENT_CONFIG).orElse(false);
     }
 
     public String getAuthenticationMechanism() {
-        return conf.getOptionalString(REST_AUTHENTICATION_MECHANISM_CONFIG).orElse(null);
+        return getOptionalString(REST_AUTHENTICATION_MECHANISM_CONFIG).orElse(null);
     }
 
     public String getAuthenticationUsers() {
-        return conf.getOptionalString(REST_AUTHENTICATION_USERS_CONFIG).orElse("");
+        return getOptionalString(REST_AUTHENTICATION_USERS_CONFIG).orElse("");
     }
 
     public AuthorizationManager getAuthorizationManager() {
-        AuthorizationManager o = conf.getClass(
+        AuthorizationManager o = getClass(
             HTTP_AUTHORIZATION_MANAGER_CLASS_CONFIG,
             AuthorizationManager.class
         );
-        Configurable.mayConfigure(o, conf);
+        Configurable.mayConfigure(o, this);
         return o;
     }
 
     public UsersIdentityManager getUserIdentityManager() {
-        if (!conf.hasPath(HTTP_AUTH_USER_IDENTITY_MANAGER_CLASS_CONFIG)) return null;
+        if (!hasPath(HTTP_AUTH_USER_IDENTITY_MANAGER_CLASS_CONFIG)) return null;
 
-        UsersIdentityManager o = conf.getClass(
+        UsersIdentityManager o = getClass(
             HTTP_AUTH_USER_IDENTITY_MANAGER_CLASS_CONFIG,
             UsersIdentityManager.class
         );
-        Configurable.mayConfigure(o, conf);
+        Configurable.mayConfigure(o, this);
         return o;
     }
 
     public AzkarraPrincipalBuilder getAuthenticationPrincipalBuilder() {
-        if (conf.hasPath(HTTP_AUTH_PRINCIPAL_BUILDER_CLASS_CONFIG)) {
-            AzkarraPrincipalBuilder o = conf.getClass(
+        if (hasPath(HTTP_AUTH_PRINCIPAL_BUILDER_CLASS_CONFIG)) {
+            AzkarraPrincipalBuilder o = getClass(
                 HTTP_AUTH_PRINCIPAL_BUILDER_CLASS_CONFIG,
                 AzkarraPrincipalBuilder.class
             );
-            Configurable.mayConfigure(o, conf);
+            Configurable.mayConfigure(o, this);
             return o;
         }
         return null;
     }
 
     public String getAuthenticationRealm() {
-        return conf.getString(REST_AUTHENTICATION_REALM_CONFIG);
+        return getString(REST_AUTHENTICATION_REALM_CONFIG);
     }
 
     public String getAuthenticationRoles() {
-        return conf.getString(REST_AUTHENTICATION_ROLES_CONFIG);
+        return getString(REST_AUTHENTICATION_ROLES_CONFIG);
     }
 
     public String getAuthenticationRestricted() {
-        return conf.getOptionalString(HTTP_RESTRICTED_ROLES_CONFIG).orElse("");
+        return getOptionalString(HTTP_RESTRICTED_ROLES_CONFIG).orElse("");
     }
 
     public boolean isHeadless() {
-        return conf.getOptionalBoolean(HTTP_HEADLESS_CONFIG).orElse(false);
+        return getOptionalBoolean(HTTP_HEADLESS_CONFIG).orElse(false);
     }
 
     public boolean isRestAuthenticationEnable() {
-        return conf.hasPath(REST_AUTHENTICATION_MECHANISM_CONFIG);
+        return hasPath(REST_AUTHENTICATION_MECHANISM_CONFIG);
     }
 
     public boolean isSslEnable() {
-        return conf.getOptionalBoolean(SSL_ENABLE).orElse(false);
+        return getOptionalBoolean(SSL_ENABLE).orElse(false);
     }
 
     public String getKeystoreLocation() {
-        return conf.getString(SSL_KEYSTORE_LOCATION);
+        return getString(SSL_KEYSTORE_LOCATION);
     }
 
     public char[] getKeystorePassword() {
-        return conf.getString(SSL_KEYSTORE_PASSWORD).toCharArray();
+        return getString(SSL_KEYSTORE_PASSWORD).toCharArray();
     }
 
     public String getKeystoreType() {
-        return conf.getString(SSL_KEYSTORE_TYPE);
+        return getString(SSL_KEYSTORE_TYPE);
     }
 
     public char[] getKeyPassword() {
-        return conf.getOptionalString(SSL_KEY_PASSWORD_CONFIG)
+        return getOptionalString(SSL_KEY_PASSWORD_CONFIG)
             .stream()
             .map(String::toCharArray)
             .findFirst()
@@ -166,11 +165,11 @@ public class SecurityConfig {
     }
 
     public String getTrustStoreLocation() {
-        return conf.getOptionalString(SSL_TRUSTSTORE_LOCATION).orElse(null);
+        return getOptionalString(SSL_TRUSTSTORE_LOCATION).orElse(null);
     }
 
     public char[] getTruststorePassword() {
-        return conf.getOptionalString(SSL_TRUSTSTORE_PASSWORD)
+        return getOptionalString(SSL_TRUSTSTORE_PASSWORD)
             .stream()
             .map(String::toCharArray)
             .findFirst()
@@ -178,6 +177,6 @@ public class SecurityConfig {
     }
 
     public String getTruststoreType() {
-        return conf.getString(SSL_TRUSTSTORE_TYPE);
+        return getString(SSL_TRUSTSTORE_TYPE);
     }
 }

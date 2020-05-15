@@ -21,12 +21,12 @@ package io.streamthoughts.examples.azkarra.noannotation;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.banner.Banner;
+import io.streamthoughts.azkarra.http.ServerConfig;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
 import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
 import io.streamthoughts.azkarra.streams.config.AzkarraConf;
-import io.streamthoughts.azkarra.streams.config.HttpServerConf;
 import io.streamthoughts.examples.azkarra.topology.BasicWordCountTopology;
 import io.streamthoughts.examples.azkarra.topology.ConfigurableWordCountTopology;
 
@@ -50,11 +50,17 @@ public class StreamsApplication {
         // register the topology to the context (the topology will not be started).
         context.registerComponent(ConfigurableWordCountTopology.class);
 
+        final ServerConfig serverConfig = ServerConfig
+                .newBuilder()
+                .setListener("localhost")
+                .setPort(8082)
+                .build();
+
         new AzkarraApplication()
             .setConfiguration(AzkarraConf.create())
             .setBannerMode(Banner.Mode.OFF)
             .setContext(context)
-            .enableHttpServer(true, HttpServerConf.with("localhost", 8082))
+            .enableHttpServer(true, serverConfig)
             .setAutoStart(true) // mandatory for auto-starting ConfigurableWordCountTopology.
             .setEnableComponentScan(false)
             .run(args);

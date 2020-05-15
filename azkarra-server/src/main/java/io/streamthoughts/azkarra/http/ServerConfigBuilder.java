@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * An helper class for build a {@link Conf} used for configuring embedded http-server.
  */
-public class ServerConfBuilder {
+public class ServerConfigBuilder {
 
     public static final String HTTP_PORT_CONFIG                    = "port";
     public static final String HTTP_LISTENER_LISTER_CONFIG         = "listener";
@@ -38,14 +38,11 @@ public class ServerConfBuilder {
 
     private final Map<String, Object> configs;
 
-    public static ServerConfBuilder newBuilder() {
-        return new ServerConfBuilder();
-    }
 
     /**
-     * Creates a new {@link ServerConfBuilder}.
+     * Creates a new {@link ServerConfigBuilder}.
      */
-    private ServerConfBuilder() {
+    ServerConfigBuilder() {
         configs = new HashMap<>();
     }
 
@@ -55,7 +52,7 @@ public class ServerConfBuilder {
      * @param port  the http port.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setPort(final int port) {
+    public ServerConfigBuilder setPort(final int port) {
         configs.put(HTTP_PORT_CONFIG, port);
         return this;
     }
@@ -66,7 +63,7 @@ public class ServerConfBuilder {
      * @param listener  the http listener.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setListener(final String listener) {
+    public ServerConfigBuilder setListener(final String listener) {
         configs.put(HTTP_LISTENER_LISTER_CONFIG, listener);
         return this;
     }
@@ -77,7 +74,7 @@ public class ServerConfBuilder {
      * @param enable    {@code true} to enable the Web UI, {@code false} otherwise.
      * @return  {@code this}.
      */
-    public ServerConfBuilder enableUI(final boolean enable) {
+    public ServerConfigBuilder enableUI(final boolean enable) {
         configs.put(HTTP_ENABLE_UI, enable);
         return this;
     }
@@ -88,7 +85,7 @@ public class ServerConfBuilder {
      * @param method       the authentication method.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setAuthenticationMethod(final String method) {
+    public ServerConfigBuilder setAuthenticationMethod(final String method) {
         configs.put(SecurityConfig.REST_AUTHENTICATION_MECHANISM_CONFIG, method);
         return this;
     }
@@ -99,7 +96,7 @@ public class ServerConfBuilder {
      * @param realm         the authentication realM
      * @return  {@code this}.
      */
-    public ServerConfBuilder setAuthenticationRealm(final String realm) {
+    public ServerConfigBuilder setAuthenticationRealm(final String realm) {
         configs.put(SecurityConfig.REST_AUTHENTICATION_REALM_CONFIG, realm);
         return this;
     }
@@ -110,7 +107,7 @@ public class ServerConfBuilder {
      * @param roles         the authentication roles.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setAuthenticationRoles(final String roles) {
+    public ServerConfigBuilder setAuthenticationRoles(final String roles) {
         configs.put(SecurityConfig.REST_AUTHENTICATION_ROLES_CONFIG, roles);
         return this;
     }
@@ -122,7 +119,7 @@ public class ServerConfBuilder {
      * @param silent       is basic authentication must be silent.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setBasicSilentAuthentication(final boolean silent) {
+    public ServerConfigBuilder setBasicSilentAuthentication(final boolean silent) {
         configs.put(SecurityConfig.REST_AUTHENTICATION_BASIC_SILENT_CONFIG, silent);
         return this;
     }
@@ -133,7 +130,7 @@ public class ServerConfBuilder {
      * @param roles         the authentication roles.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setAuthenticationRestricted(final String roles) {
+    public ServerConfigBuilder setAuthenticationRestricted(final String roles) {
         configs.put(SecurityConfig.HTTP_RESTRICTED_ROLES_CONFIG, roles);
         return this;
     }
@@ -144,7 +141,7 @@ public class ServerConfBuilder {
      * @param cls   the {@link UsersIdentityManager} class.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setUserIdentityManager(final Class<? extends UsersIdentityManager> cls) {
+    public ServerConfigBuilder setUserIdentityManager(final Class<? extends UsersIdentityManager> cls) {
         configs.put(SecurityConfig.HTTP_AUTH_USER_IDENTITY_MANAGER_CLASS_CONFIG, cls.getName());
         return this;
     }
@@ -155,7 +152,7 @@ public class ServerConfBuilder {
      * @param cls   the {@link AzkarraPrincipalBuilder} class.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setPrincipalBuilder(final Class<? extends AzkarraPrincipalBuilder> cls) {
+    public ServerConfigBuilder setPrincipalBuilder(final Class<? extends AzkarraPrincipalBuilder> cls) {
         configs.put(SecurityConfig.HTTP_AUTH_PRINCIPAL_BUILDER_CLASS_CONFIG, cls.getName());
         return this;
     }
@@ -166,7 +163,7 @@ public class ServerConfBuilder {
      * @param users         the list users to authenticate separated by comma.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setAuthenticationUsers(final String users) {
+    public ServerConfigBuilder setAuthenticationUsers(final String users) {
         configs.put(SecurityConfig.REST_AUTHENTICATION_USERS_CONFIG, users);
         return this;
     }
@@ -176,7 +173,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder setIgnoreSslHostnameVerification(final boolean ignore) {
+    public ServerConfigBuilder setIgnoreSslHostnameVerification(final boolean ignore) {
         configs.put(SecurityConfig.SSL_IGNORE_HOSTNAME_VERIFICATION, ignore);
         return this;
     }
@@ -186,7 +183,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder enableSsl() {
+    public ServerConfigBuilder enableSsl() {
         configs.put(SecurityConfig.SSL_ENABLE, true);
         return this;
     }
@@ -195,7 +192,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder disableSsl() {
+    public ServerConfigBuilder disableSsl() {
         configs.put(SecurityConfig.SSL_ENABLE, false);
         return this;
     }
@@ -207,7 +204,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder setKeyStoreLocation(final String keyStoreLocation) {
+    public ServerConfigBuilder setKeyStoreLocation(final String keyStoreLocation) {
         configs.put(SecurityConfig.SSL_KEYSTORE_LOCATION, keyStoreLocation);
         return this;
     }
@@ -218,7 +215,7 @@ public class ServerConfBuilder {
      * @param keyStorePassword the store password for the key store file.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setKeyStorePassword(final String keyStorePassword) {
+    public ServerConfigBuilder setKeyStorePassword(final String keyStorePassword) {
         configs.put(SecurityConfig.SSL_KEYSTORE_PASSWORD, keyStorePassword);
         return this;
     }
@@ -229,7 +226,7 @@ public class ServerConfBuilder {
      * @param keyStoreType     the file format of the key store file.
      * @return  {@code this}.
      */
-    public ServerConfBuilder setKeyStoreType(final String keyStoreType) {
+    public ServerConfigBuilder setKeyStoreType(final String keyStoreType) {
         configs.put(SecurityConfig.SSL_TRUSTSTORE_TYPE, keyStoreType);
         return this;
     }
@@ -241,7 +238,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder setKeyPassword(final String keyPassword) {
+    public ServerConfigBuilder setKeyPassword(final String keyPassword) {
         configs.put(SecurityConfig.SSL_KEY_PASSWORD_CONFIG, keyPassword);
         return this;
     }
@@ -253,7 +250,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder setTrustStoreLocation(final String trustStoreLocation) {
+    public ServerConfigBuilder setTrustStoreLocation(final String trustStoreLocation) {
         configs.put(SecurityConfig.SSL_TRUSTSTORE_LOCATION, trustStoreLocation);
         return this;
     }
@@ -265,7 +262,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder setTrustStorePassword(final String trustStorePassword) {
+    public ServerConfigBuilder setTrustStorePassword(final String trustStorePassword) {
         configs.put(SecurityConfig.SSL_TRUSTSTORE_PASSWORD, trustStorePassword);
         return this;
     }
@@ -277,7 +274,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}.
      */
-    public ServerConfBuilder setTrustStoreType(final String trustStoreType) {
+    public ServerConfigBuilder setTrustStoreType(final String trustStoreType) {
         configs.put(SecurityConfig.SSL_TRUSTSTORE_TYPE, trustStoreType);
         return this;
     }
@@ -287,7 +284,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}
      */
-    public ServerConfBuilder enableHeadlessMode() {
+    public ServerConfigBuilder enableHeadlessMode() {
         configs.put(SecurityConfig.HTTP_HEADLESS_CONFIG, true);
         return this;
     }
@@ -296,7 +293,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}
      */
-    public ServerConfBuilder disableHeadlessMode() {
+    public ServerConfigBuilder disableHeadlessMode() {
         configs.put(SecurityConfig.HTTP_HEADLESS_CONFIG, false);
         return this;
     }
@@ -307,7 +304,7 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}
      */
-    public ServerConfBuilder enableRestExtensions() {
+    public ServerConfigBuilder enableRestExtensions() {
         configs.put(HTTP_REST_EXTENSIONS_ENABLE, true);
         return this;
     }
@@ -318,12 +315,12 @@ public class ServerConfBuilder {
      *
      * @return  {@code this}
      */
-    public ServerConfBuilder disableRestExtensions() {
+    public ServerConfigBuilder disableRestExtensions() {
         configs.put(HTTP_REST_EXTENSIONS_ENABLE, false);
         return this;
     }
 
-    public Conf build() {
-        return Conf.with(configs);
+    public ServerConfig build() {
+        return new ServerConfig(Conf.with(configs));
     }
 }

@@ -78,9 +78,6 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(UndertowEmbeddedServer.class);
 
-    private static final int HTTP_PORT_DEFAULT = 8080;
-    private static final String HTTP_LISTENER_DEFAULT = "localhost";
-
     private final Object monitor = new Object();
 
     private final AzkarraContext context;
@@ -103,7 +100,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private Conf config;
 
-    private SecurityConfig securityConfig;
+    private ServerConfig serverConfig;
 
     private Collection<AzkarraRestExtension> registeredExtensions = new LinkedList<>();
 
@@ -125,15 +122,11 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
     @Override
     public void configure(final Conf configuration) {
         config = configuration;
-        securityConfig = new SecurityConfig(config);
-        if (securityConfig.isSslEnable()) {
-            sslContextFactory = new SSLContextFactory(securityConfig);
+        serverConfig = ServerConfig.of(config);
+        if (serverConfig.isSslEnable()) {
+            sslContextFactory = new SSLContextFactory(serverConfig);
         }
-        serverInfo = new ServerInfo(
-            config.getOptionalString(ServerConfBuilder.HTTP_LISTENER_LISTER_CONFIG).orElse(HTTP_LISTENER_DEFAULT),
-            config.getOptionalInt(ServerConfBuilder.HTTP_PORT_CONFIG).orElse(HTTP_PORT_DEFAULT),
-            securityConfig.isSslEnable()
-        );
+        serverInfo = new ServerInfo(serverConfig.getListener(), serverConfig.getPort(), serverConfig.isSslEnable());
 
         // Find and register all user-specified Jackson modules
         Collection<Module> jacksonModules = context.getAllComponents(Module.class);
@@ -145,7 +138,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
     private Undertow buildUndertowServer() {
         final Undertow.Builder sb = Undertow.builder().setServerOption(UndertowOptions.ENABLE_HTTP2, true);
 
-        if (securityConfig.isSslEnable()) {
+        if (serverConfig.isSslEnable()) {
             sb.addHttpsListener(serverInfo.getPort(), serverInfo.getHost(), sslContextFactory.getSSLContext());
         } else {
             sb.addHttpListener(serverInfo.getPort(), serverInfo.getHost());
@@ -153,19 +146,19 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
         HttpHandler handler;
 
-        if (isRestExtensionsEnable()) {
+        if (serverConfig.isRestExtensionEnable()) {
             // fallback to the ServletHandler when no route was found
             handler = initializeServletPathHandler(this::initializeRouterPathHandler);
         } else {
             handler = initializeRouterPathHandler(ResponseCodeHandler.HANDLE_404);
         }
 
-        if (securityConfig.isHeadless()) {
+        if (serverConfig.isHeadless()) {
             handler = new HeadlessHttpHandler(handler);
         }
 
-        if (securityConfig.isRestAuthenticationEnable()) {
-            handler = initializeSecurityPathHandler(sb, securityConfig, handler);
+        if (serverConfig.isRestAuthenticationEnable()) {
+            handler = initializeSecurityPathHandler(sb, serverConfig, handler);
         }
 
         // DefaultResponseHandler must always be the first handler in the chain.
@@ -180,27 +173,17 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
                 .setBasePath(APIVersions.PATH_V1)
                 .setSerdes(new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class));
 
-        if (securityConfig.isSslEnable()) {
+        if (serverConfig.isSslEnable()) {
             httpRemoteQueryBuilder.setSSLContextFactory(sslContextFactory);
-            httpRemoteQueryBuilder.setIgnoreHostnameVerification(securityConfig.isHostnameVerificationIgnored());
+            httpRemoteQueryBuilder.setIgnoreHostnameVerification(serverConfig.isHostnameVerificationIgnored());
         }
 
-        if (securityConfig.isRestAuthenticationEnable()) {
+        if (serverConfig.isRestAuthenticationEnable()) {
             httpRemoteQueryBuilder.enablePasswordAuthentication(true);
         }
 
         service = new LocalAzkarraStreamsService(context, httpRemoteQueryBuilder.build());
         context.registerSingleton(service);
-    }
-
-    private Boolean isRestExtensionsEnable() {
-        // by default REST extensions support should be disable.
-        return config.getOptionalBoolean(ServerConfBuilder.HTTP_REST_EXTENSIONS_ENABLE).orElse(false);
-    }
-
-    private boolean isWebUIEnable() {
-        // by default Web UI should always be enable.
-        return config.getOptionalBoolean(ServerConfBuilder.HTTP_ENABLE_UI).orElse(true);
     }
 
     private HttpHandler initializeRouterPathHandler(final HttpHandler fallbackHandler) {
@@ -210,7 +193,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
             serviceLoader.forEach(this::addRoutingHandler);
         }
         // Add handler to serve static resources for WebUI.
-        if (isWebUIEnable()) {
+        if (serverConfig.isUIEnable()) {
             addRoutingHandler(new WebUIHttpRoutes());
         }
 

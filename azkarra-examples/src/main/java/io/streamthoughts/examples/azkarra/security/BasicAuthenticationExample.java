@@ -18,8 +18,7 @@
  */
 package io.streamthoughts.examples.azkarra.security;
 
-import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.http.ServerConfBuilder;
+import io.streamthoughts.azkarra.http.ServerConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.autoconfigure.annotations.ComponentScan;
@@ -57,7 +56,7 @@ public class BasicAuthenticationExample {
 
     public static void main(final String[] args) {
 
-        final Conf securedServer = ServerConfBuilder.newBuilder()
+        final ServerConfig serverConfig = ServerConfig.newBuilder()
             .setListener("localhost")
             .setPort(8080)
             // Enable authentication
@@ -70,7 +69,7 @@ public class BasicAuthenticationExample {
         new AzkarraApplication()
             .setConfiguration(AzkarraConf.create("application"))
             .addSource(BasicWordCountTopology.class)
-            .enableHttpServer(true, securedServer)
+            .enableHttpServer(true, serverConfig)
             .run(args);
     }
 }
