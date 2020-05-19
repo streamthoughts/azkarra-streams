@@ -72,7 +72,10 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
             .supplier(descriptor.supplier())
             .isSingleton(descriptor.isSingleton())
             .order(descriptor.order())
-            .isPrimary(descriptor.isPrimary());
+            .isPrimary(descriptor.isPrimary())
+            .isSecondary(descriptor.isSecondary())
+            .condition(descriptor.condition().orElse(null))
+            .isEager(descriptor.isEager());
     }
 
     /**
