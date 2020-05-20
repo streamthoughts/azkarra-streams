@@ -25,7 +25,7 @@ First, run this following command :
 ```bash
 $> mvn archetype:generate -DarchetypeGroupId=io.streamthoughts \
 -DarchetypeArtifactId=azkarra-quickstart-java \
--DarchetypeVersion=0.7.0 \
+-DarchetypeVersion=0.7.1 \
 -DgroupId=azkarra.streams \
 -DartifactId=azkarra-getting-started \
 -Dversion=1.0-SNAPSHOT \
@@ -66,7 +66,7 @@ The `pom.xml` already contains the Azkarra Streams and Kafka Streams dependencie
     <dependency>
         <groupId>io.streamthoughts</groupId>
         <artifactId>azkarra-streams</artifactId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
     </dependency>
 </dependencies>
 ```
