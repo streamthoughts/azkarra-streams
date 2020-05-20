@@ -78,7 +78,7 @@ public class AzkarraConf extends AbstractConf {
 
     /**
      * Static helper that can be used to creates a new {@link AzkarraConf} instance
-     * using the specified resource base name.
+     * that loads a default configuration.
      *
      * <p>
      * This method loads the following (first-listed are higher priority):

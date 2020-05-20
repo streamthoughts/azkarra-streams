@@ -63,11 +63,16 @@ public class AutoConfigure {
         }
 
         final Class<?> mainApplicationClass = application.getMainApplicationClass();
-
-        Optional<String> configBasename = loadAutoSettingsIfEnable(mainApplicationClass);
-        final AzkarraConf conf = configBasename.map(AzkarraConf::create).orElse(AzkarraConf.empty());
-        application.addConfiguration(conf);
-
+        final Optional<String> autoConfig = loadAutoConfigIfEnable(mainApplicationClass);
+        autoConfig.ifPresent(configBasename -> {
+            if (configBasename.isEmpty())
+                // Load default configuration
+                application.addConfiguration(AzkarraConf.create());
+            else {
+                // Load user defined custom configuration
+                application.addConfiguration(AzkarraConf.create(configBasename));
+            }
+        });
         isHttpServerEnable(mainApplicationClass)
             .ifPresent(application::enableHttpServer);
 
@@ -78,7 +83,7 @@ public class AutoConfigure {
             .ifPresent(application::setEnableComponentScan);
     }
 
-    private Optional<Boolean> isComponentScanEnable(final Class<?> source) {
+    private static Optional<Boolean> isComponentScanEnable(final Class<?> source) {
         Set<Annotation> annotations = allAnnotationsOfType(source, ComponentScan.class);
         Optional<Boolean> optional = annotations.stream()
             .map(a -> ((ComponentScan) a).value())
@@ -88,7 +93,7 @@ public class AutoConfigure {
             isHttpServerEnable(AzkarraStreamsApplication.class) : Optional.empty());
     }
 
-    private Optional<Boolean> isHttpServerEnable(final Class<?> source) {
+    private static Optional<Boolean> isHttpServerEnable(final Class<?> source) {
         Set<Annotation> annotations = allAnnotationsOfType(source, EnableEmbeddedHttpServer.class);
         Optional<Boolean> optional = annotations.stream()
             .map(a -> ((EnableEmbeddedHttpServer) a).value())
@@ -98,7 +103,7 @@ public class AutoConfigure {
             isHttpServerEnable(AzkarraStreamsApplication.class) : Optional.empty());
     }
 
-    private Optional<String> loadAutoStartEnvironmentNameIfEnable(final Class<?> source) {
+    private static Optional<String> loadAutoStartEnvironmentNameIfEnable(final Class<?> source) {
         Set<Annotation> annotations = allAnnotationsOfType(source, EnableAutoStart.class);
         Optional<String> optional = annotations.stream()
            .map(a -> ((EnableAutoStart)a).environment())
@@ -109,18 +114,17 @@ public class AutoConfigure {
 
     }
 
-    private Optional<String> loadAutoSettingsIfEnable(final Class<?> source) {
+    private static Optional<String> loadAutoConfigIfEnable(final Class<?> source) {
         Set<Annotation> annotations = allAnnotationsOfType(source, EnableAutoConfig.class);
         Optional<String> optional = annotations.stream()
                 .map(a -> ((EnableAutoConfig)a).name())
                 .findFirst();
 
         return optional.or(() -> isAnnotatedWith(source, AzkarraStreamsApplication.class) ?
-                loadAutoSettingsIfEnable(AzkarraStreamsApplication.class) : Optional.empty());
+                loadAutoConfigIfEnable(AzkarraStreamsApplication.class) : Optional.empty());
 
     }
 
-    @SuppressWarnings("unchecked")
     private static <T extends AnnotatedElement> boolean isAnnotatedWith(
             final T type,
             final Class<? extends Annotation> annotation) {

@@ -28,5 +28,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EnableAutoConfig {
-    String name() default "application";
+    /**
+     * The name (optionally without extension) of a resource on classpath.
+     * By default, a default configuration is loaded no resource basename is specified.
+     */
+    String name() default "";
 }
