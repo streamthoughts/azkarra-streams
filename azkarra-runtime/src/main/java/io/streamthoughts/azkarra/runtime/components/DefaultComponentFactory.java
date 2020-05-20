@@ -32,16 +32,15 @@ import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.components.NoUniqueComponentException;
 import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.components.condition.ComponentConditionalContext;
-import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
+import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -736,8 +735,8 @@ public class DefaultComponentFactory implements ComponentFactory {
             }
             for (T instance : instances) {
                 try {
-                    ((Closeable)instance).close();
-                } catch (IOException e) {
+                    ((AutoCloseable)instance).close();
+                } catch (Exception e) {
                     LOG.warn("Error while closing component", e);
                 }
             }
