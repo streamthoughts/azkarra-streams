@@ -36,6 +36,7 @@
 
     <artifactId>azkarra-server</artifactId>
 
+    <name>Azkarra Server</name>
     <description>The Azkarra Streams embedded web server</description>
 
     <build>

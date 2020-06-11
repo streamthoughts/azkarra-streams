@@ -54,16 +54,24 @@
     </build>
 
     <dependencies>
+
         <dependency>
-            <groupId>io.streamthoughts</groupId>
-            <artifactId>azkarra-runtime</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.streamthoughts</groupId>
             <artifactId>azkarra-server</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.streamthoughts</groupId>
+            <artifactId>azkarra-runtime</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

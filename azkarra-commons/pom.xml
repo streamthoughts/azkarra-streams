@@ -15,6 +15,7 @@
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>
     </properties>
 
+    <name>Azkarra Commons</name>
     <description>Azkarra Commons provides reusable codes for Kafka Streams.</description>
 
     <build>
@@ -46,6 +47,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

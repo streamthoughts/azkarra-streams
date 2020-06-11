@@ -248,7 +248,6 @@
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-streams</artifactId>
                 <version>${kafka.streams.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>

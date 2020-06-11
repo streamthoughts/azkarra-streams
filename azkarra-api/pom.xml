@@ -28,6 +28,7 @@
 
     <artifactId>azkarra-api</artifactId>
 
+    <name>Azkarra API</name>
     <description>Azkarra Streams Core API</description>
 
     <properties>

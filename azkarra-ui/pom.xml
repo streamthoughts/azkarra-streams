@@ -28,6 +28,7 @@
 
     <artifactId>azkarra-ui</artifactId>
 
+    <name>Azkarra Dashboard</name>
     <description>Azkarra Streams Dashboard.</description>
 
     <properties>
