@@ -30,6 +30,7 @@
 
     <artifactId>azkarra-runtime</artifactId>
 
+    <name>Azkarra Runtime</name>
     <description>Azkarra Streams Runtime</description>
 
     <properties>
@@ -81,6 +82,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -25,6 +25,7 @@
         <version>0.8.0-SNAPSHOT</version>
     </parent>
 
+    <name>Azkarra Quickstart Java</name>
     <artifactId>azkarra-quickstart-java</artifactId>
 
     <packaging>maven-archetype</packaging>

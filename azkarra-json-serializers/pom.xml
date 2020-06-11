@@ -11,6 +11,7 @@
 
     <artifactId>azkarra-json-serializers</artifactId>
 
+    <name>Azkarra JSON Serializers</name>
     <description>General JSON serializers for Azkarra Streams API, uses Jackson API.</description>
 
     <properties>
@@ -47,6 +48,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
