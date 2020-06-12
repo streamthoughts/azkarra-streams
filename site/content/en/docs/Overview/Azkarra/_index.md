@@ -43,8 +43,8 @@ Azkarra helps you build Kafka Streams applications using best pratices developpe
 
 Give your users next steps from the Overview. For example:
 
-* **Getting Started**: [Get started with Azkarra Streams](/azkarra-streams/docs/getting-started/)
-* **Examples**: [Check out some example code!](/azkarra-streams/docs/examples/)
+* **Getting Started**: [Get started with Azkarra Streams](/docs/getting-started/)
+* **Examples**: [Check out some example code!](/docs/examples/)
 
 
 
