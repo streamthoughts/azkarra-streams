@@ -36,5 +36,6 @@
     <suppress checks="NPathComplexity" files="io.streamthoughts.azkarra.commons.error.SafeDeserializerConfig"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer"/>
     <suppress checks="ParameterNumber" files="SimpleComponentDescriptor" />
+    <suppress checks="BooleanExpressionComplexity" files="io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils" />
 
 </suppressions>
