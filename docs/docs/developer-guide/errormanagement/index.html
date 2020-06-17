@@ -25,14 +25,14 @@
 " />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/errormanagement/" />
-<meta property="article:published_time" content="2020-02-12T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-09T00:43:49+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:published_time" content="2020-06-17T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-06-17T21:51:25+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Error Management">
 <meta itemprop="description" content="How to handle exception thrown during `KafkaStreams` execution ?
 ">
-<meta itemprop="datePublished" content="2020-02-12T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-09T00:43:49&#43;02:00" />
-<meta itemprop="wordCount" content="355">
+<meta itemprop="datePublished" content="2020-06-17T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-06-17T21:51:25&#43;02:00" />
+<meta itemprop="wordCount" content="490">
 
 
 
@@ -125,7 +125,9 @@
 	
 	<a class="dropdown-item" href="./docs">master</a>
 	
-	<a class="dropdown-item" href="./v0-6/docs">v0.6</a>
+	<a class="dropdown-item" href="./v0-7/docs">v0.7.x</a>
+	
+	<a class="dropdown-item" href="./v0-6/docs">v0.6.x</a>
 	
 </div>
 
@@ -1101,6 +1103,471 @@
 
       
       
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/v0-7/docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">v0.7</a>
+  </li>
+  <ul>
+    <li class="collapse " id="v0-7-docs">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/overview/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Overview</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-overview">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/overview/azkarra/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-overview-azkarra">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/overview/contribution-guidelines/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Contribution Guidelines</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-overview-contribution-guidelines">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/getting-started/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Getting Started</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-getting-started">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/developer-guide/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Developer Guide</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-developer-guide">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-topologyprovider" href="/docs/archives/v0.7/developer-guide/topologyprovider/">TopologyProvider</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-streamsexecutionenvironment" href="/docs/archives/v0.7/developer-guide/streamsexecutionenvironment/">StreamsExecutionEnvironment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-configuration" href="/docs/archives/v0.7/developer-guide/configuration/">Configuration</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-azkarracontext" href="/docs/archives/v0.7/developer-guide/azkarracontext/">AzkarraContext</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-azkarraapplication" href="/docs/archives/v0.7/developer-guide/azkarraapplication/">AzkarraApplication</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-dependencyinjection" href="/docs/archives/v0.7/developer-guide/dependencyinjection/">Dependency Injection</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-streamslifecycleinterceptors" href="/docs/archives/v0.7/developer-guide/streamslifecycleinterceptors/">The StreamsLifecycle Intercepting Chain</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-errormanagement" href="/docs/archives/v0.7/developer-guide/errormanagement/">Error Management</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-embeddedwebserver" href="/docs/archives/v0.7/developer-guide/embeddedwebserver/">Embedded Web Server</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-security" href="/docs/archives/v0.7/developer-guide/security/">Security</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-rocksdb" href="/docs/archives/v0.7/developer-guide/rocksdb/">RocksDB</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/azkarra-dashboard/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Dashboard</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-azkarra-dashboard">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/azkarra-metrics/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Metrics</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-azkarra-metrics">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/azkarra-worker/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Worker</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-azkarra-worker">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/examples/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Tutorials and Shared Resources</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-examples">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/faq/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">FAQ</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-faq">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/reference/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Reference</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-reference">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/reference/api-docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams API Docs</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-reference-api-docs">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/reference/rest-apis/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams REST Interface</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-reference-rest-apis">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-application" href="/docs/archives/v0.7/reference/rest-apis/application/">Applications</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-environment" href="/docs/archives/v0.7/reference/rest-apis/environment/">Environment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-health" href="/docs/archives/v0.7/reference/rest-apis/health/">Health</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-info" href="/docs/archives/v0.7/reference/rest-apis/info/">Info</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-streams" href="/docs/archives/v0.7/reference/rest-apis/streams/">Streams</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-topology" href="/docs/archives/v0.7/reference/rest-apis/topology/">Topologies</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-versions" href="/docs/archives/v0.7/reference/rest-apis/versions/">Version</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/project-info/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Project Info</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-project-info">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-project-info-getting-the-code" href="/docs/archives/v0.7/project-info/getting_the_code/">Getting the code</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-project-info-maven-modules" href="/docs/archives/v0.7/project-info/maven_modules/">Maven modules</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
     </li>
   </ul>
 </ul>
@@ -1182,18 +1649,19 @@
 
 <nav id="TableOfContents">
   <ul>
-    <li><a href="#1-the-deadlettertopicexceptionhandler-class">1 The DeadLetterTopicExceptionHandler class</a>
+    <li><a href="#1-the-streamthreadexceptionhandler-class">1 The StreamThreadExceptionHandler class</a></li>
+    <li><a href="#2-the-deadlettertopicexceptionhandler-class">2 The DeadLetterTopicExceptionHandler class</a>
       <ul>
-        <li><a href="#11-configuring-deadlettertopicexceptionhandler">1.1 Configuring DeadLetterTopicExceptionHandler</a></li>
-        <li><a href="#12-configuring-kafkaproducer">1.2 Configuring KafkaProducer</a></li>
-        <li><a href="#13-adding-custom-headers">1.3 Adding custom headers</a></li>
+        <li><a href="#21-configuring-deadlettertopicexceptionhandler">2.1 Configuring DeadLetterTopicExceptionHandler</a></li>
+        <li><a href="#22-configuring-kafkaproducer">2.2 Configuring KafkaProducer</a></li>
+        <li><a href="#23-adding-custom-headers">2.3 Adding custom headers</a></li>
       </ul>
     </li>
-    <li><a href="#2-the-safedeserializer-class">2 The SafeDeserializer class</a>
+    <li><a href="#3-the-safedeserializer-class">3 The SafeDeserializer class</a>
       <ul>
-        <li><a href="#21-creating-a-safedeserializer">2.1 Creating a SafeDeserializer</a></li>
-        <li><a href="#22-configuring-a-safedeserializer">2.2 Configuring a SafeDeserializer</a></li>
-        <li><a href="#23-the-safeserde-class">2.3 The SafeSerde class</a></li>
+        <li><a href="#31-creating-a-safedeserializer">3.1 Creating a SafeDeserializer</a></li>
+        <li><a href="#32-configuring-a-safedeserializer">3.2 Configuring a SafeDeserializer</a></li>
+        <li><a href="#33-the-safeserde-class">3.3 The SafeSerde class</a></li>
       </ul>
     </li>
   </ul>
@@ -1246,7 +1714,31 @@
     <div class="lead">How to handle exception thrown during <code>KafkaStreams</code> execution ?</div>
 	       
 	<p>During the execution of <code>KafkaStreams</code> instance different types of errors may happens.</p>
-<h2 id="1-the-deadlettertopicexceptionhandler-class">1 The <code>DeadLetterTopicExceptionHandler</code> class</h2>
+<h2 id="1-the-streamthreadexceptionhandler-class">1 The <code>StreamThreadExceptionHandler</code> class</h2>
+<p>KafkaStreams allows Developers to configure an <code>UncaughtExceptionHandler</code> through the <code>KafkaStreams#setUncaughtExceptionHandler</code> method.
+This method is invoked when an internal when a StreamThread abruptly terminates due to an uncaught exception.</p>
+<p>Azkarra automatically configures a default <code>UncaughtExceptionHandler</code> that will
+delegate to a user-provided handler that implements the public <code>StreamThreadExceptionHandler</code> interface.</p>
+<p>Azkarra packs the 3 following built-in implementations :</p>
+<ul>
+<li>
+<p><code>CloseKafkaStreamsOnThreadException</code>: Closes immediately the <code>KafkaStreams</code> instance when a StreamThread abruptly terminates due to an uncaught exception (default).</p>
+</li>
+<li>
+<p><code>RestartKafkaStreamsOnThreadException</code>: Restarts the <code>KafkaStreams</code> instance when a StreamThread abruptly terminates due to an uncaught exception.</p>
+</li>
+<li>
+<p><code>LogAndSkipOnThreadException</code>: Logs and skips exception when a StreamThread abruptly terminates due to an uncaught exception.</p>
+</li>
+</ul>
+<p>Note: all provided implementations are located in <code>io.streamthoughts.azkarra.runtime.streams.errors.</code> package.</p>
+<p>The following config example shows how to configure a <code>StreamThreadExceptionHandler</code> :</p>
+<pre><code>azkarra {
+    context {
+        default.stream.thread.exception.handler = &quot;io.streamthoughts.azkarra.runtime.streams.errors.RestartKafkaStreamsOnThreadException&quot;
+    }
+}
+</code></pre><h2 id="2-the-deadlettertopicexceptionhandler-class">2 The <code>DeadLetterTopicExceptionHandler</code> class</h2>
 <p>Azkarra provides the <code>DeadLetterTopicExceptionHandler</code>, a <code>DeserializationExceptionHandler</code> allowing to send corrupted records into a dedicated topic.</p>
 <p>By default, the <code>DeadLetterTopicExceptionHandler</code> will send corrupted records to an sink topic named based on the source topic - i.e: <code>rejected-&lt;source_topic_name&gt;</code>.</p>
 <p>In addition, the <code>DeadLetterTopicExceptionHandler</code> will enrich corrupted records with Kafka headers to help investigate the cause of the exception.</p>
@@ -1296,7 +1788,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="11-configuring-deadlettertopicexceptionhandler">1.1 Configuring <code>DeadLetterTopicExceptionHandler</code></h3>
+<h3 id="21-configuring-deadlettertopicexceptionhandler">2.1 Configuring <code>DeadLetterTopicExceptionHandler</code></h3>
 <table>
 <thead>
 <tr>
@@ -1318,19 +1810,19 @@
 </tr>
 </tbody>
 </table>
-<h3 id="12-configuring-kafkaproducer">1.2 Configuring <code>KafkaProducer</code></h3>
+<h3 id="22-configuring-kafkaproducer">2.2 Configuring <code>KafkaProducer</code></h3>
 <p>By default, the <code>DeadLetterTopicExceptionHandler</code> uses the <code>KafkaProducer</code> attached to the internal <code>StreamThread</code>.
 A dedicated <code>KafkaProducer</code> can be created by configuring handler producer using the property prefix <code>exception.handler.dead.letter.</code>.</p>
-<h3 id="13-adding-custom-headers">1.3 Adding custom headers</h3>
+<h3 id="23-adding-custom-headers">2.3 Adding custom headers</h3>
 <p>You can configure additional header to be added to corrupted message using the prefix <code>exception.handler.dead.letter.headers.</code>.</p>
-<h2 id="2-the-safedeserializer-class">2 The <code>SafeDeserializer</code> class</h2>
+<h2 id="3-the-safedeserializer-class">3 The <code>SafeDeserializer</code> class</h2>
 <p>Azkarra provides a <code>SafeDeserializer</code> that can be used to wrap an existing <code>Deserializer</code> and catch any exception thrown during deserialization for returning a record called a <em>sentinel-object</em> that you filter later in the <code>Topology</code> (e.g null, &ldquo;N/A&rdquo;, -1, etc).</p>
-<h3 id="21-creating-a-safedeserializer">2.1 Creating a <code>SafeDeserializer</code></h3>
+<h3 id="31-creating-a-safedeserializer">3.1 Creating a <code>SafeDeserializer</code></h3>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">SafeDeserializer</span> <span style="color:#000">deserializer</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">SafeDeserializer</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#ce5c00;font-weight:bold">(</span>
     <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">GenericAvroSerde</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">deserializer</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#8f5902;font-style:italic">// the delegating deserializer
 </span><span style="color:#8f5902;font-style:italic"></span>    <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">GenericRecord</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#204a87;font-weight:bold">null</span>     			   <span style="color:#8f5902;font-style:italic">// the sentinel-object to return when an exception is catch
 </span><span style="color:#8f5902;font-style:italic"></span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><h3 id="22-configuring-a-safedeserializer">2.2 Configuring a <code>SafeDeserializer</code></h3>
+</code></pre></div><h3 id="32-configuring-a-safedeserializer">3.2 Configuring a <code>SafeDeserializer</code></h3>
 <p>The sentinel-object to return can also be configured.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">SafeDeserializer</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">Double</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">deserializer</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">SafeDeserializer</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#ce5c00;font-weight:bold">(</span>
     <span style="color:#000">Serdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">Double</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">deserializer</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#8f5902;font-style:italic">// the delegating deserializer
@@ -1340,7 +1832,7 @@ A dedicated <code>KafkaProducer</code> can be created by configuring handler pro
 <span style="color:#000">Map</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Object</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">configs</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">HashMap</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#000">configs</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">put</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">SafeDeserializerConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">SAFE_DESERIALIZER_DEFAULT_VALUE_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">0</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">0</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#000">deserializer</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">configs</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">false</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
-</code></pre></div><h3 id="23-the-safeserde-class">2.3 The <code>SafeSerde</code> class</h3>
+</code></pre></div><h3 id="33-the-safeserde-class">3.3 The <code>SafeSerde</code> class</h3>
 <p>The <code>SafeSerde</code> is an utility class allowing you to wrap existing <code>Serde</code> or <code>Deserializer</code>.</p>
 <p>Behing the scene, <code>SafeSerde</code> uses the <code>SafeDeserializer</code> for wrapping existing <code>Deserializer</code>.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">Serde</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">stringSerde</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">SafeSerdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">Double</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>  
@@ -1349,7 +1841,7 @@ A dedicated <code>KafkaProducer</code> can be created by configuring handler pro
 </code></pre></div>
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 9, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/0b26ef6365dfa6a71542b67ae96b4261e0bbb735">docs(site): update Azkarra website for release 0.7.0 (0b26ef6)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified June 17, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/647c78b9d79b4598405b92d42fbe2232d49faf19">docs(site): add configuraiton about StreamThreadExceptionHandler (647c78b)</a>
 </div>
 </div>
 

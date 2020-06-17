@@ -1054,14 +1054,38 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
     <item>
       <title>Docs: Error Management</title>
       <link>http://www.azkarrastreams.io/docs/developer-guide/errormanagement/</link>
-      <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>http://www.azkarrastreams.io/docs/developer-guide/errormanagement/</guid>
       <description>
         
         
         &lt;p&gt;During the execution of &lt;code&gt;KafkaStreams&lt;/code&gt; instance different types of errors may happens.&lt;/p&gt;
-&lt;h2 id=&#34;1-the-deadlettertopicexceptionhandler-class&#34;&gt;1 The &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt; class&lt;/h2&gt;
+&lt;h2 id=&#34;1-the-streamthreadexceptionhandler-class&#34;&gt;1 The &lt;code&gt;StreamThreadExceptionHandler&lt;/code&gt; class&lt;/h2&gt;
+&lt;p&gt;KafkaStreams allows Developers to configure an &lt;code&gt;UncaughtExceptionHandler&lt;/code&gt; through the &lt;code&gt;KafkaStreams#setUncaughtExceptionHandler&lt;/code&gt; method.
+This method is invoked when an internal when a StreamThread abruptly terminates due to an uncaught exception.&lt;/p&gt;
+&lt;p&gt;Azkarra automatically configures a default &lt;code&gt;UncaughtExceptionHandler&lt;/code&gt; that will
+delegate to a user-provided handler that implements the public &lt;code&gt;StreamThreadExceptionHandler&lt;/code&gt; interface.&lt;/p&gt;
+&lt;p&gt;Azkarra packs the 3 following built-in implementations :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;CloseKafkaStreamsOnThreadException&lt;/code&gt;: Closes immediately the &lt;code&gt;KafkaStreams&lt;/code&gt; instance when a StreamThread abruptly terminates due to an uncaught exception (default).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;RestartKafkaStreamsOnThreadException&lt;/code&gt;: Restarts the &lt;code&gt;KafkaStreams&lt;/code&gt; instance when a StreamThread abruptly terminates due to an uncaught exception.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;LogAndSkipOnThreadException&lt;/code&gt;: Logs and skips exception when a StreamThread abruptly terminates due to an uncaught exception.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Note: all provided implementations are located in &lt;code&gt;io.streamthoughts.azkarra.runtime.streams.errors.&lt;/code&gt; package.&lt;/p&gt;
+&lt;p&gt;The following config example shows how to configure a &lt;code&gt;StreamThreadExceptionHandler&lt;/code&gt; :&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;azkarra {
+    context {
+        default.stream.thread.exception.handler = &amp;quot;io.streamthoughts.azkarra.runtime.streams.errors.RestartKafkaStreamsOnThreadException&amp;quot;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;2-the-deadlettertopicexceptionhandler-class&#34;&gt;2 The &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt; class&lt;/h2&gt;
 &lt;p&gt;Azkarra provides the &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt;, a &lt;code&gt;DeserializationExceptionHandler&lt;/code&gt; allowing to send corrupted records into a dedicated topic.&lt;/p&gt;
 &lt;p&gt;By default, the &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt; will send corrupted records to an sink topic named based on the source topic - i.e: &lt;code&gt;rejected-&amp;lt;source_topic_name&amp;gt;&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;In addition, the &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt; will enrich corrupted records with Kafka headers to help investigate the cause of the exception.&lt;/p&gt;
@@ -1111,7 +1135,7 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h3 id=&#34;11-configuring-deadlettertopicexceptionhandler&#34;&gt;1.1 Configuring &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;21-configuring-deadlettertopicexceptionhandler&#34;&gt;2.1 Configuring &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt;&lt;/h3&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -1133,19 +1157,19 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h3 id=&#34;12-configuring-kafkaproducer&#34;&gt;1.2 Configuring &lt;code&gt;KafkaProducer&lt;/code&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;22-configuring-kafkaproducer&#34;&gt;2.2 Configuring &lt;code&gt;KafkaProducer&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;By default, the &lt;code&gt;DeadLetterTopicExceptionHandler&lt;/code&gt; uses the &lt;code&gt;KafkaProducer&lt;/code&gt; attached to the internal &lt;code&gt;StreamThread&lt;/code&gt;.
 A dedicated &lt;code&gt;KafkaProducer&lt;/code&gt; can be created by configuring handler producer using the property prefix &lt;code&gt;exception.handler.dead.letter.&lt;/code&gt;.&lt;/p&gt;
-&lt;h3 id=&#34;13-adding-custom-headers&#34;&gt;1.3 Adding custom headers&lt;/h3&gt;
+&lt;h3 id=&#34;23-adding-custom-headers&#34;&gt;2.3 Adding custom headers&lt;/h3&gt;
 &lt;p&gt;You can configure additional header to be added to corrupted message using the prefix &lt;code&gt;exception.handler.dead.letter.headers.&lt;/code&gt;.&lt;/p&gt;
-&lt;h2 id=&#34;2-the-safedeserializer-class&#34;&gt;2 The &lt;code&gt;SafeDeserializer&lt;/code&gt; class&lt;/h2&gt;
+&lt;h2 id=&#34;3-the-safedeserializer-class&#34;&gt;3 The &lt;code&gt;SafeDeserializer&lt;/code&gt; class&lt;/h2&gt;
 &lt;p&gt;Azkarra provides a &lt;code&gt;SafeDeserializer&lt;/code&gt; that can be used to wrap an existing &lt;code&gt;Deserializer&lt;/code&gt; and catch any exception thrown during deserialization for returning a record called a &lt;em&gt;sentinel-object&lt;/em&gt; that you filter later in the &lt;code&gt;Topology&lt;/code&gt; (e.g null, &amp;ldquo;N/A&amp;rdquo;, -1, etc).&lt;/p&gt;
-&lt;h3 id=&#34;21-creating-a-safedeserializer&#34;&gt;2.1 Creating a &lt;code&gt;SafeDeserializer&lt;/code&gt;&lt;/h3&gt;
+&lt;h3 id=&#34;31-creating-a-safedeserializer&#34;&gt;3.1 Creating a &lt;code&gt;SafeDeserializer&lt;/code&gt;&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;SafeDeserializer&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;deserializer&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;SafeDeserializer&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;
     &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;GenericAvroSerde&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;deserializer&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#8f5902;font-style:italic&#34;&gt;// the delegating deserializer
 &lt;/span&gt;&lt;span style=&#34;color:#8f5902;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;GenericRecord&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;null&lt;/span&gt;     			   &lt;span style=&#34;color:#8f5902;font-style:italic&#34;&gt;// the sentinel-object to return when an exception is catch
 &lt;/span&gt;&lt;span style=&#34;color:#8f5902;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;22-configuring-a-safedeserializer&#34;&gt;2.2 Configuring a &lt;code&gt;SafeDeserializer&lt;/code&gt;&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;32-configuring-a-safedeserializer&#34;&gt;3.2 Configuring a &lt;code&gt;SafeDeserializer&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;The sentinel-object to return can also be configured.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;SafeDeserializer&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;Double&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;deserializer&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;SafeDeserializer&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;
     &lt;span style=&#34;color:#000&#34;&gt;Serdes&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;Double&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;deserializer&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#8f5902;font-style:italic&#34;&gt;// the delegating deserializer
@@ -1155,7 +1179,7 @@ A dedicated &lt;code&gt;KafkaProducer&lt;/code&gt; can be created by configuring
 &lt;span style=&#34;color:#000&#34;&gt;Map&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;Object&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;configs&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;HashMap&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;span style=&#34;color:#000&#34;&gt;configs&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;put&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;SafeDeserializerConfig&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;SAFE_DESERIALIZER_DEFAULT_VALUE_CONFIG&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
 &lt;span style=&#34;color:#000&#34;&gt;deserializer&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;configs&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;23-the-safeserde-class&#34;&gt;2.3 The &lt;code&gt;SafeSerde&lt;/code&gt; class&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;33-the-safeserde-class&#34;&gt;3.3 The &lt;code&gt;SafeSerde&lt;/code&gt; class&lt;/h3&gt;
 &lt;p&gt;The &lt;code&gt;SafeSerde&lt;/code&gt; is an utility class allowing you to wrap existing &lt;code&gt;Serde&lt;/code&gt; or &lt;code&gt;Deserializer&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Behing the scene, &lt;code&gt;SafeSerde&lt;/code&gt; uses the &lt;code&gt;SafeDeserializer&lt;/code&gt; for wrapping existing &lt;code&gt;Deserializer&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;Serde&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;String&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;stringSerde&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;SafeSerdes&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;Double&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;  
