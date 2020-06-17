@@ -20,11 +20,15 @@ package io.streamthoughts.azkarra.runtime.streams.topology;
 
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.kstream.KTable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.getSinkTopics;
 import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.getSourceTopics;
@@ -35,6 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TopologyUtilsTest {
 
     private static final String REPARTITION_TOPIC = "KSTREAM-AGGREGATE-STATE-STORE-0000000002-repartition";
+
+    private static final String FK_JOIN_TOPIC = "KTABLE-FK-JOIN-SUBSCRIPTION-REGISTRATION-0000000006-topic";
 
     private static Topology topology;
 
@@ -47,7 +53,6 @@ public class TopologyUtilsTest {
                 .count()
                 .toStream()
                 .to("output-topic");
-
         topology = builder.build();
     }
 
@@ -64,7 +69,6 @@ public class TopologyUtilsTest {
         assertEquals(2, userTopics.size());
         assertTrue(Arrays.asList("output-topic", REPARTITION_TOPIC).containsAll(userTopics));
     }
-
 
     @Test
     public void shouldReturnTrueGivenInternalTopicNotPrefixed() {
@@ -84,6 +88,38 @@ public class TopologyUtilsTest {
     @Test
     public void shouldReturnTrueGivenNamedChangelogTopic() {
         assertTrue(TopologyUtils.isInternalTopic("test", "test-count-changelog"));
+    }
+
+    @Test
+    public void shouldReturnTrueGivenNamedFKJoinTopic() {
+        assertTrue(TopologyUtils.isInternalTopic("test", "test-" + FK_JOIN_TOPIC));
+    }
+
+    @Test
+    public void shouldFilterInternalTopicGivenTopologyWithFkJoinOpe() {
+        StreamsBuilder builder = new StreamsBuilder();
+        KTable<Object, Object> tableOne = builder.table("table-one");
+        KTable<Object, Object> tableTwo = builder.table("table-two");
+        tableOne.leftJoin(tableTwo, o -> null, (value1, value2) -> null) // non-key-joining
+                .toStream()
+                .to("output-topic");
+        topology = builder.build();
+
+        final Set<String> sourceTopics = getSourceTopics(topology.describe())
+                .stream()
+                .filter(Predicate.not(TopologyUtils::isInternalTopic))
+                .collect(Collectors.toSet());
+
+        assertEquals(2, sourceTopics.size());
+        assertTrue(Arrays.asList("table-one", "table-two").containsAll(sourceTopics));
+
+        final Set<String> sinkTopics = getSinkTopics(topology.describe())
+                .stream()
+                .filter(Predicate.not(TopologyUtils::isInternalTopic))
+                .collect(Collectors.toSet());
+
+        assertEquals(1, sinkTopics.size());
+        assertTrue(Collections.singletonList("output-topic").containsAll(sinkTopics));
     }
 
 }

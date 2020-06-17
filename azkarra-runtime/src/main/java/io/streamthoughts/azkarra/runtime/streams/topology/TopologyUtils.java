@@ -32,11 +32,22 @@ public class TopologyUtils {
     private static final String CHANGELOG_TOPIC_SUFFIX = "-changelog";
 
     /**
+     * When the topology defines a non-key joining operation on KTable, the KafkaStreams
+     * instance will create two internals topics used to re-keyed records.
+     */
+    private static final String FOREIGN_KEY_SUBSCRIPTION_TOPIC_SUFFIX = "-topic";
+    private static final String FOREIGN_KEY_SUBSCRIPTION_RESPONSE_SUFFIX = "-subscription-response-topic";
+    private static final String FOREIGN_KEY_SUBSCRIPTION_REGISTRATION_SUFFIX = "-subscription-registration-topic";
+
+    /**
      * This pattern is used to match internal topic with increment index in the form of
-     * "KSTREAM-AGGREGATE-STATE-STORE-0000000001-(repartition|changelog)".
+     * "KSTREAM-AGGREGATE-STATE-STORE-0000000001-(repartition|changelog|topic)".
      */
     private static final String INTERNAL_TOPIC_PATTERNS = ".*-[0-9]{10}(?:"
-            + REPARTITION_TOPIC_SUFFIX + "|" + CHANGELOG_TOPIC_SUFFIX + ")$";
+            + REPARTITION_TOPIC_SUFFIX
+            + "|" + CHANGELOG_TOPIC_SUFFIX
+            + "|" + FOREIGN_KEY_SUBSCRIPTION_TOPIC_SUFFIX
+            + ")$";
 
     /**
      * Pattern for identifying internal topics created for repartitioning or changelog purpose.
@@ -110,6 +121,8 @@ public class TopologyUtils {
         return (applicationId == null || topic.startsWith(applicationId)) &&
                 (INTERNAL_TOPIC_NAME_PATTERN.matcher(topic).matches()
                 || topic.endsWith(CHANGELOG_TOPIC_SUFFIX)
-                || topic.endsWith(REPARTITION_TOPIC_SUFFIX));
+                || topic.endsWith(REPARTITION_TOPIC_SUFFIX)
+                || topic.endsWith(FOREIGN_KEY_SUBSCRIPTION_RESPONSE_SUFFIX)
+                || topic.endsWith(FOREIGN_KEY_SUBSCRIPTION_REGISTRATION_SUFFIX));
     }
 }
