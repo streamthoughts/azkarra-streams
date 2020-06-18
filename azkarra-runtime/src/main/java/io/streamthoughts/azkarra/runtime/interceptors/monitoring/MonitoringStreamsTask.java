@@ -29,6 +29,8 @@ import io.streamthoughts.azkarra.serialization.json.AzkarraSimpleModule;
 import io.streamthoughts.azkarra.serialization.json.Json;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,9 @@ public final class MonitoringStreamsTask extends Thread {
     private static final String DEFAULT_EVENT_TYPE = "io.streamthoughts.azkarra.streams.stateupdateevent";
     private static final String DEFAULT_CONTENT_TYPE = "application/json";
     private static final String CE_SPEC_VERSION = "1.0";
+
+    private static final Headers RECORD_HEADERS = new RecordHeaders()
+            .add("content-type", "application/cloudevents+json; charset=UTF-8".getBytes(StandardCharsets.UTF_8));
 
     static {
         JSON.registerModule(new AzkarraSimpleModule());
@@ -199,7 +204,7 @@ public final class MonitoringStreamsTask extends Thread {
 
     private void report(final CloudEventsEntity<KafkaStreamsMetadata> event) {
         final byte[] byteValue = JSON.serialize(event).getBytes(StandardCharsets.UTF_8);
-        producer.send(new ProducerRecord<>(topic, key, byteValue));
+        producer.send(new ProducerRecord<>(topic, null, key, byteValue, RECORD_HEADERS));
         lastSentEventTimeMs = event.attributes().time().toInstant().toEpochMilli();
     }
 
