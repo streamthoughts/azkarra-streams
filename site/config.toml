@@ -134,15 +134,15 @@ no = 'Sorry to hear that. Please <a href="https://github.com/streamthoughts/azka
 
 [[params.versions]]
   version = "master"
-  url = "./docs"
+  url = "/docs"
 
 [[params.versions]]
   version = "v0.7.x"
-  url = "./v0-7/docs"
+  url = "/v0-7/docs"
 
 [[params.versions]]
   version = "v0.6.x"
-  url = "./v0-6/docs"
+  url = "/v0-6/docs"
 
 # As of Hugo 0.60
 [markup]
