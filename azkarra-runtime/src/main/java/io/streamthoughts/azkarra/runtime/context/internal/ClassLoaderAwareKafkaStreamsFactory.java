@@ -26,9 +26,10 @@ import org.apache.kafka.streams.Topology;
 
 import java.util.Objects;
 
-public class ClassLoaderAwareKafkaStreamsFactory implements KafkaStreamsFactory {
+public class ClassLoaderAwareKafkaStreamsFactory
+        extends DelegatingExecutionEnvironmentAware<KafkaStreamsFactory>
+        implements KafkaStreamsFactory {
 
-    private final KafkaStreamsFactory delegate;
     private final ClassLoader classLoader;
 
     /**
@@ -39,7 +40,7 @@ public class ClassLoaderAwareKafkaStreamsFactory implements KafkaStreamsFactory 
      */
     public ClassLoaderAwareKafkaStreamsFactory(final KafkaStreamsFactory delegate,
                                                final ClassLoader classLoader) {
-        this.delegate = Objects.requireNonNull(delegate, "the factory cannot be null");
+        super(delegate);
         this.classLoader = Objects.requireNonNull(classLoader, "the class-loader cannot be null");
     }
 

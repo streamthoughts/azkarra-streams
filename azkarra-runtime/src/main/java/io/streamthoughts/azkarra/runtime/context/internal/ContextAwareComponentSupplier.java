@@ -25,7 +25,7 @@ public abstract class ContextAwareComponentSupplier<T> extends ConfigurableSuppl
 
     protected final AzkarraContext context;
 
-    public ContextAwareComponentSupplier(final AzkarraContext context) {
+    ContextAwareComponentSupplier(final AzkarraContext context) {
         this.context = context;
     }
 }

@@ -18,36 +18,34 @@
  */
 package io.streamthoughts.azkarra.runtime.context.internal;
 
-import io.streamthoughts.azkarra.api.AzkarraContext;
-import io.streamthoughts.azkarra.api.components.GettableComponent;
-import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
+
+import java.util.Objects;
 
 /**
- * Supplier class which is used to get a specific component from {@link AzkarraContext}.
- *
- * @param <T>   the component-type.
+ * A delegating {@link StreamsExecutionEnvironmentAware} implementation.
  */
-public class ContextAwareGettableComponentSupplier<T> extends ContextAwareComponentSupplier<T> {
+public class DelegatingExecutionEnvironmentAware<T> implements StreamsExecutionEnvironmentAware {
 
-    private final GettableComponent<T> gettable;
+    final T delegate;
 
     /**
-     * Creates a new {@link ContextAwareGettableComponentSupplier} instance.
+     * Creates a new {@link DelegatingExecutionEnvironmentAware} instance.
      *
-     * @param context   the {@link AzkarraContext} instance.
-     * @param gettable  the {@link GettableComponent} instance.
+     * @param delegate  the delegate component.
      */
-    ContextAwareGettableComponentSupplier(final AzkarraContext context,
-                                          final GettableComponent<T> gettable) {
-        super(context);
-        this.gettable = gettable;
+    DelegatingExecutionEnvironmentAware(final T delegate) {
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public T get(final Conf configs) {
-        return gettable.get(configs);
+    public void setExecutionEnvironment(final StreamsExecutionEnvironment environment) {
+        if (delegate instanceof StreamsExecutionEnvironmentAware) {
+            ((StreamsExecutionEnvironmentAware)delegate).setExecutionEnvironment(environment);
+        }
     }
 }
