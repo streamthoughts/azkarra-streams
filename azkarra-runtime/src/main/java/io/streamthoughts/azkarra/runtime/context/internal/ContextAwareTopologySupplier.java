@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.runtime.context.internal;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
@@ -30,8 +31,6 @@ import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import org.apache.kafka.streams.Topology;
-
-import java.util.Objects;
 
 public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyProvider> {
 
@@ -76,16 +75,15 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
     /**
      * A delegating {@link TopologyProvider} which is not {@link Configurable}.
      */
-    public static class ClassLoaderAwareTopologyProvider implements TopologyProvider {
-
-        private final TopologyProvider delegate;
+    public static class ClassLoaderAwareTopologyProvider
+            extends DelegatingExecutionEnvironmentAware<TopologyProvider>
+            implements TopologyProvider, StreamsExecutionEnvironmentAware {
 
         private final ClassLoader topologyClassLoader;
 
         ClassLoaderAwareTopologyProvider(final TopologyProvider delegate,
                                          final ClassLoader topologyClassLoader) {
-            Objects.requireNonNull(delegate, "delegate cannot be null");
-            this.delegate = delegate;
+            super(delegate);
             this.topologyClassLoader = topologyClassLoader;
         }
 

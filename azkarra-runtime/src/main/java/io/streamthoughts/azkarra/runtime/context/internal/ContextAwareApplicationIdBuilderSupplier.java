@@ -49,12 +49,12 @@ public class ContextAwareApplicationIdBuilderSupplier
     /**
      * A delegating {@link KafkaStreamsFactory} which is not {@link Configurable}.
      */
-    public static class DelegateApplicationIdBuilder implements ApplicationIdBuilder {
-
-        private final ApplicationIdBuilder delegate;
+    public static class DelegateApplicationIdBuilder
+            extends DelegatingExecutionEnvironmentAware<ApplicationIdBuilder>
+            implements ApplicationIdBuilder {
 
         DelegateApplicationIdBuilder(final ApplicationIdBuilder delegate) {
-            this.delegate = delegate;
+            super(delegate);
         }
 
         /**

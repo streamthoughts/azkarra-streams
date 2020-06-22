@@ -46,12 +46,12 @@ public class ContextAwareThreadExceptionHandlerSupplier
     /**
      * A delegating {@link StreamThreadExceptionHandler} which is not {@link Configurable}.
      */
-    public static class DelegateStreamThreadExceptionHandler implements StreamThreadExceptionHandler {
-
-        private final StreamThreadExceptionHandler delegate;
+    public static class DelegateStreamThreadExceptionHandler
+            extends DelegatingExecutionEnvironmentAware<StreamThreadExceptionHandler>
+            implements StreamThreadExceptionHandler {
 
         DelegateStreamThreadExceptionHandler(final StreamThreadExceptionHandler delegate) {
-            this.delegate = delegate;
+            super(delegate);
         }
 
         /**
@@ -62,7 +62,6 @@ public class ContextAwareThreadExceptionHandlerSupplier
                            final Thread streamThread,
                            final Throwable e) {
             delegate.handle(container, streamThread, e);
-
         }
     }
 }

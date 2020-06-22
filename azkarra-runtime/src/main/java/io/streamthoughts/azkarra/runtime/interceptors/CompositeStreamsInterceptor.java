@@ -18,6 +18,8 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
@@ -27,9 +29,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class CompositeStreamsInterceptor implements StreamsLifecycleInterceptor {
+public class CompositeStreamsInterceptor implements StreamsLifecycleInterceptor, StreamsExecutionEnvironmentAware {
 
-    final List<StreamsLifecycleInterceptor> interceptors;
+    private final List<StreamsLifecycleInterceptor> interceptors;
 
     /**
      * Creates a new {@link CompositeStreamsInterceptor} instance.
@@ -73,5 +75,17 @@ public class CompositeStreamsInterceptor implements StreamsLifecycleInterceptor 
             (interceptor, c) -> interceptor.onStop(context, c),
             chain::execute
         ).execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setExecutionEnvironment(final StreamsExecutionEnvironment environment) {
+        for (StreamsLifecycleInterceptor interceptor : interceptors) {
+            if (interceptor instanceof StreamsExecutionEnvironmentAware) {
+                ((StreamsExecutionEnvironmentAware)interceptor).setExecutionEnvironment(environment);
+            }
+        }
     }
 }

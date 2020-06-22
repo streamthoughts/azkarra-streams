@@ -48,12 +48,12 @@ public class ContextAwareKafkaStreamsFactorySupplier
     /**
      * A delegating {@link KafkaStreamsFactory} which is not {@link Configurable}.
      */
-    public static class DelegateKafkaStreamsFactory implements KafkaStreamsFactory {
-
-        private final KafkaStreamsFactory delegate;
+    public static class DelegateKafkaStreamsFactory
+            extends DelegatingExecutionEnvironmentAware<KafkaStreamsFactory>
+            implements KafkaStreamsFactory {
 
         DelegateKafkaStreamsFactory(final KafkaStreamsFactory delegate) {
-            this.delegate = delegate;
+            super(delegate);
         }
 
         /**
