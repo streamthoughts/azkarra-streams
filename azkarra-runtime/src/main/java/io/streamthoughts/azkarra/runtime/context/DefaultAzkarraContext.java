@@ -52,6 +52,7 @@ import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFa
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
 import io.streamthoughts.azkarra.runtime.config.AzkarraContextConfig;
+import io.streamthoughts.azkarra.runtime.context.internal.ClassLoaderAwareKafkaStreamsFactory;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareApplicationIdBuilderSupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareKafkaStreamsFactorySupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareLifecycleInterceptorSupplier;
@@ -408,17 +409,28 @@ public class DefaultAzkarraContext implements AzkarraContext {
             () -> new ClassloadingIsolationInterceptor(descriptor.classLoader())
         );
 
-        // Get and register all StreamsLifeCycleInterceptors component for scopes: Application, Env, Streams
         final Conf componentResolutionConfig = streamsConfig
             .withFallback(env.getConfiguration())
             .withFallback(getConfiguration());
 
+        // Get and register all StreamsLifeCycleInterceptors component for scopes: Application, Env, Streams
         final List<Supplier<StreamsLifecycleInterceptor>> interceptors = executed.interceptors();
         interceptors.addAll(lookupLifecycleInterceptors(componentResolutionConfig, Restriction.application()));
         interceptors.addAll(lookupLifecycleInterceptors(componentResolutionConfig, Restriction.env(name)));
         interceptors.addAll(lookupLifecycleInterceptors(componentResolutionConfig, Restriction.streams(name)));
 
         completedExecuted = completedExecuted.withInterceptors(interceptors);
+
+        // Get and register KafkaStreamsFactory for one the scopes: Application, Env, Streams
+        final Supplier<KafkaStreamsFactory> factory =  executed.factory()
+            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.streams(name)))
+            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.env(name)))
+            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.application()))
+            .orElse(() -> KafkaStreamsFactory.DEFAULT);
+
+        completedExecuted = completedExecuted.withKafkaStreamsFactory(
+            () -> new ClassLoaderAwareKafkaStreamsFactory(factory.get(), descriptor.classLoader())
+        );
 
         LOG.info(
             "Registered new topology to environment '{}' for type='{}', version='{}', name='{}'.",
@@ -566,11 +578,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
         final Restriction envRestriction = Restriction.env(env.name());
 
         final Conf componentResolutionConfig = env.getConfiguration().withFallback(getConfiguration());
-
-        // Inject environment or application scoped KafkaStreamsFactory
-        lookupKafkaStreamsFactory(componentResolutionConfig, envRestriction)
-            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.application()))
-            .ifPresent(env::setKafkaStreamsFactory);
 
         // Inject environment or application scoped ApplicationIdBuilder
         lookupApplicationIdBuilder(componentResolutionConfig, envRestriction)

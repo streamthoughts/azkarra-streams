@@ -561,7 +561,8 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         }
 
         private KafkaStreamsFactory getKafkaStreamsFactory() {
-            return new EnvironmentAwareComponentSupplier<>(kafkaStreamsFactory).get(
+            final Supplier<KafkaStreamsFactory> factory = executed.factory().orElse(kafkaStreamsFactory);
+            return new EnvironmentAwareComponentSupplier<>(factory).get(
                 DefaultStreamsExecutionEnvironment.this,
                 getTopologyConfig()
             );

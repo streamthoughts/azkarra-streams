@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.runtime.streams.topology;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +54,7 @@ public class InternalExecuted extends Executed {
     }
 
     public String descriptionOrElseGet(final String defaultValue) {
-        return  Optional.ofNullable(description).orElse(defaultValue);
+        return Optional.ofNullable(description).orElse(defaultValue);
     }
 
     public String description() {
@@ -66,5 +67,9 @@ public class InternalExecuted extends Executed {
 
     public List<Supplier<StreamsLifecycleInterceptor>> interceptors() {
         return interceptors;
+    }
+
+    public Optional<Supplier<KafkaStreamsFactory>> factory() {
+        return Optional.ofNullable(factory);
     }
 }

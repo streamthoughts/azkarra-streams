@@ -28,6 +28,7 @@ import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.config.ConfigurableSupplier;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
+import io.streamthoughts.azkarra.api.util.ClassUtils;
 import org.apache.kafka.streams.Topology;
 
 import java.util.Objects;
@@ -66,25 +67,26 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
             ((AzkarraContextAware)provider).setAzkarraContext(context);
         }
 
-        if (Configurable.isConfigurable(provider.getClass())) {
-            // The components returned from the registry are already configured.
-            // Thus, here we need to wrap the component into a non-configurable one so that the configure method
-            // will be not invoke a second time by the StreamsExecutionEnvironment.
-            return new DelegateContextTopologyProvider(provider);
-        }
-        return provider;
+        // The components returned from the registry may be already configured.
+        // Thus, here we need to wrap the component into a non-configurable one so that the configure method
+        // will be not invoke a second time by the StreamsExecutionEnvironment.
+        return new ClassLoaderAwareTopologyProvider(provider, descriptor.classLoader());
     }
 
     /**
      * A delegating {@link TopologyProvider} which is not {@link Configurable}.
      */
-    public static class DelegateContextTopologyProvider implements TopologyProvider {
+    public static class ClassLoaderAwareTopologyProvider implements TopologyProvider {
 
         private final TopologyProvider delegate;
 
-        DelegateContextTopologyProvider(final TopologyProvider delegate) {
+        private final ClassLoader topologyClassLoader;
+
+        ClassLoaderAwareTopologyProvider(final TopologyProvider delegate,
+                                         final ClassLoader topologyClassLoader) {
             Objects.requireNonNull(delegate, "delegate cannot be null");
             this.delegate = delegate;
+            this.topologyClassLoader = topologyClassLoader;
         }
 
         /**
@@ -100,7 +102,13 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
          */
         @Override
         public Topology get() {
-            return delegate.get();
+            // Classloader have to swap because the topology may be loaded from external directory.
+            final ClassLoader classLoader = ClassUtils.compareAndSwapLoaders(topologyClassLoader);
+            try {
+                return delegate.get();
+            } finally {
+                ClassUtils.compareAndSwapLoaders(classLoader);
+            }
         }
     }
 }

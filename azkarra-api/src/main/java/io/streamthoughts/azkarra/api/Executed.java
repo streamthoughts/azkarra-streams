@@ -19,6 +19,8 @@
 package io.streamthoughts.azkarra.api;
 
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
+import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
 
 import java.util.LinkedList;
@@ -34,6 +36,7 @@ public class Executed {
     protected final String name;
     protected final String description;
     protected final Conf config;
+    protected final Supplier<KafkaStreamsFactory> factory;
     protected final List<Supplier<StreamsLifecycleInterceptor>> interceptors;
 
     /**
@@ -45,7 +48,7 @@ public class Executed {
      * @return a new {@link StreamsExecutionEnvironment} instance.
      */
     public static Executed as(final String name) {
-        return new Executed(name, null, null, new LinkedList<>());
+        return new Executed(name, null, null, null, new LinkedList<>());
     }
 
     /**
@@ -58,7 +61,7 @@ public class Executed {
      * @return a new {@link StreamsExecutionEnvironment} instance.
      */
     public static Executed as(final String name, final String description) {
-        return new Executed(name, description, null, new LinkedList<>());
+        return new Executed(name, description, null, null, new LinkedList<>());
     }
 
     /**
@@ -70,14 +73,14 @@ public class Executed {
      * @return a new {@link StreamsExecutionEnvironment} instance.
      */
     public static Executed with(final Conf conf) {
-        return new Executed(null, null, conf, new LinkedList<>());
+        return new Executed(null, null, conf, null, new LinkedList<>());
     }
 
     /**
      * Creates a new {@link Executed} instance.
      */
     protected Executed() {
-        this(null, null, null, new LinkedList<>());
+        this(null, null, null, null, new LinkedList<>());
     }
 
     /**
@@ -86,15 +89,17 @@ public class Executed {
      * @param name              the name to be used for the streams application.
      * @param description       the description to be used for the streams application.
      * @param config            the {@link Conf} to be used
-     *                          for configuring the {@link Topology} the {@link org.apache.kafka.streams.KafkaStreams}.
+     *                          for configuring the {@link Topology} the {@link KafkaStreams}.
      */
     private Executed(final String name,
                      final String description,
                      final Conf config,
+                     final Supplier<KafkaStreamsFactory> factory,
                      final List<Supplier<StreamsLifecycleInterceptor>> interceptors) {
         this.name = name;
         this.description = description;
         this.config = config;
+        this.factory = factory;
         this.interceptors = interceptors;
     }
 
@@ -104,6 +109,7 @@ public class Executed {
             executed.name,
             executed.description,
             executed.config,
+            executed.factory,
             executed.interceptors
         );
     }
@@ -121,6 +127,7 @@ public class Executed {
             name,
             description,
             config,
+            factory,
             interceptors
         );
     }
@@ -137,6 +144,7 @@ public class Executed {
             name,
             description,
             config,
+            factory,
             interceptors
         );
     }
@@ -154,6 +162,7 @@ public class Executed {
             name,
             description,
             config,
+            factory,
             interceptors
         );
     }
@@ -185,7 +194,26 @@ public class Executed {
             name,
             description,
             config,
+            factory,
             interceptors
+        );
+    }
+
+    /**
+     * Returns a new {@link Executed} with the specified {@link KafkaStreams} factory.
+     *
+     * @param factory  the {@link KafkaStreams} factory to be used.
+     *
+     * @return  a new {@link Executed}.
+     */
+    public Executed withKafkaStreamsFactory(final Supplier<KafkaStreamsFactory> factory) {
+        Objects.requireNonNull(factory, "factory cannot be null");
+        return new Executed(
+                name,
+                description,
+                config,
+                factory,
+                interceptors
         );
     }
 }
