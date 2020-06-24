@@ -156,13 +156,16 @@ public final class MonitoringStreamsTask extends Thread {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error while reporting state for streams application : {}", applicationId, e);
+            LOG.error(
+                "Unexpected error while reporting state for streams application : {}. Stopping task.",
+                applicationId,
+                e
+            );
             shutdown.set(true);
         } finally {
-            LOG.info("Closing the StreamsStateReporterTask for application: {}", applicationId);
-            // Closing the producer is not the responsibility of this Task.
-            producer.flush();
+            // Closing or flushing the producer is not the responsibility of this Task.
             isShutdownLatch.countDown();
+            LOG.info("StreamsStateReporterTask has been stopped for application: {}", applicationId);
         }
     }
 
@@ -210,12 +213,11 @@ public final class MonitoringStreamsTask extends Thread {
 
     public void shutdown() {
         if (shutdown.get()) return;
+        //interrupt(); // interrupt the thread to not wait for new changes.
         shutdown.set(true);
-        interrupt(); // interrupt the thread to not wait for new changes.
         try {
             isShutdownLatch.await(intervalMs, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignored) {
-
         }
     }
 

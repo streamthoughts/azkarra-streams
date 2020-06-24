@@ -105,12 +105,20 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
     @Override
     public void onStop(final StreamsLifecycleContext context,
                        final StreamsLifecycleChain chain) {
-        LOG.info("Closing the MonitoringStreamsInterceptor for application = {}.", container.applicationId());
         try {
-            closeTasks();
-            producer.flush();
+            chain.execute();
         } finally {
-            producer.close();
+            final String id = container.applicationId();
+            try {
+                LOG.info("Closing MonitoringStreamsInterceptor for application = {}.", id);
+                closeTasks();
+                producer.flush();
+            } catch (Exception e) {
+                LOG.error("Unexpected error occurred while closing reporting task", e);
+            } finally {
+                producer.close();
+                LOG.info("MonitoringStreamsInterceptor has been closed for application = {}.", id);
+            }
         }
     }
 
@@ -128,7 +136,7 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
 
         // We should immediately restart the reporting task in case of unexpected exception.
         task.setUncaughtExceptionHandler((t, e) -> {
-            LOG.error("Unexpected error {} is DEAD - {} ", t.getName(), e.getMessage());
+            LOG.error("Unexpected error {} is DEAD ", t.getName(), e);
             startTask(applicationId);
         });
         task.start();
