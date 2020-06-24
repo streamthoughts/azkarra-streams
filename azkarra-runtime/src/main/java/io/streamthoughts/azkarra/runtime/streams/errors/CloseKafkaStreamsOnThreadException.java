@@ -23,6 +23,8 @@ import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
@@ -34,6 +36,8 @@ public class CloseKafkaStreamsOnThreadException implements
         StreamThreadExceptionHandler,
         StreamsExecutionEnvironmentAware {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CloseKafkaStreamsOnThreadException.class);
+
     private StreamsExecutionEnvironment environment;
 
     /**
@@ -44,6 +48,12 @@ public class CloseKafkaStreamsOnThreadException implements
                        final Thread streamThread,
                        final Throwable e) {
         final ApplicationId id = new ApplicationId(container.applicationId());
+        LOG.error(
+            "The instance '{}' may be in error state. " +
+            "A stream thread died due to uncaught exception. Stopping application immediately.",
+            container.applicationId(),
+            e
+        );
         this.environment.stop(id, false, Duration.ZERO);
 
     }
