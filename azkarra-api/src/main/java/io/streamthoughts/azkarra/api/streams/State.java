@@ -40,6 +40,8 @@ public enum State {
 
     NOT_RUNNING,
 
+    STOPPED,
+
     ERROR;
 
 }

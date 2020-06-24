@@ -135,6 +135,10 @@ public class KafkaStreamsContainer {
      * @return  the future {@link org.apache.kafka.streams.KafkaStreams.State} of the streams.
      */
     public synchronized Future<KafkaStreams.State> start(final Executor executor) {
+        LOG.info("Starting KafkaStreams container for name='{}', version='{}', id='{}'.",
+                topologyContainer.metadata().name(),
+                topologyContainer.metadata().version(),
+                applicationId());
         this.executor = executor;
         started = Time.SYSTEM.milliseconds();
         kafkaStreams = streamsFactory.make(
@@ -146,7 +150,7 @@ public class KafkaStreamsContainer {
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
         // https://issues.apache.org/jira/browse/KAFKA-7380
         return CompletableFuture.supplyAsync(() -> {
-            LOG.info("Initializing KafkaStreams container (application.id={})", applicationId());
+            LOG.info("Executing stream-lifecycle interceptor chain (application.id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
                 (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifecycleContext(this), chain),
@@ -405,7 +409,10 @@ public class KafkaStreamsContainer {
                 }
             );
             streamsLifeCycle.execute();
+            LOG.info("KafkaStreams container has been closed (application.id={})", applicationId());
+            stateChanges(new StateChangeEvent(State.STOPPED, State.valueOf(kafkaStreams.state().name())));
         }, "kafka-streams-container-close-thread");
+
         shutdownThread.setDaemon(true);
         shutdownThread.start();
 
@@ -428,7 +435,7 @@ public class KafkaStreamsContainer {
             stateChangeWatchers.add(new StateChangeWatcher() {
                 @Override
                 public boolean accept(final State state) {
-                    return state == State.NOT_RUNNING;
+                    return state == State.STOPPED;
                 }
 
                 @Override

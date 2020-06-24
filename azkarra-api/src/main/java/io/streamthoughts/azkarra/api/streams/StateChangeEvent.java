@@ -18,6 +18,8 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
+import io.streamthoughts.azkarra.api.time.Time;
+
 import java.util.Objects;
 
 public class StateChangeEvent {
@@ -25,6 +27,17 @@ public class StateChangeEvent {
     private final long timestamp;
     private final State newState;
     private final State oldState;
+
+    /**
+     * Creates a new {@link StateChangeEvent} instance.
+     *
+     * @param newState  the new {@link State}.
+     * @param oldState  the old {@link State}.
+     */
+    public StateChangeEvent(final State newState,
+                            final State oldState) {
+        this(Time.SYSTEM.milliseconds(), newState, oldState);
+    }
 
     /**
      * Creates a new {@link StateChangeEvent} instance.

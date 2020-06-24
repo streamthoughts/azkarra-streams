@@ -35,6 +35,8 @@ import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
 import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifecycleContext;
 import io.streamthoughts.azkarra.metrics.AzkarraMetricsConfig;
 import io.streamthoughts.azkarra.metrics.annotations.ConditionalOnMetricsEnable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -44,6 +46,8 @@ import static io.streamthoughts.azkarra.metrics.AzkarraMetricsConfig.METRICS_BIN
 @ConditionalOnMetricsEnable
 @ConditionalOn(property = METRICS_BINDERS_KAFKA_STREAMS_ENABLE_CONFIG, havingValue = "true")
 public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements StreamsLifecycleInterceptor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MeterKafkaStreamsInterceptor.class);
 
     private static final String TAG_APPLICATION_ID = "application.id";
 
@@ -67,6 +71,7 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
     @Override
     public void onStart(final StreamsLifecycleContext context,
                         final StreamsLifecycleChain chain) {
+        LOG.info("Starting the MonitoringStreamsInterceptor for application = {}.", context.applicationId());
         if (isEnable) {
             context.addStateChangeWatcher(new KafkaStreamsContainer.StateChangeWatcher() {
                 @Override
@@ -78,9 +83,13 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
                 public void onChange(final StateChangeEvent event) {
                     final List<Tag> tags = List.of(Tag.of(TAG_APPLICATION_ID, context.applicationId()));
                     final var kafkaStreams = ((InternalStreamsLifecycleContext) context).container().getKafkaStreams();
-                    metrics = new KafkaStreamsMetrics(kafkaStreams, tags);
                     MeterRegistry registry = getComponent(MeterRegistry.class, Qualifiers.byPrimary());
+                    metrics = new KafkaStreamsMetrics(kafkaStreams, tags);
                     metrics.bindTo(registry);
+                    LOG.info(
+                        "Bind metrics for application = {} to MeterRegistry[{}] successfully.",
+                        context.applicationId(),
+                        registry.getClass().getName());
                 }
             });
         }
@@ -93,6 +102,8 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
     @Override
     public void onStop(final StreamsLifecycleContext context,
                        final StreamsLifecycleChain chain) {
+        LOG.info("Closing the MonitoringStreamsInterceptor for application = {}.", context.applicationId());
         if (metrics != null) metrics.close();
+        chain.execute();
     }
 }

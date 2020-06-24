@@ -338,11 +338,6 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         final TopologyContainer topologyContainer = topologyProvider.getTopology();
 
         final ApplicationId applicationId = topologyContainer.applicationId();
-        LOG.info("Initializing new streams container for name='{}', version='{}', id='{}'.",
-            topologyContainer.metadata().name(),
-            topologyContainer.metadata().version(),
-            applicationId);
-
         checkStreamsIsAlreadyRunningFor(applicationId);
 
         if (streamThreadExceptionHandler == null)
