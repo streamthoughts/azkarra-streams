@@ -29,6 +29,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ClassUtils {
 
@@ -89,11 +91,17 @@ public class ClassUtils {
     }
 
     public static <T extends Annotation> List<T> getAllDeclaredAnnotationsByType(final Class<?> cls,
-                                                                                 final Class<T> type) {
-        List<T> result = new ArrayList<>();
-        for (Class<?> t : getAllSuperTypes(cls)) {
-            T[] declared = t.getDeclaredAnnotationsByType(type);
-            result.addAll(Arrays.asList(declared));
+                                                                                 final Class<T> annotationType) {
+        final List<T> result = new ArrayList<>();
+        for (final Class<?> t : getAllSuperTypes(cls)) {
+            result.addAll(Arrays.asList(t.getDeclaredAnnotationsByType(annotationType)));
+            final Set<Annotation> annotations = Arrays.stream(t.getDeclaredAnnotations())
+                .filter(Predicate.not(ClassUtils::isJavaLangAnnotation))
+                .filter(annotation -> annotation.annotationType() != annotationType)
+                .collect(Collectors.toSet());
+            annotations.forEach( annotation ->
+                result.addAll(getAllDeclaredAnnotationsByType(annotation.annotationType(), annotationType))
+            );
         }
         return result;
     }
@@ -137,6 +145,10 @@ public class ClassUtils {
             result.addAll(Arrays.asList(interfaces));
         }
         return result;
+    }
+
+    private static boolean isJavaLangAnnotation(final Annotation annotation) {
+        return annotation.annotationType().getName().startsWith("java.lang.annotation");
     }
 
 }
