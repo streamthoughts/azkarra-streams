@@ -1,5 +1,5 @@
 ---
-date: 2020-06-22
+date: 2020-06-26
 title: "Azkarra Worker"
 linkTitle: "Azkarra Worker"
 weight: 50
@@ -10,7 +10,7 @@ description: >
 ## Downloading Azkarra Worker
 
 ```bash
-AZKARRA_VERSION=0.7.3
+AZKARRA_VERSION=0.7.4
 wget https://github.com/streamthoughts/azkarra-streams/releases/download/v$AZKARRA_VERSION/azkarra-worker-$AZKARRA_VERSION.tar.gz -P .
 tar -xzvf azkarra-worker-$AZKARRA_VERSION.tar.gz
 cd azkarra-worker-$AZKARRA_VERSION

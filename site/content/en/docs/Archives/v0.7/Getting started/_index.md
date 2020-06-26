@@ -1,5 +1,5 @@
 ---
-date: 2020-05-09
+date: 2020-06-26
 title: "Getting Started"
 linkTitle: "Getting Started"
 weight: 10
@@ -25,7 +25,7 @@ First, run this following command :
 ```bash
 $> mvn archetype:generate -DarchetypeGroupId=io.streamthoughts \
 -DarchetypeArtifactId=azkarra-quickstart-java \
--DarchetypeVersion=0.7.1 \
+-DarchetypeVersion=0.7.4 \
 -DgroupId=azkarra.streams \
 -DartifactId=azkarra-getting-started \
 -Dversion=1.0-SNAPSHOT \
@@ -66,7 +66,7 @@ The `pom.xml` already contains the Azkarra Streams and Kafka Streams dependencie
     <dependency>
         <groupId>io.streamthoughts</groupId>
         <artifactId>azkarra-streams</artifactId>
-        <version>0.7.1</version>
+        <version>0.7.4</version>
     </dependency>
 </dependencies>
 ```
