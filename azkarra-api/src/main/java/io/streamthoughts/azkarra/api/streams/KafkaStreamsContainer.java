@@ -288,7 +288,16 @@ public class KafkaStreamsContainer {
        return kafkaStreams.metrics();
     }
 
+    /**
+     * Gets the offsets for the topic/partitions assigned to this {@link KafkaStreams} instance.
+     * If the {@link KafkaStreams} instance is not running then no offsets will be computed.
+     *
+     * @return  the {@link ConsumerGroupOffsets}.
+     */
     public ConsumerGroupOffsets offsets() {
+        if (isNotRunning()) {
+            return new ConsumerGroupOffsets(applicationId(), Collections.emptySet());
+        }
 
         final ConsumerGroupOffsets consumerGroupOffsets = GlobalConsumerOffsetsRegistry
             .getInstance()
@@ -409,7 +418,9 @@ public class KafkaStreamsContainer {
                 }
             );
             streamsLifeCycle.execute();
+            closeInternals();
             LOG.info("KafkaStreams container has been closed (application.id={})", applicationId());
+            // This may trigger a container restart
             stateChanges(new StateChangeEvent(State.STOPPED, State.valueOf(kafkaStreams.state().name())));
         }, "kafka-streams-container-close-thread");
 
@@ -419,19 +430,18 @@ public class KafkaStreamsContainer {
         final long waitMs = timeout.toMillis();
         if (waitMs > 0) {
             try {
-                // This will cause a deadlock if the call is a StreamThread.
                 shutdownThread.join(waitMs);
             } catch (InterruptedException e) {
-                LOG.debug("Cannot transit to {} within {}ms", KafkaStreams.State.NOT_RUNNING, waitMs);
+                LOG.debug("Cannot transit to {} within {}ms", State.STOPPED, waitMs);
             }
         }
     }
 
     public void restart() {
-        if (isNotRunning()) {
-            restartNow(); // Restart internal streams immediately
-        } else {
-            // Register a watcher that will restart the streams as soon as the state is NOT_RUNNING.
+        // If the container is not already STOPPED we should ensure that
+        // all resources are properly closed before restarting.
+        if (state.value() != State.STOPPED) {
+            // Register a watcher that will restart this container as soon as its state is STOPPED.
             stateChangeWatchers.add(new StateChangeWatcher() {
                 @Override
                 public boolean accept(final State state) {
@@ -445,6 +455,8 @@ public class KafkaStreamsContainer {
             });
             // Do NOT clean-up states while restarting the streams.
             close(false, Duration.ZERO);
+        } else {
+            restartNow(); // Restart this container immediately
         }
     }
 
@@ -627,6 +639,17 @@ public class KafkaStreamsContainer {
         if (kafkaStreams == null)
             throw new IllegalStateException("Cannot get access to KafkaStreams, instance is not created yet.");
         return kafkaStreams;
+    }
+
+    private void closeInternals() {
+        LOG.info("Closing internal clients for Kafka Streams container (application.id={})", applicationId());
+        try {
+            if (consumer != null) consumer.close();
+        } catch (Exception e) {
+            LOG.error("Unexpected error occurred while closing internal resources", e);
+        } finally {
+            consumer = null;
+        }
     }
 
     /**
