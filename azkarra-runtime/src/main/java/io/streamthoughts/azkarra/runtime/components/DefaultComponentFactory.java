@@ -566,7 +566,11 @@ public class DefaultComponentFactory implements ComponentFactory {
         Objects.requireNonNull(context, "context cannot be null");
         Objects.requireNonNull(qualifier, "qualifier cannot be null");
         Stream<ComponentDescriptor<T>> candidates = findDescriptorCandidatesByType(type, context);
-        return qualifier.filter(type, candidates).collect(Collectors.toList());
+        return qualifier
+                .filter(type, candidates)
+                 // we need to sort components after filtering because qualifiers may change order.
+                .sorted(ComponentDescriptor.ORDER_BY_ORDER)
+                .collect(Collectors.toList());
     }
 
     /**

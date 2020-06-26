@@ -26,16 +26,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CompositeQualifier<T> implements Qualifier<T> {
+public class AnyQualifier<T> implements Qualifier<T> {
 
     private final List<Qualifier<T>> qualifiers;
 
     /**
-     * Creates a new {@link CompositeQualifier} instance.
+     * Creates a new {@link AnyQualifier} instance.
      *
      * @param qualifiers    the list of {@link Qualifier}.
      */
-    public CompositeQualifier(final List<Qualifier<T>> qualifiers) {
+    public AnyQualifier(final List<Qualifier<T>> qualifiers) {
         this.qualifiers = qualifiers;
     }
 
@@ -45,11 +45,9 @@ public class CompositeQualifier<T> implements Qualifier<T> {
     @Override
     public Stream<ComponentDescriptor<T>> filter(final Class<T> componentType,
                                                  final Stream<ComponentDescriptor<T>> candidates) {
-        Stream<ComponentDescriptor<T>> reduced = candidates;
-        for (Qualifier<T> qualifier : qualifiers) {
-            reduced = qualifier.filter(componentType, reduced);
-        }
-        return reduced;
+        final List<ComponentDescriptor<T>> listCandidates = candidates.collect(Collectors.toList());
+        return qualifiers.stream()
+              .flatMap(qualifier -> qualifier.filter(componentType, listCandidates.stream()));
     }
 
     /**
@@ -58,8 +56,8 @@ public class CompositeQualifier<T> implements Qualifier<T> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CompositeQualifier)) return false;
-        CompositeQualifier<?> that = (CompositeQualifier<?>) o;
+        if (!(o instanceof AnyQualifier)) return false;
+        AnyQualifier<?> that = (AnyQualifier<?>) o;
         return Objects.equals(qualifiers, that.qualifiers);
     }
 

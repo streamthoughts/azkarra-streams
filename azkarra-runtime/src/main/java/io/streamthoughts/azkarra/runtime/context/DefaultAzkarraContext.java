@@ -35,6 +35,7 @@ import io.streamthoughts.azkarra.api.components.GettableComponent;
 import io.streamthoughts.azkarra.api.components.Ordered;
 import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.components.Restriction;
+import io.streamthoughts.azkarra.api.components.qualifier.AnyQualifier;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
@@ -70,6 +71,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -389,8 +391,8 @@ public class DefaultAzkarraContext implements AzkarraContext {
                                                    final StreamsExecutionEnvironment env,
                                                    final InternalExecuted executed) {
 
-        // Gets user-defined name or fallback on descriptor cannot be null).
-        final String name = executed.nameOrElseGet(descriptor.name());
+        // Gets user-defined streams name or fallback on descriptor cannot be null).
+        final String streamName = executed.nameOrElseGet(descriptor.name());
 
         // Gets user-defined description or fallback on descriptor (can be null).
         final String description = executed.descriptionOrElseGet(descriptor.description());
@@ -400,31 +402,31 @@ public class DefaultAzkarraContext implements AzkarraContext {
             Conf.with("streams", descriptor.streamsConfigs())
         );
 
-        Executed completedExecuted = Executed.as(name)
+        Executed completedExecuted = Executed.as(streamName)
                 .withConfig(streamsConfig)
                 .withDescription(Optional.ofNullable(description).orElse(""));
-
-        // Register StreamsLifeCycleInterceptor for class-loading isolation.
-        completedExecuted = completedExecuted.withInterceptor(
-            () -> new ClassloadingIsolationInterceptor(descriptor.classLoader())
-        );
 
         final Conf componentResolutionConfig = streamsConfig
             .withFallback(env.getConfiguration())
             .withFallback(getConfiguration());
 
-        // Get and register all StreamsLifeCycleInterceptors component for scopes: Application, Env, Streams
         final List<Supplier<StreamsLifecycleInterceptor>> interceptors = executed.interceptors();
-        interceptors.addAll(lookupLifecycleInterceptors(componentResolutionConfig, Restriction.application()));
-        interceptors.addAll(lookupLifecycleInterceptors(componentResolutionConfig, Restriction.env(name)));
-        interceptors.addAll(lookupLifecycleInterceptors(componentResolutionConfig, Restriction.streams(name)));
+        // Register StreamsLifeCycleInterceptor for class-loading isolation (must always be registered first)
+        interceptors.add(() -> new ClassloadingIsolationInterceptor(descriptor.classLoader()));
 
+        // Get and register all StreamsLifeCycleInterceptors component for scopes: Application, Env, Streams
+        interceptors.addAll(lookupLifecycleInterceptors(
+            componentResolutionConfig,
+            Restriction.application(),
+            Restriction.env(env.name()),
+            Restriction.streams(streamName)))
+        ;
         completedExecuted = completedExecuted.withInterceptors(interceptors);
 
         // Get and register KafkaStreamsFactory for one the scopes: Application, Env, Streams
         final Supplier<KafkaStreamsFactory> factory =  executed.factory()
-            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.streams(name)))
-            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.env(name)))
+            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.streams(streamName)))
+            .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.env(env.name())))
             .or(() -> lookupKafkaStreamsFactory(componentResolutionConfig, Restriction.application()))
             .orElse(() -> KafkaStreamsFactory.DEFAULT);
 
@@ -437,7 +439,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
             env.name(),
             descriptor.className() ,
             descriptor.version(),
-            name
+            streamName
         );
 
         final ContextAwareTopologySupplier supplier = new ContextAwareTopologySupplier(this, descriptor);
@@ -630,8 +632,13 @@ public class DefaultAzkarraContext implements AzkarraContext {
     }
 
     private List<Supplier<StreamsLifecycleInterceptor>> lookupLifecycleInterceptors(final Conf conf,
-                                                                                    final Restriction restriction) {
-        final Qualifier<StreamsLifecycleInterceptor>  qualifier = Qualifiers.byRestriction(restriction);
+                                                                                    final Restriction... restrictions) {
+        final Qualifier<StreamsLifecycleInterceptor> qualifier = new AnyQualifier<>(
+            Arrays
+            .stream(restrictions)
+            .map(Qualifiers::<StreamsLifecycleInterceptor>byRestriction)
+            .collect(Collectors.toList())
+        );
         return componentFactory.getAllComponentProviders(StreamsLifecycleInterceptor.class, qualifier)
             .stream()
             .filter(provider -> provider.isEnable(new ConfigConditionalContext<>(conf)))

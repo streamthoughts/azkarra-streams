@@ -22,10 +22,13 @@ import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.components.Restriction;
 import io.streamthoughts.azkarra.api.util.Version;
 
+import java.util.Arrays;
+
 public class Qualifiers {
 
+    @SafeVarargs
     public static <T> Qualifier<T> byQualifiers(final Qualifier<T>... qualifiers) {
-        return new CompositeQualifier<>(qualifiers);
+        return new CompositeQualifier<>(Arrays.asList(qualifiers));
     }
 
     public static <T> Qualifier<T> byPrimary() {
