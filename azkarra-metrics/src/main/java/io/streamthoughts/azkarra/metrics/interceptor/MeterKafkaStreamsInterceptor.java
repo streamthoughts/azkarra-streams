@@ -71,7 +71,7 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
     @Override
     public void onStart(final StreamsLifecycleContext context,
                         final StreamsLifecycleChain chain) {
-        LOG.info("Starting the MonitoringStreamsInterceptor for application = {}.", context.applicationId());
+        LOG.info("Starting the MeterKafkaStreamsInterceptor for application = {}.", context.applicationId());
         if (isEnable) {
             context.addStateChangeWatcher(new KafkaStreamsContainer.StateChangeWatcher() {
                 @Override
@@ -89,7 +89,7 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
                     LOG.info(
                         "Bind metrics for application = {} to MeterRegistry[{}] successfully.",
                         context.applicationId(),
-                        registry.getClass().getName());
+                        registry.getClass().getSimpleName());
                 }
             });
         }
@@ -102,7 +102,7 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
     @Override
     public void onStop(final StreamsLifecycleContext context,
                        final StreamsLifecycleChain chain) {
-        LOG.info("Closing the MonitoringStreamsInterceptor for application = {}.", context.applicationId());
+        LOG.info("Closing the MeterKafkaStreamsInterceptor for application = {}.", context.applicationId());
         if (metrics != null) metrics.close();
         chain.execute();
     }
