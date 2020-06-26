@@ -190,12 +190,14 @@ public class Executed {
      */
     public Executed withInterceptors(final List<Supplier<StreamsLifecycleInterceptor>> interceptors) {
         Objects.requireNonNull(interceptors, "interceptors cannot be null");
+        List<Supplier<StreamsLifecycleInterceptor>> merged = new LinkedList<>(this.interceptors);
+        merged.addAll(interceptors);
         return new Executed(
             name,
             description,
             config,
             factory,
-            interceptors
+            merged
         );
     }
 

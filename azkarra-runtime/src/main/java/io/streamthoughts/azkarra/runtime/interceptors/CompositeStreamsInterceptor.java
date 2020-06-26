@@ -28,6 +28,7 @@ import io.streamthoughts.azkarra.api.streams.InternalStreamsLifeCycleChain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CompositeStreamsInterceptor implements StreamsLifecycleInterceptor, StreamsExecutionEnvironmentAware {
 
@@ -87,5 +88,21 @@ public class CompositeStreamsInterceptor implements StreamsLifecycleInterceptor,
                 ((StreamsExecutionEnvironmentAware)interceptor).setExecutionEnvironment(environment);
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String name() {
+        if (interceptors.isEmpty()) {
+            return "CompositeStreamsInterceptor[]";
+        }
+        if (interceptors.size() == 1) {
+            return interceptors.get(0).name();
+        }
+        return interceptors.stream()
+            .map(StreamsLifecycleInterceptor::name)
+            .collect(Collectors.joining(", ", "CompositeStreamsInterceptor[", "]"));
     }
 }

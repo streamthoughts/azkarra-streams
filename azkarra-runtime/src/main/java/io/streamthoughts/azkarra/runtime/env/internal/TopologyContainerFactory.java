@@ -99,7 +99,7 @@ public class TopologyContainerFactory {
                 .map(i -> supply(i, topologyConfig))
                 .collect(Collectors.toList());
 
-        interceptors.forEach(i -> LOG.info("Adding streams interceptor: {}", i.getClass().getSimpleName()));
+        interceptors.forEach(i -> LOG.info("Adding streams interceptor: {}", i.name()));
 
         Conf streamsConfig = streamsConfig(topologyConfig);
 

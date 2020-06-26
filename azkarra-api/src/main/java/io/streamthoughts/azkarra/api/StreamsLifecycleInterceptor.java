@@ -41,4 +41,13 @@ public interface StreamsLifecycleInterceptor {
     default void onStop(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
         chain.execute();
     }
+
+    /**
+     * The Interceptor name is mostly used for logging information.
+     *
+     * @return the name of this interceptor.
+     */
+    default String name() {
+        return getClass().getSimpleName();
+    }
 }

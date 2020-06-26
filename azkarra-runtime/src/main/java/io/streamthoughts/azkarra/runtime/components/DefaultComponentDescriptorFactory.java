@@ -115,7 +115,7 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
 
     private static int getOrderFor(final Class<?> cls) {
         List<Order> annotations = ClassUtils.getAllDeclaredAnnotationsByType(cls, Order.class);
-        return annotations.isEmpty() ? Ordered.LOWEST_ORDER : annotations.get(0).value();
+        return annotations.isEmpty() ? Ordered.LOWEST_ORDER - 1 : annotations.get(0).value();
     }
 
     private static String getVersionFor(final Class<?> cls, final ClassLoader classLoader) {
