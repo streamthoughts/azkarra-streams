@@ -22,7 +22,7 @@
     <parent>
         <artifactId>azkarra-streams-reactor</artifactId>
         <groupId>io.streamthoughts</groupId>
-        <version>0.7.3</version>
+        <version>0.7.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -188,7 +188,7 @@
         <dependency>
             <groupId>io.streamthoughts</groupId>
             <artifactId>azkarra-ui</artifactId>
-            <version>0.7.3</version>
+            <version>0.7.4</version>
             <scope>provided</scope>
         </dependency>
 
