@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.streamthoughts.azkarra.api.util.ClassUtils.getAllDeclaredAnnotationsByType;
+import static io.streamthoughts.azkarra.api.util.AnnotationResolver.findAllAnnotationsByType;
 
 /**
  *  A {@link SimpleComponentDescriptor} for describing a {@link TopologyProvider} implementation.
@@ -57,7 +57,7 @@ public final class TopologyDescriptor<T extends TopologyProvider> extends Simple
         // Because DefaultStreamsConfig is a repeatable annotation is more straightforward
         // to directly lookup for the annotation instead of using attributes
         // that will contains the container annotation)
-        Map<String, String> mapConfigs = getAllDeclaredAnnotationsByType(type(), DefaultStreamsConfig.class)
+        Map<String, String> mapConfigs = findAllAnnotationsByType(type(), DefaultStreamsConfig.class)
             .stream()
             .collect(Collectors.toMap(DefaultStreamsConfig::name, DefaultStreamsConfig::value));
         streamConfigs = Conf.with(mapConfigs);

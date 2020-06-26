@@ -36,53 +36,5 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ClassUtilsTest {
 
-    @Test
-    public void shouldResolvedRepeatableAnnotation() {
-        final List<String> annotations = ClassUtils.getAllDeclaredAnnotationsByType(
-            RepeatableTestClass.class,
-            DefaultStreamsConfig.class
-        ).stream().map(DefaultStreamsConfig::name).collect(Collectors.toList());
-        assertEquals(2, annotations.size());
-        assertTrue(annotations.containsAll(Arrays.asList("child1", "child2")));
-    }
 
-    @Test
-    public void shouldResolvedInheritedAnnotation() {
-        final List<String> annotations = ClassUtils.getAllDeclaredAnnotationsByType(
-            InheritedTestClass.class,
-            DefaultStreamsConfig.class
-        ).stream().map(DefaultStreamsConfig::name).collect(Collectors.toList());
-        assertEquals(1, annotations.size());
-        assertTrue(annotations.contains("inherited"));
-    }
-
-    @Test
-    public void shouldResolvedAnnotatedAnnotation() {
-        final List<String> annotations = ClassUtils.getAllDeclaredAnnotationsByType(
-            CustomTestClass.class,
-            DefaultStreamsConfig.class
-        ).stream().map(DefaultStreamsConfig::name).collect(Collectors.toList());
-        assertEquals(1, annotations.size());
-        assertTrue(annotations.contains("custom"));
-    }
-
-    @DefaultStreamsConfig(name = "inherited", value = "-")
-    static class SuperAnnotatedClass { }
-
-    private static class InheritedTestClass extends SuperAnnotatedClass  { }
-
-    @DefaultStreamsConfig(name = "child1", value = "-")
-    @DefaultStreamsConfig(name = "child2", value = "-")
-    private static class RepeatableTestClass  {
-    }
-
-    @Inherited
-    @Target({ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @DefaultStreamsConfig(name = "custom", value = "-")
-    @interface CustomConfig { }
-
-    @CustomConfig
-    private static class CustomTestClass  {
-    }
 }

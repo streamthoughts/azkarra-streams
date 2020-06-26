@@ -19,7 +19,7 @@
 package io.streamthoughts.azkarra.streams.autoconfigure;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
-import io.streamthoughts.azkarra.api.util.ClassUtils;
+import io.streamthoughts.azkarra.api.util.AnnotationResolver;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.autoconfigure.annotations.AzkarraStreamsApplication;
@@ -135,6 +135,6 @@ public class AutoConfigure {
     private static <T extends AnnotatedElement> Set<Annotation> allAnnotationsOfType(
             final T type,
             final Class<? extends Annotation> annotation) {
-        return ReflectionUtils.getAllAnnotations(type, a -> ClassUtils.isAnnotationOfType(a, annotation));
+        return ReflectionUtils.getAllAnnotations(type, a -> AnnotationResolver.isAnnotationOfType(a, annotation));
     }
 }

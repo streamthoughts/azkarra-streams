@@ -30,6 +30,7 @@ import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.condition.Conditions;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.util.AnnotationResolver;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import io.streamthoughts.azkarra.runtime.components.BasicComponentFactory;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentClassLoader;
@@ -289,15 +290,15 @@ public class ComponentScanner {
     }
 
     private static boolean isSingleton(final Class<?> componentClass) {
-        return ClassUtils.isSuperTypesAnnotatedWith(componentClass, Singleton.class);
+        return AnnotationResolver.isAnnotatedWith(componentClass, Singleton.class);
     }
 
     private static boolean isSingleton(final Method method) {
-        return ClassUtils.isMethodAnnotatedWith(method, Singleton.class);
+        return AnnotationResolver.isAnnotatedWith(method, Singleton.class);
     }
 
     private static String getNamedQualifierOrNull(final Class<?> componentClass) {
-        List<Named> annotations = ClassUtils.getAllDeclaredAnnotationsByType(componentClass, Named.class);
+        List<Named> annotations = AnnotationResolver.findAllAnnotationsByType(componentClass, Named.class);
         return annotations.isEmpty() ? null : annotations.get(0).value();
     }
 
@@ -315,32 +316,32 @@ public class ComponentScanner {
 
     private static void mayAddModifierForOrder(final Class<?> cls,
                                                final List<ComponentDescriptorModifier> modifiers) {
-        List<Order> annotations = ClassUtils.getAllDeclaredAnnotationsByType(cls, Order.class);
+        List<Order> annotations = AnnotationResolver.findAllAnnotationsByType(cls, Order.class);
         if (!annotations.isEmpty())
             modifiers.add(withOrder(annotations.get(0).value()));
     }
 
     private static void mayAddModifierForPrimary(final Class<?> componentClass,
                                                  final List<ComponentDescriptorModifier> modifiers) {
-        if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Primary.class))
+        if (AnnotationResolver.isAnnotatedWith(componentClass, Primary.class))
             modifiers.add(asPrimary());
     }
 
     private static void mayAddModifierForPrimary(final Method method,
                                                  final List<ComponentDescriptorModifier> modifiers) {
-        if (ClassUtils.isMethodAnnotatedWith(method, Primary.class))
+        if (AnnotationResolver.isAnnotatedWith(method, Primary.class))
             modifiers.add(asPrimary());
     }
 
     private static void mayAddModifierForSecondary(final Method method,
                                                    final List<ComponentDescriptorModifier> modifiers) {
-        if (ClassUtils.isMethodAnnotatedWith(method, Secondary.class))
+        if (AnnotationResolver.isAnnotatedWith(method, Secondary.class))
             modifiers.add(asSecondary());
     }
 
     private static void mayAddModifierForSecondary(final Class<?> componentClass,
                                                    final List<ComponentDescriptorModifier> modifiers) {
-        if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Secondary.class))
+        if (AnnotationResolver.isAnnotatedWith(componentClass, Secondary.class))
             modifiers.add(asSecondary());
     }
 
@@ -348,7 +349,7 @@ public class ComponentScanner {
                                                final List<ComponentDescriptorModifier> modifiers) {
         mayAddModifiersForConditions(
             modifiers,
-            Arrays.asList(componentMethod.getDeclaredAnnotationsByType(ConditionalOn.class))
+            AnnotationResolver.findAllAnnotationsByType(componentMethod, ConditionalOn.class)
         );
     }
 
@@ -356,7 +357,7 @@ public class ComponentScanner {
                                                    final List<ComponentDescriptorModifier> modifiers) {
         mayAddModifiersForConditions(
             modifiers,
-            ClassUtils.getAllDeclaredAnnotationsByType(componentClass, ConditionalOn.class)
+            AnnotationResolver.findAllAnnotationsByType(componentClass, ConditionalOn.class)
         );
     }
 
@@ -370,13 +371,13 @@ public class ComponentScanner {
 
     private static void mayAddModifierForEagerlyInitialization(final Method method,
                                                                final List<ComponentDescriptorModifier> modifiers) {
-        if (ClassUtils.isMethodAnnotatedWith(method, Eager.class))
+        if (AnnotationResolver.isAnnotatedWith(method, Eager.class))
             modifiers.add(asEager());
     }
 
     private static void mayAddModifierForEagerlyInitialization(final Class<?> componentClass,
                                                                final List<ComponentDescriptorModifier> modifiers) {
-        if (ClassUtils.isSuperTypesAnnotatedWith(componentClass, Eager.class))
+        if (AnnotationResolver.isAnnotatedWith(componentClass, Eager.class))
             modifiers.add(asEager());
     }
 

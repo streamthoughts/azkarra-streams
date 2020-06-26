@@ -20,17 +20,11 @@ package io.streamthoughts.azkarra.api.util;
 
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ClassUtils {
 
@@ -76,52 +70,6 @@ public class ClassUtils {
         return !cls.isInterface() && !Modifier.isAbstract(cls.getModifiers());
     }
 
-    public static boolean isAnnotationOfType(final Annotation annotation,
-                                             final Class<?> type) {
-        return annotation.annotationType().equals(type);
-    }
-
-    public static List<Annotation> getAllDeclaredAnnotations(final Class<?> cls) {
-        List<Annotation> result = new ArrayList<>();
-        for (Class<?> t : getAllSuperTypes(cls)) {
-            Annotation[] declared = t.getDeclaredAnnotations();
-            result.addAll(Arrays.asList(declared));
-        }
-        return result;
-    }
-
-    public static <T extends Annotation> List<T> getAllDeclaredAnnotationsByType(final Class<?> cls,
-                                                                                 final Class<T> annotationType) {
-        final List<T> result = new ArrayList<>();
-        for (final Class<?> t : getAllSuperTypes(cls)) {
-            result.addAll(Arrays.asList(t.getDeclaredAnnotationsByType(annotationType)));
-            final Set<Annotation> annotations = Arrays.stream(t.getDeclaredAnnotations())
-                .filter(Predicate.not(ClassUtils::isJavaLangAnnotation))
-                .filter(annotation -> annotation.annotationType() != annotationType)
-                .collect(Collectors.toSet());
-            annotations.forEach( annotation ->
-                result.addAll(getAllDeclaredAnnotationsByType(annotation.annotationType(), annotationType))
-            );
-        }
-        return result;
-    }
-
-    public static <A extends Annotation> boolean isMethodAnnotatedWith(final Method method,
-                                                                       final Class<A> annotation) {
-
-        return method.getDeclaredAnnotation(annotation) != null;
-    }
-
-    public static <A extends Annotation> boolean isSuperTypesAnnotatedWith(final Class<?> component,
-                                                                           final Class<A> annotation) {
-        for (Class<?> t : getAllSuperTypes(component)) {
-            A[] declared = t.getDeclaredAnnotationsByType(annotation);
-            if (declared.length > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public static Set<Class<?>> getAllSuperTypes(final Class<?> type) {
         Set<Class<?>> result = new LinkedHashSet<>();
@@ -146,9 +94,4 @@ public class ClassUtils {
         }
         return result;
     }
-
-    private static boolean isJavaLangAnnotation(final Annotation annotation) {
-        return annotation.annotationType().getName().startsWith("java.lang.annotation");
-    }
-
 }

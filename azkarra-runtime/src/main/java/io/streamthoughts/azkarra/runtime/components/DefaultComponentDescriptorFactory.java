@@ -27,6 +27,7 @@ import io.streamthoughts.azkarra.api.components.ComponentNameGenerator;
 import io.streamthoughts.azkarra.api.components.ComponentRegistrationException;
 import io.streamthoughts.azkarra.api.components.Ordered;
 import io.streamthoughts.azkarra.api.components.Versioned;
+import io.streamthoughts.azkarra.api.util.AnnotationResolver;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -72,13 +72,12 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
                                            final Supplier<T> componentSupplier,
                                            final boolean isSingleton) {
 
-        final ClassLoader classLoader = componentType.getClassLoader();
-        final String version = getVersionFor(componentType, classLoader);
+        final var classLoader = componentType.getClassLoader();
+        final var version = getVersionFor(componentType, classLoader);
 
+        final var metadata = new ComponentMetadata();
 
-        final ComponentMetadata metadata = new ComponentMetadata();
-
-        ComponentDescriptorBuilder<T> builder = new ComponentDescriptorBuilder<T>()
+        var builder = new ComponentDescriptorBuilder<T>()
            .type(componentType)
            .supplier(componentSupplier)
            .metadata(metadata)
@@ -88,8 +87,7 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
         if (version != null)
             builder.version(version);
 
-        List<Annotation> allDeclaredAnnotations = ClassUtils.getAllDeclaredAnnotations(componentType);
-
+        var allDeclaredAnnotations = AnnotationResolver.findAllAnnotations(componentType);
         for (Annotation annotation : allDeclaredAnnotations) {
             Class<? extends Annotation> type = annotation.annotationType();
             ComponentAttribute attribute = new ComponentAttribute(type.getSimpleName().toLowerCase());
@@ -114,12 +112,12 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
     }
 
     private static int getOrderFor(final Class<?> cls) {
-        List<Order> annotations = ClassUtils.getAllDeclaredAnnotationsByType(cls, Order.class);
+        var annotations = AnnotationResolver.findAllAnnotationsByType(cls, Order.class);
         return annotations.isEmpty() ? Ordered.LOWEST_ORDER - 1 : annotations.get(0).value();
     }
 
     private static String getVersionFor(final Class<?> cls, final ClassLoader classLoader) {
-        ClassLoader saveLoader = ClassUtils.compareAndSwapLoaders(classLoader);
+        var saveLoader = ClassUtils.compareAndSwapLoaders(classLoader);
         try {
             String version = null;
             if (Versioned.class.isAssignableFrom(cls)) {
