@@ -18,30 +18,60 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
+import org.apache.kafka.streams.KafkaStreams;
+
 /**
- * The status for a {@link org.apache.kafka.streams.KafkaStreams} instance.
+ * The status for a {@link KafkaStreams} instance.
  *
- * @see org.apache.kafka.streams.KafkaStreams.State
+ * @see KafkaStreams.State
  * @see KafkaStreamsContainer
  */
 public enum State {
 
+    /**
+     * The {@link KafkaStreams} instance has been created yet.
+     */
     NOT_CREATED,
 
+    /**
+     * The {@link KafkaStreams} instance has been created successfully.
+     */
     CREATED,
 
+    /**
+     * The {@link KafkaStreamsContainer} is waiting for sources
+     * topics to be created before starting {@link KafkaStreams} instance.
+     */
     WAITING_FOR_TOPICS,
 
+    /**
+     * @see KafkaStreams.State#REBALANCING
+     */
     REBALANCING,
 
+    /**
+     * @see KafkaStreams.State#RUNNING
+     */
     RUNNING,
 
+    /**
+     * @see KafkaStreams.State#PENDING_SHUTDOWN
+     */
     PENDING_SHUTDOWN,
 
+    /**
+     * @see KafkaStreams.State#NOT_RUNNING
+     */
     NOT_RUNNING,
 
+    /**
+     * The {@link KafkaStreamsContainer} shutdown is complete.
+     */
     STOPPED,
 
-    ERROR;
+    /**
+     * @see KafkaStreams.State#ERROR
+     */
+    ERROR
 
 }
