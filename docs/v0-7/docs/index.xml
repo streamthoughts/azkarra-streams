@@ -29,7 +29,7 @@
     <item>
       <title>Docs: Getting Started</title>
       <link>http://www.azkarrastreams.io/docs/archives/v0.7/getting-started/</link>
-      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 26 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>http://www.azkarrastreams.io/docs/archives/v0.7/getting-started/</guid>
       <description>
@@ -50,7 +50,7 @@ For that purpose we are going to develop a Kafka Streams application using the f
 First, run this following command :&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$&amp;gt; mvn archetype:generate -DarchetypeGroupId&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt;io.streamthoughts &lt;span style=&#34;color:#4e9a06&#34;&gt;\
 &lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&lt;/span&gt;-DarchetypeArtifactId&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt;azkarra-quickstart-java &lt;span style=&#34;color:#4e9a06&#34;&gt;\
-&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&lt;/span&gt;-DarchetypeVersion&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt;0.7.1 &lt;span style=&#34;color:#4e9a06&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&lt;/span&gt;-DarchetypeVersion&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt;0.7.4 &lt;span style=&#34;color:#4e9a06&#34;&gt;\
 &lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&lt;/span&gt;-DgroupId&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt;azkarra.streams &lt;span style=&#34;color:#4e9a06&#34;&gt;\
 &lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&lt;/span&gt;-DartifactId&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt;azkarra-getting-started &lt;span style=&#34;color:#4e9a06&#34;&gt;\
 &lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&lt;/span&gt;-Dversion&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;=&lt;/span&gt;1.0-SNAPSHOT &lt;span style=&#34;color:#4e9a06&#34;&gt;\
@@ -83,7 +83,7 @@ First, run this following command :&lt;/p&gt;
     &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;dependency&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;
         &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;groupId&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;io.streamthoughts&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
         &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;artifactId&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;azkarra-streams&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;version&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;0.7.1&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;version&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;gt;&lt;/span&gt;0.7.4&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
     &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
 &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;lt;/dependencies&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;By default, Maven resources files are add to &lt;code&gt;src/main/resources&lt;/code&gt;

@@ -26,7 +26,7 @@
 " />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/getting-started/" />
-<meta property="og:updated_time" content="2020-06-22T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="og:updated_time" content="2020-06-26T00:00:00+00:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Getting Started">
 <meta itemprop="description" content="Get started with Azkarra Streams through a step by step tutorial.
 "><meta name="twitter:card" content="summary"/>
@@ -1707,7 +1707,7 @@ For that purpose we are going to develop a Kafka Streams application using the f
 First, run this following command :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; mvn archetype:generate -DarchetypeGroupId<span style="color:#ce5c00;font-weight:bold">=</span>io.streamthoughts <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-DarchetypeArtifactId<span style="color:#ce5c00;font-weight:bold">=</span>azkarra-quickstart-java <span style="color:#4e9a06">\
-</span><span style="color:#4e9a06"></span>-DarchetypeVersion<span style="color:#ce5c00;font-weight:bold">=</span>0.7.3 <span style="color:#4e9a06">\
+</span><span style="color:#4e9a06"></span>-DarchetypeVersion<span style="color:#ce5c00;font-weight:bold">=</span>0.7.4 <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-DgroupId<span style="color:#ce5c00;font-weight:bold">=</span>azkarra.streams <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-DartifactId<span style="color:#ce5c00;font-weight:bold">=</span>azkarra-getting-started <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>-Dversion<span style="color:#ce5c00;font-weight:bold">=</span>1.0-SNAPSHOT <span style="color:#4e9a06">\
@@ -1740,7 +1740,7 @@ First, run this following command :</p>
     <span style="color:#204a87;font-weight:bold">&lt;dependency</span><span style="color:#204a87;font-weight:bold">&gt;</span>
         <span style="color:#204a87;font-weight:bold">&lt;groupId</span><span style="color:#204a87;font-weight:bold">&gt;</span>io.streamthoughts<span style="color:#204a87;font-weight:bold">&lt;/groupId&gt;</span>
         <span style="color:#204a87;font-weight:bold">&lt;artifactId</span><span style="color:#204a87;font-weight:bold">&gt;</span>azkarra-streams<span style="color:#204a87;font-weight:bold">&lt;/artifactId&gt;</span>
-        <span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>0.7.3<span style="color:#204a87;font-weight:bold">&lt;/version&gt;</span>
+        <span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>0.7.4<span style="color:#204a87;font-weight:bold">&lt;/version&gt;</span>
     <span style="color:#204a87;font-weight:bold">&lt;/dependency&gt;</span>
 <span style="color:#204a87;font-weight:bold">&lt;/dependencies&gt;</span>
 </code></pre></div><p>By default, Maven resources files are add to <code>src/main/resources</code>
@@ -2075,7 +2075,7 @@ $&gt; ./quickstart-create-wordcount-topics.sh
 $&gt; docker <span style="color:#204a87">exec</span> -it azkarra-cp-broker /usr/bin/kafka-topics <span style="color:#4e9a06">\
 </span><span style="color:#4e9a06"></span>--create --topic streams-wordcount-output --replication-factor <span style="color:#0000cf;font-weight:bold">1</span> --partitions <span style="color:#0000cf;font-weight:bold">3</span> --zookeeper zookeeper:2181
 </code></pre></div><p>As a last step, we will package and run the Maven project :</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; mvn clean package <span style="color:#ce5c00;font-weight:bold">&amp;&amp;</span> java -jar target/azkarra-quickstart-java-0.7.3.jar
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; mvn clean package <span style="color:#ce5c00;font-weight:bold">&amp;&amp;</span> java -jar target/azkarra-quickstart-java-0.7.4.jar
 </code></pre></div><p>Let's produce some input messages to Kafka topic <code>streams-plaintext-input</code> :</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$&gt; docker <span style="color:#204a87">exec</span> -it azkarra-cp-broker /usr/bin/kafka-console-producer <span style="color:#4e9a06">\ </span>
 --topic streams-plaintext-input --broker-list kafka:9092
@@ -2568,7 +2568,7 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified June 22, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/410eda3a9d59803372a4c2b521b57780623eabe0">update(site): update for version 0.7.3 (410eda3)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified June 26, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/e6b62dcee301ef4257c02e90b5b91bf2c81a2ce7">update(site): update docs for release 7.4 (e6b62dc)</a>
 </div>
 </div>
 
