@@ -25,6 +25,8 @@ import io.undertow.server.HttpServerExchange;
 
 public class StreamsStopHandler extends AbstractStreamHttpHandler implements WithApplication {
 
+    private static final String CLEANUP_QUERY_PARAM = "cleanup";
+
     /**
      * Creates a new {@link StreamsStopHandler} instance.
      *
@@ -39,8 +41,12 @@ public class StreamsStopHandler extends AbstractStreamHttpHandler implements Wit
      */
     @Override
     public void handleRequest(final HttpServerExchange exchange, final String applicationId) {
-        JsonNode jsonNode = ExchangeHelper.readJsonRequest(exchange);
-        boolean cleanup = jsonNode.get("cleanup").asBoolean();
+        final JsonNode payload = ExchangeHelper.readJsonRequest(exchange);
+        boolean cleanup = false;
+        if (!payload.isMissingNode() && payload.hasNonNull(CLEANUP_QUERY_PARAM)) {
+            JsonNode node = payload.get(CLEANUP_QUERY_PARAM);
+            cleanup = node.asBoolean();
+        }
         service.stopStreams(applicationId, cleanup);
     }
 }
