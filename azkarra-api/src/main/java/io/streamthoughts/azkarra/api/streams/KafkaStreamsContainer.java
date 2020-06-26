@@ -62,9 +62,11 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -104,10 +106,31 @@ public class KafkaStreamsContainer {
 
     private KafkaConsumer<byte[], byte[]> consumer;
 
+    private volatile ContainerState containerState;
+    private final Object containerStateLock = new Object();
+
     /**
      * The {@link Executor} which is used top start/stop the internal streams in a non-blocking way.
      */
     private Executor executor;
+
+    // The internal states used to manage container Lifecycle
+    private enum ContainerState {
+        CREATED(1, 3),                  // 0
+        STARTING(2),                    // 1
+        STARTED(3),                     // 2
+        PENDING_SHUTDOWN(4),            // 3
+        STOPPED(1, 3);                  // 4
+
+        private final Set<Integer> validTransitions = new HashSet<>();
+        ContainerState(final Integer... validTransitions) {
+            this.validTransitions.addAll(Arrays.asList(validTransitions));
+        }
+
+        public boolean isValidTransition(final ContainerState newState) {
+            return validTransitions.contains(newState.ordinal());
+        }
+    }
 
     /**
      * Creates a new {@link KafkaStreamsContainer} instance.
@@ -119,6 +142,7 @@ public class KafkaStreamsContainer {
                           final KafkaStreamsFactory streamsFactory) {
         Objects.requireNonNull(topologyContainer, "topologyContainer cannot be null");
         Objects.requireNonNull(streamsFactory, "streamsFactory cannot be null");
+        containerState = ContainerState.CREATED;
         setState(State.NOT_CREATED);
         this.streamsFactory = streamsFactory;
         this.topologyContainer = topologyContainer;
@@ -136,27 +160,30 @@ public class KafkaStreamsContainer {
      */
     public synchronized Future<KafkaStreams.State> start(final Executor executor) {
         LOG.info("Starting KafkaStreams container for name='{}', version='{}', id='{}'.",
-                topologyContainer.metadata().name(),
-                topologyContainer.metadata().version(),
-                applicationId());
-        this.executor = executor;
+            topologyContainer.metadata().name(),
+            topologyContainer.metadata().version(),
+            applicationId());
+
+        setContainerState(ContainerState.STARTING);
         started = Time.SYSTEM.milliseconds();
+        reset();
+        this.executor = executor;
+        stateChangeWatchers.clear(); // Remove all watchers that was registered during a previous run.
         kafkaStreams = streamsFactory.make(
             topologyContainer.topology(),
             topologyContainer.streamsConfig()
         );
-        reset();
         setState(State.CREATED);
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
         // https://issues.apache.org/jira/browse/KAFKA-7380
         return CompletableFuture.supplyAsync(() -> {
-            LOG.info("Executing stream-lifecycle interceptor chain (application.id={})", applicationId());
+            LOG.info("Executing stream-lifecycle interceptor chain (id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
                 topologyContainer.interceptors().iterator(),
                 (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifecycleContext(this), chain),
                 () -> {
                     try {
-                        LOG.info("Starting KafkaStreams (application.id={})", applicationId());
+                        LOG.info("Starting KafkaStreams (id={})", applicationId());
                         kafkaStreams.start();
                     } catch (StreamsException e) {
                         lastObservedException = e;
@@ -167,10 +194,11 @@ public class KafkaStreamsContainer {
             streamsLifeCycle.execute();
             KafkaStreams.State state = kafkaStreams.state();
             LOG.info(
-                "Completed KafkaStreams initialization (application.id={}, state={})",
+                "Completed KafkaStreamsContainer initialization (id={}, state={})",
                 applicationId(),
                 state
             );
+            setContainerState(ContainerState.STARTED);
             return state;
 
          }, executor);
@@ -180,6 +208,11 @@ public class KafkaStreamsContainer {
         lastObservedException = null;
     }
 
+    /**
+     * Sets the current state of the streams.
+     *
+     * @param state the KafkaStreams state.
+     */
     public void setState(final State state) {
         this.state = new TimestampedValue<>(state);
     }
@@ -285,7 +318,7 @@ public class KafkaStreamsContainer {
      * @return  a map of {@link Metric}.
      */
     public Map<MetricName, ? extends Metric> metrics() {
-       return kafkaStreams.metrics();
+       return initialized() ? kafkaStreams.metrics() : Collections.emptyMap();
     }
 
     /**
@@ -400,63 +433,125 @@ public class KafkaStreamsContainer {
      *
      */
     public void close(final boolean cleanUp, final Duration timeout) {
-        if (cleanUp) reset();
-        // close() method can be invoked from a StreamThread (i.e through UncaughtExceptionHandler),
-        // to avoid thread deadlock streams instance should be closed using another thread.
-        final Thread shutdownThread = new Thread(() -> {
-            LOG.info("Closing KafkaStreams container (application.id={})", applicationId());
-            StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
-                topologyContainer.interceptors().iterator(),
-                (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifecycleContext(this), chain),
-                () -> {
-                    kafkaStreams.close();
-                    if (cleanUp) {
-                        LOG.info("Cleanup local states (application.id={})", applicationId());
-                        kafkaStreams.cleanUp();
-                    }
-                    LOG.info("KafkaStreams closed completely (application.id={})", applicationId());
-                }
-            );
-            streamsLifeCycle.execute();
-            closeInternals();
-            LOG.info("KafkaStreams container has been closed (application.id={})", applicationId());
-            // This may trigger a container restart
-            stateChanges(new StateChangeEvent(State.STOPPED, State.valueOf(kafkaStreams.state().name())));
-        }, "kafka-streams-container-close-thread");
+        closeAndOptionallyRestart(cleanUp, timeout, false);
+    }
 
-        shutdownThread.setDaemon(true);
-        shutdownThread.start();
+    private void closeAndOptionallyRestart(final boolean cleanUp,
+                                           final Duration timeout,
+                                           final boolean restartAfterClose) {
+        validateInitialized();
+
+        boolean proceed = true;
+        synchronized (containerStateLock) {
+            if (!setContainerState(ContainerState.PENDING_SHUTDOWN)) {
+                LOG.warn(
+                    "KafkaStreamsContainer is already in the pending shutdown state, wait to complete shutdown (id={})",
+                    applicationId());
+                proceed = false;
+            }
+        }
+
+        if (proceed) {
+
+            if (restartAfterClose) {
+                // Register a watcher that will restart this container as soon as its state is STOPPED.
+                stateChangeWatchers.add(new StateChangeWatcher() {
+                    @Override
+                    public boolean accept(final State state) {
+                        return state == State.STOPPED;
+                    }
+
+                    @Override
+                    public void onChange(final StateChangeEvent event) {
+                        restartNow();
+                    }
+                });
+            }
+
+            if (cleanUp) reset();
+            // close() method can be invoked from a StreamThread (i.e through UncaughtExceptionHandler),
+            // to avoid thread deadlock streams instance should be closed using another thread.
+            final Thread shutdownThread = new Thread(() -> {
+                LOG.info("Closing KafkaStreamsContainer (id={})", applicationId());
+                StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
+                    topologyContainer.interceptors().iterator(),
+                    (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifecycleContext(this), chain),
+                    () -> {
+                        kafkaStreams.close();
+                        if (cleanUp) {
+                            LOG.info("Cleanup local states (id={})", applicationId());
+                            kafkaStreams.cleanUp();
+                        }
+                        LOG.info("KafkaStreams closed completely (id={})", applicationId());
+                    }
+                );
+                streamsLifeCycle.execute();
+                closeInternals();
+                LOG.info("KafkaStreamsContainer has been closed (id={})", applicationId());
+                // This may trigger a container restart
+                setContainerState(ContainerState.STOPPED);
+                stateChanges(new StateChangeEvent(State.STOPPED, State.valueOf(kafkaStreams.state().name())));
+            }, "kafka-streams-container-close-thread");
+
+            shutdownThread.setDaemon(true);
+            shutdownThread.start();
+        }
 
         final long waitMs = timeout.toMillis();
-        if (waitMs > 0) {
-            try {
-                shutdownThread.join(waitMs);
-            } catch (InterruptedException e) {
-                LOG.debug("Cannot transit to {} within {}ms", State.STOPPED, waitMs);
+        if (waitMs > 0 && !waitOnContainerState(ContainerState.STOPPED, waitMs)) {
+            LOG.debug(
+                "KafkaStreamsContainer cannot transit to {} within {}ms (id={})",
+                ContainerState.STOPPED,
+                waitMs,
+                applicationId()
+            );
+        }
+    }
+
+    private boolean setContainerState(final ContainerState newState) {
+        synchronized (containerStateLock) {
+            if (!containerState.isValidTransition(newState)) {
+                if (containerState == ContainerState.PENDING_SHUTDOWN && newState == ContainerState.PENDING_SHUTDOWN) {
+                    return false;
+                }
+                throw new IllegalStateException("KafkaStreamsContainer " + applicationId() + ": " +
+                        "Unexpected state transition from " + containerState + " to " + newState);
             }
+            containerState = newState;
+            containerStateLock.notifyAll();
+            return true;
+        }
+    }
+
+    private boolean waitOnContainerState(final ContainerState targetState,
+                                         final long waitMs) {
+        final long start = Time.SYSTEM.milliseconds();
+        synchronized (containerStateLock) {
+            long elapsedMs = 0L;
+            while (containerState != targetState) {
+                if (waitMs > elapsedMs) {
+                    final long remainingMs = waitMs - elapsedMs;
+                    try {
+                        containerStateLock.wait(remainingMs);
+                    } catch (final InterruptedException ignore) {
+                    }
+                } else {
+                    return false;
+                }
+                elapsedMs = Time.SYSTEM.milliseconds() - start;
+            }
+            return true;
         }
     }
 
     public void restart() {
-        // If the container is not already STOPPED we should ensure that
-        // all resources are properly closed before restarting.
-        if (state.value() != State.STOPPED) {
-            // Register a watcher that will restart this container as soon as its state is STOPPED.
-            stateChangeWatchers.add(new StateChangeWatcher() {
-                @Override
-                public boolean accept(final State state) {
-                    return state == State.STOPPED;
-                }
-
-                @Override
-                public void onChange(final StateChangeEvent event) {
-                    restartNow();
-                }
-            });
-            // Do NOT clean-up states while restarting the streams.
-            close(false, Duration.ZERO);
+        // It seems to be safe to restart this container immediately
+        if (containerState.isValidTransition(ContainerState.STARTING)) {
+            restartNow();
+        // Else we should ensure that all the container resources are properly closed before restarting.
         } else {
-            restartNow(); // Restart this container immediately
+            // Do NOT clean-up states while restarting the streams.
+            closeAndOptionallyRestart(false, Duration.ZERO, true);
         }
     }
 
@@ -478,9 +573,8 @@ public class KafkaStreamsContainer {
     }
 
     public Set<StreamsServerInfo> getAllMetadata() {
-        if (isNotRunning()) {
-            return Collections.emptySet();
-        }
+        if (isNotRunning()) return Collections.emptySet();
+
         // allMetadata throw an IllegalAccessException if instance is not running
         return kafkaStreams.allMetadata()
            .stream()
@@ -490,6 +584,8 @@ public class KafkaStreamsContainer {
 
     public Collection<StreamsServerInfo> getAllMetadataForStore(final String storeName) {
         Objects.requireNonNull(storeName, "storeName cannot be null");
+        if (isNotRunning()) return Collections.emptySet();
+
         Collection<StreamsMetadata> metadata = kafkaStreams.allMetadataForStore(storeName);
         return metadata.stream()
             .map(this::newServerInfoFor)
@@ -502,6 +598,9 @@ public class KafkaStreamsContainer {
         Objects.requireNonNull(storeName, "storeName cannot be null");
         Objects.requireNonNull(key, "key cannot be null");
         Objects.requireNonNull(keySerializer, "keySerializer cannot be null");
+
+        if (!initialized()) return Optional.empty();
+
         StreamsMetadata metadata = kafkaStreams.metadataForKey(storeName, key, keySerializer);
         return metadata == null || metadata.equals(StreamsMetadata.NOT_AVAILABLE) ?
             Optional.empty(): Optional.of(newServerInfoFor(metadata));
@@ -540,8 +639,12 @@ public class KafkaStreamsContainer {
 
     /**
      * Checks if the {@link KafkaStreams} is neither RUNNING nor REBALANCING.
+     *
+     * @return {@code true} if no {@link KafkaStreams} is initialized.
      */
     public boolean isNotRunning() {
+        if (!initialized()) return true;
+
         // This is equivalent to the KafkaStreams methods :
         // State.isRunning() <= 2.4 or State.isRunningOrRebalancing() >= 2.5
         final KafkaStreams.State state = kafkaStreams.state();
@@ -636,9 +739,14 @@ public class KafkaStreamsContainer {
      * @return  the {@link KafkaStreams}.
      */
     public KafkaStreams getKafkaStreams() {
-        if (kafkaStreams == null)
-            throw new IllegalStateException("Cannot get access to KafkaStreams, instance is not created yet.");
+        validateInitialized();
         return kafkaStreams;
+    }
+
+    private void validateInitialized() {
+        if (!initialized())
+            throw new IllegalStateException(
+                "This container is not started. Cannot get access to KafkaStreams instance.");
     }
 
     private void closeInternals() {
@@ -650,6 +758,14 @@ public class KafkaStreamsContainer {
         } finally {
             consumer = null;
         }
+    }
+
+    /**
+     * @return {@code true} if the {@link KafkaStreams} is not equal {@code null},
+     *                      i.e container has been started at least once.
+     */
+    private boolean initialized() {
+        return kafkaStreams != null;
     }
 
     /**

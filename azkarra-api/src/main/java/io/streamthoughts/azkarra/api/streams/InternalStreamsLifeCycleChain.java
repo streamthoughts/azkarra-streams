@@ -63,9 +63,7 @@ public class InternalStreamsLifeCycleChain implements StreamsLifecycleChain {
         try {
             callback.execute(interceptor, this);
         } catch (Throwable t) {
-            LOG.error(
-                "Unexpected error while executing interceptor '{}'. Ignored.",
-                interceptor.getClass().getSimpleName(), t);
+            LOG.error("Unexpected error while executing interceptor '{}'. Ignored.", interceptor.name(), t);
             execute();
         }
     }
