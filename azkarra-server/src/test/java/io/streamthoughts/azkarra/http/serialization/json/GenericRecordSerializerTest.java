@@ -22,39 +22,67 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import io.streamthoughts.azkarra.api.time.Time;
+import io.streamthoughts.azkarra.example.User;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.avro.data.TimeConversions;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.io.JsonEncoder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 public class GenericRecordSerializerTest {
 
+    private static final String SCHEMA =
+            "{\"namespace\": \"avro.example\", " +
+            "\"type\": \"record\",\"name\": \"User\"," +
+            "\"fields\": [{\"name\": \"name\",\"type\": \"string\"}," +
+            "{\"name\": \"created\",\"type\": {\"type\": \"long\",\"logicalType\": \"timestamp-millis\"}}]}";
+
+    private static Instant NOW = Instant.now();
+
     @Test
-    public void shouldSerializeGenericRecordIntoValidJson() throws IOException {
+    public void shouldSerializeAvroToJsonGivenGenericRecord() throws IOException {
 
-        Schema schema = SchemaBuilder.record("test")
-                .fields()
-                .optionalString("fieldA")
-                .optionalString("fieldB")
-                .endRecord();
-
-        GenericData.Record record = new GenericRecordBuilder(schema)
-                .set("fieldA", "value-a")
-                .set("fieldB", "value-b")
-                .build();
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse(SCHEMA);
+        GenericRecord record = new GenericData.Record(schema);
+        record.put("name", "kafka");
+        record.put("created", NOW.toEpochMilli());
 
         Writer jsonWriter = new StringWriter();
         JsonGenerator jsonGenerator = new JsonFactory().createGenerator(jsonWriter);
         SerializerProvider serializerProvider = new ObjectMapper().getSerializerProvider();
         new GenericRecordSerializer().serialize(record, jsonGenerator, serializerProvider);
         jsonGenerator.flush();
-        Assertions.assertEquals("{\"fieldA\": \"value-a\", \"fieldB\": \"value-b\"}", jsonWriter.toString());
+        Assertions.assertEquals(
+            "{\"name\":\"kafka\",\"created\":" + NOW.toEpochMilli() + "}"
+            , jsonWriter.toString());
     }
 
+    @Test
+    public void shouldSerializeAvroToJsonGivenSpecificRecord() throws IOException {
+        User specificRecord = User.newBuilder().setName("kafka").setCreated(NOW).build();
+        Writer jsonWriter = new StringWriter();
+        JsonGenerator jsonGenerator = new JsonFactory().createGenerator(jsonWriter);
+        SerializerProvider serializerProvider = new ObjectMapper().getSerializerProvider();
+        new GenericRecordSerializer().serialize(specificRecord, jsonGenerator, serializerProvider);
+        jsonGenerator.flush();
+        Assertions.assertEquals(
+            "{\"name\":\"kafka\",\"created\":" + NOW.toEpochMilli() + "}",
+            jsonWriter.toString());
+    }
 }
