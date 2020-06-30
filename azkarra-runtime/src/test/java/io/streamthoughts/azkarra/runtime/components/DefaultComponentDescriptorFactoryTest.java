@@ -18,16 +18,18 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
-import io.streamthoughts.azkarra.api.annotations.DefaultStreamsConfig;
+import io.streamthoughts.azkarra.api.annotations.ConfValue;
+import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorFactory;
 import io.streamthoughts.azkarra.api.components.Versioned;
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.util.Version;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultComponentDescriptorFactoryTest {
@@ -44,21 +46,33 @@ public class DefaultComponentDescriptorFactoryTest {
     }
 
     @Test
-    public void shouldCreateDescriptorGivenVersionedClass() {
+    public void shouldCreateDescriptorAndLoadConfigFromAnnotationMetadata() {
         ComponentDescriptor<TestClassWithAnnotations> descriptor = factory.make(
             null, TestClassWithAnnotations.class, TestClassWithAnnotations::new, true);
         assertNotNull(descriptor);
-        assertFalse(descriptor.isVersioned());
-
-        descriptor.metadata().contains("DefaultStreamsConfig", "key-1", "value1");
-        descriptor.metadata().contains("DefaultStreamsConfig", "key-2", "value2");
+        assertTrue(descriptor.metadata().contains("confvalue", "value", "value1"));
+        assertTrue(descriptor.metadata().contains("confvalue", "value", "value2"));
+        Conf configuration = descriptor.configuration();
+        assertNotNull(configuration);
+        assertTrue(configuration.hasPath("key-1"));
+        assertTrue(configuration.hasPath("key-2"));
     }
 
     @Test
-    public void shouldCreateDescriptorGivenAnnotatedClass() {
+    public void shouldCreateDescriptorAndLoadOrderFromAnnotationMetadata() {
+        ComponentDescriptor<TestClassWithAnnotations> descriptor = factory.make(
+                null, TestClassWithAnnotations.class, TestClassWithAnnotations::new, true);
+        assertNotNull(descriptor);
+        assertTrue(descriptor.metadata().contains("order", "value", 42));
+        assertEquals(42, descriptor.order());
+    }
+
+    @Test
+    public void shouldCreateDescriptorGivenVersionedClass() {
         ComponentDescriptor<TestVersionedClass> descriptor = factory.make(
             null, TestVersionedClass.class, TestVersionedClass::new, true);
         assertNotNull(descriptor);
+        assertTrue(descriptor.isVersioned());
         assertTrue(Version.isEqual(descriptor.version(), "1.0"));
     }
 
@@ -66,8 +80,9 @@ public class DefaultComponentDescriptorFactoryTest {
 
     }
 
-    @DefaultStreamsConfig(name = "key-1", value = "value1")
-    @DefaultStreamsConfig(name = "key-2", value = "value2")
+    @Order(42)
+    @ConfValue(key = "key-1", value = "value1")
+    @ConfValue(key = "key-2", value = "value2")
     private static class TestClassWithAnnotations {
 
     }

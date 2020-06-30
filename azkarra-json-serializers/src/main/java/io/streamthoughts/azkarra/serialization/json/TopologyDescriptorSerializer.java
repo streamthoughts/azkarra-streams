@@ -47,7 +47,7 @@ public class TopologyDescriptorSerializer extends JsonSerializer<TopologyDescrip
         gen.writeFieldName("aliases");
         gen.writeObject(descriptor.aliases());
         gen.writeFieldName("config");
-        gen.writeObject(descriptor.streamsConfigs());
+        gen.writeObject(descriptor.configuration());
         gen.writeEndObject();
     }
 }

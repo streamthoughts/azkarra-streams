@@ -68,6 +68,10 @@ public class TopologyContainerFactory {
         this.applicationIdBuilderSupplier = applicationIdBuilderSupplier;
     }
 
+    public Supplier<ApplicationIdBuilder> getApplicationIdBuilderSupplier() {
+        return applicationIdBuilderSupplier;
+    }
+
     /**
      * Makes a {@link Topology} instance using the specified {@link TopologyDescriptor}.
      *

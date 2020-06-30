@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.api.util;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.streamthoughts.azkarra.api.util.ClassUtils.getAllSuperTypes;
 
@@ -38,12 +40,23 @@ public class AnnotationResolver {
         return new TypeAnnotationFilter(annotation).matches(type);
     }
 
+    public static boolean isAnnotationContainer(final Class<? extends Annotation> annotationType) {
+        try {
+            final Method value = annotationType.getDeclaredMethod("value");
+            Class<?> returnType = value.getReturnType();
+            return returnType.isArray() && returnType.getComponentType().isAnnotation();
+        } catch (final NoSuchMethodException e) {
+            return false;
+        }
+    }
+
     public static List<Annotation> findAllAnnotations(final Class<?> cls) {
         final var annotations = new ArrayList<Annotation>();
         for (final Class<?> t : getAllSuperTypes(cls)) {
             // add all declared annotations
             var declared = Arrays.stream(t.getDeclaredAnnotations())
                 .filter(Predicate.not(JAVA_PACKAGES::matches))
+                .flatMap(AnnotationResolver::mayUnwrapAnnotationContainer)
                 .collect(Collectors.toList());
             annotations.addAll(declared);
 
@@ -53,6 +66,18 @@ public class AnnotationResolver {
                 .forEach(annotations::add);
         }
         return annotations;
+    }
+
+    private static Stream<Annotation> mayUnwrapAnnotationContainer(final Annotation annotation) {
+        if (!isAnnotationContainer(annotation.annotationType()))
+            return Stream.of(annotation);
+
+        try {
+            Method value = annotation.annotationType().getDeclaredMethod("value");
+            return Arrays.stream((Annotation[])value.invoke(annotation));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static <T extends Annotation> List<T> findAllAnnotationsByType(final Method method,

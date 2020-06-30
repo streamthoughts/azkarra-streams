@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.api.components;
 
 import io.streamthoughts.azkarra.api.components.condition.Condition;
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.util.Objects;
@@ -61,6 +62,8 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
     private final boolean isConditional;
 
     private final int order;
+
+    private Conf configuration;
 
     /**
      * Creates a new {@link SimpleComponentDescriptor} instance.
@@ -183,6 +186,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
         );
         metadata = descriptor.metadata();
         aliases.addAll(descriptor.aliases());
+        configuration = descriptor.configuration();
     }
 
     /**
@@ -305,6 +309,18 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
      * {@inheritDoc}
      */
     @Override
+    public Conf configuration() {
+        return configuration == null ? Conf.empty() : configuration;
+    }
+
+    public void configuration(final Conf configuration) {
+        this.configuration = configuration;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int order() {
         return order;
     }
@@ -322,6 +338,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
                 Objects.equals(type, that.type) &&
                 Objects.equals(supplier, that.supplier);
     }
+
 
     /**
      * {@inheritDoc}

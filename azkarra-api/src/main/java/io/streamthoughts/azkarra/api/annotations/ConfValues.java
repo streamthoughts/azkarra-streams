@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -21,21 +21,20 @@ package io.streamthoughts.azkarra.api.annotations;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker interface that a {@link io.streamthoughts.azkarra.api.streams.TopologyProvider} can used to define
- * the configuration properties to be used for creating a new {@link org.apache.kafka.streams.KafkaStreams} instance.
+ * This annotation can be used to provide default config values to a configurable component.
+ *
+ * @see io.streamthoughts.azkarra.api.config.Conf
+ * @see io.streamthoughts.azkarra.api.config.Configurable
  */
 @Documented
 @Inherited
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(DefaultStreamsConfigs.class)
-public @interface DefaultStreamsConfig {
-    String name();
-    String value();
+public @interface ConfValues {
+    ConfValue[] value();
 }

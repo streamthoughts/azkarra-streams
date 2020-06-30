@@ -23,6 +23,7 @@ import io.streamthoughts.azkarra.api.components.Restriction;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class Qualifiers {
 
@@ -65,6 +66,14 @@ public class Qualifiers {
 
     public static <T> Qualifier<T> byRestriction(final Restriction restriction) {
         return new RestrictionQualifier<>(restriction);
+    }
+
+    public static <T> Qualifier<T> byAnyRestrictions(final Restriction... restrictions) {
+        return new AnyQualifier<>(Arrays
+            .stream(restrictions)
+            .map(Qualifiers::<T>byRestriction)
+            .collect(Collectors.toList())
+        );
     }
 
     public static <T> Qualifier<T> byLatestVersion() {

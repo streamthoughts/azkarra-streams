@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.config.Conf;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ public class AutoCreateTopicsInterceptorConfig {
      * @param originals the {@link Conf} instance.
      */
     public AutoCreateTopicsInterceptorConfig(final Conf originals) {
-        this.originals = originals;
+        this.originals = Objects.requireNonNull(originals, "originals config cannot be null");
     }
 
     /**

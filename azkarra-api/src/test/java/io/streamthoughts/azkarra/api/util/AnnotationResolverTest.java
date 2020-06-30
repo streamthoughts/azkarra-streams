@@ -90,9 +90,14 @@ public class AnnotationResolverTest {
     }
 
     @Test
-    public void shouldResolvedAllAnnotationsGivenClass() {
+    public void shouldResolvedAllAnnotationsByUnwrappingContainerGivenClass() {
         final List<Annotation> annotations = AnnotationResolver.findAllAnnotations(RepeatableTestClass.class);
-        assertEquals(1, annotations.size()); // only contains container annotations
+        assertEquals(2, annotations.size());
+
+        final List<String> values = annotations
+                .stream().map(annotation -> ((TestAnnotation)annotation).value())
+                .collect(Collectors.toList());
+        assertTrue(values.containsAll(Arrays.asList("child1", "child2")));
     }
 
     @Test

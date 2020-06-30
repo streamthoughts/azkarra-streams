@@ -18,7 +18,7 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
-import io.streamthoughts.azkarra.api.annotations.DefaultStreamsConfig;
+import io.streamthoughts.azkarra.api.annotations.ConfValue;
 import io.streamthoughts.azkarra.api.annotations.TopologyInfo;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorFactory;
@@ -44,19 +44,19 @@ public class TopologyDescriptorFactoryTest {
             true
         );
 
-        TopologyDescriptor<TestTopologyProvider> topologyDescriptor = new TopologyDescriptor<>(descriptor);
+        var topologyDescriptor = new TopologyDescriptor<>(descriptor);
 
         assertEquals(TestTopologyProvider.class.getName(), topologyDescriptor.className());
         assertEquals("CustomAlias", topologyDescriptor.aliases().iterator().next());
         assertEquals("1.0", topologyDescriptor.version().toString());
         assertEquals("test description", topologyDescriptor.description());
-        assertEquals("2", topologyDescriptor.streamsConfigs().getString(StreamsConfig.NUM_STREAM_THREADS_CONFIG));
-        assertEquals("static.app.id", topologyDescriptor.streamsConfigs().getString(StreamsConfig.APPLICATION_ID_CONFIG));
+        assertEquals("2", topologyDescriptor.configuration().getString(StreamsConfig.NUM_STREAM_THREADS_CONFIG));
+        assertEquals("static.app.id", topologyDescriptor.configuration().getString(StreamsConfig.APPLICATION_ID_CONFIG));
     }
 
     @TopologyInfo( description = "test description", aliases = "CustomAlias")
-    @DefaultStreamsConfig(name = StreamsConfig.NUM_STREAM_THREADS_CONFIG, value = "2")
-    @DefaultStreamsConfig(name = StreamsConfig.APPLICATION_ID_CONFIG, value = "static.app.id")
+    @ConfValue(key = StreamsConfig.NUM_STREAM_THREADS_CONFIG, value = "2")
+    @ConfValue(key = StreamsConfig.APPLICATION_ID_CONFIG, value = "static.app.id")
     public static class TestTopologyProvider implements TopologyProvider {
 
         @Override

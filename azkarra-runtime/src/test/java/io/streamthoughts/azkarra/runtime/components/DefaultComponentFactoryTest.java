@@ -100,7 +100,6 @@ public class DefaultComponentFactoryTest {
         Assertions.assertEquals("componentOne", descriptor.get().name());
     }
 
-
     @Test
     public void shouldThrowConflictingComponentExceptionGivenTwoIdenticalComponents() {
         factory.registerComponent(TestB.class);

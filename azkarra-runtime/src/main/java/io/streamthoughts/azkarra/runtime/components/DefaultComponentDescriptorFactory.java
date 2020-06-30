@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.runtime.components;
 
+import io.streamthoughts.azkarra.api.annotations.ConfValue;
 import io.streamthoughts.azkarra.api.annotations.Order;
 import io.streamthoughts.azkarra.api.components.ComponentAttribute;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
@@ -27,6 +28,7 @@ import io.streamthoughts.azkarra.api.components.ComponentNameGenerator;
 import io.streamthoughts.azkarra.api.components.ComponentRegistrationException;
 import io.streamthoughts.azkarra.api.components.Ordered;
 import io.streamthoughts.azkarra.api.components.Versioned;
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.util.AnnotationResolver;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import org.slf4j.Logger;
@@ -34,9 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class DefaultComponentDescriptorFactory implements ComponentDescriptorFactory {
 
@@ -75,23 +77,53 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
         final var classLoader = componentType.getClassLoader();
         final var version = getVersionFor(componentType, classLoader);
 
-        final var metadata = new ComponentMetadata();
+        final ComponentMetadata metadata = loadAnnotationComponentMetadata(componentType);
 
         var builder = new ComponentDescriptorBuilder<T>()
            .type(componentType)
            .supplier(componentSupplier)
            .metadata(metadata)
            .isSingleton(isSingleton)
-           .order(getOrderFor(componentType));
+           .order(extractComponentOrderFromMetadata(metadata))
+           .configuration(extractComponentConfFromMetadata(metadata));
 
         if (version != null)
             builder.version(version);
 
-        var allDeclaredAnnotations = AnnotationResolver.findAllAnnotations(componentType);
-        for (Annotation annotation : allDeclaredAnnotations) {
+        if (componentName != null)
+            builder.name(componentName);
+        else
+            builder.name(componentNameGenerator.generate(builder));
+
+        return builder.build();
+    }
+
+    private int extractComponentOrderFromMetadata(final ComponentMetadata metadata) {
+        return metadata.attributesForName(attributeNameFor(Order.class))
+            .stream()
+            .findFirst()
+            .map(attribute -> (int)attribute.value("value"))
+            .orElse(Ordered.LOWEST_ORDER - 1);
+    }
+
+    private Conf extractComponentConfFromMetadata(final ComponentMetadata metadata) {
+        return Conf.with(
+            metadata.attributesForName(attributeNameFor(ConfValue.class))
+                .stream()
+                .collect(Collectors.toMap(
+                    attr -> attr.stringValue("key"),
+                    attr -> attr.stringValue("value")
+                )
+        ));
+    }
+
+    private <T> ComponentMetadata loadAnnotationComponentMetadata(final Class<T> componentType) {
+        final var metadata = new ComponentMetadata();
+        var annotations = AnnotationResolver.findAllAnnotations(componentType);
+        for (var annotation : annotations) {
             Class<? extends Annotation> type = annotation.annotationType();
-            ComponentAttribute attribute = new ComponentAttribute(type.getSimpleName().toLowerCase());
-            for (Method method : type.getDeclaredMethods()) {
+            var attribute = new ComponentAttribute(attributeNameFor(type));
+            for (var method : type.getDeclaredMethods()) {
                 try {
                     Object defaultValue = method.getDefaultValue();
                     Object value = method.invoke(annotation);
@@ -102,18 +134,11 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
             }
             metadata.addAttribute(attribute);
         }
-
-        if (componentName != null)
-            builder.name(componentName);
-        else
-            builder.name(componentNameGenerator.generate(builder));
-
-        return builder.build();
+        return metadata;
     }
 
-    private static int getOrderFor(final Class<?> cls) {
-        var annotations = AnnotationResolver.findAllAnnotationsByType(cls, Order.class);
-        return annotations.isEmpty() ? Ordered.LOWEST_ORDER - 1 : annotations.get(0).value();
+    private String attributeNameFor(final Class<? extends Annotation> annotationType) {
+        return annotationType.getSimpleName().toLowerCase();
     }
 
     private static String getVersionFor(final Class<?> cls, final ClassLoader classLoader) {

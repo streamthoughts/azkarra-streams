@@ -148,7 +148,7 @@ export default {
     configure(topology) {
       this.form.version = topology.version;
       this.form.type = topology.name;
-      this.form.config.streams = topology.config;
+      this.form.config = topology.config;
       this.toggleModal();
     },
 

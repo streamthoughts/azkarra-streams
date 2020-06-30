@@ -20,21 +20,40 @@ package io.streamthoughts.azkarra.runtime.context;
 
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.api.components.ComponentFactory;
+import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
+import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
+import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
+import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySupplier;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptor;
+import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
+import io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptor;
+import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import org.apache.kafka.streams.Topology;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.function.Supplier;
 
+import static io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptorConfig.AUTO_CREATE_TOPICS_ENABLE_CONFIG;
+import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG;
+import static io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptorConfig.WAIT_FOR_TOPICS_ENABLE_CONFIG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class DefaultAzkarraContextTest {
 
@@ -57,12 +76,12 @@ public class DefaultAzkarraContextTest {
 
     @Test
     public void shouldRegisterTopologyToGivenEnvironmentWhenStart() {
-        StreamsExecutionEnvironment env = Mockito.spy(DefaultStreamsExecutionEnvironment.create("env"));
+        StreamsExecutionEnvironment env = spy(DefaultStreamsExecutionEnvironment.create("env"));
         context.addExecutionEnvironment(env);
         context.addTopology(TestTopologyProvider.class, "env", Executed.as("test"));
         context.preStart();
-        Mockito.verify(env, Mockito.times(1))
-                .addTopology(Mockito.any(Supplier.class), executedArgumentCaptor.capture());
+        verify(env, times(1))
+                .addTopology(any(Supplier.class), executedArgumentCaptor.capture());
 
         InternalExecuted executed = new InternalExecuted(executedArgumentCaptor.getValue());
         assertEquals("test", executed.name());
@@ -80,6 +99,119 @@ public class DefaultAzkarraContextTest {
                 + TestTopologyProvider.class.getName() + "', environment 'env' not found", errorMessage);
     }
 
+    @Test
+    public void shouldAutomaticallyRegisterConditionalAutoCreateTopicsInterceptor() {
+        ComponentFactory factory = context.getComponentFactory();
+        Assertions.assertTrue(factory.containsComponent(AutoCreateTopicsInterceptor.class));
+
+        Assertions.assertNotNull(factory.getComponent(
+            AutoCreateTopicsInterceptor.class,
+            Conf.with(AUTO_CREATE_TOPICS_ENABLE_CONFIG, true))
+        );
+        Assertions.assertThrows(
+            NoSuchComponentException.class,
+            () -> factory.getComponent(
+                AutoCreateTopicsInterceptor.class,
+                Conf.with(AUTO_CREATE_TOPICS_ENABLE_CONFIG, false)
+            )
+        );
+    }
+
+    @Test
+    public void shouldAutomaticallyRegisterConditionalMonitoringStreamsInterceptor() {
+        ComponentFactory factory = context.getComponentFactory();
+        Assertions.assertTrue(factory.containsComponent(MonitoringStreamsInterceptor.class));
+
+        Assertions.assertNotNull(factory.getComponent(
+            MonitoringStreamsInterceptor.class,
+            Conf.with(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, true))
+        );
+        Assertions.assertThrows(
+            NoSuchComponentException.class,
+            () -> factory.getComponent(
+                MonitoringStreamsInterceptor.class,
+                Conf.with(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, false)
+            )
+        );
+    }
+
+    @Test
+    public void shouldAutomaticallyRegisterConditionalWaitForSourceTopicsInterceptor() {
+        ComponentFactory factory = context.getComponentFactory();
+        Assertions.assertTrue(factory.containsComponent(WaitForSourceTopicsInterceptor.class));
+
+        Assertions.assertNotNull(factory.getComponent(
+            WaitForSourceTopicsInterceptor.class,
+            Conf.with(WAIT_FOR_TOPICS_ENABLE_CONFIG, true))
+        );
+        Assertions.assertThrows(
+            NoSuchComponentException.class,
+            () -> factory.getComponent(
+                WaitForSourceTopicsInterceptor.class,
+                Conf.with(WAIT_FOR_TOPICS_ENABLE_CONFIG, false)
+            )
+        );
+    }
+
+    @Test
+    public void shouldProperlyMergedAllConfigsWhenAddingTopology() {
+        //Setup
+        var mkEnv = mock(StreamsExecutionEnvironment.class);
+        when(mkEnv.name()).thenReturn("test");
+        when(mkEnv.getConfiguration()).thenReturn(Conf.with("prop.env", "env.value"));
+
+        var mkDescriptor = mock(TopologyDescriptor.class);
+        when(mkDescriptor.name()).thenReturn("test");
+        when(mkDescriptor.configuration()).thenReturn(Conf.with("prop.descriptor", "desc.value"));
+        Executed executed = Executed.as("test-app").withConfig(Conf.with("prop.executed", "exec.value"));
+        context.setConfiguration(Conf.with("prop.context", "value"));
+
+        //Execute
+        context.addTopologyToEnvironment(mkDescriptor, mkEnv, new InternalExecuted(executed));
+
+        // Assert
+        verify(mkEnv, times(1)).addTopology(
+            any(ContextAwareTopologySupplier.class),
+            executedArgumentCaptor.capture()
+        );
+
+        var captured = new InternalExecuted(executedArgumentCaptor.getValue());
+        assertEquals("test-app", captured.name());
+        assertTrue(captured.config().hasPath("prop.env"), "Missing prop.env");
+        assertTrue(captured.config().hasPath("prop.descriptor"), "Missing prop.descriptor");
+        assertTrue(captured.config().hasPath("prop.executed"), "Missing prop.executed");
+        assertTrue(captured.config().hasPath("prop.context"), "Missing prop.context");
+    }
+
+    @Test
+    public void shouldProperlyConfigureInterceptorsWhenAddingTopology() {
+        var mkEnv = mock(StreamsExecutionEnvironment.class);
+        when(mkEnv.name()).thenReturn("test");
+
+        var mkDescriptor = mock(TopologyDescriptor.class);
+        when(mkDescriptor.name()).thenReturn("test");
+        when(mkDescriptor.configuration()).thenReturn(Conf.empty());
+        when(mkDescriptor.classLoader()).thenReturn(this.getClass().getClassLoader());
+
+        context.setConfiguration(ConfBuilder.newConf()
+            .with(AUTO_CREATE_TOPICS_ENABLE_CONFIG, true)
+            .with(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, true)
+            .with(WAIT_FOR_TOPICS_ENABLE_CONFIG, true)
+        );
+
+        //Execute
+        context.addTopologyToEnvironment(mkDescriptor, mkEnv, new InternalExecuted(Executed.as("test-app")));
+        // Assert
+        verify(mkEnv, times(1)).addTopology(
+            any(ContextAwareTopologySupplier.class),
+            executedArgumentCaptor.capture()
+        );
+
+        var captured = new InternalExecuted(executedArgumentCaptor.getValue());
+        assertEquals(4, captured.interceptors().size());
+        assertEquals("ClassloadingIsolationInterceptor", captured.interceptors().get(0).get().name()); // assert first
+        assertEquals("WaitForSourceTopicsInterceptor", captured.interceptors().get(3).get().name()); // assert last
+    }
 
     public static class TestTopologyProvider implements TopologyProvider {
 

@@ -163,7 +163,7 @@ public final class Conditions {
      * @param annotations   the {@link ConditionalOn} annotations.
      * @return              the {@link Condition}s.
      */
-    public static List<Condition> buildConditionsForAnnotation(final List<ConditionalOn> annotations) {
+    public static List<Condition> buildConditionsForAnnotations(final List<ConditionalOn> annotations) {
         List<Condition> allConditions = new LinkedList<>();
         for (ConditionalOn conditional : annotations) {
             for (Class<? extends Condition> conditionClass : conditional.conditions()) {

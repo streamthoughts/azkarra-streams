@@ -687,7 +687,7 @@ public class DefaultComponentFactory implements ComponentFactory {
                 Supplier<T> factory = descriptor.supplier();
 
                 maySetComponentFactoryAware(factory);
-                Configurable.mayConfigure(factory, conf);
+                Configurable.mayConfigure(factory, Conf.of(conf, descriptor.configuration()));
 
                 T instance = factory.get();
 

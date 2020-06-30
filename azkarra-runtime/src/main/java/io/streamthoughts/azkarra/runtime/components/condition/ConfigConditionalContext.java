@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.runtime.components.condition;
 
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
+import io.streamthoughts.azkarra.api.components.GettableComponent;
 import io.streamthoughts.azkarra.api.components.condition.ComponentConditionalContext;
 import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.components.condition.ConditionContext;
@@ -28,13 +29,16 @@ import io.streamthoughts.azkarra.api.config.Conf;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Default {@link ComponentConditionalContext} implementation..
  */
-public class ConfigConditionalContext<T> implements ComponentConditionalContext<ComponentDescriptor<T>> {
+public class ConfigConditionalContext<T> implements
+        ComponentConditionalContext<ComponentDescriptor<T>>,
+        Predicate<GettableComponent<T>> {
 
-    static <T> ConfigConditionalContext<T> of(final Conf config) {
+    public static <T> ConfigConditionalContext<T> of(final Conf config) {
         return new ConfigConditionalContext<>(config);
     }
 
@@ -47,6 +51,14 @@ public class ConfigConditionalContext<T> implements ComponentConditionalContext<
      */
     public ConfigConditionalContext(final Conf config) {
         this.config = Objects.requireNonNull(config);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean test(final GettableComponent<T> component) {
+        return component.isEnable(this);
     }
 
     /**

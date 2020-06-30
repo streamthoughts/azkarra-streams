@@ -18,32 +18,22 @@
  */
 package io.streamthoughts.azkarra.api.providers;
 
-import io.streamthoughts.azkarra.api.annotations.DefaultStreamsConfig;
 import io.streamthoughts.azkarra.api.annotations.TopologyInfo;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
-import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static io.streamthoughts.azkarra.api.util.AnnotationResolver.findAllAnnotationsByType;
 
 /**
  *  A {@link SimpleComponentDescriptor} for describing a {@link TopologyProvider} implementation.
- *
- * @param <T>   the {@link TopologyProvider} type.
  */
-public final class TopologyDescriptor<T extends TopologyProvider> extends SimpleComponentDescriptor<T> {
+public class TopologyDescriptor<T extends TopologyProvider> extends SimpleComponentDescriptor<T> {
 
     private static final String TOPOLOGY_INFO_ATTRIBUTE = TopologyInfo.class.getSimpleName();
 
     private final String description;
-
-    private final Conf streamConfigs;
 
     /**
      * Creates a new {@link TopologyDescriptor} instance.
@@ -53,21 +43,10 @@ public final class TopologyDescriptor<T extends TopologyProvider> extends Simple
         description = metadata().stringValue(TOPOLOGY_INFO_ATTRIBUTE, "description");
         String[] aliases = metadata().arrayValue(TOPOLOGY_INFO_ATTRIBUTE, "aliases");
         addAliases(new HashSet<>(Arrays. asList(aliases)));
-
-        // Because DefaultStreamsConfig is a repeatable annotation is more straightforward
-        // to directly lookup for the annotation instead of using attributes
-        // that will contains the container annotation)
-        Map<String, String> mapConfigs = findAllAnnotationsByType(type(), DefaultStreamsConfig.class)
-            .stream()
-            .collect(Collectors.toMap(DefaultStreamsConfig::name, DefaultStreamsConfig::value));
-        streamConfigs = Conf.with(mapConfigs);
     }
 
     public String description() {
         return description;
     }
 
-    public Conf streamsConfigs() {
-        return streamConfigs;
-    }
 }

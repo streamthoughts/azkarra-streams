@@ -88,6 +88,9 @@ public class ConfBuilder implements Conf {
         return build().getDouble(path);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> getStringList(final String path) {
         return build().getStringList(path);

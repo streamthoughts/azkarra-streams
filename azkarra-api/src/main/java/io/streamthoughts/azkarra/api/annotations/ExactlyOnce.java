@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,25 +16,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.util;
+package io.streamthoughts.azkarra.api.annotations;
 
-import io.streamthoughts.azkarra.api.annotations.DefaultStreamsConfig;
-import org.junit.jupiter.api.Test;
+import org.apache.kafka.streams.StreamsConfig;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-
-public class ClassUtilsTest {
-
-
+/**
+ * This annotation can be used to automatically set the streams property
+ * {@code processing.guarantee} to {@code exactly_once}.
+ *
+ * @see StreamsConfig#PROCESSING_GUARANTEE_CONFIG
+ * @see StreamsConfig#EXACTLY_ONCE
+ */
+@Documented
+@Inherited
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@ConfValue(key = "streams." + StreamsConfig.PROCESSING_GUARANTEE_CONFIG, value = StreamsConfig.EXACTLY_ONCE)
+public @interface ExactlyOnce {
 }

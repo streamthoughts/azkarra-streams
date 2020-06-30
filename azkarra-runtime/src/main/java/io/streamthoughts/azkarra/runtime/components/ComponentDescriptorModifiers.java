@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.components.condition.Conditions;
+import io.streamthoughts.azkarra.api.config.Conf;
 
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class ComponentDescriptorModifiers {
     }
 
     /**
-     * Gets a modifier implementation that will set the conditions that conditions that need to be
+     * Gets a modifier implementation that will set the conditions that need to be
      * fulfilled for the component to be eligible for use in the application.
      *
      * @param conditions the {@link Condition}s to add.
@@ -104,7 +105,7 @@ public class ComponentDescriptorModifiers {
     }
 
     /**
-     * Gets a modifier implementation that will set the conditions that conditions that need to be
+     * Gets a modifier implementation that will set the conditions that need to be
      * fulfilled for the component to be eligible for use in the application.
      *
      * @param conditions the {@link Condition}s to add.
@@ -116,6 +117,23 @@ public class ComponentDescriptorModifiers {
             public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
                 return ComponentDescriptorBuilder.<T>create(descriptor)
                     .condition(Conditions.compose(conditions))
+                    .build();
+            }
+        };
+    }
+
+    /**
+     * Gets a modifier implementation that will set the default configuration to
+     * pass to the component if it implements the {@link io.streamthoughts.azkarra.api.config.Configurable} interface.
+     * @param configuration the {@link Conf}.
+     * @return              a new {@link ComponentDescriptorModifier} instance.
+     */
+    public static ComponentDescriptorModifier withConfig(final Conf configuration) {
+        return new ComponentDescriptorModifier() {
+            @Override
+            public <T> ComponentDescriptor<T> apply(final ComponentDescriptor<T> descriptor) {
+                return ComponentDescriptorBuilder.<T>create(descriptor)
+                    .configuration(configuration)
                     .build();
             }
         };

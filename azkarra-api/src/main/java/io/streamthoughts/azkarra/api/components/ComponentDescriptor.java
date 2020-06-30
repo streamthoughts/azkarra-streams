@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.api.components;
 
 import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.io.Closeable;
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
 /**
  * Describes a single component managed by a {@link ComponentFactory}.
  *
- * @param <T>   the component type.
+ * @param <T> the component type.
  */
 public interface ComponentDescriptor<T> extends Ordered {
 
@@ -167,7 +168,15 @@ public interface ComponentDescriptor<T> extends Ordered {
      * Gets the {@link Condition}  that need to be fulfilled for
      * this component to be eligible for use in the application.
      *
-     * @return  the {@link Condition}s.
+     * @return  the {@link Condition}.
      */
     Optional<Condition> condition();
+
+    /**
+     * Gets the default configuration that will pass to the describe component
+     * if it implements the {@link io.streamthoughts.azkarra.api.config.Configurable} interface.
+     *
+     * @return  the {@link Conf}.
+     */
+    Conf configuration();
 }

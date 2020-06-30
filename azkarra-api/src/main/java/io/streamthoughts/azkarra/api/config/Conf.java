@@ -38,7 +38,7 @@ public interface Conf {
     EmptyConf EMPTY = new EmptyConf();
 
     /**
-     * Static helper that can be used to creates a new empty
+     * Static helper that can be used to create a new empty
      * {@link Conf} instance using the specified key-value pair.
      *
      * @return a new {@link Conf} instance.
@@ -48,13 +48,28 @@ public interface Conf {
     }
 
     /**
-     * Static helper that can be used to creates a new empty
+     * Static helper that can be used to create a new empty
      * {@link Conf} instance using the specified {@link Map}.
      *
      * @return a new {@link Conf} instance.
      */
     static Conf with(final Map<String, ?> map) {
         return new MapConf(map);
+    }
+
+    /**
+     * Static helper that can be used to merge multiple {@link Conf} instances.
+     *
+     * @return a new {@link Conf} instance.
+     */
+    static Conf of(final Conf...configurations) {
+        Conf config = empty();
+        for (Conf conf : configurations) {
+            if (conf != null) {
+                config = config.withFallback(conf);
+            }
+        }
+        return Conf.with(config.getConfAsMap()); // This will have the effect to flatten the configuration.
     }
 
     /**
@@ -171,7 +186,7 @@ public interface Conf {
      *
      * @param path    the parameter path.
      *
-     *
+     * @throws MissingConfException if no parameter can be found for the specified path.
      * @return a string list value.
      */
     List<String> getStringList(final String path);

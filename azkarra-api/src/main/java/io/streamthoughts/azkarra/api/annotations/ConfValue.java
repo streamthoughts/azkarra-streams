@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -21,14 +21,24 @@ package io.streamthoughts.azkarra.api.annotations;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
+/**
+ * This annotation can be used to provide default config values to a configurable component.
+ *
+ * @see io.streamthoughts.azkarra.api.config.Conf
+ * @see io.streamthoughts.azkarra.api.config.Configurable
+ */
 @Documented
 @Inherited
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultStreamsConfigs {
-    DefaultStreamsConfig[] value();
+@Repeatable(ConfValues.class)
+public @interface ConfValue {
+    String key();
+    String value() default "";
 }

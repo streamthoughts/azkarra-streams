@@ -297,6 +297,14 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      * {@inheritDoc}
      */
     @Override
+    public Supplier<ApplicationIdBuilder> getApplicationIdBuilder() {
+        return topologyFactory.getApplicationIdBuilderSupplier();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public StreamsExecutionEnvironment setWaitForTopicsToBeCreated(boolean waitForTopicToBeCreated) {
         this.waitForTopicToBeCreated = waitForTopicToBeCreated;
         return this;

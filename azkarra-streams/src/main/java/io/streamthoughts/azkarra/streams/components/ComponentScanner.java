@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.streams.components;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.annotations.ConditionalOn;
+import io.streamthoughts.azkarra.api.annotations.ConfValue;
 import io.streamthoughts.azkarra.api.annotations.Eager;
 import io.streamthoughts.azkarra.api.annotations.Factory;
 import io.streamthoughts.azkarra.api.annotations.Order;
@@ -28,11 +29,12 @@ import io.streamthoughts.azkarra.api.annotations.Secondary;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
-import io.streamthoughts.azkarra.api.components.condition.Conditions;
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.util.AnnotationResolver;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import io.streamthoughts.azkarra.runtime.components.BasicComponentFactory;
+import io.streamthoughts.azkarra.streams.components.annotation.ComponentDescriptorModifierResolver;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentClassLoader;
 import io.streamthoughts.azkarra.streams.components.isolation.ComponentResolver;
 import io.streamthoughts.azkarra.streams.components.isolation.ExternalComponent;
@@ -55,20 +57,27 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
+import static io.streamthoughts.azkarra.api.components.condition.Conditions.buildConditionsForAnnotations;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asEager;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asPrimary;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.asSecondary;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withConditions;
+import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withConfig;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withOrder;
+import static io.streamthoughts.azkarra.streams.components.annotation.ComponentDescriptorModifierResolver.onAnnotationExists;
+import static io.streamthoughts.azkarra.streams.components.annotation.ComponentDescriptorModifierResolver.onAnnotations;
+import static io.streamthoughts.azkarra.streams.components.annotation.ComponentDescriptorModifierResolver.onSingleAnnotation;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.reflections.ReflectionUtils.getAllMethods;
 import static org.reflections.ReflectionUtils.withAnnotation;
 
@@ -84,6 +93,8 @@ public class ComponentScanner {
 
     private static final FilterBuilder DEFAULT_FILTER_BY = new FilterBuilder();
 
+    private final List<ComponentDescriptorModifierResolver> descriptorModifierResolvers;
+
     private final ComponentRegistry registry;
 
     /**
@@ -94,6 +105,22 @@ public class ComponentScanner {
     public ComponentScanner(final ComponentRegistry registry) {
         Objects.requireNonNull(registry, "registry cannot be null");
         this.registry = registry;
+        descriptorModifierResolvers = new LinkedList<>();
+        descriptorModifierResolvers.add(onAnnotationExists(Primary.class, asPrimary()));
+        descriptorModifierResolvers.add(onAnnotationExists(Secondary.class, asSecondary()));
+        descriptorModifierResolvers.add(onAnnotationExists(Eager.class, asEager()));
+        descriptorModifierResolvers.add(onSingleAnnotation(
+            Order.class,
+            annotations -> withOrder(annotations.value()))
+        );
+        descriptorModifierResolvers.add(onAnnotations(
+            ConfValue.class,
+            annotations -> withConfig(Conf.with(annotations.stream().collect(toMap(ConfValue::key, ConfValue::value)))))
+        );
+        descriptorModifierResolvers.add(onAnnotations(
+            ConditionalOn.class,
+            annotations -> withConditions(buildConditionsForAnnotations(annotations)))
+        );
     }
 
     /**
@@ -105,7 +132,7 @@ public class ComponentScanner {
        final List<String> paths = Arrays
            .stream(componentPaths.split(","))
            .map(String::trim)
-           .collect(Collectors.toList());
+           .collect(toList());
         scan(paths);
     }
 
@@ -173,7 +200,7 @@ public class ComponentScanner {
                                        final ClassLoader classLoader,
                                        final com.google.common.base.Predicate<String> filterBy) {
         LOG.info("Scanning components from paths : {}",
-            Arrays.stream(urls).map(URL::getPath).collect(Collectors.joining("\n\t", "\n\t", "")));
+            Arrays.stream(urls).map(URL::getPath).collect(joining("\n\t", "\n\t", "")));
 
         ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.setClassLoaders(new ClassLoader[]{classLoader});
@@ -223,44 +250,36 @@ public class ComponentScanner {
 
         final String componentName = getNamedQualifierOrElse(method, method.getName());
 
-        List<ComponentDescriptorModifier> modifiers = new ArrayList<>();
+        final var modifiers = descriptorModifierResolvers
+            .stream()
+            .flatMap(adder -> adder.resolves(method).stream())
+            .toArray(ComponentDescriptorModifier[]::new);
 
-        mayAddModifierForOrder(method, modifiers);
-        mayAddModifierForPrimary(method, modifiers);
-        mayAddModifierForSecondary(method, modifiers);
-        mayAddModifierForCondition(method, modifiers);
-        mayAddModifierForEagerlyInitialization(method, modifiers);
-
-        final ComponentDescriptorModifier[] objects = modifiers.toArray(new ComponentDescriptorModifier[]{});
-        registerComponent(componentName, componentClass, supplier, isSingleton(method), objects);
+        registerComponent(componentName, componentClass, supplier, isSingleton(method), modifiers);
     }
 
     @SuppressWarnings("unchecked")
-    private void registerComponentClass(final Class<Object> cls, final ClassLoader classLoader) {
+    private void registerComponentClass(final Class<Object> clazz, final ClassLoader classLoader) {
         final Supplier<Object> supplier;
         final Class<Object> type;
-        if (isSupplier(cls)) {
-            supplier = (Supplier<Object>) ClassUtils.newInstance(cls, classLoader);
-            type = resolveSupplierReturnType(cls);
+        if (isSupplier(clazz)) {
+            supplier = (Supplier<Object>) ClassUtils.newInstance(clazz, classLoader);
+            type = resolveSupplierReturnType(clazz);
             if (type == null)
                 throw new AzkarraException("Unexpected error while scanning component. " +
-                    "Cannot resolve return type from supplier: " + cls.getName());
+                    "Cannot resolve return type from supplier: " + clazz.getName());
         } else {
-            supplier = new BasicComponentFactory<>(cls, classLoader);
-            type = cls;
+            supplier = new BasicComponentFactory<>(clazz, classLoader);
+            type = clazz;
         }
 
-        List<ComponentDescriptorModifier> modifiers = new ArrayList<>();
-        mayAddModifierForOrder(cls, modifiers);
-        mayAddModifierForPrimary(cls, modifiers);
-        mayAddModifierForSecondary(cls, modifiers);
-        mayAddModifierForCondition(cls, modifiers);
-        mayAddModifierForEagerlyInitialization(cls, modifiers);
+        final var modifiers = descriptorModifierResolvers
+            .stream()
+            .flatMap(adder -> adder.resolves(clazz).stream())
+            .toArray(ComponentDescriptorModifier[]::new);
 
-        final ComponentDescriptorModifier[] arrayModifiers = modifiers.toArray(new ComponentDescriptorModifier[]{});
-
-        final String componentName = getNamedQualifierOrNull(cls);
-        registerComponent(componentName, type, supplier, isSingleton(cls), arrayModifiers);
+        final String componentName = getNamedQualifierOrNull(clazz);
+        registerComponent(componentName, type, supplier, isSingleton(clazz), modifiers);
     }
 
     private void registerComponent(final String componentName,
@@ -305,80 +324,6 @@ public class ComponentScanner {
     private static String getNamedQualifierOrElse(final Method componentMethod, final String defaultName) {
         Named annotation = componentMethod.getDeclaredAnnotation(Named.class);
         return annotation == null ? defaultName : annotation.value();
-    }
-
-    private static void mayAddModifierForOrder(final Method componentMethod,
-                                               final List<ComponentDescriptorModifier> modifiers) {
-        Order annotation = componentMethod.getDeclaredAnnotation(Order.class);
-        if (annotation != null)
-            modifiers.add(withOrder(annotation.value()));
-    }
-
-    private static void mayAddModifierForOrder(final Class<?> cls,
-                                               final List<ComponentDescriptorModifier> modifiers) {
-        List<Order> annotations = AnnotationResolver.findAllAnnotationsByType(cls, Order.class);
-        if (!annotations.isEmpty())
-            modifiers.add(withOrder(annotations.get(0).value()));
-    }
-
-    private static void mayAddModifierForPrimary(final Class<?> componentClass,
-                                                 final List<ComponentDescriptorModifier> modifiers) {
-        if (AnnotationResolver.isAnnotatedWith(componentClass, Primary.class))
-            modifiers.add(asPrimary());
-    }
-
-    private static void mayAddModifierForPrimary(final Method method,
-                                                 final List<ComponentDescriptorModifier> modifiers) {
-        if (AnnotationResolver.isAnnotatedWith(method, Primary.class))
-            modifiers.add(asPrimary());
-    }
-
-    private static void mayAddModifierForSecondary(final Method method,
-                                                   final List<ComponentDescriptorModifier> modifiers) {
-        if (AnnotationResolver.isAnnotatedWith(method, Secondary.class))
-            modifiers.add(asSecondary());
-    }
-
-    private static void mayAddModifierForSecondary(final Class<?> componentClass,
-                                                   final List<ComponentDescriptorModifier> modifiers) {
-        if (AnnotationResolver.isAnnotatedWith(componentClass, Secondary.class))
-            modifiers.add(asSecondary());
-    }
-
-    private static void mayAddModifierForCondition(final Method componentMethod,
-                                               final List<ComponentDescriptorModifier> modifiers) {
-        mayAddModifiersForConditions(
-            modifiers,
-            AnnotationResolver.findAllAnnotationsByType(componentMethod, ConditionalOn.class)
-        );
-    }
-
-    private static void mayAddModifierForCondition(final Class<?> componentClass,
-                                                   final List<ComponentDescriptorModifier> modifiers) {
-        mayAddModifiersForConditions(
-            modifiers,
-            AnnotationResolver.findAllAnnotationsByType(componentClass, ConditionalOn.class)
-        );
-    }
-
-    private static void mayAddModifiersForConditions(final List<ComponentDescriptorModifier> modifiers,
-                                                     final List<ConditionalOn> annotations) {
-        var conditions = Conditions.buildConditionsForAnnotation(annotations);
-        if (!conditions.isEmpty()) {
-            modifiers.add(withConditions(conditions));
-        }
-    }
-
-    private static void mayAddModifierForEagerlyInitialization(final Method method,
-                                                               final List<ComponentDescriptorModifier> modifiers) {
-        if (AnnotationResolver.isAnnotatedWith(method, Eager.class))
-            modifiers.add(asEager());
-    }
-
-    private static void mayAddModifierForEagerlyInitialization(final Class<?> componentClass,
-                                                               final List<ComponentDescriptorModifier> modifiers) {
-        if (AnnotationResolver.isAnnotatedWith(componentClass, Eager.class))
-            modifiers.add(asEager());
     }
 
     // The Reflections class may throw a ReflectionsException when parallel executor

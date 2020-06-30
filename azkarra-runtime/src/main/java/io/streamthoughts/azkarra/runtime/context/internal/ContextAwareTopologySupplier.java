@@ -34,7 +34,7 @@ import org.apache.kafka.streams.Topology;
 
 public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyProvider> {
 
-    private final ComponentDescriptor<TopologyProvider>  descriptor;
+    private final ComponentDescriptor<? extends TopologyProvider>  descriptor;
     private final AzkarraContext context;
 
     /**
@@ -44,7 +44,7 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
      * @param descriptor    the {@link TopologyDescriptor} instance.
      */
     public ContextAwareTopologySupplier(final AzkarraContext context,
-                                        final ComponentDescriptor<TopologyProvider> descriptor) {
+                                        final ComponentDescriptor<? extends TopologyProvider> descriptor) {
         this.descriptor = descriptor;
         this.context = context;
     }

@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentMetadata;
 import io.streamthoughts.azkarra.api.components.condition.Condition;
 import io.streamthoughts.azkarra.api.components.SimpleComponentDescriptor;
+import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
     private boolean isEager = false;
     private Set<String> aliases = new HashSet<>();
     private int order;
+    private Conf configuration;
 
     /**
      * Static helper method for creating a new {@link ComponentDescriptorBuilder} instance.
@@ -75,6 +77,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
             .isPrimary(descriptor.isPrimary())
             .isSecondary(descriptor.isSecondary())
             .condition(descriptor.condition().orElse(null))
+            .configuration(descriptor.configuration())
             .isEager(descriptor.isEager());
     }
 
@@ -274,6 +277,19 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Conf configuration() {
+        return Optional.ofNullable(configuration).orElse(Conf.empty());
+    }
+
+    public ComponentDescriptorBuilder<T> configuration(final Conf configuration) {
+        this.configuration = configuration;
+        return this;
+    }
+
+    /**
      * Sets the order of the component.
      *
      * @param order the order of the component.
@@ -308,6 +324,7 @@ public class ComponentDescriptorBuilder<T> implements ComponentDescriptor<T> {
         );
         descriptor.metadata(metadata);
         descriptor.addAliases(aliases);
+        descriptor.configuration(configuration);
         return descriptor;
     }
 }
