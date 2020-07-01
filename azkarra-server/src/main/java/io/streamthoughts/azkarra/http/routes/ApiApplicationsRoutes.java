@@ -54,8 +54,10 @@ public class ApiApplicationsRoutes implements RoutingHandlerProvider {
                 new ApplicationGetTopologyHandler(service))
 
             .post(templatePath("{id}/stores/{storeName}"),
-                new BlockingHandler(new ApplicationQueryStoreHandler(service)));
+                new BlockingHandler(new ApplicationQueryStoreHandler(service, false)))
 
+            .post(templatePath("{id}/stores/{storeName}/records"),
+                new BlockingHandler(new ApplicationQueryStoreHandler(service, true)));
     }
 
     private String templatePath(final String assignments) {

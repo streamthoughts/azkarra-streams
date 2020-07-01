@@ -18,29 +18,36 @@
  */
 package io.streamthoughts.azkarra.http.handler;
 
+import io.streamthoughts.azkarra.api.AzkarraStreamsService;
+import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.QueryInfo;
 import io.streamthoughts.azkarra.api.query.internal.Query;
-import io.streamthoughts.azkarra.http.query.JsonQuerySerde;
-import io.streamthoughts.azkarra.http.ExchangeHelper;
-import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
+import io.streamthoughts.azkarra.http.ExchangeHelper;
+import io.streamthoughts.azkarra.http.query.JsonQuerySerde;
 import io.undertow.server.HttpServerExchange;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ApplicationQueryStoreHandler extends AbstractStreamHttpHandler implements WithApplication {
 
     private static final String QUERY_PARAM_STORE_NAME = "storeName";
+
+    private final boolean onlySuccessKVRecords;
 
     /**
      * Creates a new {@link ApplicationQueryStoreHandler} instance.
      *
      * @param service   the {@link AzkarraStreamsService} instance.
      */
-    public ApplicationQueryStoreHandler(final AzkarraStreamsService service) {
+    public ApplicationQueryStoreHandler(final AzkarraStreamsService service,
+                                        final boolean onlySuccessKVRecords) {
         super(service);
+        this.onlySuccessKVRecords = onlySuccessKVRecords;
     }
 
     /**
@@ -49,7 +56,6 @@ public class ApplicationQueryStoreHandler extends AbstractStreamHttpHandler impl
     @Override
     public void handleRequest(final HttpServerExchange exchange, final String applicationId) throws IOException {
         final String store = ExchangeHelper.getQueryParam(exchange, QUERY_PARAM_STORE_NAME);
-
         byte[] data = exchange.getInputStream().readAllBytes();
         Tuple<QueryInfo, Queried> deserialized = JsonQuerySerde.deserialize(store, data);
 
@@ -57,12 +63,21 @@ public class ApplicationQueryStoreHandler extends AbstractStreamHttpHandler impl
 
         Query<Object, Object> query = queryInfo.type().buildQuery(queryInfo.storeName(), queryInfo.operation());
         final QueryResult<Object, Object> result = service.query(
-                applicationId,
-                query,
-                queryInfo.parameters(),
-                deserialized.right()
+            applicationId,
+            query,
+            queryInfo.parameters(),
+            deserialized.right()
         );
-        ExchangeHelper.sendJsonResponse(exchange, result);
+        ExchangeHelper.sendJsonResponse(exchange, onlySuccessKVRecords ? onlySuccessKVRecords(result): result);
+    }
+
+    private static List<KV<Object, Object>> onlySuccessKVRecords(final QueryResult<Object, Object> result) {
+        return result
+            .getResult()
+            .getSuccess()
+            .stream()
+            .flatMap(s -> s.getRecords().stream())
+            .collect(Collectors.toList());
     }
 }
 
