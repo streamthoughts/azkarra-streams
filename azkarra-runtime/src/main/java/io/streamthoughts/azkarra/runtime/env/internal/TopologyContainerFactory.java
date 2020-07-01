@@ -111,7 +111,7 @@ public class TopologyContainerFactory {
                 .buildApplicationId(metadata, streamsConfig);
 
         streamsConfig = Conf
-                .with(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString())
+                .of(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString())
                 .withFallback(streamsConfig);
 
         Topology topology = provider.get();

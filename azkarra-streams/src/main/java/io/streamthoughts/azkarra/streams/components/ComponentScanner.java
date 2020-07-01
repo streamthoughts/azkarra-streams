@@ -115,7 +115,7 @@ public class ComponentScanner {
         );
         descriptorModifierResolvers.add(onAnnotations(
             ConfValue.class,
-            annotations -> withConfig(Conf.with(annotations.stream().collect(toMap(ConfValue::key, ConfValue::value)))))
+            annotations -> withConfig(Conf.of(annotations.stream().collect(toMap(ConfValue::key, ConfValue::value)))))
         );
         descriptorModifierResolvers.add(onAnnotations(
             ConditionalOn.class,

@@ -27,7 +27,7 @@ public class EnvironmentConfigTest {
     @Test
     public void shouldCreateEnvConfigGivenValidConf() {
 
-        Conf conf = Conf.with(EnvironmentConfig.ENVIRONMENT_NAME_CONFIG, "__default");
+        Conf conf = Conf.of(EnvironmentConfig.ENVIRONMENT_NAME_CONFIG, "__default");
 
         EnvironmentConfig environmentConfig = EnvironmentConfig.read(conf);
 

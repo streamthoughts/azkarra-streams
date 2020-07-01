@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.streams.StreamsConfig;
 import org.junit.jupiter.api.Assertions;
@@ -38,57 +37,40 @@ public class ConfSerializerTest {
     @Test
     public void shouldObfuscateConfigGivenPasswordStreamsKey() throws IOException {
 
-        Conf conf = ConfBuilder.newConf()
-                .with(SaslConfigs.SASL_JAAS_CONFIG, "dummy")
-                .build();
+        var conf = Conf.of(SaslConfigs.SASL_JAAS_CONFIG, "dummy");
         assertWithConf(conf, "{\"sasl.jaas.config\":\"[hidden]\"}");
     }
 
     @Test
     public void shouldObfuscateConfigGivenPasswordStreamsKeyPrefixedWithProducer() throws IOException {
 
-        Conf conf = ConfBuilder.newConf()
-                .with(StreamsConfig.producerPrefix(SaslConfigs.SASL_JAAS_CONFIG), "dummy")
-                .build();
+        var conf = Conf.of(StreamsConfig.producerPrefix(SaslConfigs.SASL_JAAS_CONFIG), "dummy");
         assertWithConf(conf, "{\"producer.sasl.jaas.config\":\"[hidden]\"}");
     }
 
     @Test
     public void shouldObfuscateConfigGivenPasswordStreamsKeyPrefixedWithConsumer() throws IOException {
-
-        Conf conf = ConfBuilder.newConf()
-                .with(StreamsConfig.consumerPrefix(SaslConfigs.SASL_JAAS_CONFIG), "dummy")
-                .build();
+        var conf = Conf.of(StreamsConfig.consumerPrefix(SaslConfigs.SASL_JAAS_CONFIG), "dummy");
         assertWithConf(conf, "{\"consumer.sasl.jaas.config\":\"[hidden]\"}");
     }
 
     @Test
     public void shouldObfuscateConfigGivenPasswordStreamsKeyPrefixedWithAdmin() throws IOException {
-
-        Conf conf = ConfBuilder.newConf()
-                .with(StreamsConfig.adminClientPrefix(SaslConfigs.SASL_JAAS_CONFIG), "dummy")
-                .build();
+        var conf = Conf.of(StreamsConfig.adminClientPrefix(SaslConfigs.SASL_JAAS_CONFIG), "dummy");
         assertWithConf(conf, "{\"admin.sasl.jaas.config\":\"[hidden]\"}");
     }
 
     @Test
     public void shouldObfuscateConfigGivenPasswordStreamsKeyPrefixedWithStreams() throws IOException {
-
-        Conf conf = ConfBuilder.newConf()
-                .with("streams." + SaslConfigs.SASL_JAAS_CONFIG, "dummy")
-                .build();
+        var conf = Conf.of("streams." + SaslConfigs.SASL_JAAS_CONFIG, "dummy");
         assertWithConf(conf, "{\"streams.sasl.jaas.config\":\"[hidden]\"}");
     }
 
     @Test
     public void shouldObfuscateConfigGivenKeyEndingWithPassword() throws IOException {
-
-        Conf conf = ConfBuilder.newConf()
-                .with("my.secret.password", "dummy")
-                .build();
+        var conf = Conf.of("my.secret.password", "dummy");
         assertWithConf(conf, "{\"my.secret.password\":\"[hidden]\"}");
     }
-
 
     private void assertWithConf(final Conf conf, final String expected) throws IOException {
         Writer jsonWriter = new StringWriter();

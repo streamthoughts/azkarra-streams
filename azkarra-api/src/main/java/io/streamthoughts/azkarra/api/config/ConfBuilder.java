@@ -26,7 +26,10 @@ import java.util.Properties;
 
 /**
  * Helper class which can be used for building new {@link Conf} instance.
+ *
+ * @deprecated use of one of the helper methods provided by the {@link Conf} class.
  */
+@Deprecated
 public class ConfBuilder implements Conf {
 
     private final Map<String, Object> parameters;
@@ -161,7 +164,7 @@ public class ConfBuilder implements Conf {
     }
 
     public Conf build() {
-        return Conf.with(parameters);
+        return Conf.of(parameters);
     }
 
     /**

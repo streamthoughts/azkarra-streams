@@ -20,7 +20,6 @@ package io.streamthoughts.azkarra.runtime.env;
 
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
@@ -46,21 +45,22 @@ public class DefaultStreamsExecutionEnvironmentTest {
         DefaultStreamsExecutionEnvironment environment = (DefaultStreamsExecutionEnvironment)
                 DefaultStreamsExecutionEnvironment.create();
 
-        ConfBuilder envConf = ConfBuilder.newConf()
-                .with("streams.prop", "value")
-                .with("streams.default.prop", "value")
-                .with("prop", "value")
-                .with("default.prop", "value");
+        var envConf = Conf.of(
+            "streams.prop", "value",
+            "streams.default.prop", "value",
+            "prop", "value",
+            "default.prop", "value"
+        );
 
         environment.setConfiguration(envConf);
 
         Executed executed = Executed.as("dummy-topology", "a test topology")
-            .withConfig(ConfBuilder.newConf()
-                .with("streams.user.prop", "value")
-                .with("streams.default.prop", "override")
-                .with("user.prop", "value")
-                .with("default.prop", "override")
-            );
+            .withConfig(Conf.of(
+                "streams.user.prop", "value",
+                "streams.default.prop", "override",
+                "user.prop", "value",
+                "default.prop", "override"
+            ));
 
         TopologyContainer container = environment.new InternalTopologyProvider(
             DummyTopologyProvider::new,

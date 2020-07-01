@@ -40,7 +40,7 @@ public class ApplicationConfigTest {
     @Test
     public void shouldCreateContextGivenConfWithProviders() {
 
-        final Conf conf = Conf.with(
+        final Conf conf = Conf.of(
             ApplicationConfig.CONTEXT_COMPONENT_CONFIG,
             Collections.singletonList("test")
         );
@@ -54,9 +54,9 @@ public class ApplicationConfigTest {
     @Test
     public void shouldCreateContextGivenConfWithEnv() {
 
-        Conf envConf = Conf.with(EnvironmentConfig.ENVIRONMENT_NAME_CONFIG, "__default");
+        Conf envConf = Conf.of(EnvironmentConfig.ENVIRONMENT_NAME_CONFIG, "__default");
 
-        final Conf conf = Conf.with(
+        final Conf conf = Conf.of(
             ApplicationConfig.CONTEXT_ENVIRONMENTS_CONFIG,
             Collections.singletonList(envConf));
 

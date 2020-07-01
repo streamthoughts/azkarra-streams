@@ -43,8 +43,73 @@ public interface Conf {
      *
      * @return a new {@link Conf} instance.
      */
-    static Conf with(final String path, final Object value) {
-        return new Property(path, value);
+    static Conf of(final String k1, final Object v1) {
+        return new Property(k1, v1);
+    }
+
+    /**
+     * Static helper that can be used to create a new empty
+     * {@link Conf} instance using the specified key-value pair.
+     *
+     * @return a new {@link Conf} instance.
+     */
+    static Conf of(final String k1, final Object v1,
+                   final String k2, final Object v2) {
+        return new MapConf(Map.of(k1, v1, k2, v2));
+    }
+
+    /**
+     * Static helper that can be used to create a new empty
+     * {@link Conf} instance using the specified key-value pair.
+     *
+     * @return a new {@link Conf} instance.
+     */
+    static Conf of(final String k1, final Object v1,
+                   final String k2, final Object v2,
+                   final String k3, final Object v3) {
+        return new MapConf(Map.of(k1, v1, k2, v2, k3, v3));
+    }
+
+    /**
+     * Static helper that can be used to create a new empty
+     * {@link Conf} instance using the specified key-value pair.
+     *
+     * @return a new {@link Conf} instance.
+     */
+    static Conf of(final String k1, final Object v1,
+                   final String k2, final Object v2,
+                   final String k3, final Object v3,
+                   final String k4, final Object v4) {
+        return new MapConf(Map.of(k1, v1, k2, v2, k3, v3, k4, v4));
+    }
+
+    /**
+     * Static helper that can be used to create a new empty
+     * {@link Conf} instance using the specified key-value pair.
+     *
+     * @return a new {@link Conf} instance.
+     */
+    static Conf of(final String k1, final Object v1,
+                   final String k2, final Object v2,
+                   final String k3, final Object v3,
+                   final String k4, final Object v4,
+                   final String k5, final Object v5) {
+        return new MapConf(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5));
+    }
+
+    /**
+     * Static helper that can be used to create a new empty
+     * {@link Conf} instance using the specified key-value pair.
+     *
+     * @return a new {@link Conf} instance.
+     */
+    static Conf of(final String k1, final Object v1,
+                   final String k2, final Object v2,
+                   final String k3, final Object v3,
+                   final String k4, final Object v4,
+                   final String k5, final Object v5,
+                   final String k6, final Object v6) {
+        return new MapConf(Map.of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5, k6, v6));
     }
 
     /**
@@ -53,7 +118,7 @@ public interface Conf {
      *
      * @return a new {@link Conf} instance.
      */
-    static Conf with(final Map<String, ?> map) {
+    static Conf of(final Map<String, ?> map) {
         return new MapConf(map);
     }
 
@@ -69,7 +134,7 @@ public interface Conf {
                 config = config.withFallback(conf);
             }
         }
-        return Conf.with(config.getConfAsMap()); // This will have the effect to flatten the configuration.
+        return Conf.of(config.getConfAsMap()); // This will have the effect to flatten the configuration.
     }
 
     /**

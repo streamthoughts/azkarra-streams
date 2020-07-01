@@ -108,7 +108,7 @@ public class ApplicationConfig {
                 // Lookup for configuration prefixed with 'metrics' to simplify the user-defined configuration.
                 // Note : this will be refactored in later version because this create a direct reference
                 // to the Azkarra Metrics module.
-                context = context.withFallback(Conf.with("metrics", conf.getSubConf(AZKARRA_METRICS)));
+                context = context.withFallback(Conf.of("metrics", conf.getSubConf(AZKARRA_METRICS)));
             }
             return new ApplicationConfig(
                 context,

@@ -103,7 +103,7 @@ public class KafkaStreamContainerBuilder {
         Conf streamsConfig = topologyContainer.streamsConfig();
         if (!streamsConfig.hasPath(ROCKSDB_CONFIG_SETTER_CLASS_CONFIG)) {
             rocksDBConf = rocksDBConf.withFallback(
-                Conf.with(ROCKSDB_CONFIG_SETTER_CLASS_CONFIG, DefaultRocksDBConfigSetter.class.getName())
+                Conf.of(ROCKSDB_CONFIG_SETTER_CLASS_CONFIG, DefaultRocksDBConfigSetter.class.getName())
             );
         }
 
@@ -147,7 +147,7 @@ public class KafkaStreamContainerBuilder {
             .filter(s -> s != null && !s.isEmpty())
             .collect(Collectors.joining(","));
 
-            final Conf finalStreamsConfig = Conf.with(interceptorConfig, interceptors).withFallback(streamsConfig);
+            final Conf finalStreamsConfig = Conf.of(interceptorConfig, interceptors).withFallback(streamsConfig);
 
             // delegate KafkaStreams instantiation to user-factory.
             final KafkaStreams kafkaStreams = factory.make(topology, finalStreamsConfig);

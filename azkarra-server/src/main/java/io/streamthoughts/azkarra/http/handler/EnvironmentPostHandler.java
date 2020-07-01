@@ -51,7 +51,7 @@ public class EnvironmentPostHandler extends AbstractStreamHttpHandler {
         if (isNullOrEmpty(env.name)) {
             throw new BadRequestException("Invalid JSON field, 'name' cannot be null.");
         }
-        service.addNewEnvironment(env.name, Conf.with(env.config));
+        service.addNewEnvironment(env.name, Conf.of(env.config));
     }
 
     public static final class EnvironmentPayload {

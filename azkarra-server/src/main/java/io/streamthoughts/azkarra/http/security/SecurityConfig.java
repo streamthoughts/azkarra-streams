@@ -19,7 +19,6 @@
 package io.streamthoughts.azkarra.http.security;
 
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.config.DelegatingConf;
 import io.streamthoughts.azkarra.http.security.auth.AzkarraPrincipalBuilder;
@@ -55,13 +54,13 @@ public class SecurityConfig extends DelegatingConf {
     public static final String SSL_KEY_PASSWORD_CONFIG              = "ssl.key.password";
 
 
-    private static final Conf DEFAULT_CONF = ConfBuilder.newConf()
-        .with(HTTP_AUTHORIZATION_MANAGER_CLASS_CONFIG, SimpleAuthorizationManager.class.getName())
-        .with(REST_AUTHENTICATION_ROLES_CONFIG, "*")
-        .with(REST_AUTHENTICATION_REALM_CONFIG, "AzkarraServer")
-        .with(SSL_KEYSTORE_TYPE, "PKCS12")
-        .with(SSL_TRUSTSTORE_TYPE, "PKCS12")
-        .build();
+    private static final Conf DEFAULT_CONF = Conf.of(
+        HTTP_AUTHORIZATION_MANAGER_CLASS_CONFIG, SimpleAuthorizationManager.class.getName(),
+        REST_AUTHENTICATION_ROLES_CONFIG, "*",
+        REST_AUTHENTICATION_REALM_CONFIG, "AzkarraServer",
+        SSL_KEYSTORE_TYPE, "PKCS12",
+        SSL_TRUSTSTORE_TYPE, "PKCS12"
+    );
 
     /**
      * Creates a new {@link SecurityConfig} instance.

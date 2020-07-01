@@ -23,14 +23,12 @@ import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySupplier;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptor;
-import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
@@ -106,13 +104,13 @@ public class DefaultAzkarraContextTest {
 
         Assertions.assertNotNull(factory.getComponent(
             AutoCreateTopicsInterceptor.class,
-            Conf.with(AUTO_CREATE_TOPICS_ENABLE_CONFIG, true))
+            Conf.of(AUTO_CREATE_TOPICS_ENABLE_CONFIG, true))
         );
         Assertions.assertThrows(
             NoSuchComponentException.class,
             () -> factory.getComponent(
                 AutoCreateTopicsInterceptor.class,
-                Conf.with(AUTO_CREATE_TOPICS_ENABLE_CONFIG, false)
+                Conf.of(AUTO_CREATE_TOPICS_ENABLE_CONFIG, false)
             )
         );
     }
@@ -124,13 +122,13 @@ public class DefaultAzkarraContextTest {
 
         Assertions.assertNotNull(factory.getComponent(
             MonitoringStreamsInterceptor.class,
-            Conf.with(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, true))
+            Conf.of(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, true))
         );
         Assertions.assertThrows(
             NoSuchComponentException.class,
             () -> factory.getComponent(
                 MonitoringStreamsInterceptor.class,
-                Conf.with(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, false)
+                Conf.of(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, false)
             )
         );
     }
@@ -142,13 +140,13 @@ public class DefaultAzkarraContextTest {
 
         Assertions.assertNotNull(factory.getComponent(
             WaitForSourceTopicsInterceptor.class,
-            Conf.with(WAIT_FOR_TOPICS_ENABLE_CONFIG, true))
+            Conf.of(WAIT_FOR_TOPICS_ENABLE_CONFIG, true))
         );
         Assertions.assertThrows(
             NoSuchComponentException.class,
             () -> factory.getComponent(
                 WaitForSourceTopicsInterceptor.class,
-                Conf.with(WAIT_FOR_TOPICS_ENABLE_CONFIG, false)
+                Conf.of(WAIT_FOR_TOPICS_ENABLE_CONFIG, false)
             )
         );
     }
@@ -158,13 +156,13 @@ public class DefaultAzkarraContextTest {
         //Setup
         var mkEnv = mock(StreamsExecutionEnvironment.class);
         when(mkEnv.name()).thenReturn("test");
-        when(mkEnv.getConfiguration()).thenReturn(Conf.with("prop.env", "env.value"));
+        when(mkEnv.getConfiguration()).thenReturn(Conf.of("prop.env", "env.value"));
 
         var mkDescriptor = mock(TopologyDescriptor.class);
         when(mkDescriptor.name()).thenReturn("test");
-        when(mkDescriptor.configuration()).thenReturn(Conf.with("prop.descriptor", "desc.value"));
-        Executed executed = Executed.as("test-app").withConfig(Conf.with("prop.executed", "exec.value"));
-        context.setConfiguration(Conf.with("prop.context", "value"));
+        when(mkDescriptor.configuration()).thenReturn(Conf.of("prop.descriptor", "desc.value"));
+        Executed executed = Executed.as("test-app").withConfig(Conf.of("prop.executed", "exec.value"));
+        context.setConfiguration(Conf.of("prop.context", "value"));
 
         //Execute
         context.addTopologyToEnvironment(mkDescriptor, mkEnv, new InternalExecuted(executed));
@@ -193,11 +191,11 @@ public class DefaultAzkarraContextTest {
         when(mkDescriptor.configuration()).thenReturn(Conf.empty());
         when(mkDescriptor.classLoader()).thenReturn(this.getClass().getClassLoader());
 
-        context.setConfiguration(ConfBuilder.newConf()
-            .with(AUTO_CREATE_TOPICS_ENABLE_CONFIG, true)
-            .with(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, true)
-            .with(WAIT_FOR_TOPICS_ENABLE_CONFIG, true)
-        );
+        context.setConfiguration(Conf.of(
+            AUTO_CREATE_TOPICS_ENABLE_CONFIG, true,
+            MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG, true,
+            WAIT_FOR_TOPICS_ENABLE_CONFIG, true
+        ));
 
         //Execute
         context.addTopologyToEnvironment(mkDescriptor, mkEnv, new InternalExecuted(Executed.as("test-app")));

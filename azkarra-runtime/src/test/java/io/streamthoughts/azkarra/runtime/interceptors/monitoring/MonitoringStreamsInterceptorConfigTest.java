@@ -48,7 +48,7 @@ public class MonitoringStreamsInterceptorConfigTest {
     @Test
     public void shouldGetProvidedAdvertisedConfig() {
         MonitoringStreamsInterceptorConfig config = new MonitoringStreamsInterceptorConfig(
-                Conf.with(MONITORING_INTERCEPTOR_ADVERTISED_SERVER_CONFIG, "my-server")
+                Conf.of(MONITORING_INTERCEPTOR_ADVERTISED_SERVER_CONFIG, "my-server")
         );
         assertEquals("my-server", config.getAdvertisedServer().get());
     }
@@ -56,7 +56,7 @@ public class MonitoringStreamsInterceptorConfigTest {
     @Test
     public void shouldGetProvidedIntervalMsConfig() {
         MonitoringStreamsInterceptorConfig config = new MonitoringStreamsInterceptorConfig(
-            Conf.with(MONITORING_INTERCEPTOR_INTERVAL_MS_CONFIG, 5000)
+            Conf.of(MONITORING_INTERCEPTOR_INTERVAL_MS_CONFIG, 5000)
         );
         assertEquals(5000L, config.getIntervalMs());
     }
@@ -64,7 +64,7 @@ public class MonitoringStreamsInterceptorConfigTest {
     @Test
     public void shouldGetProvidedTopicConfig() {
         MonitoringStreamsInterceptorConfig config = new MonitoringStreamsInterceptorConfig(
-            Conf.with(MONITORING_INTERCEPTOR_TOPIC_CONFIG, "test-topic")
+            Conf.of(MONITORING_INTERCEPTOR_TOPIC_CONFIG, "test-topic")
         );
         assertEquals("test-topic", config.getTopic());
     }
@@ -73,7 +73,7 @@ public class MonitoringStreamsInterceptorConfigTest {
     public void shouldGetProvidedExtensionsConfigs() {
 
         MonitoringStreamsInterceptorConfig config = new MonitoringStreamsInterceptorConfig(
-            Conf.with(Map.of(
+            Conf.of(Map.of(
                 MONITORING_INTERCEPTOR_EXTENSIONS_CONFIG + ".k1", "v1",
                 MONITORING_INTERCEPTOR_EXTENSIONS_CONFIG + ".k2", "v2")
             ));

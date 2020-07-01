@@ -321,6 +321,6 @@ public class ServerConfigBuilder {
     }
 
     public ServerConfig build() {
-        return new ServerConfig(Conf.with(configs));
+        return new ServerConfig(Conf.of(configs));
     }
 }

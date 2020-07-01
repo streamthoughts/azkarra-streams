@@ -29,7 +29,7 @@ import org.apache.kafka.streams.Topology;
  */
 public abstract class OptimizedTopologyProvider implements TopologyProvider, Configurable {
 
-    private static final Conf OPTIMIZED_CONF = Conf.with(StreamsConfig.TOPOLOGY_OPTIMIZATION, StreamsConfig.OPTIMIZE);
+    private static final Conf OPTIMIZED_CONF = Conf.of(StreamsConfig.TOPOLOGY_OPTIMIZATION, StreamsConfig.OPTIMIZE);
 
     private Conf configuration;
 

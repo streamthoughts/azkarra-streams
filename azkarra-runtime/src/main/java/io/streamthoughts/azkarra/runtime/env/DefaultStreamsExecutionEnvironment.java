@@ -279,7 +279,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     @Override
     public StreamsExecutionEnvironment setRocksDBConfig(final RocksDBConfig rocksDBConfig) {
         Objects.requireNonNull(rocksDBConfig, "rocksDBConfig cannot be null");
-        configuration = configuration.withFallback(Conf.with("streams", rocksDBConfig.conf()));
+        configuration = configuration.withFallback(Conf.of("streams", rocksDBConfig.conf()));
         return this;
     }
 

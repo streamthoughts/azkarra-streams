@@ -34,7 +34,7 @@ public class InMemoryUserIdentityManagerTest {
     public void shouldThrowSecurityExceptionGivenInvalidConfig() {
         final InMemoryUserIdentityManager manager = new InMemoryUserIdentityManager();
         Assertions.assertThrows(SecurityConfException.class, () ->
-            manager.configure(Conf.with(SecurityConfig.REST_AUTHENTICATION_USERS_CONFIG, "alice"))
+            manager.configure(Conf.of(SecurityConfig.REST_AUTHENTICATION_USERS_CONFIG, "alice"))
         );
     }
 
@@ -43,7 +43,7 @@ public class InMemoryUserIdentityManagerTest {
         final InMemoryUserIdentityManager manager = new InMemoryUserIdentityManager();
 
         manager.configure(
-            Conf.with(SecurityConfig.REST_AUTHENTICATION_USERS_CONFIG,
+            Conf.of(SecurityConfig.REST_AUTHENTICATION_USERS_CONFIG,
             "alice:password,admin:MD5:"+ "5f4dcc3b5aa765d61d8327deb882cf99"
         ));
 

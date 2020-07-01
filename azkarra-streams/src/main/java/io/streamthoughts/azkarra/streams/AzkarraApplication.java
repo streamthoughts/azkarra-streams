@@ -414,8 +414,8 @@ public class AzkarraApplication {
             // configure streams discovery if http server is enable
             final ServerInfo info = embeddedHttpServer.info();
             final String server = info.getHost() + ":" + info.getPort();
-            final Conf serverConfig = Conf.with(StreamsConfig.APPLICATION_SERVER_CONFIG, server);
-            context.addConfiguration(Conf.with("streams", serverConfig));
+            final Conf serverConfig = Conf.of(StreamsConfig.APPLICATION_SERVER_CONFIG, server);
+            context.addConfiguration(Conf.of("streams", serverConfig));
         }
 
         /**

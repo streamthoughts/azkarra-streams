@@ -53,7 +53,7 @@ public class DefaultApplicationIdBuilderTest {
         TopologyMetadata metadata = getTopologyMetadata("dummy");
         ApplicationId result = builderWithUserEnv.buildApplicationId(
             metadata,
-            Conf.with(StreamsConfig.APPLICATION_ID_CONFIG, applicationId));
+            Conf.of(StreamsConfig.APPLICATION_ID_CONFIG, applicationId));
         Assertions.assertEquals(applicationId, result.toString());
     }
 

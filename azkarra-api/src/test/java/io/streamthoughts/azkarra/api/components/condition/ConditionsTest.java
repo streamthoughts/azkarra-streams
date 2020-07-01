@@ -44,7 +44,7 @@ public class ConditionsTest {
     public void shouldReturnTrueWhenConditionOnPropertyEqualsGivenMatchingContext() {
         Assertions.assertTrue(Conditions
             .onPropertyEquals("props", "val")
-            .matches(contextWith(Conf.with("props", "val")))
+            .matches(contextWith(Conf.of("props", "val")))
         );
     }
 
@@ -60,7 +60,7 @@ public class ConditionsTest {
     public void shouldReturnTrueWhenConditionOnPropertyExistGivenMatchingContext() {
         Assertions.assertTrue(Conditions
                 .onPropertyExist("props")
-                .matches(contextWith(Conf.with("props", "val")))
+                .matches(contextWith(Conf.of("props", "val")))
         );
     }
 
@@ -76,7 +76,7 @@ public class ConditionsTest {
     public void shouldReturnTrueWhenConditionOnPropertyTrueGivenMatchingContext() {
         Assertions.assertTrue(Conditions
                 .onPropertyTrue("props")
-                .matches(contextWith(Conf.with("props", "yes")))
+                .matches(contextWith(Conf.of("props", "yes")))
         );
     }
 
@@ -100,7 +100,7 @@ public class ConditionsTest {
     public void shouldReturnFalseWhenConditionOnPropertyMissingGivenMatchingContext() {
         Assertions.assertFalse(Conditions
                 .onPropertyMissing("props")
-                .matches(contextWith(Conf.with("props", "")))
+                .matches(contextWith(Conf.of("props", "")))
         );
     }
 
@@ -108,7 +108,7 @@ public class ConditionsTest {
     public void shouldReturnTrueWhenConditionOnPropertyMatchesGivenMatchingContext() {
         Assertions.assertTrue(Conditions
                 .onPropertyMatches("props", "^val.*")
-                .matches(contextWith(Conf.with("props", "value")))
+                .matches(contextWith(Conf.of("props", "value")))
         );
     }
 
@@ -116,7 +116,7 @@ public class ConditionsTest {
     public void shouldReturnFalseWhenConditionOnPropertyMatchesGivenMatchingContext() {
         Assertions.assertFalse(Conditions
                 .onPropertyMatches("props", "^val.*")
-                .matches(contextWith(Conf.with("props", "foo")))
+                .matches(contextWith(Conf.of("props", "foo")))
         );
     }
 

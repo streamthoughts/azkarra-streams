@@ -49,7 +49,7 @@ public class StreamsPostHandler extends AbstractStreamHttpHandler {
 
         final Executed executed = Executed.as(streams.getName())
             .withDescription(streams.getDescription())
-            .withConfig(Conf.with(streams.getConfig()));
+            .withConfig(Conf.of(streams.getConfig()));
 
         final ApplicationId id = service.startStreamsTopology(
             streams.getType(),

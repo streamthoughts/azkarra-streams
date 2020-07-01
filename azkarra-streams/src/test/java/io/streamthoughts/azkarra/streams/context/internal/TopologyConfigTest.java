@@ -19,24 +19,25 @@
 package io.streamthoughts.azkarra.streams.context.internal;
 
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.errors.MissingConfException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TopologyConfigTest {
 
     @Test
     public void shouldCreateTopologyConfigGivenValidConf() {
 
-        Conf conf = ConfBuilder.newConf()
-                .with(TopologyConfig.TOPOLOGY_NAME_CONFIG, "test-name")
-                .with(TopologyConfig.TOPOLOGY_DESCRIPTION_CONFIG, "test-description")
-                .with(TopologyConfig.TOPOLOGY_PROVIDER_ALIAS_CONFIG, "alias")
-                .with(TopologyConfig.TOPOLOGY_STREAMS_CONFIG, Conf.with("configKey", "configValue"))
-                .build();
+        var conf = Conf.of(
+             TopologyConfig.TOPOLOGY_NAME_CONFIG, "test-name",
+             TopologyConfig.TOPOLOGY_DESCRIPTION_CONFIG, "test-description",
+             TopologyConfig.TOPOLOGY_PROVIDER_ALIAS_CONFIG, "alias",
+             TopologyConfig.TOPOLOGY_STREAMS_CONFIG, Conf.of("configKey", "configValue")
+        );
 
         TopologyConfig topologyConfig = TopologyConfig.read(conf);
 

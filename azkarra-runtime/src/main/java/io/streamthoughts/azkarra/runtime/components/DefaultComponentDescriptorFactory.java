@@ -107,7 +107,7 @@ public class DefaultComponentDescriptorFactory implements ComponentDescriptorFac
     }
 
     private Conf extractComponentConfFromMetadata(final ComponentMetadata metadata) {
-        return Conf.with(
+        return Conf.of(
             metadata.attributesForName(attributeNameFor(ConfValue.class))
                 .stream()
                 .collect(Collectors.toMap(

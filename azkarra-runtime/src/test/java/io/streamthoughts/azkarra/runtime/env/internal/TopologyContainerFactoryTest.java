@@ -66,7 +66,7 @@ public class TopologyContainerFactoryTest {
     public void shouldCreateConfigurableTopologyContainer() {
         Executed executed = Executed.as("dummy-topology")
             .withDescription("user-description")
-            .withConfig(Conf.with("version", "configured-version"));
+            .withConfig(Conf.of("version", "configured-version"));
 
         TopologyContainer container = factory.make(
             ConfigurableTopologyProvider::new,
