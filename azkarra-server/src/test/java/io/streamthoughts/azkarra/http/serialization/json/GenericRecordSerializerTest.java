@@ -22,35 +22,28 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import io.streamthoughts.azkarra.api.time.Time;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.example.User;
-import org.apache.avro.LogicalTypes;
+import io.streamthoughts.azkarra.serialization.json.Json;
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
-import org.apache.avro.data.TimeConversions;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.JsonEncoder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.sql.Timestamp;
 import java.time.Instant;
 
 public class GenericRecordSerializerTest {
 
     private static final String SCHEMA =
             "{\"namespace\": \"avro.example\", " +
-            "\"type\": \"record\",\"name\": \"User\"," +
-            "\"fields\": [{\"name\": \"name\",\"type\": \"string\"}," +
-            "{\"name\": \"created\",\"type\": {\"type\": \"long\",\"logicalType\": \"timestamp-millis\"}}]}";
+                    "\"type\": \"record\",\"name\": \"User\"," +
+                    "\"fields\": [{\"name\": \"name\",\"type\": \"string\"}," +
+                    "{\"name\": \"created\",\"type\": {\"type\": \"long\",\"logicalType\": \"timestamp-millis\"}}]}";
 
     private static Instant NOW = Instant.now();
 
@@ -69,8 +62,29 @@ public class GenericRecordSerializerTest {
         new GenericRecordSerializer().serialize(record, jsonGenerator, serializerProvider);
         jsonGenerator.flush();
         Assertions.assertEquals(
-            "{\"name\":\"kafka\",\"created\":" + NOW.toEpochMilli() + "}"
-            , jsonWriter.toString());
+                "{\"name\":\"kafka\",\"created\":" + NOW.toEpochMilli() + "}"
+                , jsonWriter.toString());
+    }
+
+    @Test
+    public void shouldSerializeAvroToJsonGivenKV() {
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse(SCHEMA);
+        GenericRecord record = new GenericData.Record(schema);
+        record.put("name", "kafka");
+        record.put("created", NOW.toEpochMilli());
+
+        Json json = Json.getDefault();
+
+        final SimpleModule module = new SimpleModule();
+        module.addSerializer(GenericRecord.class, new GenericRecordSerializer());
+        json.registerModule(module);
+
+        String serialized = json.serialize(KV.of("key", record));
+        System.out.println(serialized);
+        Assertions.assertEquals(
+                "{\"key\":\"key\",\"value\":{\"name\":\"kafka\",\"created\":" + NOW.toEpochMilli() + "}}"
+                , serialized);
     }
 
     @Test
@@ -82,7 +96,7 @@ public class GenericRecordSerializerTest {
         new GenericRecordSerializer().serialize(specificRecord, jsonGenerator, serializerProvider);
         jsonGenerator.flush();
         Assertions.assertEquals(
-            "{\"name\":\"kafka\",\"created\":" + NOW.toEpochMilli() + "}",
-            jsonWriter.toString());
+                "{\"name\":\"kafka\",\"created\":" + NOW.toEpochMilli() + "}",
+                jsonWriter.toString());
     }
 }

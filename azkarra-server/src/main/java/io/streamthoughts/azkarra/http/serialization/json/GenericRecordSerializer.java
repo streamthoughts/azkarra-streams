@@ -45,7 +45,7 @@ public class GenericRecordSerializer extends JsonSerializer<GenericRecord> {
                           final JsonGenerator gen,
                           final SerializerProvider serializers) throws IOException {
 
-        gen.writeRaw(getJsonString(record, record.getSchema()));
+        gen.writeRawValue(getJsonString(record, record.getSchema()));
     }
 
     private static String getJsonString(final GenericRecord record, final Schema schema) {
