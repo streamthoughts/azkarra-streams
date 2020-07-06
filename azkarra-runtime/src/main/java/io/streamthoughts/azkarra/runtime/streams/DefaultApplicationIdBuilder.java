@@ -27,8 +27,6 @@ import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.util.Utils;
 import org.apache.kafka.streams.StreamsConfig;
 
-import java.util.Optional;
-
 import static java.lang.Character.isUpperCase;
 
 /**
@@ -55,7 +53,7 @@ public class DefaultApplicationIdBuilder implements ApplicationIdBuilder, Stream
      */
     @Override
     public ApplicationId buildApplicationId(final TopologyMetadata metadata, final Conf streamsConfig) {
-        final Optional<String> id = streamsConfig.getOptionalString(StreamsConfig.APPLICATION_ID_CONFIG);
+        var id = streamsConfig.getOptionalString("streams." + StreamsConfig.APPLICATION_ID_CONFIG);
         return id.map(ApplicationId::new).orElseGet(() -> new ApplicationId(normalize(build(metadata, environment))));
     }
 

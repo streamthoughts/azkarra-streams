@@ -593,8 +593,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
             .or(() -> componentSupplierFactory.findStreamThreadExceptionHandler(componentResolutionConfig, Restriction.application()))
             .or(() -> Optional.of(azkarraContextConfig::getDefaultStreamsThreadExceptionHandler))
             .ifPresent(env::setStreamThreadExceptionHandler);
-        // The WaitForSourceTopicInterceptor is add to the streams level.
-        env.setWaitForTopicsToBeCreated(false);
     }
 
     private void checkIfEnvironmentExists(final String name, final String errorMessage) {

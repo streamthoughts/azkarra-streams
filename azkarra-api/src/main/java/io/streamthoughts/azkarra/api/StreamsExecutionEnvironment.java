@@ -80,8 +80,9 @@ public interface StreamsExecutionEnvironment {
     StreamsExecutionEnvironment addGlobalStateListener(final StateRestoreListener listener);
 
     /**
-     * Adds a streams interceptor hat will set to all {@link KafkaStreams} instance created
+     * Adds a streams interceptor that will set to all {@link KafkaStreams} instance created
      * in this {@link StreamsExecutionEnvironment}.
+     * The interceptors will be executed in the order in which they were added.
      *
      * @param interceptor   the {@link {@link StreamsLifecycleInterceptor}}.
      * @return this {@link StreamsExecutionEnvironment} instance.
@@ -150,15 +151,6 @@ public interface StreamsExecutionEnvironment {
      * @return          this {@link ApplicationIdBuilder} instance or {@code null}.
      */
     Supplier<ApplicationIdBuilder> getApplicationIdBuilder();
-
-    /**
-     * Sets if the streams instances should wait for topics source to be created before starting.
-     * If some source topics are missing at startup, a streams instance fails.
-     *
-     * @param waitForTopicToBeCreated   should wait for topics to be created.
-     * @return                          this {@link StreamsExecutionEnvironment} instance.
-     */
-    StreamsExecutionEnvironment setWaitForTopicsToBeCreated(final boolean waitForTopicToBeCreated);
 
     /**
      * Adds streamsConfig that will be used in fallback if not present in defined environment streamsConfig.

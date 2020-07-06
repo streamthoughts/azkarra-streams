@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.api.streams;
 
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
+import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
@@ -28,8 +29,9 @@ import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerLogOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.GlobalConsumerOffsetsRegistry;
 import io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher;
+import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleChain;
 import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifecycleContext;
-import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
+import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -79,6 +81,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.joining;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
 
@@ -90,19 +93,23 @@ public class KafkaStreamsContainer {
 
     private KafkaStreams kafkaStreams;
 
+    private final Conf streamsConfig;
+
     private long started = -1;
 
     private volatile Throwable lastObservedException;
 
     private volatile TimestampedValue<State> state;
 
-    private final TopologyContainer topologyContainer;
+    private final TopologyDefinition topologyDefinition;
 
     private volatile Set<ThreadMetadata> threadMetadata = Collections.emptySet();
 
     private final String applicationServer;
 
     private final LinkedBlockingQueue<StateChangeWatcher> stateChangeWatchers = new LinkedBlockingQueue<>();
+
+    private final List<StreamsLifecycleInterceptor> interceptors;
 
     private KafkaConsumer<byte[], byte[]> consumer;
 
@@ -133,19 +140,30 @@ public class KafkaStreamsContainer {
     }
 
     /**
+     * @return a new {@link KafkaStreamsContainerBuilder} instance.
+     */
+    public static KafkaStreamsContainerBuilder newBuilder() {
+        return new KafkaStreamsContainerBuilder();
+    }
+
+    /**
      * Creates a new {@link KafkaStreamsContainer} instance.
      *
-     * @param topologyContainer the {@link TopologyContainer} instance.
-     * @param streamsFactory    the {@link KafkaStreamsFactory} instance.
+     * @param topologyDefinition the {@link TopologyDefinition} instance.
+     * @param streamsFactory     the {@link KafkaStreamsFactory} instance.
      */
-    KafkaStreamsContainer(final TopologyContainer topologyContainer,
-                          final KafkaStreamsFactory streamsFactory) {
-        Objects.requireNonNull(topologyContainer, "topologyContainer cannot be null");
+    KafkaStreamsContainer(final Conf streamsConfig,
+                          final TopologyDefinition topologyDefinition,
+                          final KafkaStreamsFactory streamsFactory,
+                          final List<StreamsLifecycleInterceptor> interceptors) {
+        Objects.requireNonNull(topologyDefinition, "topologyDefinition cannot be null");
         Objects.requireNonNull(streamsFactory, "streamsFactory cannot be null");
+        this.streamsConfig = Objects.requireNonNull(streamsConfig, "streamConfigs cannot be null");
         containerState = ContainerState.CREATED;
         setState(State.NOT_CREATED);
+        this.interceptors = interceptors;
         this.streamsFactory = streamsFactory;
-        this.topologyContainer = topologyContainer;
+        this.topologyDefinition = topologyDefinition;
         this.applicationServer = streamsConfig()
             .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
             .orElse(null);
@@ -160,9 +178,15 @@ public class KafkaStreamsContainer {
      */
     public synchronized Future<KafkaStreams.State> start(final Executor executor) {
         LOG.info("Starting KafkaStreams container for name='{}', version='{}', id='{}'.",
-            topologyContainer.metadata().name(),
-            topologyContainer.metadata().version(),
+            topologyDefinition.name(),
+            topologyDefinition.version(),
             applicationId());
+
+        LOG.info("StreamsLifecycleInterceptors : {}",
+        interceptors
+            .stream()
+            .map(StreamsLifecycleInterceptor::name)
+            .collect(joining("\n\t", "\n\t", "")));
 
         setContainerState(ContainerState.STARTING);
         started = Time.SYSTEM.milliseconds();
@@ -170,8 +194,8 @@ public class KafkaStreamsContainer {
         this.executor = executor;
         stateChangeWatchers.clear(); // Remove all watchers that was registered during a previous run.
         kafkaStreams = streamsFactory.make(
-            topologyContainer.topology(),
-            topologyContainer.streamsConfig()
+            topologyDefinition.topology(),
+            streamsConfig
         );
         setState(State.CREATED);
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
@@ -179,7 +203,7 @@ public class KafkaStreamsContainer {
         return CompletableFuture.supplyAsync(() -> {
             LOG.info("Executing stream-lifecycle interceptor chain (id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
-                topologyContainer.interceptors().iterator(),
+                interceptors.iterator(),
                 (interceptor, chain) -> interceptor.onStart(new InternalStreamsLifecycleContext(this), chain),
                 () -> {
                     try {
@@ -264,7 +288,7 @@ public class KafkaStreamsContainer {
      * @return a {@link Conf} instance.
      */
     public Conf streamsConfig() {
-        return topologyContainer.streamsConfig();
+        return streamsConfig;
     }
 
     /**
@@ -300,7 +324,11 @@ public class KafkaStreamsContainer {
      * @return  a {@link TopologyMetadata} instance.
      */
     public TopologyMetadata topologyMetadata() {
-        return topologyContainer.metadata();
+        return new TopologyMetadata(
+            topologyDefinition.name(),
+            topologyDefinition.version(),
+            topologyDefinition.description()
+        );
     }
 
     /**
@@ -309,7 +337,7 @@ public class KafkaStreamsContainer {
      * @return  a new {@link TopologyDescription} instance.
      */
     public TopologyDescription topologyDescription() {
-        return topologyContainer.description();
+        return topologyDefinition.topology().describe();
     }
 
     /**
@@ -474,7 +502,7 @@ public class KafkaStreamsContainer {
             final Thread shutdownThread = new Thread(() -> {
                 LOG.info("Closing KafkaStreamsContainer (id={})", applicationId());
                 StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
-                    topologyContainer.interceptors().iterator(),
+                    interceptors.iterator(),
                     (interceptor, chain) -> interceptor.onStop(new InternalStreamsLifecycleContext(this), chain),
                     () -> {
                         kafkaStreams.close();
@@ -793,5 +821,4 @@ public class KafkaStreamsContainer {
          */
         void onChange(final StateChangeEvent event);
     }
-
 }

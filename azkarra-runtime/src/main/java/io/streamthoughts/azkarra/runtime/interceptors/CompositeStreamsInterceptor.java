@@ -23,7 +23,7 @@ import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
-import io.streamthoughts.azkarra.api.streams.InternalStreamsLifeCycleChain;
+import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleChain;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -31,26 +31,25 @@ import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamContainerBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
-import io.streamthoughts.azkarra.api.streams.topology.TopologyContainer;
+import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
+import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.runtime.env.internal.EnvironmentAwareComponentSupplier;
-import io.streamthoughts.azkarra.runtime.env.internal.TopologyContainerFactory;
-import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
 import io.streamthoughts.azkarra.runtime.streams.errors.CloseKafkaStreamsOnThreadException;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.processor.StateRestoreListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -134,12 +133,10 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
 
     private List<StateRestoreListener> restoreListeners = new LinkedList<>();
 
-    private final TopologyContainerFactory topologyFactory;
-
     /**
      * The list of topologies to initialize when the environment is started.
      */
-    private final List<InternalTopologyProvider> topologies;
+    private final List<InternalTopologyDefinition> topologies;
 
     /**
      * The list of streams instances currently started.
@@ -152,9 +149,9 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
 
     private final List<Supplier<StreamsLifecycleInterceptor>> interceptors;
 
-    private boolean waitForTopicToBeCreated = false;
-
     private Supplier<StreamThreadExceptionHandler> streamThreadExceptionHandler;
+
+    private Supplier<ApplicationIdBuilder> applicationIdBuilderSupplier;
 
     /**
      * Creates a new {@link DefaultStreamsExecutionEnvironment} instance.
@@ -178,7 +175,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         this.activeStreams = new HashMap<>();
         this.interceptors = new LinkedList<>();
         this.kafkaStreamsFactory = () -> KafkaStreamsFactory.DEFAULT;
-        this.topologyFactory = new TopologyContainerFactory(this, DefaultApplicationIdBuilder::new);
+        this.applicationIdBuilderSupplier = DefaultApplicationIdBuilder::new;
         this.topologies = new LinkedList<>();
         this.name = envName;
         setState(State.CREATED);
@@ -289,7 +286,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     @Override
     public StreamsExecutionEnvironment setApplicationIdBuilder(final Supplier<ApplicationIdBuilder> supplier) {
         Objects.requireNonNull(supplier, "builder cannot be null");
-        topologyFactory.setApplicationIdBuilder(supplier);
+        applicationIdBuilderSupplier = supplier;
         return this;
     }
 
@@ -298,16 +295,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      */
     @Override
     public Supplier<ApplicationIdBuilder> getApplicationIdBuilder() {
-        return topologyFactory.getApplicationIdBuilderSupplier();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StreamsExecutionEnvironment setWaitForTopicsToBeCreated(boolean waitForTopicToBeCreated) {
-        this.waitForTopicToBeCreated = waitForTopicToBeCreated;
-        return this;
+        return applicationIdBuilderSupplier;
     }
 
     /**
@@ -323,7 +311,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      */
     @Override
     public ApplicationId addTopology(final Supplier<TopologyProvider> provider, final Executed executed) {
-        final InternalTopologyProvider internalProvider = new InternalTopologyProvider(provider, executed);
+        final InternalTopologyDefinition internalProvider = new InternalTopologyDefinition(provider, executed);
         topologies.add(internalProvider);
         return state == State.STARTED ? start(internalProvider) : null;
     }
@@ -341,32 +329,34 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         setState(State.STARTED);
     }
 
-    private ApplicationId start(final InternalTopologyProvider topologyProvider) {
+    private ApplicationId start(final InternalTopologyDefinition topology) {
+        LOG.info("Building new Topology for name='{}', version='{}'", topology.name(), topology.version());
 
-        final TopologyContainer topologyContainer = topologyProvider.getTopology();
-
-        final ApplicationId applicationId = topologyContainer.applicationId();
+        var applicationId = topology.getOrCreateApplicationId();
         checkStreamsIsAlreadyRunningFor(applicationId);
+
+        var topologyConfig = topology.getTopologyConfig();
+        var streamsConfig = topologyConfig.hasPath("streams") ? topologyConfig.getSubConf("streams") : Conf.empty();
+        var applicationIdConfig = Conf.of(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString());
 
         if (streamThreadExceptionHandler == null)
             streamThreadExceptionHandler = CloseKafkaStreamsOnThreadException::new;
 
-        final Thread.UncaughtExceptionHandler exceptionHandler = new InternalKafkaStreamsUncaughtExceptionHandler(
-            applicationId,
-            new EnvironmentAwareComponentSupplier<>(streamThreadExceptionHandler)
-                .get(this, topologyContainer.streamsConfig())
-        );
-        final KafkaStreamsContainer streamsContainer = KafkaStreamContainerBuilder.newBuilder()
-            .withTopologyContainer(topologyContainer)
+        var threadExceptionHandler = supply(streamThreadExceptionHandler, topologyConfig);
+
+        var kafkaStreamsContainer = KafkaStreamsContainer.newBuilder()
             .withStateListeners(stateListeners)
             .withRestoreListeners(restoreListeners)
-            .withUncaughtExceptionHandler(Collections.singletonList(exceptionHandler))
-            .withKafkaStreamsFactory(topologyProvider.getKafkaStreamsFactory())
+            .withStreamThreadExceptionHandlers(List.of(threadExceptionHandler))
+            .withStreamsConfig(Conf.of(applicationIdConfig, streamsConfig))
+            .withTopologyDefinition(topology)
+            .withKafkaStreamsFactory(topology.getKafkaStreamsFactory())
+            .withInterceptors(topology.getAllInterceptors())
             .build();
 
-        activeStreams.put(applicationId, streamsContainer);
+        activeStreams.put(applicationId, kafkaStreamsContainer);
 
-        streamsContainer.start(STREAMS_EXECUTOR);
+        kafkaStreamsContainer.start(STREAMS_EXECUTOR);
 
         return applicationId;
     }
@@ -433,7 +423,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         container.close(cleanUp, timeout);
         if (remove) {
             activeStreams.remove(id);
-            topologies.removeIf(t -> t.isApplication(id));
+            topologies.removeIf(t -> t.matches(id));
             LOG.info("Streams instance '{}' was removed from environment '{}'", id, name);
         }
     }
@@ -515,89 +505,101 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     }
 
     @VisibleForTesting
-    class InternalTopologyProvider {
+    class InternalTopologyDefinition implements TopologyDefinition {
 
         private final Supplier<TopologyProvider> supplier;
         private final InternalExecuted executed;
-
-        private TopologyContainer container;
+        private ApplicationId applicationId;
+        private TopologyProvider provider;
 
         /**
-         * Creates a new {@link InternalTopologyProvider} instance.
+         * Creates a new {@link InternalTopologyDefinition} instance.
          *
          * @param supplier  the supplier to supplier.
          * @param executed  the {@link Executed} instance.
          */
-        InternalTopologyProvider(final Supplier<TopologyProvider> supplier,
-                                 final Executed executed) {
+        InternalTopologyDefinition(final Supplier<TopologyProvider> supplier,
+                                   final Executed executed) {
             this.supplier = supplier;
             this.executed = new InternalExecuted(executed);
         }
 
-        public TopologyContainer getTopology() {
-
-            if (container == null) {
-                final Conf topologyConfig = getTopologyConfig();
-
-                // Merged all interceptors
-                final List<Supplier<StreamsLifecycleInterceptor>> allInterceptors =
-                        Stream.concat(
-                            interceptors.stream(),
-                            executed.interceptors().stream()
-                        ).collect(Collectors.toList());
-
-                if (waitForTopicToBeCreated)
-                    allInterceptors.add(WaitForSourceTopicsInterceptor::new);
-
-                final Executed merged = new InternalExecuted()
-                    .withName(executed.name())
-                    .withDescription(executed.description())
-                    .withConfig(topologyConfig)
-                    .withInterceptors(allInterceptors);
-                container = topologyFactory.make(supplier, merged);
-            }
-            return container;
+        List<StreamsLifecycleInterceptor> getAllInterceptors() {
+            return Stream
+                .concat(interceptors.stream(), executed.interceptors().stream())
+                .map(i -> supply(i, getTopologyConfig()))
+                .collect(Collectors.toList());
         }
 
-        boolean isApplication(final ApplicationId id) {
-            return container.applicationId().equals(id);
-        }
-
-        private KafkaStreamsFactory getKafkaStreamsFactory() {
+        KafkaStreamsFactory getKafkaStreamsFactory() {
             final Supplier<KafkaStreamsFactory> factory = executed.factory().orElse(kafkaStreamsFactory);
-            return new EnvironmentAwareComponentSupplier<>(factory).get(
-                DefaultStreamsExecutionEnvironment.this,
-                getTopologyConfig()
-            );
+            return supply(factory, getTopologyConfig());
         }
 
-        private Conf getTopologyConfig() {
+
+        Conf getTopologyConfig() {
+            var ctxConfig = context != null ? context.getConfiguration() : Conf.empty();
+            var envConfig = DefaultStreamsExecutionEnvironment.this.getConfiguration();
             // Merged all configurations
-            return executed.config()
-                .withFallback(DefaultStreamsExecutionEnvironment.this.getConfiguration())
-                .withFallback(context != null ? context.getConfiguration() : Conf.empty());
+            return Conf.of(executed.config(), envConfig, envConfig, ctxConfig);
         }
-    }
 
-    private class InternalKafkaStreamsUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+        private TopologyProvider getOrCreateTopologyProvider() {
+            if (provider == null) {
+                provider = supply(supplier, getTopologyConfig());
+            }
+            return provider;
+        }
 
-        private final ApplicationId id;
-        private final StreamThreadExceptionHandler delegate;
-
-        InternalKafkaStreamsUncaughtExceptionHandler(final ApplicationId id,
-                                                     final StreamThreadExceptionHandler handler) {
-            this.id = Objects.requireNonNull(id, "id cannot be null");
-            this.delegate = Objects.requireNonNull(handler, "handler cannot be null");
+        ApplicationId getOrCreateApplicationId() {
+            if (applicationId == null) {
+                var applicationIdBuilder = supply(applicationIdBuilderSupplier, getTopologyConfig());
+                applicationId = applicationIdBuilder.buildApplicationId(
+                    new TopologyMetadata(name(), version(), description()),
+                    getTopologyConfig()
+                );
+             }
+            return applicationId;
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public void uncaughtException(final Thread t, final Throwable e) {
-            LOG.debug("Catch uncaught exception, executing handler: {}", delegate.getClass());
-            final KafkaStreamsContainer container = activeStreams.get(id);
-            delegate.handle(container, t, e);
+        public String name() {
+            return executed.name();
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String version() {
+            return getOrCreateTopologyProvider().version();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String description() {
+            return executed.description();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Topology topology() {
+            return getOrCreateTopologyProvider().get();
+        }
+
+        public boolean matches(final ApplicationId applicationId) {
+            return getOrCreateApplicationId().equals(applicationId);
+        }
+    }
+
+    private <T> T supply(final Supplier<T> supplier, final Conf componentConfig) {
+        return new EnvironmentAwareComponentSupplier<>(supplier).get(this, componentConfig);
     }
 }

@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.streams;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
+import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleChain;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

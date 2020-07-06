@@ -34,8 +34,8 @@ public class TopologyMetadata {
      * @param description       the topology description.
      */
     public TopologyMetadata(final String name,
-                     final String version,
-                     final String description) {
+                            final String version,
+                            final String description) {
         Objects.requireNonNull(name, "name cannot be null");
         Objects.requireNonNull(version, "version cannot be null");
 

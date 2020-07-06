@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.api.streams.internal;
 
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
