@@ -27,10 +27,15 @@ import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.config.ConfigurableSupplier;
+import io.streamthoughts.azkarra.api.events.EventStream;
+import io.streamthoughts.azkarra.api.events.EventStreamProvider;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import org.apache.kafka.streams.Topology;
+
+import java.util.Collections;
+import java.util.List;
 
 public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyProvider> {
 
@@ -77,7 +82,7 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
      */
     public static class ClassLoaderAwareTopologyProvider
             extends DelegatingExecutionEnvironmentAware<TopologyProvider>
-            implements TopologyProvider, StreamsExecutionEnvironmentAware {
+            implements TopologyProvider, StreamsExecutionEnvironmentAware, EventStreamProvider {
 
         private final ClassLoader topologyClassLoader;
 
@@ -107,6 +112,17 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
             } finally {
                 ClassUtils.compareAndSwapLoaders(classLoader);
             }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public List<EventStream> getEventStreams() {
+            if (delegate instanceof EventStreamProvider) {
+                return ((EventStreamProvider)delegate).getEventStreams();
+            }
+            return Collections.emptyList();
         }
     }
 }

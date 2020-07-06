@@ -16,38 +16,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events.callback;
 
-import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
+import io.streamthoughts.azkarra.api.events.BlockingRecordQueue;
 
-import java.util.Collections;
-import java.util.List;
-
-public interface TopologyDefinition {
-
-    /**
-     * @return  the topology name.
-     */
-    String getName();
+/**
+ * The callback for {@link BlockingRecordQueue}.
+ *
+ * @since 0.8.0
+ */
+public interface QueueCallback {
 
     /**
-     * @return  the topology version.
+     * Invokes when the queue is closed.
      */
-    String getVersion();
+    void onClosed();
 
     /**
-     * @return the topology description.
+     * Invokes when a new record is queued.
      */
-    String getDescription();
-
-    /**
-     * @return the {@link Topology}.
-     */
-    Topology getTopology();
-
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
-    }
+    void onQueued();
 
 }

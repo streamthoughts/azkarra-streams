@@ -16,38 +16,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events;
 
-import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
 
-import java.util.Collections;
-import java.util.List;
+/**
+ * The default interface to be used for executing logic when buffer limit is reached.
+ *
+ * @see BlockingRecordQueue
+ *
+ * @since 0.8.0
+ */
+@FunctionalInterface
+public interface LimitHandler {
 
-public interface TopologyDefinition {
-
-    /**
-     * @return  the topology name.
-     */
-    String getName();
-
-    /**
-     * @return  the topology version.
-     */
-    String getVersion();
-
-    /**
-     * @return the topology description.
-     */
-    String getDescription();
-
-    /**
-     * @return the {@link Topology}.
-     */
-    Topology getTopology();
-
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
+    class BlockingQueueLimitReachedException extends AzkarraException {
+        BlockingQueueLimitReachedException(final String message) {
+            super(message);
+        }
     }
 
+    /**
+     * Invokes when the limit of a {@link BlockingRecordQueue} is reached.
+     *
+     * @param queue the queue that reached its limit.
+     */
+    <K, V> void onLimitReached(final BlockingRecordQueue<K, V> queue);
 }
+
+

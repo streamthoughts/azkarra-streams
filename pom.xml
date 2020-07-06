@@ -29,6 +29,7 @@
 
     <modules>
         <module>azkarra-api</module>
+        <module>azkarra-reactive-tck</module>
         <module>azkarra-runtime</module>
         <module>azkarra-streams</module>
         <module>azkarra-ui</module>

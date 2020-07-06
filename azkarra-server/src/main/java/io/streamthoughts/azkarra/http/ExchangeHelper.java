@@ -44,7 +44,7 @@ public class ExchangeHelper {
 
     private static final String CONTENT_TYPE = "application/json; charset=utf-8";
 
-    static final Json JSON = new Json(new ObjectMapper());
+    public static final Json JSON = new Json(new ObjectMapper());
 
     static {
         final SimpleModule module = new SimpleModule();

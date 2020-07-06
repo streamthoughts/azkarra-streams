@@ -16,38 +16,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events.reactive.internal;
 
-import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
-
-import java.util.Collections;
-import java.util.List;
-
-public interface TopologyDefinition {
-
-    /**
-     * @return  the topology name.
-     */
-    String getName();
+/**
+ * Default interface that is used to wrap a subscription identifier.
+ *
+ * @since 0.8.0
+ */
+public interface SubscriptionId {
 
     /**
-     * @return  the topology version.
+     * @return the subscription identifier object.
      */
-    String getVersion();
-
-    /**
-     * @return the topology description.
-     */
-    String getDescription();
-
-    /**
-     * @return the {@link Topology}.
-     */
-    Topology getTopology();
-
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
-    }
+    Object get();
 
 }
