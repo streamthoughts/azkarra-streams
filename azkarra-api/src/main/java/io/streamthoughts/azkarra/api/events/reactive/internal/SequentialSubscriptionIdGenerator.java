@@ -16,38 +16,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events.reactive.internal;
 
-import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
+import java.util.concurrent.atomic.AtomicLong;
 
-import java.util.Collections;
-import java.util.List;
+/**
+ * Class that can be used to generate a sequential {@link SubscriptionId}.
+ *
+ * @since 0.8.0
+ */
+public class SequentialSubscriptionIdGenerator implements SubscriptionIdGenerator {
 
-public interface TopologyDefinition {
-
-    /**
-     * @return  the topology name.
-     */
-    String getName();
+    private final AtomicLong counter = new AtomicLong(0);
 
     /**
-     * @return  the topology version.
+     * {@inheritDoc}
      */
-    String getVersion();
-
-    /**
-     * @return the topology description.
-     */
-    String getDescription();
-
-    /**
-     * @return the {@link Topology}.
-     */
-    Topology getTopology();
-
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
+    @Override
+    public LongSubscriptionId generateNext() {
+        return new LongSubscriptionId(counter.getAndIncrement());
     }
-
 }

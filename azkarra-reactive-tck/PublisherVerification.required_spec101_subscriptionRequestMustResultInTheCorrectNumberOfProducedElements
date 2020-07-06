@@ -1,0 +1,80 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for io.streamthoughts:azkarra-api-reactive-tck:jar:0.8.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-jar-plugin is missing. @ line 21, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] -------------< io.streamthoughts:azkarra-api-reactive-tck >-------------
+[INFO] Building azkarra-api-reactive-tck 0.8.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-checkstyle-plugin:3.1.0:check (validate) @ azkarra-api-reactive-tck ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ azkarra-api-reactive-tck ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:compile (default-compile) @ azkarra-api-reactive-tck ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ azkarra-api-reactive-tck ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/florian/Workspace/GitHub/azkarra-streams/azkarra-api-reactive-tck/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.0:testCompile (default-testCompile) @ azkarra-api-reactive-tck ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.0.0-M3:test (default-test) @ azkarra-api-reactive-tck ---
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisherVerificationTest
+[ERROR] Tests run: 38, Failures: 4, Errors: 0, Skipped: 12, Time elapsed: 42.176 s <<< FAILURE! - in io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisherVerificationTest
+[ERROR] required_createPublisher3MustProduceAStreamOfExactly3Elements(io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisherVerificationTest)  Time elapsed: 0.205 s  <<< FAILURE!
+java.lang.AssertionError: Publisher org.reactivestreams.FlowAdapters$ReactivePublisherFromFlow@75437611 produced only 1 element expected [true] but found [false]
+
+[ERROR] required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements(io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisherVerificationTest)  Time elapsed: 3.002 s  <<< FAILURE!
+java.lang.AssertionError: Publisher org.reactivestreams.FlowAdapters$ReactivePublisherFromFlow@cc43f62 produced less than 3 elements after two respective `request` calls within 1000 ms
+Caused by: java.lang.AssertionError: Publisher org.reactivestreams.FlowAdapters$ReactivePublisherFromFlow@cc43f62 produced less than 3 elements after two respective `request` calls within 1000 ms
+
+[ERROR] required_spec105_mustSignalOnCompleteWhenFiniteStreamTerminates(io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisherVerificationTest)  Time elapsed: 0.202 s  <<< FAILURE!
+java.lang.AssertionError: Expected element but got end-of-stream
+Caused by: java.lang.AssertionError: Expected element but got end-of-stream
+
+[ERROR] required_spec317_mustSupportACumulativePendingElementCountUpToLongMaxValue(io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisherVerificationTest)  Time elapsed: 0.203 s  <<< FAILURE!
+java.lang.AssertionError: Expected element but got end-of-stream
+Caused by: java.lang.AssertionError: Expected element but got end-of-stream
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AsyncMulticastEventStreamPublisherVerificationTest>PublisherVerification.required_createPublisher3MustProduceAStreamOfExactly3Elements:179->PublisherVerification.activePublisherTest:1142 Publisher org.reactivestreams.FlowAdapters$ReactivePublisherFromFlow@75437611 produced only 1 element expected [true] but found [false]
+[ERROR]   AsyncMulticastEventStreamPublisherVerificationTest>PublisherVerification.required_spec101_subscriptionRequestMustResultInTheCorrectNumberOfProducedElements:211->PublisherVerification.activePublisherTest:1142 Publisher org.reactivestreams.FlowAdapters$ReactivePublisherFromFlow@cc43f62 produced less than 3 elements after two respective `request` calls within 1000 ms
+[ERROR]   AsyncMulticastEventStreamPublisherVerificationTest>PublisherVerification.required_spec105_mustSignalOnCompleteWhenFiniteStreamTerminates:397->PublisherVerification.activePublisherTest:1142 Expected element but got end-of-stream
+[ERROR]   AsyncMulticastEventStreamPublisherVerificationTest>PublisherVerification.required_spec317_mustSupportACumulativePendingElementCountUpToLongMaxValue:1055->PublisherVerification.activePublisherTest:1142 Expected element but got end-of-stream
+[INFO] 
+[ERROR] Tests run: 38, Failures: 4, Errors: 0, Skipped: 12
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  44.262 s
+[INFO] Finished at: 2020-07-09T18:58:47+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M3:test (default-test) on project azkarra-api-reactive-tck: There are test failures.
+[ERROR] 
+[ERROR] Please refer to /home/florian/Workspace/GitHub/azkarra-streams/azkarra-api-reactive-tck/target/surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

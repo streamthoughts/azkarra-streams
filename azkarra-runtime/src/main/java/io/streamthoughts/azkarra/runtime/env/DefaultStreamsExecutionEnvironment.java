@@ -29,6 +29,8 @@ import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.RocksDBConfig;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.events.EventStream;
+import io.streamthoughts.azkarra.api.events.EventStreamProvider;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
@@ -50,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -136,7 +139,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     /**
      * The list of topologies to initialize when the environment is started.
      */
-    private final List<InternalTopologyDefinition> topologies;
+    private final List<TopologyDefinitionHolder> topologies;
 
     /**
      * The list of streams instances currently started.
@@ -311,7 +314,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
      */
     @Override
     public ApplicationId addTopology(final Supplier<TopologyProvider> provider, final Executed executed) {
-        final InternalTopologyDefinition internalProvider = new InternalTopologyDefinition(provider, executed);
+        final TopologyDefinitionHolder internalProvider = new TopologyDefinitionHolder(provider, executed);
         topologies.add(internalProvider);
         return state == State.STARTED ? start(internalProvider) : null;
     }
@@ -329,13 +332,18 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         setState(State.STARTED);
     }
 
-    private ApplicationId start(final InternalTopologyDefinition topology) {
-        LOG.info("Building new Topology for name='{}', version='{}'", topology.name(), topology.version());
+    private ApplicationId start(final TopologyDefinitionHolder topologyHolder) {
+        final TopologyDefinition definition = topologyHolder.createTopologyDefinition();
 
-        var applicationId = topology.getOrCreateApplicationId();
+        LOG.info("Building new Topology for name='{}', version='{}'", definition.getName(), definition.getVersion());
+
+        var topologyConfig = topologyHolder.getTopologyConfig();
+
+        var applicationId = generateApplicationId(definition, topologyHolder.getTopologyConfig());
         checkStreamsIsAlreadyRunningFor(applicationId);
 
-        var topologyConfig = topology.getTopologyConfig();
+        topologyHolder.setApplicationId(applicationId);
+
         var streamsConfig = topologyConfig.hasPath("streams") ? topologyConfig.getSubConf("streams") : Conf.empty();
         var applicationIdConfig = Conf.of(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString());
 
@@ -349,13 +357,12 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             .withRestoreListeners(restoreListeners)
             .withStreamThreadExceptionHandlers(List.of(threadExceptionHandler))
             .withStreamsConfig(Conf.of(applicationIdConfig, streamsConfig))
-            .withTopologyDefinition(topology)
-            .withKafkaStreamsFactory(topology.getKafkaStreamsFactory())
-            .withInterceptors(topology.getAllInterceptors())
+            .withTopologyDefinition(definition)
+            .withKafkaStreamsFactory(topologyHolder.getKafkaStreamsFactory())
+            .withInterceptors(topologyHolder.getAllInterceptors())
             .build();
 
         activeStreams.put(applicationId, kafkaStreamsContainer);
-
         kafkaStreamsContainer.start(STREAMS_EXECUTOR);
 
         return applicationId;
@@ -463,6 +470,16 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         return this;
     }
 
+    private ApplicationId generateApplicationId(final TopologyDefinition definition,
+                                                final Conf TopologyConfig) {
+        var applicationIdBuilder = supply(applicationIdBuilderSupplier, TopologyConfig);
+        return applicationIdBuilder.buildApplicationId(
+            new TopologyMetadata(definition.getName(), definition.getVersion(), definition.getDescription()),
+            TopologyConfig
+        );
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -505,23 +522,26 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
     }
 
     @VisibleForTesting
-    class InternalTopologyDefinition implements TopologyDefinition {
+    class TopologyDefinitionHolder {
 
         private final Supplier<TopologyProvider> supplier;
         private final InternalExecuted executed;
         private ApplicationId applicationId;
-        private TopologyProvider provider;
 
         /**
-         * Creates a new {@link InternalTopologyDefinition} instance.
+         * Creates a new {@link TopologyDefinitionHolder} instance.
          *
          * @param supplier  the supplier to supplier.
          * @param executed  the {@link Executed} instance.
          */
-        InternalTopologyDefinition(final Supplier<TopologyProvider> supplier,
-                                   final Executed executed) {
+        TopologyDefinitionHolder(final Supplier<TopologyProvider> supplier,
+                                 final Executed executed) {
             this.supplier = supplier;
             this.executed = new InternalExecuted(executed);
+        }
+
+        public void setApplicationId(final ApplicationId applicationId) {
+            this.applicationId = applicationId;
         }
 
         List<StreamsLifecycleInterceptor> getAllInterceptors() {
@@ -536,7 +556,6 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             return supply(factory, getTopologyConfig());
         }
 
-
         Conf getTopologyConfig() {
             var ctxConfig = context != null ? context.getConfiguration() : Conf.empty();
             var envConfig = DefaultStreamsExecutionEnvironment.this.getConfiguration();
@@ -544,62 +563,81 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             return Conf.of(executed.config(), envConfig, envConfig, ctxConfig);
         }
 
-        private TopologyProvider getOrCreateTopologyProvider() {
-            if (provider == null) {
-                provider = supply(supplier, getTopologyConfig());
-            }
-            return provider;
+        TopologyDefinition createTopologyDefinition() {
+            return new InternalTopologyDefinition(
+                executed.name(),
+                executed.description(),
+                supply(supplier, getTopologyConfig())
+            );
         }
 
-        ApplicationId getOrCreateApplicationId() {
-            if (applicationId == null) {
-                var applicationIdBuilder = supply(applicationIdBuilderSupplier, getTopologyConfig());
-                applicationId = applicationIdBuilder.buildApplicationId(
-                    new TopologyMetadata(name(), version(), description()),
-                    getTopologyConfig()
-                );
-             }
-            return applicationId;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String name() {
-            return executed.name();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String version() {
-            return getOrCreateTopologyProvider().version();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public String description() {
-            return executed.description();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Topology topology() {
-            return getOrCreateTopologyProvider().get();
-        }
-
-        public boolean matches(final ApplicationId applicationId) {
-            return getOrCreateApplicationId().equals(applicationId);
+        boolean matches(final ApplicationId applicationId) {
+            return this.applicationId.equals(applicationId);
         }
     }
 
     private <T> T supply(final Supplier<T> supplier, final Conf componentConfig) {
         return new EnvironmentAwareComponentSupplier<>(supplier).get(this, componentConfig);
+    }
+
+
+    private static class InternalTopologyDefinition implements TopologyDefinition {
+
+        private final String name;
+        private final String description;
+        private final TopologyProvider provider;
+
+        private Topology topology;
+
+        InternalTopologyDefinition(final String name,
+                                   final String description,
+                                   final TopologyProvider provider) {
+            this.name = name;
+            this.description = description;
+            this.provider = provider;
+            this.topology = provider.get();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getVersion() {
+            return provider.version();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getDescription() {
+            return description;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Topology getTopology() {
+            return topology;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public List<EventStream> getEventStreams() {
+            return (provider instanceof EventStreamProvider) ?
+                ((EventStreamProvider)provider).getEventStreams() :
+                Collections.emptyList();
+        }
     }
 }

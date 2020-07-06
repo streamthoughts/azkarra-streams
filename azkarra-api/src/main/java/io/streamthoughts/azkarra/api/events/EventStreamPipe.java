@@ -16,38 +16,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events;
 
-import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
-
-import java.util.Collections;
-import java.util.List;
-
-public interface TopologyDefinition {
-
-    /**
-     * @return  the topology name.
-     */
-    String getName();
-
-    /**
-     * @return  the topology version.
-     */
-    String getVersion();
+/**
+ * The EventStreamPipe is used to attached or detach an object that will be responsible to consume
+ * records send to an {@link EventStream}.
+ *
+ * @see EventStream#open(EventStreamPipe)
+ *
+ * @param <K>   the record-key type.
+ * @param <V>   the record-value type.
+ *
+ * @since 0.8.0
+ */
+public interface EventStreamPipe<K, V> {
 
     /**
-     * @return the topology description.
+     * Set the queue from which records are produced.
+     *
+     * @param queue the {@link BlockingRecordQueue}.
      */
-    String getDescription();
-
-    /**
-     * @return the {@link Topology}.
-     */
-    Topology getTopology();
-
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
-    }
+    void onOpen(final BlockingRecordQueue<K, V> queue);
 
 }

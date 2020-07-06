@@ -16,38 +16,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events.reactive;
 
+import io.streamthoughts.azkarra.api.events.BlockingRecordQueue;
 import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
+import io.streamthoughts.azkarra.api.events.EventStreamProvider;
+import io.streamthoughts.azkarra.api.model.KV;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.Flow;
 
-public interface TopologyDefinition {
-
-    /**
-     * @return  the topology name.
-     */
-    String getName();
-
-    /**
-     * @return  the topology version.
-     */
-    String getVersion();
-
-    /**
-     * @return the topology description.
-     */
-    String getDescription();
+/**
+ * The main publisher interface to subscribe to a specific streams of key-value records.
+ *
+ * @see EventStream
+ * @see EventStreamProvider
+ * @see BlockingRecordQueue
+ *
+ * @param <K>       the record key type.
+ * @param <V>       the record value type.
+ *
+ * @since 0.8.0
+ */
+public interface EventStreamPublisher<K, V> extends Flow.Publisher<KV<K, V>> {
 
     /**
-     * @return the {@link Topology}.
+     * Get the event type name attached to this publisher.
+     *
+     * @return the event type name.
      */
-    Topology getTopology();
+    String type();
 
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
-    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void subscribe(final Flow.Subscriber<? super KV<K, V>> subscriber);
 
 }

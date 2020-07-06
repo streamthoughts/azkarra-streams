@@ -21,6 +21,10 @@ package io.streamthoughts.azkarra.api.streams;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.events.EventStream;
+import io.streamthoughts.azkarra.api.events.reactive.EventStreamPublisher;
+import io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisher;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
@@ -69,6 +73,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -115,6 +121,10 @@ public class KafkaStreamsContainer {
 
     private volatile ContainerState containerState;
     private final Object containerStateLock = new Object();
+
+    private final List<EventStream> eventStreams = new LinkedList<>();
+
+    private final Map<String, EventStreamPublisher> publishers = new LinkedHashMap<>();
 
     /**
      * The {@link Executor} which is used top start/stop the internal streams in a non-blocking way.
@@ -167,6 +177,7 @@ public class KafkaStreamsContainer {
         this.applicationServer = streamsConfig()
             .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
             .orElse(null);
+        topologyDefinition.getEventStreams().forEach(this::registerEventStream);
     }
 
     /**
@@ -178,8 +189,8 @@ public class KafkaStreamsContainer {
      */
     public synchronized Future<KafkaStreams.State> start(final Executor executor) {
         LOG.info("Starting KafkaStreams container for name='{}', version='{}', id='{}'.",
-            topologyDefinition.name(),
-            topologyDefinition.version(),
+            topologyDefinition.getName(),
+            topologyDefinition.getVersion(),
             applicationId());
 
         LOG.info("StreamsLifecycleInterceptors : {}",
@@ -194,9 +205,17 @@ public class KafkaStreamsContainer {
         this.executor = executor;
         stateChangeWatchers.clear(); // Remove all watchers that was registered during a previous run.
         kafkaStreams = streamsFactory.make(
-            topologyDefinition.topology(),
+            topologyDefinition.getTopology(),
             streamsConfig
         );
+
+        for (EventStream<? ,?> stream : eventStreams) {
+            var eventType = stream.type();
+            if (publishers.put(eventType, new AsyncMulticastEventStreamPublisher<>(stream)) != null) {
+                throw new AzkarraException("Cannot register two event-streams for type: " + eventType);
+            }
+        }
+
         setState(State.CREATED);
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
         // https://issues.apache.org/jira/browse/KAFKA-7380
@@ -228,8 +247,17 @@ public class KafkaStreamsContainer {
          }, executor);
     }
 
+    public EventStreamPublisher getEventStreamPublisher(final String eventType) {
+        return publishers.get(Objects.requireNonNull(eventType, "eventType cannot be null"));
+    }
+
+    public <K, V> void registerEventStream(final EventStream<K, V> eventStream) {
+        eventStreams.add(Objects.requireNonNull(eventStream, "eventStream cannot be null"));
+    }
+
     private void reset() {
         lastObservedException = null;
+        publishers.clear();
     }
 
     /**
@@ -325,9 +353,9 @@ public class KafkaStreamsContainer {
      */
     public TopologyMetadata topologyMetadata() {
         return new TopologyMetadata(
-            topologyDefinition.name(),
-            topologyDefinition.version(),
-            topologyDefinition.description()
+            topologyDefinition.getName(),
+            topologyDefinition.getVersion(),
+            topologyDefinition.getDescription()
         );
     }
 
@@ -337,7 +365,7 @@ public class KafkaStreamsContainer {
      * @return  a new {@link TopologyDescription} instance.
      */
     public TopologyDescription topologyDescription() {
-        return topologyDefinition.topology().describe();
+        return topologyDefinition.getTopology().describe();
     }
 
     /**
@@ -519,6 +547,8 @@ public class KafkaStreamsContainer {
                 // This may trigger a container restart
                 setContainerState(ContainerState.STOPPED);
                 stateChanges(new StateChangeEvent(State.STOPPED, State.valueOf(kafkaStreams.state().name())));
+                // Close all EventStreams
+                eventStreams.forEach(EventStream::close);
             }, "kafka-streams-container-close-thread");
 
             shutdownThread.setDaemon(true);

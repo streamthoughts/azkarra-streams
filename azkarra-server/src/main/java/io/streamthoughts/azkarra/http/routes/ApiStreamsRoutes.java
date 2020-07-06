@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.http.routes;
 
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.http.APIVersions;
+import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.handler.StreamsDeleteHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsGetConfigHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsGetDetailsHandler;
@@ -31,6 +32,7 @@ import io.streamthoughts.azkarra.http.handler.StreamsPostHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsRestartHandler;
 import io.streamthoughts.azkarra.http.handler.StreamsStopHandler;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
+import io.streamthoughts.azkarra.http.sse.EventStreamConnectionCallback;
 import io.undertow.Handlers;
 import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
@@ -62,6 +64,8 @@ public class ApiStreamsRoutes implements RoutingHandlerProvider {
             = "/streams/{id}/restart";
     private static final String PATH_STREAMS_STOP
             = "/streams/{id}/stop";
+    private static final String PATH_STREAMS_SSE
+            = "/streams/{id}/subscribe/{event}";
 
     /**
      * Creates a new {@link ApiStreamsRoutes} instance.
@@ -99,6 +103,9 @@ public class ApiStreamsRoutes implements RoutingHandlerProvider {
             .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS, metricsHandler)
             .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS_GROUP, metricsHandler)
             .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS_GROUP_METRIC, metricsHandler)
-            .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS_GROUP_METRIC_VALUE, metricsHandler);
+            .get(APIVersions.PATH_V1 + PATH_STREAMS_METRICS_GROUP_METRIC_VALUE, metricsHandler)
+            .get(APIVersions.PATH_V1 + PATH_STREAMS_SSE,
+                Handlers.serverSentEvents(new EventStreamConnectionCallback(service, ExchangeHelper.JSON))
+            );
     }
 }

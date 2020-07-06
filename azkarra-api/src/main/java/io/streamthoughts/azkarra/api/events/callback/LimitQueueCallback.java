@@ -16,38 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events.callback;
 
-import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
+import io.streamthoughts.azkarra.api.events.BlockingRecordQueue;
+import io.streamthoughts.azkarra.api.events.LimitHandler;
 
-import java.util.Collections;
-import java.util.List;
-
-public interface TopologyDefinition {
-
-    /**
-     * @return  the topology name.
-     */
-    String getName();
+/**
+ * The limit callback for {@link BlockingRecordQueue}.
+ *
+ * @since 0.8.0
+ */
+public interface LimitQueueCallback extends QueueCallback {
 
     /**
-     * @return  the topology version.
+     * Sets the handler to be invoked when the queue limit is reached.
+     *
+     * @param limitHandler  the {@link LimitHandler}.
      */
-    String getVersion();
+    void setLimitHandler(final LimitHandler limitHandler);
 
     /**
-     * @return the topology description.
+     * Sets the {@link BlockingRecordQueue} to be passed to the {@link LimitHandler}.
+     *
+     * @param queue the {@link BlockingRecordQueue}.
      */
-    String getDescription();
-
-    /**
-     * @return the {@link Topology}.
-     */
-    Topology getTopology();
-
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
-    }
-
+    void setQueue(final BlockingRecordQueue queue);
 }

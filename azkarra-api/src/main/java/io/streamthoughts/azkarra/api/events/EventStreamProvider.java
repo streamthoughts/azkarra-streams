@@ -16,38 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.topology;
+package io.streamthoughts.azkarra.api.events;
 
-import io.streamthoughts.azkarra.api.events.EventStream;
-import org.apache.kafka.streams.Topology;
-
-import java.util.Collections;
 import java.util.List;
 
-public interface TopologyDefinition {
+/**
+ * EventStreamsProvider.
+ *
+ * @since 0.8.0
+ */
+public interface EventStreamProvider {
 
     /**
-     * @return  the topology name.
+     * Returns the list of {@link EventStream}
+     *
+     * @return  a list of {@link EventStream}. Must not return {@code null}.
      */
-    String getName();
-
-    /**
-     * @return  the topology version.
-     */
-    String getVersion();
-
-    /**
-     * @return the topology description.
-     */
-    String getDescription();
-
-    /**
-     * @return the {@link Topology}.
-     */
-    Topology getTopology();
-
-    default List<EventStream> getEventStreams() {
-        return Collections.emptyList();
-    }
+    List<EventStream> getEventStreams();
 
 }
