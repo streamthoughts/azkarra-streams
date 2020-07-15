@@ -151,7 +151,7 @@ public class AutoCreateTopicsInterceptor
         checkState();
         mayInitializeNewTopicsFromContext(context.topologyName());
 
-        if (context.streamsState() == State.CREATED) {
+        if (context.streamsState() == State.Standards.CREATED) {
 
             final Set<String> userDeclaredTopics = getUserDeclaredTopics(context.topologyDescription());
 
@@ -171,7 +171,7 @@ public class AutoCreateTopicsInterceptor
         chain.execute();
 
         // List all topics (i.e user-topics, change-log, repartition) only if streams application is running.
-        if (context.streamsState() == State.RUNNING) {
+        if (context.streamsState() == State.Standards.RUNNING) {
             apply(this::listTopics, context);
         }
     }

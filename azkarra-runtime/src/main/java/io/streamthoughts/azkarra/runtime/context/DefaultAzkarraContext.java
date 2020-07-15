@@ -61,6 +61,7 @@ import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySu
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
+import io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
@@ -86,6 +87,7 @@ import static io.streamthoughts.azkarra.api.components.condition.Conditions.onPr
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withConditions;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withOrder;
 import static io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptorConfig.AUTO_CREATE_TOPICS_ENABLE_CONFIG;
+import static io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptorConfig.KAFKA_READY_INTERCEPTOR_ENABLE_CONFIG;
 import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG;
 import static io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptorConfig.WAIT_FOR_TOPICS_ENABLE_CONFIG;
 
@@ -176,6 +178,11 @@ public class DefaultAzkarraContext implements AzkarraContext {
         registerComponent(
             MonitoringStreamsInterceptor.class,
             withConditions(onPropertyTrue(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG))
+        );
+        registerComponent(
+            KafkaBrokerReadyInterceptor.class,
+            withConditions(onPropertyTrue(KAFKA_READY_INTERCEPTOR_ENABLE_CONFIG)),
+            withOrder(Ordered.HIGHEST_ORDER)
         );
         registerComponent(
             WaitForSourceTopicsInterceptor.class,

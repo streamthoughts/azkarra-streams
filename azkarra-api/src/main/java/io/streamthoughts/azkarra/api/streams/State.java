@@ -21,57 +21,58 @@ package io.streamthoughts.azkarra.api.streams;
 import org.apache.kafka.streams.KafkaStreams;
 
 /**
- * The status for a {@link KafkaStreams} instance.
- *
- * @see KafkaStreams.State
- * @see KafkaStreamsContainer
+ * Interface that can be used to set the state of the {@link KafkaStreamsContainer}.
  */
-public enum State {
+public interface State {
+
+    String name();
 
     /**
-     * The {@link KafkaStreams} instance has been created yet.
+     * The standard {@link State} for a {@link KafkaStreams} instance.
+     *
+     * @see KafkaStreams.State
+     * @see KafkaStreamsContainer
      */
-    NOT_CREATED,
+    enum Standards implements State {
 
-    /**
-     * The {@link KafkaStreams} instance has been created successfully.
-     */
-    CREATED,
+        /**
+         * The {@link KafkaStreams} instance has been created yet.
+         */
+        NOT_CREATED,
 
-    /**
-     * The {@link KafkaStreamsContainer} is waiting for sources
-     * topics to be created before starting {@link KafkaStreams} instance.
-     */
-    WAITING_FOR_TOPICS,
+        /**
+         * The {@link KafkaStreams} instance has been created successfully.
+         */
+        CREATED,
 
-    /**
-     * @see KafkaStreams.State#REBALANCING
-     */
-    REBALANCING,
+        /**
+         * @see KafkaStreams.State#REBALANCING
+         */
+        REBALANCING,
 
-    /**
-     * @see KafkaStreams.State#RUNNING
-     */
-    RUNNING,
+        /**
+         * @see KafkaStreams.State#RUNNING
+         */
+        RUNNING,
 
-    /**
-     * @see KafkaStreams.State#PENDING_SHUTDOWN
-     */
-    PENDING_SHUTDOWN,
+        /**
+         * @see KafkaStreams.State#PENDING_SHUTDOWN
+         */
+        PENDING_SHUTDOWN,
 
-    /**
-     * @see KafkaStreams.State#NOT_RUNNING
-     */
-    NOT_RUNNING,
+        /**
+         * @see KafkaStreams.State#NOT_RUNNING
+         */
+        NOT_RUNNING,
 
-    /**
-     * The {@link KafkaStreamsContainer} shutdown is complete.
-     */
-    STOPPED,
+        /**
+         * The {@link KafkaStreamsContainer} shutdown is complete.
+         */
+        STOPPED,
 
-    /**
-     * @see KafkaStreams.State#ERROR
-     */
-    ERROR
-
+        /**
+         * @see KafkaStreams.State#ERROR
+         */
+        ERROR
+    }
 }

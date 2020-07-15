@@ -76,7 +76,7 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
             context.addStateChangeWatcher(new KafkaStreamsContainer.StateChangeWatcher() {
                 @Override
                 public boolean accept(final State newState) {
-                    return newState == State.RUNNING;
+                    return newState == State.Standards.RUNNING;
                 }
 
                 @Override

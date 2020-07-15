@@ -160,7 +160,7 @@ public class AutoCreateTopicsInterceptorTest {
 
     private StreamsLifecycleContext newContext() {
         return new StreamsLifecycleContext() {
-            State state = State.CREATED;
+            State state = State.Standards.CREATED;
 
             @Override
             public String applicationId() {
