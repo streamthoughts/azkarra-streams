@@ -23,8 +23,8 @@ import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.events.EventStream;
-import io.streamthoughts.azkarra.api.events.reactive.EventStreamPublisher;
 import io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisher;
+import io.streamthoughts.azkarra.api.events.reactive.EventStreamPublisher;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
@@ -38,6 +38,8 @@ import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifecycleCo
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -119,6 +121,8 @@ public class KafkaStreamsContainer {
 
     private KafkaConsumer<byte[], byte[]> consumer;
 
+    private AdminClient adminClient;
+
     private volatile ContainerState containerState;
     private final Object containerStateLock = new Object();
 
@@ -130,6 +134,7 @@ public class KafkaStreamsContainer {
      * The {@link Executor} which is used top start/stop the internal streams in a non-blocking way.
      */
     private Executor executor;
+    private final UUID containerId;
 
     // The internal states used to manage container Lifecycle
     private enum ContainerState {
@@ -170,10 +175,11 @@ public class KafkaStreamsContainer {
         Objects.requireNonNull(streamsFactory, "streamsFactory cannot be null");
         this.streamsConfig = Objects.requireNonNull(streamsConfig, "streamConfigs cannot be null");
         containerState = ContainerState.CREATED;
-        setState(State.NOT_CREATED);
+        setState(State.Standards.NOT_CREATED);
         this.interceptors = interceptors;
         this.streamsFactory = streamsFactory;
         this.topologyDefinition = topologyDefinition;
+        this.containerId = UUID.randomUUID();
         this.applicationServer = streamsConfig()
             .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
             .orElse(null);
@@ -216,7 +222,7 @@ public class KafkaStreamsContainer {
             }
         }
 
-        setState(State.CREATED);
+        setState(State.Standards.CREATED);
         // start() may block during a undefined period of time if the topology has defined GlobalKTables.
         // https://issues.apache.org/jira/browse/KAFKA-7380
         return CompletableFuture.supplyAsync(() -> {
@@ -437,39 +443,53 @@ public class KafkaStreamsContainer {
     public Producer<byte[], byte[]> getProducer(final Map<String, Object> overrides) {
         String producerClientId = (String) overrides.get(ProducerConfig.CLIENT_ID_CONFIG);
         if (producerClientId == null) {
-            final UUID containerId = UUID.randomUUID();
             final String clientId = streamsConfig()
                     .getOptionalString(StreamsConfig.CLIENT_ID_CONFIG)
                     .orElse(applicationId());
             producerClientId = clientId + "-" + containerId + "-producer";
         }
-        Map<String, Object> props = getProducerConfigs(streamsConfig().getConfAsMap());
+        Map<String, Object> props = getProducerConfigs(streamsConfig.getConfAsMap());
         props.putAll(overrides);
-        props.put(BOOTSTRAP_SERVERS_CONFIG, streamsConfig().getString(BOOTSTRAP_SERVERS_CONFIG));
+        props.put(BOOTSTRAP_SERVERS_CONFIG, streamsConfig.getString(BOOTSTRAP_SERVERS_CONFIG));
         props.put(CLIENT_ID_CONFIG, producerClientId);
         return new KafkaProducer<>(props, new ByteArraySerializer(), new ByteArraySerializer());
     }
 
     /**
-     * Gets an {@link Consumer} instance for this {@link KafkaStreams} instance.
+     * Gets a shared {@link Consumer} instance for this {@link KafkaStreams} instance.
      *
      * @return a {@link Consumer} instance.
      */
     private synchronized Consumer<byte[], byte[]> getConsumer() {
         if (consumer == null) {
-            final UUID containerId = UUID.randomUUID();
-            final String clientId = streamsConfig()
-                    .getOptionalString(StreamsConfig.CLIENT_ID_CONFIG)
-                    .orElse(applicationId());
-            final String consumerClientId = clientId + "-" + containerId + "-consumer";
-            Map<String, Object> props = getConsumerConfigs(streamsConfig().getConfAsMap());
-            props.put(BOOTSTRAP_SERVERS_CONFIG, streamsConfig().getString(BOOTSTRAP_SERVERS_CONFIG));
-            props.put(CLIENT_ID_CONFIG, consumerClientId);
+            var configs = getConsumerConfigs(streamsConfig.getConfAsMap());
+
+            var clientId = streamsConfig().getOptionalString(CLIENT_ID_CONFIG).orElse(applicationId());
+            var consumerClientId = clientId + "-" + containerId + "-consumer";
+            configs.put(BOOTSTRAP_SERVERS_CONFIG, streamsConfig.getString(BOOTSTRAP_SERVERS_CONFIG));
+            configs.put(CLIENT_ID_CONFIG, consumerClientId);
             // no need to set group id for a internal consumer
-            props.remove(ConsumerConfig.GROUP_ID_CONFIG);
-            consumer = new KafkaConsumer<>(props, new ByteArrayDeserializer(), new ByteArrayDeserializer());
+            configs.remove(ConsumerConfig.GROUP_ID_CONFIG);
+            consumer = new KafkaConsumer<>(configs, new ByteArrayDeserializer(), new ByteArrayDeserializer());
         }
         return consumer;
+    }
+
+    /**
+     * Gets a shared {@link AdminClient} instance for this {@link KafkaStreams} instance.
+     *
+     * @return a {@link AdminClient} instance.
+     */
+    public synchronized AdminClient getAdminClient() {
+        if (adminClient == null) {
+            var configs = getAdminClientConfigs(streamsConfig.getConfAsMap());
+            var clientId = streamsConfig.getOptionalString(CLIENT_ID_CONFIG).orElse(applicationId());
+            var adminClientId = clientId + "-" + containerId + "-admin";
+            configs.put(BOOTSTRAP_SERVERS_CONFIG, streamsConfig.getString(BOOTSTRAP_SERVERS_CONFIG));
+            configs.put(CLIENT_ID_CONFIG, adminClientId);
+            adminClient = AdminClient.create(configs);
+        }
+        return adminClient;
     }
 
     /**
@@ -514,7 +534,7 @@ public class KafkaStreamsContainer {
                 stateChangeWatchers.add(new StateChangeWatcher() {
                     @Override
                     public boolean accept(final State state) {
-                        return state == State.STOPPED;
+                        return state == State.Standards.STOPPED;
                     }
 
                     @Override
@@ -546,7 +566,8 @@ public class KafkaStreamsContainer {
                 LOG.info("KafkaStreamsContainer has been closed (id={})", applicationId());
                 // This may trigger a container restart
                 setContainerState(ContainerState.STOPPED);
-                stateChanges(new StateChangeEvent(State.STOPPED, State.valueOf(kafkaStreams.state().name())));
+                var oldState = State.Standards.valueOf(kafkaStreams.state().name());
+                stateChanges(new StateChangeEvent(State.Standards.STOPPED, oldState));
                 // Close all EventStreams
                 eventStreams.forEach(EventStream::close);
             }, "kafka-streams-container-close-thread");
@@ -720,7 +741,7 @@ public class KafkaStreamsContainer {
 
     void stateChanges(final StateChangeEvent stateChangeEvent) {
         state = new TimestampedValue<>(stateChangeEvent.timestamp(), stateChangeEvent.newState());
-        if (state.value() == State.RUNNING) {
+        if (state.value() == State.Standards.RUNNING) {
             threadMetadata = kafkaStreams.localThreadsMetadata();
         } else {
             threadMetadata = Collections.emptySet();
@@ -771,9 +792,22 @@ public class KafkaStreamsContainer {
             ).collect(Collectors.toSet());
     }
 
+    private static Map<String, Object> getAdminClientConfigs(final Map<String, Object> configs) {
+        return getConfigsForKeys(configs, AdminClientConfig.configNames());
+    }
+
     private static Map<String, Object> getConsumerConfigs(final Map<String, Object> configs) {
+        return getConfigsForKeys(configs, ConsumerConfig.configNames());
+    }
+
+    private static Map<String, Object> getProducerConfigs(final Map<String, Object> configs) {
+        return getConfigsForKeys(configs, ProducerConfig.configNames());
+    }
+
+    private static Map<String, Object> getConfigsForKeys(final Map<String, Object> configs,
+                                                         final Set<String> keys) {
         final Map<String, Object> parsed = new HashMap<>();
-        for (final String configName: ConsumerConfig.configNames()) {
+        for (final String configName : keys) {
             if (configs.containsKey(configName)) {
                 parsed.put(configName, configs.get(configName));
             }
@@ -781,15 +815,6 @@ public class KafkaStreamsContainer {
         return parsed;
     }
 
-    private static Map<String, Object> getProducerConfigs(final Map<String, Object> configs) {
-        final Map<String, Object> parsed = new HashMap<>();
-        for (final String configName: ProducerConfig.configNames()) {
-            if (configs.containsKey(configName)) {
-                parsed.put(configName, configs.get(configName));
-            }
-        }
-        return parsed;
-    }
 
     /**
      * Returns the wrapper {@link KafkaStreams} instance.
@@ -811,10 +836,12 @@ public class KafkaStreamsContainer {
         LOG.info("Closing internal clients for Kafka Streams container (application.id={})", applicationId());
         try {
             if (consumer != null) consumer.close();
+            if (adminClient != null) adminClient.close();
         } catch (Exception e) {
             LOG.error("Unexpected error occurred while closing internal resources", e);
         } finally {
             consumer = null;
+            adminClient = null;
         }
     }
 

@@ -105,6 +105,8 @@ public class TopologyUtilsTest {
                 .to("output-topic");
         topology = builder.build();
 
+        System.out.println(topology.describe());
+
         final Set<String> sourceTopics = getSourceTopics(topology.describe())
                 .stream()
                 .filter(Predicate.not(TopologyUtils::isInternalTopic))

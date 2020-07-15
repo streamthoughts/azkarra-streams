@@ -78,20 +78,19 @@ public class StreamsHealthIndicator implements HealthIndicator, AzkarraContextAw
                                  final Health.Builder builder) {
         final State value = container.state().value();
         final Optional<Throwable> exception = container.exception();
-        switch (value) {
-            case RUNNING :
-                builder.up();
-                break;
-            case ERROR :
-                builder.down();
-                exception.ifPresent(builder::withException);
-                break;
-            case NOT_RUNNING:
-                exception.ifPresentOrElse(e -> builder.down().withException(e), builder::unknown);
-                break;
-            default:
-                builder.unknown();
-                break;
+
+        if (value.equals(State.Standards.RUNNING)) {
+            builder.up();
+
+        } else if (value.equals(State.Standards.ERROR)) {
+            builder.down();
+            exception.ifPresent(builder::withException);
+        }
+        else if (value.equals(State.Standards.NOT_RUNNING)) {
+            exception.ifPresentOrElse(e -> builder.down().withException(e), builder::unknown);
+
+        } else {
+            builder.unknown();
         }
     }
 

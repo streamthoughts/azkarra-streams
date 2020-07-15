@@ -33,6 +33,7 @@
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.streams.components.ComponentResolver"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher" />
+    <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptorConfig" />
     <suppress checks="NPathComplexity" files="io.streamthoughts.azkarra.commons.error.SafeDeserializerConfig"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer"/>
     <suppress checks="ParameterNumber" files="SimpleComponentDescriptor" />

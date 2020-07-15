@@ -197,8 +197,8 @@ public class KafkaStreamsContainerBuilder {
             compositeStateListener.addListener((newState, oldState) -> {
                 final StateChangeEvent event = new StateChangeEvent(
                     Time.SYSTEM.milliseconds(),
-                    State.valueOf(newState.name()),
-                    State.valueOf(oldState.name())
+                    State.Standards.valueOf(newState.name()),
+                    State.Standards.valueOf(oldState.name())
                 );
                 container.stateChanges(event);
             });

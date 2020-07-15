@@ -47,6 +47,8 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
 
     private final AdminClient adminClient;
 
+    enum InterceptorState implements State { WAITING_FOR_TOPICS }
+
     /**
      * Creates a new {@link WaitForSourceTopicsInterceptor} instance.
      */
@@ -68,14 +70,14 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
      */
     @Override
     public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
-        if (context.streamsState() == State.CREATED) {
+        if (context.streamsState() == State.Standards.CREATED) {
             final Set<String> sourceTopics = getSourceTopics(context.topologyDescription())
                 .stream()
                 .filter(Predicate.not(TopologyUtils::isInternalTopic))
                 .collect(Collectors.toSet());
 
             if (!sourceTopics.isEmpty()) {
-                context.setState(State.WAITING_FOR_TOPICS);
+                context.setState(InterceptorState.WAITING_FOR_TOPICS);
                 apply(context, client -> {
                     LOG.info("Waiting for source topic(s) to be created: {}", sourceTopics);
                     try {
