@@ -41,11 +41,11 @@ public class KeyValueGetQueryTest {
     @Test
     public void shouldGetGivenKey() {
         KeyValueGetQuery<String, String> query = new KeyValueGetQuery<>(STORE_NAME, "key", Serdes.String().serializer());
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn("value");
-        when(mkContainer.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(mkContainer.localKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<String, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());

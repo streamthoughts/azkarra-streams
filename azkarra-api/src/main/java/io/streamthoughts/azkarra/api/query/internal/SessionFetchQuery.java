@@ -69,7 +69,7 @@ public class SessionFetchQuery<K, V>  extends KeyedLocalStoreQuery<K, Windowed<K
     @Override
     public Try<List<KV<Windowed<K>, V>>>  execute(final KafkaStreamsContainer container, final long limit) {
 
-        final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = container.getLocalSessionStore(storeName());
+        final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = container.localSessionStore(storeName());
 
         final Reader<ReadOnlySessionStore<K, V>, List<KV<Windowed<K>, V>>> reader =
             reader(key())

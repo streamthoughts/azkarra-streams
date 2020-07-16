@@ -71,7 +71,7 @@ public class KeyValueCountQuery implements LocalStoreQuery<String, Long> {
                                                final long limit) {
 
         final LocalStoreAccessor<ReadOnlyKeyValueStore<Object, Object>> accessor =
-                container.getLocalKeyValueStore(storeName);
+                container.localKeyValueStore(storeName);
 
         Reader<ReadOnlyKeyValueStore<Object, Object>, List<KV<String, Long>>> reader = reader()
                 .map(value -> Optional.ofNullable(value)

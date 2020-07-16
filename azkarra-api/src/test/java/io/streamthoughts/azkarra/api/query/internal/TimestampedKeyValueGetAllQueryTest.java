@@ -42,11 +42,11 @@ public class TimestampedKeyValueGetAllQueryTest {
     @Test
     public void shouldGetAll() {
         TimestampedKeyValueGetAllQuery<String, String> query = new TimestampedKeyValueGetAllQuery<>(STORE_NAME);
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.all()).thenReturn(new InMemoryKeyValueIterator<>("key", ValueAndTimestamp.make("value", 1L)));
-        when(mkContainer.getLocalTimestampedKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(mkContainer.localTimestampedKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<String, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());

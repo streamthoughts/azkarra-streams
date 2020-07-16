@@ -23,7 +23,6 @@ import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,11 +43,11 @@ public class KeyValueGetRangeQueryTest {
         KeyValueGetRangeQuery<String, String> query = new KeyValueGetRangeQuery<>(STORE_NAME,
                 "keyFrom",
                 "keyTo");
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.range("keyFrom", "keyTo")).thenReturn(new InMemoryKeyValueIterator<>("keyFrom", "value"));
-        when(mkContainer.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(mkContainer.localKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<String, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());

@@ -24,7 +24,6 @@ import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.State;
-import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DescribeClusterOptions;
@@ -65,7 +64,7 @@ public class KafkaBrokerReadyInterceptor implements StreamsLifecycleInterceptor,
         int numBrokerAvailable = 0;
         try {
             LOG.info("Checking for Kafka to be ready. Expected broker(s): {}", config.getMinAvailableBrokers());
-            final var container = ((InternalStreamsLifecycleContext) context).container();
+            final var container = context.container();
             final var adminClient = container.getAdminClient();
 
             final var start = Time.SYSTEM.milliseconds();

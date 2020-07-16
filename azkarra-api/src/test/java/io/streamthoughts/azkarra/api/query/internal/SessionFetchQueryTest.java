@@ -46,11 +46,11 @@ public class SessionFetchQueryTest {
         SessionFetchQuery<String, String> query = new SessionFetchQuery<>(
                 STORE_NAME, KEY,
                 Serdes.String().serializer());
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         ReadOnlySessionStore store = mock(ReadOnlySessionStore.class);
         when(store.fetch(KEY)).thenReturn(new InMemoryKeyValueIterator<>(new Windowed<>("key", null), "value"));
-        when(mkContainer.getLocalSessionStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(mkContainer.localSessionStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<Windowed<String>, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());

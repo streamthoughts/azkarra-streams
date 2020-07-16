@@ -73,7 +73,7 @@ public class WindowFetchQuery<K, V> extends KeyedLocalStoreQuery<K, K, V> {
     @Override
     public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
-        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.getLocalWindowStore(storeName());
+        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.localWindowStore(storeName());
 
         final Reader<ReadOnlyWindowStore<K, V>, List<KV<K, V>>> reader =
             reader(key(), time).map(value -> Optional.ofNullable(value)

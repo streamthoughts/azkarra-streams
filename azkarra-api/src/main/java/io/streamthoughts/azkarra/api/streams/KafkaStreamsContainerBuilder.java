@@ -107,7 +107,7 @@ public class KafkaStreamsContainerBuilder {
         }
 
         final var delegatingKafkaStreamsFactory = new DelegatingKafkaStreamsFactory(kafkaStreamsFactory);
-        final var container = new KafkaStreamsContainer(
+        final var container = new DefaultKafkaStreamsContainer(
             enrichedStreamsConfig,
             topologyDefinition,
             delegatingKafkaStreamsFactory,
@@ -162,7 +162,7 @@ public class KafkaStreamsContainerBuilder {
     private class DelegatingKafkaStreamsFactory implements KafkaStreamsFactory {
 
         private final KafkaStreamsFactory factory;
-        private KafkaStreamsContainer container;
+        private DefaultKafkaStreamsContainer container;
 
         /**
          * Creates a new {@link DelegatingKafkaStreamsFactory} instance.
@@ -173,7 +173,7 @@ public class KafkaStreamsContainerBuilder {
             this.factory = Objects.requireNonNull(factory, "factory cannot be null");
         }
 
-        void setKafkaStreamsContainer(final KafkaStreamsContainer container) {
+        void setKafkaStreamsContainer(final DefaultKafkaStreamsContainer container) {
             this.container = container;
         }
 

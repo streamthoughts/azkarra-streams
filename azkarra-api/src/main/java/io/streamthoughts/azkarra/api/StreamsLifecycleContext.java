@@ -21,8 +21,8 @@ package io.streamthoughts.azkarra.api;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.State;
+import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.util.Version;
-import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.TopologyDescription;
 
 
@@ -32,42 +32,46 @@ import org.apache.kafka.streams.TopologyDescription;
 public interface StreamsLifecycleContext {
 
     /**
-     * Gets {@code application.id} of the current streams instance.
-     *
-     * @return  return {@code application.id} of the current streams instance.
+     * @see KafkaStreamsContainer#applicationId()
      */
-    String applicationId();
+    default String applicationId() {
+        return container().applicationId();
+    }
 
     /**
-     * Gets the {@link TopologyDescription} of the current streams instance.
-     *
-     * @return  the {@link TopologyDescription} instance; cannot be {@code null}.
+     * @see KafkaStreamsContainer#topologyDescription()
      */
-    TopologyDescription topologyDescription();
+    default TopologyDescription topologyDescription() {
+        return container().topologyDescription();
+    }
 
     /**
-     * @return  the user-specified name for the streams.
+     * @see TopologyMetadata#name()
      */
-    String topologyName();
+    default String topologyName() {
+        return container().topologyMetadata().name();
+    }
 
     /**
-     * @return  the version of the streams topology.
+     * @see TopologyMetadata#version()
      */
-    Version topologyVersion();
+    default Version topologyVersion() {
+        return Version.parse(container().topologyMetadata().version());
+    }
 
     /**
-     * Gets the configuration of the current streams instance.
-     *
-     * @return  the {@link Conf} instance; cannot be {@code null}.
+     * @see KafkaStreamsContainer#streamsConfig()
      */
-    Conf streamsConfig();
+    default Conf streamsConfig() {
+        return container().streamsConfig();
+    }
 
     /**
-     * Gets the state value of the current streams instance.
-     *
-     * @return  the {@link State}; cannot be {@code null}.
+     * @see KafkaStreamsContainer#state()
      */
-    State streamsState();
+    default State streamsState() {
+        return container().state().value();
+    }
 
     /**
      * Sets the state of the current streams instance.
@@ -77,10 +81,7 @@ public interface StreamsLifecycleContext {
     void setState(final State state);
 
     /**
-     * Register a watcher to be notified of {@link KafkaStreams.State} change event.
-     *
-     * @param watcher   the {@link KafkaStreamsContainer.StateChangeWatcher} to be registered.
+     * @return the {@link KafkaStreamsContainer}; cannot be {@code null}.
      */
-    void addStateChangeWatcher(final KafkaStreamsContainer.StateChangeWatcher watcher);
-
+    KafkaStreamsContainer container();
 }

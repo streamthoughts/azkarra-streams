@@ -198,8 +198,8 @@ public class AutoCreateTopicsInterceptorTest {
             }
 
             @Override
-            public void addStateChangeWatcher(KafkaStreamsContainer.StateChangeWatcher watcher) {
-
+            public KafkaStreamsContainer container() {
+                return null;
             }
         };
     }

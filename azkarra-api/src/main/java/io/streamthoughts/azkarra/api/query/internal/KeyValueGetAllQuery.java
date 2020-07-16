@@ -66,7 +66,7 @@ public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
     @Override
     public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
-        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.getLocalKeyValueStore(storeName);
+        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.localKeyValueStore(storeName);
 
         final Reader<ReadOnlyKeyValueStore<K, V>, List<KV<K, V>>> reader = reader()
             .map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));

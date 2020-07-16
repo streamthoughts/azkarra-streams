@@ -44,7 +44,10 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.matches;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DistributedQueryTest {
 
@@ -62,7 +65,8 @@ public class DistributedQueryTest {
     public void setUp() {
         client = mock(RemoteQueryClient.class);
         streams = mock(KafkaStreamsContainer.class);
-        when(streams.getDefaultKeySerde())
+        when(streams.isRunning()).thenReturn(true);
+        when(streams.defaultKeySerde())
             .thenReturn(Optional.empty());
 
         when(client.query(any(), any(), any()))
@@ -84,12 +88,12 @@ public class DistributedQueryTest {
         when(streams.getLocalServerInfo())
             .thenReturn(Optional.of(localServer));
 
-        when(streams.getMetadataForStoreAndKey(any(), any(), any()))
+        when(streams.findMetadataForStoreAndKey(any(), any(), any()))
             .thenReturn(Optional.of(localServer));
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn(42L);
-        when(streams.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(streams.localKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);
@@ -110,7 +114,7 @@ public class DistributedQueryTest {
         when(streams.getLocalServerInfo())
             .thenReturn(Optional.of(newServerInfo("local", true)));
 
-        when(streams.getMetadataForStoreAndKey(any(), any(), any()))
+        when(streams.findMetadataForStoreAndKey(any(), any(), any()))
             .thenReturn(Optional.of(newServerInfo("remote", false)));
 
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
@@ -135,7 +139,7 @@ public class DistributedQueryTest {
         when(streams.getLocalServerInfo())
             .thenReturn(Optional.of(newServerInfo("local", true)));
 
-        when(streams.getAllMetadataForStore(any()))
+        when(streams.allMetadataForStore(any()))
             .thenReturn(Arrays.asList(
                 newServerInfo("local", true),
                 newServerInfo("remote", false))
@@ -143,7 +147,7 @@ public class DistributedQueryTest {
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.all()).thenReturn(new InMemoryKeyValueIterator<>("key", 42L));
-        when(streams.getLocalKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(streams.localKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);

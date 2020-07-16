@@ -42,11 +42,11 @@ public class TimestampedKeyValueGetQueryTest {
     @Test
     public void shouldGetGivenKey() {
         TimestampedKeyValueGetQuery<String, String> query = new TimestampedKeyValueGetQuery<>(STORE_NAME, "key", Serdes.String().serializer());
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn(ValueAndTimestamp.make("value", 1L));
-        when(mkContainer.getLocalTimestampedKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(mkContainer.localTimestampedKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<String, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());

@@ -95,7 +95,7 @@ public class DistributedQuery<K, V> {
         long now = Time.SYSTEM.milliseconds();
 
         // Quickly check if streams instance is still running
-        if (streams.isNotRunning()) {
+        if (!streams.isRunning()) {
             throw new InvalidStreamsStateException(
                 "streams instance for id '" + streams.applicationId() +
                         "' is not running (" + streams.state().value() + ")"
@@ -116,7 +116,7 @@ public class DistributedQuery<K, V> {
 
         final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results = new LinkedList<>();
 
-        Collection<StreamsServerInfo> servers = streams.getAllMetadataForStore(query.storeName());
+        Collection<StreamsServerInfo> servers = streams.allMetadataForStore(query.storeName());
         if (servers.isEmpty()) {
             String error = "no metadata available for store '" + query.storeName() + "'";
             LOG.warn(error);
@@ -158,7 +158,7 @@ public class DistributedQuery<K, V> {
         } else {
             // Let's try to get the default configured key serializer, fallback to StringSerializer otherwise.
             @SuppressWarnings("unchecked")
-            final Serde<K> serde = (Serde<K>) streams.getDefaultKeySerde().orElse(Serdes.String());
+            final Serde<K> serde = (Serde<K>) streams.defaultKeySerde().orElse(Serdes.String());
             keySerializer = serde.serializer();
         }
 
@@ -198,7 +198,7 @@ public class DistributedQuery<K, V> {
                                                         final Queried options) throws AzkarraException {
         final String serverName = streams.applicationServer();
 
-        final Optional<StreamsServerInfo> info = streams.getMetadataForStoreAndKey(
+        final Optional<StreamsServerInfo> info = streams.findMetadataForStoreAndKey(
             query.storeName(),
             query.key(),
             keySerializer

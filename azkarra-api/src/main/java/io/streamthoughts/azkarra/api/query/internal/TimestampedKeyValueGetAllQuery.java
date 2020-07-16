@@ -68,7 +68,7 @@ public class TimestampedKeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, 
     public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>> accessor =
-                container.getLocalTimestampedKeyValueStore(storeName);
+                container.localTimestampedKeyValueStore(storeName);
 
         final Reader<ReadOnlyKeyValueStore<K, ValueAndTimestamp<V>>, List<KV<K, V>>> reader =
             reader().map(iterator -> LocalStoreQuery.toKeyValueAndTimestampListAndClose(iterator, limit));

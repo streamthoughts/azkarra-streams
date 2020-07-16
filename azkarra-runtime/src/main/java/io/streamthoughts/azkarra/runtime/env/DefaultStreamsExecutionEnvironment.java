@@ -33,6 +33,7 @@ import io.streamthoughts.azkarra.api.events.EventStream;
 import io.streamthoughts.azkarra.api.events.EventStreamProvider;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
+import io.streamthoughts.azkarra.api.streams.DefaultKafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
@@ -352,7 +353,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
 
         var threadExceptionHandler = supply(streamThreadExceptionHandler, topologyConfig);
 
-        var kafkaStreamsContainer = KafkaStreamsContainer.newBuilder()
+        var kafkaStreamsContainer = DefaultKafkaStreamsContainer.newBuilder()
             .withStateListeners(stateListeners)
             .withRestoreListeners(restoreListeners)
             .withStreamThreadExceptionHandlers(List.of(threadExceptionHandler))

@@ -32,7 +32,6 @@ import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
-import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifecycleContext;
 import io.streamthoughts.azkarra.metrics.AzkarraMetricsConfig;
 import io.streamthoughts.azkarra.metrics.annotations.ConditionalOnMetricsEnable;
 import org.slf4j.Logger;
@@ -73,7 +72,8 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
                         final StreamsLifecycleChain chain) {
         LOG.info("Starting the MeterKafkaStreamsInterceptor for application = {}.", context.applicationId());
         if (isEnable) {
-            context.addStateChangeWatcher(new KafkaStreamsContainer.StateChangeWatcher() {
+            final var streamsContainer = context.container();
+            streamsContainer.addStateChangeWatcher(new KafkaStreamsContainer.StateChangeWatcher() {
                 @Override
                 public boolean accept(final State newState) {
                     return newState == State.Standards.RUNNING;
@@ -82,7 +82,7 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
                 @Override
                 public void onChange(final StateChangeEvent event) {
                     final List<Tag> tags = List.of(Tag.of(TAG_APPLICATION_ID, context.applicationId()));
-                    final var kafkaStreams = ((InternalStreamsLifecycleContext) context).container().getKafkaStreams();
+                    final var kafkaStreams =  streamsContainer.kafkaStreams();
                     MeterRegistry registry = getComponent(MeterRegistry.class, Qualifiers.byPrimary());
                     metrics = new KafkaStreamsMetrics(kafkaStreams, tags);
                     metrics.bindTo(registry);

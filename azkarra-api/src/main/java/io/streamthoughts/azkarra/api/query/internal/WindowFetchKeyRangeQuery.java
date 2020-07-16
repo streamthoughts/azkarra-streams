@@ -84,7 +84,7 @@ public class WindowFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed<
     @Override
     public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
-        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.getLocalWindowStore(store);
+        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.localWindowStore(store);
 
         final Reader<ReadOnlyWindowStore<K, V>, List<KV<Windowed<K>, V>>> reader =
             reader(keyFrom, keyTo, timeFrom, timeTo)

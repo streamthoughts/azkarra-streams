@@ -75,7 +75,7 @@ public class TimestampedWindowFetchQuery<K, V> extends KeyedLocalStoreQuery<K, K
     public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> accessor =
-                container.getLocalTimestampedWindowStore(storeName());
+                container.localTimestampedWindowStore(storeName());
 
         final Reader<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>, List<KV<K, V>>> reader =
             reader(key(), time).map(value -> Optional.ofNullable(value)

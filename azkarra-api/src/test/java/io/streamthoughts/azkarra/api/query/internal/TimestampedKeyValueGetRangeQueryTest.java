@@ -23,7 +23,6 @@ import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ValueAndTimestamp;
 import org.junit.jupiter.api.Assertions;
@@ -45,13 +44,13 @@ public class TimestampedKeyValueGetRangeQueryTest {
         TimestampedKeyValueGetRangeQuery<String, String> query = new TimestampedKeyValueGetRangeQuery<>(STORE_NAME,
                 "keyFrom",
                 "keyTo");
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.range("keyFrom", "keyTo")).thenReturn(
             new InMemoryKeyValueIterator<>("keyFrom", ValueAndTimestamp.make("value", 1L))
         );
-        when(mkContainer.getLocalTimestampedKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(mkContainer.localTimestampedKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<String, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());

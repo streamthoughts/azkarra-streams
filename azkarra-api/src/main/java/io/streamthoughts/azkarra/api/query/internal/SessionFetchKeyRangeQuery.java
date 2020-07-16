@@ -77,7 +77,7 @@ public class SessionFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed
     @Override
     public Try<List<KV<Windowed<K>, V>>>  execute(final KafkaStreamsContainer container, final long limit) {
 
-        final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = container.getLocalSessionStore(store);
+        final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = container.localSessionStore(store);
 
         final Reader<ReadOnlySessionStore<K, V>, List<KV<Windowed<K>, V>>> reader =
             reader(keyFrom, keyTo)

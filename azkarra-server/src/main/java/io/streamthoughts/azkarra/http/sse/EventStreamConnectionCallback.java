@@ -67,7 +67,7 @@ public class EventStreamConnectionCallback implements ServerSentEventConnectionC
 
         try {
             final KafkaStreamsContainer container = service.getStreamsById(applicationId);
-            final EventStreamPublisher publisher = container.getEventStreamPublisher(eventChannel);
+            final EventStreamPublisher publisher = container.eventStreamPublisherForType(eventChannel);
             if (publisher == null) {
                 connection.shutdown();
                 return;

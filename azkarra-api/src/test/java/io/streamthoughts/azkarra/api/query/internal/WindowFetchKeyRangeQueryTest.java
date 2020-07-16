@@ -47,15 +47,14 @@ public class WindowFetchKeyRangeQueryTest {
     public void shouldFetchKeyRange() {
         WindowFetchKeyRangeQuery<String, String> query = new WindowFetchKeyRangeQuery<>(
             STORE_NAME, KEY_FROM, KEY_TO, Instant.MIN, Instant.MAX);
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
-
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         Windowed<String> windowed = new Windowed<>(KEY_FROM, new TimeWindow(0L, 1L));
         ReadOnlyWindowStore store = mock(ReadOnlyWindowStore.class);
         when(store.fetch(KEY_FROM, KEY_TO, Instant.MIN, Instant.MAX)).thenReturn(
                 new InMemoryKeyValueIterator<>(windowed, "value")
         );
-        when(mkContainer.getLocalWindowStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(mkContainer.localWindowStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<Windowed<String>, String>>> result = query.execute(mkContainer);
         Assertions.assertEquals(1, result.get().size());

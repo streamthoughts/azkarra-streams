@@ -45,11 +45,11 @@ public class TimestampedWindowFetchQueryTest {
     public void shouldFetchGivenKeyAndTime() {
         TimestampedWindowFetchQuery<String, String> query = new TimestampedWindowFetchQuery<>(
                 STORE_NAME, KEY, Serdes.String().serializer(), TIME);
-        KafkaStreamsContainer mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
 
         ReadOnlyWindowStore store = mock(ReadOnlyWindowStore.class);
         when(store.fetch(KEY, TIME)).thenReturn(ValueAndTimestamp.make("value", 1L));
-        when(mkContainer.getLocalTimestampedWindowStore(matches(STORE_NAME)))
+        when(mkContainer.localTimestampedWindowStore(matches(STORE_NAME)))
                 .thenReturn(new LocalStoreAccessor<>(() -> store));
 
         Try<List<KV<String, String>>> result = query.execute(mkContainer);

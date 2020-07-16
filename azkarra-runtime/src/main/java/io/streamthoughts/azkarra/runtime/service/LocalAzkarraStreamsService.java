@@ -253,7 +253,7 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
     @Override
     public Set<StreamsServerInfo> getStreamsInstancesById(final String applicationId) {
         final KafkaStreamsContainer container = getStreamsById(applicationId);
-        return container.getAllMetadata();
+        return container.allMetadata();
     }
 
     /**
@@ -334,7 +334,7 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
     }
 
     private void checkIsRunning(final KafkaStreamsContainer streams) {
-        if (streams.isNotRunning()) {
+        if (!streams.isRunning()) {
             throw new InvalidStreamsStateException(
                 "streams instance for id '" + streams.applicationId() +
                 "' is not running (" + streams.state().value() + ")"
