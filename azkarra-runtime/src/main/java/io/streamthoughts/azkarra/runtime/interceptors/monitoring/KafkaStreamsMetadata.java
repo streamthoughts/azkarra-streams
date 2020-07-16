@@ -18,19 +18,23 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors.monitoring;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
+import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.processor.ThreadMetadata;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 /**
  * Represents the runtime state of a single {@link KafkaStreams} instance.
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class KafkaStreamsMetadata {
 
     private final TimestampedValue<State> state;
@@ -38,6 +42,8 @@ public class KafkaStreamsMetadata {
     private final Set<ThreadMetadata> threads;
 
     private final ConsumerGroupOffsets offsets;
+
+    private final List<LocalStorePartitionLags> stores;
 
     /**
      * Creates a new {@link KafkaStreamsMetadata} instance.
@@ -47,11 +53,13 @@ public class KafkaStreamsMetadata {
      * @param offsets   the {@link ConsumerGroupOffsets} of the {@link KafkaStreams instance.
      */
     public KafkaStreamsMetadata(final TimestampedValue<State> state,
-                         final Set<ThreadMetadata> threads,
-                         final ConsumerGroupOffsets offsets) {
+                                final Set<ThreadMetadata> threads,
+                                final ConsumerGroupOffsets offsets,
+                                final List<LocalStorePartitionLags> stores) {
         this.state = Objects.requireNonNull(state, "state cannot be null");
         this.threads = Objects.requireNonNull(threads, "threads cannot be null");
         this.offsets = Objects.requireNonNull(offsets, "offsets cannot be null");
+        this.stores = stores;
     }
 
     @JsonProperty("state")
@@ -74,6 +82,11 @@ public class KafkaStreamsMetadata {
         return offsets;
     }
 
+    @JsonProperty("stores")
+    public List<LocalStorePartitionLags> stores() {
+        return stores;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -81,20 +94,22 @@ public class KafkaStreamsMetadata {
         KafkaStreamsMetadata that = (KafkaStreamsMetadata) o;
         return  Objects.equals(state, that.state) &&
                 Objects.equals(threads, that.threads) &&
-                Objects.equals(offsets, that.offsets);
+                Objects.equals(offsets, that.offsets) &&
+                Objects.equals(stores, that.stores) ;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(state, threads, offsets);
+        return Objects.hash(state, threads, offsets, stores);
     }
 
     @Override
     public String toString() {
         return "KafkaStreamsMetadata{" +
                 "state=" + state +
-                ", streamThreads=" + threads +
+                ", threads=" + threads +
                 ", offsets=" + offsets +
+                ", stores=" + stores +
                 '}';
     }
 }

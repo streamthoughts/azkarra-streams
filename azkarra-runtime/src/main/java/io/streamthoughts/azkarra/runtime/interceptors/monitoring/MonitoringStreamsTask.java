@@ -75,9 +75,7 @@ public final class MonitoringStreamsTask extends Thread {
 
     private volatile LinkedBlockingQueue<KafkaStreamsMetadata> changes;
 
-    private final String applicationId;
-
-    private final String applicationServer;
+    private final CloudEventsContext evtContext;
 
     private final String topic;
 
@@ -94,34 +92,28 @@ public final class MonitoringStreamsTask extends Thread {
     /**
      * Creates a new {@link MonitoringStreamsTask} instance.
      */
-    public MonitoringStreamsTask(final String applicationId,
-                                 final String applicationServer,
+    public MonitoringStreamsTask(final CloudEventsContext evtContext,
                                  final CloudEventsExtension customExtensions,
                                  final Reportable<? extends KafkaStreamsMetadata> reportable,
                                  final long intervalMs,
                                  final Producer<byte[], byte[]> producer,
                                  final String topic) {
-        Objects.requireNonNull(applicationId, "applicationId can't be null");
-        Objects.requireNonNull(producer, "producer can't be null");
-        Objects.requireNonNull(reportable, "reportable can't be null");
-        Objects.requireNonNull(topic, "topic can't be null");
-        this.applicationId = applicationId;
-        this.applicationServer = applicationServer;
-        this.reportable = reportable;
-        this.producer = producer;
+        this.evtContext = Objects.requireNonNull(evtContext, "evtContext can't be null");
+        this.reportable = Objects.requireNonNull(reportable, "reportable can't be null");
+        this.producer = Objects.requireNonNull(producer, "producer can't be null");
+        this.topic = Objects.requireNonNull(topic, "topic can't be null");
         this.intervalMs = intervalMs;
-        this.topic = topic;
         this.isShutdownLatch = new CountDownLatch(1);
         this.shutdown = new AtomicBoolean(false);
         this.customExtensions = customExtensions;
         changes = new LinkedBlockingQueue<>();
         azkarraExtensions = StreamsExtensionBuilder.newBuilder()
-            .withApplicationId(applicationId)
-            .withApplicationServer(applicationServer)
+            .withApplicationId(evtContext.applicationId())
+            .withApplicationServer(evtContext.applicationServer())
             .with("monitorintervalms", intervalMs)
             .build();
 
-        key = applicationId.getBytes(StandardCharsets.UTF_8);
+        key = evtContext.applicationId().getBytes(StandardCharsets.UTF_8);
     }
 
     public void offer(final KafkaStreamsMetadata state) {
@@ -139,7 +131,7 @@ public final class MonitoringStreamsTask extends Thread {
      */
     @Override
     public void run() {
-        LOG.info("Starting the StreamsStateReporterTask for application: {}", applicationId);
+        LOG.info("Starting the StreamsStateReporterTask for application: {}", evtContext.applicationId());
         try {
             while (!shutdown.get()) {
                 final long start = Time.SYSTEM.milliseconds();
@@ -158,14 +150,14 @@ public final class MonitoringStreamsTask extends Thread {
         } catch (Exception e) {
             LOG.error(
                 "Unexpected error while reporting state for streams application : {}. Stopping task.",
-                applicationId,
+                    evtContext.applicationId(),
                 e
             );
             shutdown.set(true);
         } finally {
             // Closing or flushing the producer is not the responsibility of this Task.
             isShutdownLatch.countDown();
-            LOG.info("StreamsStateReporterTask has been stopped for application: {}", applicationId);
+            LOG.info("StreamsStateReporterTask has been stopped for application: {}", evtContext.applicationId());
         }
     }
 
@@ -186,11 +178,11 @@ public final class MonitoringStreamsTask extends Thread {
     }
 
     private CloudEventsEntity<KafkaStreamsMetadata> buildEvent(final KafkaStreamsMetadata data) {
-
         final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         return CloudEventsBuilder.<KafkaStreamsMetadata>newBuilder()
-            .withId(buildCloudEventId(now))
-            .withSource("azkarra/ks/" + applicationServer)
+            .withId(evtContext.cloudEventId(now))
+            .withSource(evtContext.cloudEventSource())
+            .withSubject(evtContext.cloudEventSubject())
             .withType(DEFAULT_EVENT_TYPE)
             .withSpecVersion(CE_SPEC_VERSION)
             .withTime(now)
@@ -201,9 +193,6 @@ public final class MonitoringStreamsTask extends Thread {
             .build();
     }
 
-    private String buildCloudEventId(final ZonedDateTime now) {
-        return "appid:" + applicationId + ";appsrv:" + applicationServer + ";ts:" + now.toInstant().toEpochMilli();
-    }
 
     private void report(final CloudEventsEntity<KafkaStreamsMetadata> event) {
         final byte[] byteValue = JSON.serialize(event).getBytes(StandardCharsets.UTF_8);

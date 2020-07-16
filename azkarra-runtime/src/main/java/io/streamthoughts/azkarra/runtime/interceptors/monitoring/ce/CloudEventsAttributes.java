@@ -38,6 +38,12 @@ public class CloudEventsAttributes {
      * Identifies the context in which an event happened.
      */
     protected String source;
+
+    /**
+     * Identifies the subject of the event.
+     */
+    protected String subject;
+
     /**
      * The version of the CloudEvents specification which the event uses.
      */
@@ -66,6 +72,11 @@ public class CloudEventsAttributes {
     @JsonProperty("source")
     public String source() {
         return source;
+    }
+
+    @JsonProperty("subject")
+    public String subject() {
+        return subject;
     }
 
     @JsonProperty("specversion")
@@ -99,6 +110,7 @@ public class CloudEventsAttributes {
         CloudEventsAttributes that = (CloudEventsAttributes) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(source, that.source) &&
+                Objects.equals(subject, that.subject) &&
                 Objects.equals(specVersion, that.specVersion) &&
                 Objects.equals(type, that.type) &&
                 Objects.equals(time, that.time) &&
@@ -110,7 +122,7 @@ public class CloudEventsAttributes {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(id, source, specVersion, type, time, dataContentType);
+        return Objects.hash(id, source, subject, specVersion, type, time, dataContentType);
     }
 
     /**
@@ -121,6 +133,7 @@ public class CloudEventsAttributes {
         return "CloudEventsAttributes{" +
                 "id='" + id + '\'' +
                 ", source='" + source + '\'' +
+                ", subject='" + subject + '\'' +
                 ", specVersion='" + specVersion + '\'' +
                 ", type='" + type + '\'' +
                 ", time=" + time +

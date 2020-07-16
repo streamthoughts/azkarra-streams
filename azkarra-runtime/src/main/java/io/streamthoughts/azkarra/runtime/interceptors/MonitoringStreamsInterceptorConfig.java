@@ -57,6 +57,9 @@ public class MonitoringStreamsInterceptorConfig {
     /** {@code monitoring.streams.interceptor.advertised.server} */
     public static final String MONITORING_INTERCEPTOR_ADVERTISED_SERVER_CONFIG = "monitoring.streams.interceptor.advertised.server";
 
+    /** {@code monitoring.streams.interceptor.info.enabled.stores.lag} */
+    public static final String MONITORING_INTERCEPTOR_ENABLE_STORES_LAG_CONFIG = "monitoring.streams.interceptor.info.enabled.stores.lag";
+
     /** {@code monitoring.streams.interceptor.ce.extensions} */
     public static final String MONITORING_INTERCEPTOR_EXTENSIONS_CONFIG = "monitoring.streams.interceptor.ce.extensions";
 
@@ -132,6 +135,17 @@ public class MonitoringStreamsInterceptorConfig {
                 originals.getSubConf(MONITORING_INTERCEPTOR_EXTENSIONS_CONFIG).getConfAsMap() :
                 Collections.emptyMap();
         return () -> extensions;
+    }
+
+    /**
+     * Checks if offset lags should be monitored for all local state stores.
+     *
+     * @return {@code false} by default.
+     */
+    public boolean isStoresLagsEnabled() {
+        return originals
+            .getOptionalBoolean(MONITORING_INTERCEPTOR_ENABLE_STORES_LAG_CONFIG)
+            .orElse(false);
     }
 
     /**

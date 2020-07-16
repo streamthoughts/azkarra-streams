@@ -24,6 +24,7 @@ import io.streamthoughts.azkarra.api.events.reactive.EventStreamPublisher;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
+import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.Producer;
@@ -42,6 +43,7 @@ import org.apache.kafka.streams.state.ValueAndTimestamp;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -180,6 +182,14 @@ public interface KafkaStreamsContainer {
      * @return  the {@link KafkaStreams}.
      */
     KafkaStreams kafkaStreams();
+
+    /**
+     * Gets the partition lag for all local state store.
+     *
+     * @see KafkaStreams#allLocalStorePartitionLags().
+     * @return the list of {@link LocalStorePartitionLags}.
+     */
+    List<LocalStorePartitionLags> allLocalStorePartitionLags();
 
     Optional<StreamsServerInfo> getLocalServerInfo();
 

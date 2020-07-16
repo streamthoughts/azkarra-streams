@@ -28,10 +28,12 @@ import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
 import io.streamthoughts.azkarra.runtime.interceptors.monitoring.KafkaStreamsMetadata;
 import io.streamthoughts.azkarra.runtime.interceptors.monitoring.MonitoringStreamsTask;
+import io.streamthoughts.azkarra.runtime.interceptors.monitoring.CloudEventsContext;
 import org.apache.kafka.clients.producer.Producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -80,15 +82,16 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
         final Map<String, Object> producerConfigs = config.getProducerConfigs(clientId);
         producer = container.createNewProducer(producerConfigs);
 
-        final String advertisedServer = config.getAdvertisedServer().orElse(container.applicationServer());
+        final var advertisedServer = config.getAdvertisedServer().orElse(container.applicationServer());
+        final var eventsContext = new CloudEventsContext(container.applicationId(), advertisedServer, queryClusterId());
         taskSupplier = () -> new MonitoringStreamsTask(
-            container.applicationId(),
-            advertisedServer,
+            eventsContext,
             config.getExtensions(),
             () -> new KafkaStreamsMetadata(
                 container.state(),
                 container.threadMetadata(),
-                container.offsets()
+                container.offsets(),
+                config.isStoresLagsEnabled() ? container.allLocalStorePartitionLags() : Collections.emptyList()
             ),
             config.getIntervalMs(),
             producer,
@@ -96,6 +99,15 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
         );
         startTask(container.applicationId());
         chain.execute();
+    }
+
+    private String queryClusterId() {
+        try {
+            return container.getAdminClient().describeCluster().clusterId().get();
+        } catch (Exception e) {
+            LOG.error("Failed to describe cluster Id. Use default value 'unknown'", e);
+            return "unknown";
+        }
     }
 
     /**
@@ -149,7 +161,8 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
                 task.offer(new KafkaStreamsMetadata(
                     new TimestampedValue<>(event.timestamp(), event.newState()),
                     container.threadMetadata(),
-                    container.offsets()
+                    container.offsets(),
+                    config.isStoresLagsEnabled() ? container.allLocalStorePartitionLags() : Collections.emptyList()
                 ));
             }
             container.addStateChangeWatcher(this);

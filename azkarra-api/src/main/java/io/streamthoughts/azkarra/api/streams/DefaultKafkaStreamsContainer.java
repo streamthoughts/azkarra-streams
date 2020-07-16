@@ -35,6 +35,8 @@ import io.streamthoughts.azkarra.api.streams.consumer.ConsumerLogOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.GlobalConsumerOffsetsRegistry;
 import io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher;
 import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleChain;
+import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
+import io.streamthoughts.azkarra.api.streams.store.PartitionLogOffsetsAndLag;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
@@ -568,7 +570,7 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
         }
 
         final long waitMs = timeout.toMillis();
-        if (waitMs > 0 && !waitOnContainerState(ContainerState.STOPPED, waitMs)) {
+        if (waitMs > 0 && !waitUntilContainerIsStopped(waitMs)) {
             LOG.debug(
                 "KafkaStreamsContainer cannot transit to {} within {}ms (id={})",
                 ContainerState.STOPPED,
@@ -607,12 +609,11 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
         }
     }
 
-    private boolean waitOnContainerState(final ContainerState targetState,
-                                         final long waitMs) {
+    private boolean waitUntilContainerIsStopped(final long waitMs) {
         final long start = Time.SYSTEM.milliseconds();
         synchronized (containerStateLock) {
             long elapsedMs = 0L;
-            while (containerState != targetState) {
+            while (containerState != ContainerState.STOPPED) {
                 if (waitMs > elapsedMs) {
                     final long remainingMs = waitMs - elapsedMs;
                     try {
@@ -651,6 +652,30 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
             }
             return state;
         });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<LocalStorePartitionLags> allLocalStorePartitionLags() {
+        return kafkaStreams.allLocalStorePartitionLags()
+            .entrySet()
+            .stream()
+            .map(entry  -> {
+                var storeName = entry.getKey();
+                var positions = new ArrayList<PartitionLogOffsetsAndLag>(entry.getValue().size());
+                entry.getValue().forEach((partition, lag) -> {
+                    positions.add(new PartitionLogOffsetsAndLag(
+                        partition,
+                        lag.currentOffsetPosition(),
+                        lag.endOffsetPosition(),
+                        lag.offsetLag()
+                    ));
+                });
+                return new LocalStorePartitionLags(storeName, positions);
+            })
+            .collect(Collectors.toList());
     }
 
     /**

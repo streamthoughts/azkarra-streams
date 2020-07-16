@@ -64,6 +64,14 @@ public class CloudEventsBuilder<T> extends CloudEventsAttributes {
     }
 
     /**
+     * @see CloudEventsAttributes#source()
+     */
+    public CloudEventsBuilder<T> withSubject(final String subject) {
+        this.subject = subject;
+        return this;
+    }
+
+    /**
      * @see CloudEventsAttributes#specVersion()
      */
     public CloudEventsBuilder<T> withSpecVersion(final String specVersion) {
