@@ -16,7 +16,7 @@
     "datatables.net-bs4": "^1.10.20",
     "jquery": "^3.5.0",
     "jsoneditor": "^7.5.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "moment": "^2.24.0",
     "popper.js": "^1.16.1",
     "vue": "^2.6.11",
