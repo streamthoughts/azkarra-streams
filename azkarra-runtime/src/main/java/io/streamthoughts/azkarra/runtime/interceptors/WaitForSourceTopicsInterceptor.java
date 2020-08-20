@@ -30,10 +30,12 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.getSourceTopics;
@@ -84,9 +86,13 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
     @Override
     public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
         if (context.streamsState() == State.Standards.CREATED) {
+
+            final List<Pattern> excludePatterns = config.getExcludePatterns();
+
             final Set<String> sourceTopics = getSourceTopics(context.topologyDescription())
                 .stream()
                 .filter(Predicate.not(TopologyUtils::isInternalTopic))
+                .filter(topic -> excludePatterns.stream().noneMatch(it -> it.matcher(topic).matches()))
                 .collect(Collectors.toSet());
 
             if (!sourceTopics.isEmpty()) {

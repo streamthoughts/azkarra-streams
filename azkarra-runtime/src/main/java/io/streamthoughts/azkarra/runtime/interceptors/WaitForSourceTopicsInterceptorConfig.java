@@ -21,7 +21,11 @@ package io.streamthoughts.azkarra.runtime.interceptors;
 import io.streamthoughts.azkarra.api.config.Conf;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The configuration class for {@link WaitForSourceTopicsInterceptor}.
@@ -39,6 +43,11 @@ public class WaitForSourceTopicsInterceptorConfig {
     public static String WAIT_FOR_TOPICS_TIMEOUT_MS_CONFIG = "wait.for.topics.timeout.ms";
     public static long  WAIT_FOR_TOPICS_TIMEOUT_MS_DEFAULT = Long.MAX_VALUE;
 
+    /**
+     * {@code wait.for.topics.exclude.patterns}
+     */
+    public static String WAIT_FOR_TOPICS_EXCLUDE_PATTERNS = "wait.for.topics.exclude.patterns";
+
     private final Conf originals;
     /**
      * Creates a new {@link AutoCreateTopicsInterceptorConfig} instance.
@@ -54,5 +63,16 @@ public class WaitForSourceTopicsInterceptorConfig {
                 .getOptionalLong(WAIT_FOR_TOPICS_TIMEOUT_MS_CONFIG)
                 .orElse(WAIT_FOR_TOPICS_TIMEOUT_MS_DEFAULT);
         return Duration.ofMillis(millis);
+    }
+
+    public List<Pattern> getExcludePatterns() {
+        if (originals.hasPath(WAIT_FOR_TOPICS_EXCLUDE_PATTERNS)) {
+            return originals
+                .getStringList(WAIT_FOR_TOPICS_EXCLUDE_PATTERNS)
+                .stream()
+                .map(Pattern::compile)
+                .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
