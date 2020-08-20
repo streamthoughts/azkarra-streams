@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2019-2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.config;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -27,14 +28,14 @@ import java.util.function.Supplier;
  */
 public abstract class ConfigurableSupplier<T> implements Supplier<T>, Configurable {
 
-    private Conf configs;
+    private Conf config;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void configure(final Conf configs) {
-        this.configs = configs;
+    public void configure(final Conf configuration) {
+        this.config = Objects.requireNonNull(configuration, "configuration cannot be null");
 
     }
 
@@ -43,7 +44,12 @@ public abstract class ConfigurableSupplier<T> implements Supplier<T>, Configurab
      */
     @Override
     public T get() {
-        return get(configs);
+        verifyState();
+        return get(config);
+    }
+
+    private void verifyState() {
+        if (config == null) throw new IllegalStateException("supplier is not configured");
     }
 
     public abstract T get(final Conf configs);

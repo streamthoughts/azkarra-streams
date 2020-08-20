@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2019-2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -18,11 +18,41 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors;
 
+import io.streamthoughts.azkarra.api.config.Conf;
+
+import java.time.Duration;
+import java.util.Objects;
+
 /**
  * The configuration class for {@link WaitForSourceTopicsInterceptor}.
  */
 public class WaitForSourceTopicsInterceptorConfig {
 
+    /**
+     * {@code auto.create.topics.configs}
+     */
     public static String WAIT_FOR_TOPICS_ENABLE_CONFIG    = "enable.wait.for.topics";
 
+    /**
+     * {@code wait.for.topics.timeout.ms}
+     */
+    public static String WAIT_FOR_TOPICS_TIMEOUT_MS_CONFIG = "wait.for.topics.timeout.ms";
+    public static long  WAIT_FOR_TOPICS_TIMEOUT_MS_DEFAULT = Long.MAX_VALUE;
+
+    private final Conf originals;
+    /**
+     * Creates a new {@link AutoCreateTopicsInterceptorConfig} instance.
+     *
+     * @param originals the {@link Conf} instance.
+     */
+    public WaitForSourceTopicsInterceptorConfig(final Conf originals) {
+        this.originals = Objects.requireNonNull(originals, "originals config cannot be null");
+    }
+
+    public Duration getTimeout() {
+        final Long millis = originals
+                .getOptionalLong(WAIT_FOR_TOPICS_TIMEOUT_MS_CONFIG)
+                .orElse(WAIT_FOR_TOPICS_TIMEOUT_MS_DEFAULT);
+        return Duration.ofMillis(millis);
+    }
 }

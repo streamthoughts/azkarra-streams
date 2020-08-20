@@ -23,6 +23,7 @@ import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
@@ -206,6 +207,7 @@ public class DefaultAzkarraContextTest {
         );
 
         var captured = new InternalExecuted(executedArgumentCaptor.getValue());
+        captured.interceptors().forEach(it -> Configurable.mayConfigure(it, Conf.empty()));
         assertEquals(4, captured.interceptors().size());
         assertEquals("ClassloadingIsolationInterceptor", captured.interceptors().get(0).get().name()); // assert first
         assertEquals("WaitForSourceTopicsInterceptor", captured.interceptors().get(3).get().name()); // assert last

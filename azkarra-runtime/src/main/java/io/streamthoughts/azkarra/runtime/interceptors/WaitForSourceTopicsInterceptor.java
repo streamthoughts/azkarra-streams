@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2019-2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -21,6 +21,8 @@ package io.streamthoughts.azkarra.runtime.interceptors;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
+import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.admin.AdminClientUtils;
 import io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils;
@@ -29,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -41,11 +44,13 @@ import static io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils.g
  *
  * Kafka Streams fails if one of the source topic is missing (error: INCOMPLETE_SOURCE_TOPIC_METADATA);
  */
-public class WaitForSourceTopicsInterceptor implements StreamsLifecycleInterceptor {
+public class WaitForSourceTopicsInterceptor implements StreamsLifecycleInterceptor, Configurable {
 
     private static final Logger LOG = LoggerFactory.getLogger(WaitForSourceTopicsInterceptor.class);
 
     private final AdminClient adminClient;
+
+    private WaitForSourceTopicsInterceptorConfig config;
 
     enum InterceptorState implements State { WAITING_FOR_TOPICS }
 
@@ -69,6 +74,14 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
      * {@inheritDoc}
      */
     @Override
+    public void configure(final Conf configuration) {
+        this.config = new WaitForSourceTopicsInterceptorConfig(configuration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void onStart(final StreamsLifecycleContext context, final StreamsLifecycleChain chain) {
         if (context.streamsState() == State.Standards.CREATED) {
             final Set<String> sourceTopics = getSourceTopics(context.topologyDescription())
@@ -79,15 +92,21 @@ public class WaitForSourceTopicsInterceptor implements StreamsLifecycleIntercept
             if (!sourceTopics.isEmpty()) {
                 context.setState(InterceptorState.WAITING_FOR_TOPICS);
                 apply(context, client -> {
-                    LOG.info("Waiting for source topic(s) to be created: {}", sourceTopics);
+                    LOG.info(
+                        "Waiting for source topic(s) to be created: {} (timeout={}ms)",
+                        sourceTopics,
+                        config.getTimeout().toMillis()
+                    );
                     try {
-                        AdminClientUtils.waitForTopicToExist(client, sourceTopics);
+                        AdminClientUtils.waitForTopicToExist(client, sourceTopics, config.getTimeout());
+                        LOG.info("All source topics are created. KafkaStreams instance can be safely started");
                     } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    // ignore and attempts to start anyway;
+                        Thread.currentThread().interrupt();
+                        // ignore and attempts to start anyway;
+                    } catch (TimeoutException e) {
+                        LOG.warn(e.getMessage());
                     }
                 });
-                LOG.info("All source topics are created. KafkaStreams instance can be safely started");
             }
         }
         chain.execute();

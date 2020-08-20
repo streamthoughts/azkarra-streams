@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2019-2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.api.streams.admin;
 
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.time.SystemTime;
+import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.ListTopicsResult;
@@ -74,17 +75,38 @@ public class AdminClientUtils {
      * @throws InterruptedException while waiting for response from broker.
      */
     public static void waitForTopicToExist(final AdminClient client,
-                                           final Set<String> topics) throws InterruptedException {
+                                           final Set<String> topics) throws InterruptedException, TimeoutException {
+        waitForTopicToExist(client, topics, Duration.ofMillis(Long.MAX_VALUE));
+    }
+
+    /**
+     * Wait for the specified topics to be created on the cluster until timeout.
+     *
+     * @param client        the {@link AdminClient} instance to be used.
+     * @param topics        the list of topics name to be verified.
+     *
+     * @throws InterruptedException while waiting for response from broker.
+     */
+    public static void waitForTopicToExist(final AdminClient client,
+                                           final Set<String> topics,
+                                           final Duration timeout) throws InterruptedException, TimeoutException {
         Set<String> missingTopics = topics;
         LOG.debug("Checking for topic(s) to be created: {}", missingTopics);
-        while (true) {
+
+        long timeoutMs = timeout.toMillis();
+        long begin = Time.SYSTEM.milliseconds();
+        while ( (Time.SYSTEM.milliseconds() - begin) < timeoutMs) {
             missingTopics = checkTopicsMissing(client, missingTopics);
             if (missingTopics.isEmpty())
                 return;
 
             LOG.debug("Waiting for topic(s) to be created: {}", missingTopics);
-            SystemTime.SYSTEM.sleep(Duration.ofSeconds(1));
+            final long remaining = Math.max(0, timeoutMs - (Time.SYSTEM.milliseconds() - begin));
+            if (remaining > 0) {
+                SystemTime.SYSTEM.sleep(Duration.ofMillis(Math.min(5_000, remaining)));
+            }
         }
+        throw new TimeoutException("Cannot check if all topics exist due to timeout");
     }
 
     public static CompletableFuture<Collection<TopicListing>> listTopics(final AdminClient client) {
