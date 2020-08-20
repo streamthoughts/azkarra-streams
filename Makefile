@@ -1,6 +1,6 @@
 # Makefile used to build docker images for Azkarra
 
-AZKARRA_VERSION := $(shell mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)
+AZKARRA_VERSION := $(shell ./mvnw org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)
 GIT_COMMIT := $(shell git rev-parse --short HEAD)
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
@@ -33,7 +33,7 @@ build-images:
 	echo "GIT_BRANCH="$(GIT_BRANCH)
 	echo "==========================================\n "
 	mkdir -p ./docker-build/classes && mkdir -p ./docker-build/dependencies && mkdir -p ./docker-build/resources;
-	mvn clean package && \
+	./mvnw clean package && \
 	cp -r ${DIST_DIR}/bin ./docker-build/resources/ && \
 	cp -r ${DIST_DIR}/etc ./docker-build/resources/ && \
 	find ${DIST_DIR}/share/java/ -type f -regextype posix-egrep -not -iregex '^.*(?-worker)/(?azkarra-).*\.jar' -print0 | xargs -0 cp -t ./docker-build/dependencies && \
