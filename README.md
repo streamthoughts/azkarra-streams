@@ -7,7 +7,8 @@ Azkarra Streams is a lightweight Java framework which makes easy to develop and 
 
 _**[Kafka Streams](https://kafka.apache.org/documentation/streams/)** is a client library for building applications and microservices, where the input and output data are stored in Kafka clusters. 
 It combines the simplicity of writing and deploying standard Java and Scala applications on the client side  with the benefits of Kafka's server-side cluster technology (source: [Apache documentation](https://kafka.apache.org/documentation/streams/))._
-## Features
+
+## 🚀 Features
 
 * Create stand-alone Kafka Streams applications.
 * Easy externalization of Topology and Kafka Streams configurations (using Typesafe Config).
@@ -16,7 +17,12 @@ It combines the simplicity of writing and deploying standard Java and Scala appl
 * Provide production-ready features such as metrics, health checks, dead-letter-queues.
 * Encryption and Authentication with SSL or Basic Auth.
 
-## Quickstart 
+## 🙏 Show your support
+
+Do you think this project can help you create event-driven applications based on Kafka Streams?
+Please 🌟 this repository to support us!
+
+## 🚀 Quickstart 
 
 Azkarra is available in [Maven Central](https://mvnrepository.com/artifact/io.streamthoughts/azkarra-streams-reactor/0.7.0). You can add Azkarra Streams to the dependency of the pom.xml of your project.
 
@@ -33,13 +39,13 @@ Azkarra is available in [Maven Central](https://mvnrepository.com/artifact/io.st
 **Prerequisites for building Azkarra:**
 
 * Git
-* Maven (we recommend version 3.5.3)
+* Maven (we recommend version 3.6.3)
 * Java 11
 
 ```bash
 $ git clone https://github.com/streamthoughts/azkarra-streams.git
 $ cd azkarra-streams
-$ mvn clean package -DskipTests
+$ ./mvnw clean package -DskipTests
 ```
 
 *NOTE: Azkarra Worker is built in `./azkarra-worker/target/distribution/`*
@@ -48,7 +54,7 @@ $ mvn clean package -DskipTests
 
 If you want to read more about using **Azkarra Streams**, the documentation can be found on [www.azkarrastreams.io](https://www.azkarrastreams.io/)
 
-## Contributions
+## 💡Contributions
 
 Any feedback, bug reports and PRs are greatly appreciated!
 
@@ -67,7 +73,7 @@ Open an [issue](https://github.com/streamthoughts/azkarra-streams/issues) with a
 
 ## Licence
 
-Copyright 2019 StreamThoughts.
+Copyright 2019-2020 StreamThoughts.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
