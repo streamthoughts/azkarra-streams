@@ -53,7 +53,7 @@ public class ConditionalStreamsApplication {
             return Version.getVersion();
         }
         @Override
-        public Topology get() {
+        public Topology topology() {
             Normalize normalize = getComponent(Normalize.class);
             final StreamsBuilder builder = new StreamsBuilder();
             builder.stream("streams-plaintext-input", Consumed.with(Serdes.String(), Serdes.String()))

@@ -55,7 +55,7 @@ public abstract class OptimizedTopologyProvider implements TopologyProvider, Con
      * {@inheritDoc}
      */
     @Override
-    public Topology get() {
+    public Topology topology() {
         checkState();
         return getStreamBuilder().build(getOptimizedConfiguration().getConfAsProperties());
     }

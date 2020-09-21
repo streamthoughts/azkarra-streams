@@ -32,5 +32,5 @@ public interface Provider<T> extends Versioned {
      *
      * @return  a new instance of type {@link T}.
      */
-    T get();
+    T topology();
 }

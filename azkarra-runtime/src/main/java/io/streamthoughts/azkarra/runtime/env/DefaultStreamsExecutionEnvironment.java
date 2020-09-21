@@ -596,7 +596,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
             this.name = name;
             this.description = description;
             this.provider = provider;
-            this.topology = provider.get();
+            this.topology = provider.topology();
         }
 
         /**
@@ -637,7 +637,7 @@ public class DefaultStreamsExecutionEnvironment implements StreamsExecutionEnvir
         @Override
         public List<EventStream> getEventStreams() {
             return (provider instanceof EventStreamProvider) ?
-                ((EventStreamProvider)provider).getEventStreams() :
+                ((EventStreamProvider)provider).eventStreams() :
                 Collections.emptyList();
         }
     }

@@ -45,7 +45,7 @@ public class EventStreamSupport implements EventStreamProvider {
      * {@inheritDoc}
      */
     @Override
-    public List<EventStream> getEventStreams() {
+    public List<EventStream> eventStreams() {
         return new ArrayList<>(streams.values());
     }
 

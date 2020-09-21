@@ -56,7 +56,7 @@ public class ClassComponentAliasesGeneratorTest {
         }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             return null;
         }
     }

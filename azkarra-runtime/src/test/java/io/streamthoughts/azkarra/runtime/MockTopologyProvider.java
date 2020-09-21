@@ -37,7 +37,7 @@ public class MockTopologyProvider implements TopologyProvider {
     }
 
     @Override
-    public Topology get() {
+    public Topology topology() {
         return topology;
     }
 }

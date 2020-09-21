@@ -39,5 +39,5 @@ public interface TopologyProvider extends Provider<Topology> {
      *
      * @return  the {@link Topology} instance.
      */
-    Topology get();
+    Topology topology();
 }

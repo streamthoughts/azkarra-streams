@@ -69,7 +69,7 @@ object StreamingApp {
             return Version.getVersion()
         }
 
-        override fun get(): Topology {
+        override fun topology(): Topology {
             val builder = StreamsBuilder()
             val source: KStream<String, String> = builder.stream(topicSource)
 

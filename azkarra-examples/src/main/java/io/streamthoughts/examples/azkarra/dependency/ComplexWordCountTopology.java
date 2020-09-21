@@ -69,7 +69,7 @@ public class ComplexWordCountTopology implements TopologyProvider, Configurable 
     }
 
     @Override
-    public Topology get() {
+    public Topology topology() {
 
         final StreamsBuilder builder = new StreamsBuilder();
 

@@ -104,11 +104,11 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
          * {@inheritDoc}
          */
         @Override
-        public Topology get() {
+        public Topology topology() {
             // Classloader have to swap because the topology may be loaded from external directory.
             final ClassLoader classLoader = ClassUtils.compareAndSwapLoaders(topologyClassLoader);
             try {
-                return delegate.get();
+                return delegate.topology();
             } finally {
                 ClassUtils.compareAndSwapLoaders(classLoader);
             }
@@ -118,9 +118,9 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
          * {@inheritDoc}
          */
         @Override
-        public List<EventStream> getEventStreams() {
+        public List<EventStream> eventStreams() {
             if (delegate instanceof EventStreamProvider) {
-                return ((EventStreamProvider)delegate).getEventStreams();
+                return ((EventStreamProvider)delegate).eventStreams();
             }
             return Collections.emptyList();
         }

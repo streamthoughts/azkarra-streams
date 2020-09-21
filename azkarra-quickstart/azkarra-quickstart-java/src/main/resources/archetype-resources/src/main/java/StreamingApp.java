@@ -73,7 +73,7 @@ public class StreamingApp {
         }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             final StreamsBuilder builder = new StreamsBuilder();
 
             final KStream<String, String> source = builder.stream(topicSource);

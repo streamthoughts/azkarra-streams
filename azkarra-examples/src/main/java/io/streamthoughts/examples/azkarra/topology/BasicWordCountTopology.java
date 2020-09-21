@@ -46,7 +46,7 @@ public class BasicWordCountTopology implements TopologyProvider {
     }
 
     @Override
-    public Topology get() {
+    public Topology topology() {
 
         final StreamsBuilder builder = new StreamsBuilder();
 

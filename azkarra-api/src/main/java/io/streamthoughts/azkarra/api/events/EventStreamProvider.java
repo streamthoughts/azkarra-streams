@@ -32,6 +32,6 @@ public interface EventStreamProvider {
      *
      * @return  a list of {@link EventStream}. Must not return {@code null}.
      */
-    List<EventStream> getEventStreams();
+    List<EventStream> eventStreams();
 
 }

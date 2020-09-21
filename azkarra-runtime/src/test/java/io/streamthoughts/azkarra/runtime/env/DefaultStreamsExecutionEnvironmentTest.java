@@ -92,7 +92,7 @@ public class DefaultStreamsExecutionEnvironmentTest {
         }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             return MOCK;
         }
     }

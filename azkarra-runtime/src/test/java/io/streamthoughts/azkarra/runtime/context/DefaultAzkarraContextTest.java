@@ -221,7 +221,7 @@ public class DefaultAzkarraContextTest {
         }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             return null;
         }
     }

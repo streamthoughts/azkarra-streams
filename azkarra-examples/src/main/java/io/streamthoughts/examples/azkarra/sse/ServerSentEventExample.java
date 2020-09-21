@@ -52,7 +52,7 @@ public class ServerSentEventExample {
         }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             setDefaultEventQueueSize(10_000);
             setDefaultEventQueueLimitHandler(LimitHandlers.dropHeadOnLimitReached());
             addEventStreamsWithDefaults("word"); // register a default event-streams for type named 'word'

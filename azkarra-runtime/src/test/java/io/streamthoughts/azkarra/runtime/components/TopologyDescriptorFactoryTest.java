@@ -65,7 +65,7 @@ public class TopologyDescriptorFactoryTest {
         }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             return null;
         }
     }
