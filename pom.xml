@@ -34,12 +34,12 @@
         <module>azkarra-streams</module>
         <module>azkarra-ui</module>
         <module>azkarra-server</module>
-        <module>azkarra-archetype</module>
         <module>azkarra-commons</module>
         <module>azkarra-worker</module>
         <module>azkarra-examples</module>
         <module>azkarra-json-serializers</module>
         <module>azkarra-metrics</module>
+        <module>azkarra-quickstart</module>
     </modules>
 
     <name>Azkarra Streams</name>

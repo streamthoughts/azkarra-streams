@@ -34,6 +34,7 @@ import static io.streamthoughts.azkarra.api.util.ClassUtils.getAllSuperTypes;
 public class AnnotationResolver {
 
     private static final PackageAnnotationFilter JAVA_PACKAGES = new PackageAnnotationFilter("java", "javax");
+    private static final PackageAnnotationFilter KOTLIN_PACKAGES = new PackageAnnotationFilter("kotlin");
 
     public static boolean isAnnotationOfType(final Annotation annotation,
                                              final Class<?> type) {
@@ -56,6 +57,7 @@ public class AnnotationResolver {
             // add all declared annotations
             var declared = Arrays.stream(t.getDeclaredAnnotations())
                 .filter(Predicate.not(JAVA_PACKAGES::matches))
+                .filter(Predicate.not(KOTLIN_PACKAGES::matches))
                 .flatMap(AnnotationResolver::mayUnwrapAnnotationContainer)
                 .collect(Collectors.toList());
             annotations.addAll(declared);
@@ -103,6 +105,7 @@ public class AnnotationResolver {
         final var typeAnnotationFilter = new TypeAnnotationFilter(annotationType);
         return Arrays.stream(annotations)
             .filter(Predicate.not(JAVA_PACKAGES::matches))
+            .filter(Predicate.not(KOTLIN_PACKAGES::matches))
             .filter(Predicate.not(typeAnnotationFilter::matches))
             .flatMap(annotation -> findAllAnnotationsByType(annotation.annotationType(), annotationType).stream())
             .collect(Collectors.toList());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -39,11 +39,12 @@ import java.util.Arrays;
 /**
  * Skeleton for a Azkarra Streams Application
  *
- * <p>Check the tutorials and examples on the<a href="https://streamthoughts.github.io/azkarra-streams/">
- * Azkarra Streams Github Project</a>.</p>
+ * <p>For a tutorial how to write a Azkarra Streams application, check the
+ * tutorials and examples on the <a href="https://www.azkarrastreams.io/docs/">Azkarra Website</a>.
+ * </p>
  */
 @AzkarraStreamsApplication
-public class SimpleStreamsApp {
+public class StreamingApp {
 
     public static void main(final String[] args) {
         AzkarraApplication.run(SimpleStreamsApp.class, args);

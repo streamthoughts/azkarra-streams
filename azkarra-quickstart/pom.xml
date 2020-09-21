@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
- Copyright 2019 StreamThoughts.
+ Copyright 2019-2020 StreamThoughts.
 
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements. See the NOTICE file distributed with
@@ -24,27 +25,19 @@
         <groupId>io.streamthoughts</groupId>
         <version>0.8.0-SNAPSHOT</version>
     </parent>
-
-    <name>Azkarra Quickstart Java</name>
-    <artifactId>azkarra-quickstart-java</artifactId>
-
-    <packaging>maven-archetype</packaging>
     <modelVersion>4.0.0</modelVersion>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
+    <artifactId>azkarra-quickstart</artifactId>
+    <packaging>pom</packaging>
 
     <properties>
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <description>Default Maven Archetype for creating a simple Azkarra Streams project</description>
+    <modules>
+        <module>azkarra-quickstart-java</module>
+        <module>azkarra-quickstart-kotlin</module>
+    </modules>
 
     <build>
         <plugins>

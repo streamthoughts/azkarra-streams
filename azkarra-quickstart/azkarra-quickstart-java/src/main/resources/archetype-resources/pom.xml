@@ -28,18 +28,6 @@
     <name>azkarra-quickstart-java</name>
     <description>Simple Azkarra Streams project</description>
 
-    <organization>
-        <name>streamthoughts</name>
-        <url>http://streamthoughts.io</url>
-    </organization>
-
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
     <properties>
         <azkarra.streams.version>@project.version@</azkarra.streams.version>
         <kafka.streams.version>@kafka.streams.version@</kafka.streams.version>
