@@ -201,14 +201,7 @@ public class AutoCreateTopicsInterceptor
 
     private void apply(final BiConsumer<AdminClient, StreamsLifecycleContext> consumer,
                        final StreamsLifecycleContext context) {
-        // use a one-shot AdminClient if no one is provided.
-        if (adminClient == null) {
-            try (final AdminClient client = AdminClientUtils.newAdminClient(context.streamsConfig())) {
-                consumer.accept(client, context);
-            }
-        } else {
-            consumer.accept(adminClient, context);
-        }
+        consumer.accept(adminClient != null ? adminClient : context.container().getAdminClient(), context);
     }
 
     private void listTopics(final AdminClient client, final StreamsLifecycleContext context) {
