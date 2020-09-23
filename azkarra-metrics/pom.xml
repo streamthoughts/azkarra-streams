@@ -31,7 +31,7 @@
 
     <properties>
         <checkstyle.config.location>${project.parent.basedir}</checkstyle.config.location>
-        <micrometer.version>1.5.0</micrometer.version>
+        <micrometer.version>1.5.5</micrometer.version>
     </properties>
 
     <name>Azkarra Metrics</name>
