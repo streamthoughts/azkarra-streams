@@ -21,8 +21,6 @@ package io.streamthoughts.azkarra.api.server;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 
-import java.io.Closeable;
-
 /**
  * A pluggable interface to allow registration of new JAX-RS resources like REST endpoints.
  * The implementations are discovered using the standard Java {@link java.util.ServiceLoader} mechanism.
@@ -30,7 +28,7 @@ import java.io.Closeable;
  * Hence, the fully qualified name of the extension classes that implement the {@link AzkarraRestExtension}
  * interface must be add to a {@code META-INF/services/io.streamthoughts.azkarra.api.server.AzkarraRestExtension} file.
  */
-public interface AzkarraRestExtension extends Configurable, Closeable {
+public interface AzkarraRestExtension extends Configurable, AutoCloseable {
 
     /**
      * Configures this instance with the specified {@link Conf}.
@@ -48,4 +46,9 @@ public interface AzkarraRestExtension extends Configurable, Closeable {
      * @param restContext   the {@link AzkarraRestExtensionContext} instance.
      */
     void register(final AzkarraRestExtensionContext restContext);
+
+    @Override
+    default void close() throws Exception {
+
+    }
 }

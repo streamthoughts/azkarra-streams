@@ -90,9 +90,5 @@ public class UndertowEmbeddedWithServletContainerIT {
             restContext.configurable().register(TestResource.class);
         }
 
-        @Override
-        public void close() throws IOException {
-
-        }
     }
 }

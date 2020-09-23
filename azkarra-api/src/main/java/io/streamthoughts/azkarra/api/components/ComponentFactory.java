@@ -25,6 +25,12 @@ import io.streamthoughts.azkarra.api.config.Configurable;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface ComponentFactory extends
         ComponentRegistry, ComponentDescriptorRegistry, ConditionalDescriptorRegistry, Closeable {
@@ -229,4 +235,32 @@ public interface ComponentFactory extends
 
     @Override
     void close() throws IOException;
+
+    /**
+     * @return the set of known {@link ClassLoader}.
+     */
+    Set<ClassLoader> getAllClassLoaders();
+
+    /**
+     * Loads all services for the given type using the standard Java {@link java.util.ServiceLoader} mechanism.
+     *
+     * @param type  the service Class type.
+     * @param <T>   the service type.
+     * @return      the services implementing the given type.
+     */
+    default <T> List<T> loadAllServices(final Class<T> type) {
+        final List<T> loaded = new LinkedList<>();
+        final Set<Class<? extends T>> types = new HashSet<>();
+        for (ClassLoader cl : getAllClassLoaders()) {
+            ServiceLoader<T> serviceLoader = ServiceLoader.load(type, cl);
+            var providers = serviceLoader.stream().collect(Collectors.toList());
+            for (ServiceLoader.Provider<T> provider : providers) {
+                if (!types.contains(provider.type())) {
+                    types.add(provider.type());
+                    loaded.add(provider.get());
+                }
+            }
+        }
+        return loaded;
+    }
 }

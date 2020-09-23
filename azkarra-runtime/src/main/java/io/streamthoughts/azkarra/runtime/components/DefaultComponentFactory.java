@@ -44,6 +44,7 @@ import java.io.Closeable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,8 @@ public class DefaultComponentFactory implements ComponentFactory {
     private ComponentAliasesGenerator componentAliasesGenerator;
 
     private ComponentDescriptorFactory descriptorFactory;
+
+    private final Set<ClassLoader> classLoaders = new HashSet<>();
 
     private volatile boolean initialized = false;
 
@@ -309,6 +312,14 @@ public class DefaultComponentFactory implements ComponentFactory {
      * {@inheritDoc}
      */
     @Override
+    public Set<ClassLoader> getAllClassLoaders() {
+        return classLoaders;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <T> Collection<ComponentDescriptor<T>> findAllDescriptorsByAlias(final String alias) {
         return findAllDescriptorsByAlias(alias, TRUE_CONDITIONAL_CONTEXT);
     }
@@ -505,6 +516,7 @@ public class DefaultComponentFactory implements ComponentFactory {
             throw new ConflictingComponentDefinitionException(
                 "Failed to resister ComponentDescriptor, component already exists for key: " + key);
         }
+        classLoaders.add(descriptor.classLoader());
     }
 
     public DefaultComponentFactory setComponentAliasesGenerator(final ComponentAliasesGenerator aliasesGenerator) {

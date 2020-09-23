@@ -24,8 +24,10 @@ import io.streamthoughts.azkarra.api.config.Conf;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -119,7 +121,17 @@ public class DelegatingComponentFactory implements ComponentFactory {
 
     @Override
     public void close() throws IOException {
-        this.factory.close();
+        factory.close();
+    }
+
+    @Override
+    public Set<ClassLoader> getAllClassLoaders() {
+        return factory.getAllClassLoaders();
+    }
+
+    @Override
+    public <T> List<T> loadAllServices(final Class<T> type) {
+        return factory.loadAllServices(type);
     }
 
     @Override

@@ -257,14 +257,16 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private void registerRestExtensions(final ResourceConfig resourceConfig) {
         LOG.info("Initializing JAX-RS resources");
-        InternalRestExtensionContext extensionContext = new InternalRestExtensionContext(resourceConfig, context);
-        ServiceLoader<AzkarraRestExtension> extensions = ServiceLoader.load(AzkarraRestExtension.class);
-        for (AzkarraRestExtension extension : extensions) {
-            LOG.info("Registering AzkarraRestExtension: {}", extension.getClass().getName());
-            registeredExtensions.add(extension);
-            extension.configure(config);
-            extension.register(extensionContext);
-        }
+        var extensionContext = new InternalRestExtensionContext(resourceConfig, context);
+        LOG.debug("Loading extensions using ClassLoaders: {}", context.getComponentFactory().getAllClassLoaders());
+        context.getComponentFactory()
+            .loadAllServices(AzkarraRestExtension.class)
+            .forEach(extension -> {
+                LOG.info("Registering AzkarraRestExtension: {}", extension.getClass().getName());
+                registeredExtensions.add(extension);
+                extension.configure(config);
+                extension.register(extensionContext);
+            });
     }
 
     @VisibleForTesting
