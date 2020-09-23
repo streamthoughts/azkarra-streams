@@ -18,8 +18,8 @@
  */
 package io.streamthoughts.azkarra.api.query;
 
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
+import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -32,13 +32,13 @@ public interface RemoteQueryClient {
     /**
      * Executes a query to the specified server.
      *
-     * @param server     the {@link StreamsServerInfo} to query.
+     * @param server     the {@link ServerHostInfo} to query.
      * @param query      the {@link QueryInfo} to send.
      * @param options    the {@link Queried} options.
      *
      * @return  a {@link CompletableFuture} of {@link QueryResult}.
      */
-    <K, V> CompletableFuture<QueryResult<K, V>> query(final StreamsServerInfo server,
+    <K, V> CompletableFuture<QueryResult<K, V>> query(final ServerHostInfo server,
                                                       final QueryInfo query,
                                                       final Queried options);
 }

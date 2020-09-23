@@ -34,7 +34,8 @@ import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.api.streams.ServerMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.api.util.FutureCollectors;
 import org.apache.kafka.common.serialization.Serde;
@@ -44,12 +45,10 @@ import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
@@ -116,7 +115,12 @@ public class DistributedQuery<K, V> {
 
         final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results = new LinkedList<>();
 
-        Collection<StreamsServerInfo> servers = streams.allMetadataForStore(query.storeName());
+        var servers = streams
+            .allMetadataForStore(query.storeName())
+            .stream()
+            .map(ServerMetadata::hostInfo)
+            .collect(Collectors.toList());
+
         if (servers.isEmpty()) {
             String error = "no metadata available for store '" + query.storeName() + "'";
             LOG.warn(error);
@@ -130,14 +134,14 @@ public class DistributedQuery<K, V> {
                 streams.applicationServer(),
                 options.withRemoteAccessAllowed(false));
             remotes = servers.stream()
-                .filter(Predicate.not(StreamsServerInfo::isLocal))
+                .filter(Predicate.not(ServerHostInfo::isLocal))
                 .map(server -> context.executeAsyncQueryRemotely(server, false))
                 .collect(Collectors.toList());
         }
         //Execute the query locally only if the local instance own the queried store.
         LocalQueryContext localQueryContext = new LocalQueryContext(streams, options);
         servers.stream()
-            .filter(StreamsServerInfo::isLocal)
+            .filter(ServerHostInfo::isLocal)
             .findFirst()
             .map(target -> localQueryContext.execute(target, false).getResult().unwrap().get(0)
             ).ifPresent(results::add);
@@ -182,44 +186,44 @@ public class DistributedQuery<K, V> {
     /**
      * Execute this key-query either locally or remotely.
      *
-     * @param streams       the {@link KafkaStreamsContainer} instance.
+     * @param container       the {@link KafkaStreamsContainer} instance.
      * @param keySerializer the {@link Serializer} used for serializing the key.
      * @param options       the {@link Queried} option.
      *
      * @return              the {@link QueryResult}
      * @throws AzkarraException
-     *             A local query can fail if the streams is re-initializing (task migration)
+     *             A local query can fail if the container is re-initializing (task migration)
      *             or the store is not initialized (or closed).
      *
      *             A remote query can fail if the remote instance is down and re-balancing has not occurred yet.
      */
-    private QueryResult<K, V> querySingleHostStateStore(final KafkaStreamsContainer streams,
+    private QueryResult<K, V> querySingleHostStateStore(final KafkaStreamsContainer container,
                                                         final Serializer<K> keySerializer ,
                                                         final Queried options) throws AzkarraException {
-        final String serverName = streams.applicationServer();
-
-        final Optional<StreamsServerInfo> info = streams.findMetadataForStoreAndKey(
-            query.storeName(),
-            query.key(),
-            keySerializer
-        );
-
-        if (info.isEmpty()) {
-            String error = "no metadata available for store '" + query.storeName() + "', key '" + query.key() + "'";
-            return buildNotAvailableResult(serverName, error);
-        }
-
-        final StreamsServerInfo targetServer = info.get();
-
-        final QueryContext<K, V> context;
-        if (targetServer.isLocal()) {
-            context = new LocalQueryContext(streams, options);
-        } else if (options.remoteAccessAllowed()) {
-            context = new RemoteQueryContext(streams.applicationServer(), options);
-        } else {
-            context = (target, failable) -> buildQueryResult(serverName, Collections.emptyList());
-        }
-        return context.execute(targetServer, true);
+        final String serverName = container.applicationServer();
+        return container
+            .findMetadataForStoreAndKey(query.storeName(), query.key(), keySerializer)
+            .map(keyQueryMetadata -> {
+                var activeHost = keyQueryMetadata.getActiveHost();
+                var target = new ServerHostInfo(
+                        container.applicationId(),
+                        activeHost.host(),
+                        activeHost.port(),
+                        container.isSameHost(activeHost)
+                );
+                final QueryContext<K, V> context;
+                if (target.isLocal()) {
+                    context = new LocalQueryContext(container, options);
+                } else if (options.remoteAccessAllowed()) {
+                    context = new RemoteQueryContext(serverName, options);
+                } else {
+                    context = (t, f) -> buildQueryResult(serverName, Collections.emptyList());
+                }
+                return context.execute(target, true);
+            }).orElseGet(() -> {
+                var error = "no metadata available for store '" + query.storeName() + "', key '" + query.key() + "'";
+                return buildNotAvailableResult(serverName, error);
+            });
     }
 
     private QueryResult<K, V> buildNotAvailableResult(final String server,
@@ -312,15 +316,13 @@ public class DistributedQuery<K, V> {
         }
     }
 
-
-
     private interface QueryContext<K, V>  {
 
-        default QueryResult<K, V> execute(final StreamsServerInfo target) throws AzkarraException {
+        default QueryResult<K, V> execute(final ServerHostInfo target) throws AzkarraException {
             return execute(target, false);
         }
 
-        QueryResult<K, V> execute(final StreamsServerInfo target, final boolean failable) throws AzkarraException;
+        QueryResult<K, V> execute(final ServerHostInfo target, final boolean failable) throws AzkarraException;
     }
 
     private class LocalQueryContext implements QueryContext<K, V> {
@@ -337,7 +339,7 @@ public class DistributedQuery<K, V> {
          * {@inheritDoc}
          */
         @Override
-        public QueryResult<K, V> execute(final StreamsServerInfo target, final boolean failable) {
+        public QueryResult<K, V> execute(final ServerHostInfo target, final boolean failable) {
             Try<List<KV<K, V>>> executed = query.execute(streams, queried.limit());
 
             if (failable && executed.isFailure()) {
@@ -376,7 +378,7 @@ public class DistributedQuery<K, V> {
             this.options = options;
         }
 
-        private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final StreamsServerInfo remote,
+        private CompletableFuture<QueryResult<K, V>> executeAsyncQueryRemotely(final ServerHostInfo remote,
                                                                                final boolean failable) {
             CompletableFuture<QueryResult<K, V>> future = remoteQueryClient.query(remote, query, options);
             if (!failable) {
@@ -389,7 +391,7 @@ public class DistributedQuery<K, V> {
          * {@inheritDoc}
          */
         @Override
-        public QueryResult<K, V> execute(final StreamsServerInfo remote, final boolean failable) {
+        public QueryResult<K, V> execute(final ServerHostInfo remote, final boolean failable) {
             final String remoteServerName = remote.hostAndPort();
             QueryResult<K, V> result;
             try {

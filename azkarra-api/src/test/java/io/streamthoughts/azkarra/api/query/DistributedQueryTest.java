@@ -30,7 +30,10 @@ import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.api.streams.ServerMetadata;
+import org.apache.kafka.streams.KeyQueryMetadata;
+import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,16 +87,17 @@ public class DistributedQueryTest {
     public void shouldQueryLocalKVStateStoreGivenKeyQuery() {
         distributed = new DistributedQuery<>(client, buildKeyValueQuery());
         when(streams.applicationServer()).thenReturn("local:1234");
-        StreamsServerInfo localServer = newServerInfo("local", true);
-        when(streams.getLocalServerInfo())
+        ServerMetadata localServer = newServerMetadata("local", true);
+        when(streams.localServerMetadata())
             .thenReturn(Optional.of(localServer));
 
         when(streams.findMetadataForStoreAndKey(any(), any(), any()))
-            .thenReturn(Optional.of(localServer));
+            .thenReturn(Optional.of(newKeyQueryMetadata("local")));
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn(42L);
         when(streams.localKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
+        when(streams.isSameHost(new HostInfo("local", 1234))).thenReturn(true);
 
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);
@@ -111,16 +115,17 @@ public class DistributedQueryTest {
     public void shouldQueryRemoteKVStateStoreGivenKeyQuery() {
         distributed = new DistributedQuery<>(client, buildKeyValueQuery());
         when(streams.applicationServer()).thenReturn("local:1234");
-        when(streams.getLocalServerInfo())
-            .thenReturn(Optional.of(newServerInfo("local", true)));
+        when(streams.localServerMetadata())
+            .thenReturn(Optional.of(newServerMetadata("local", true)));
 
         when(streams.findMetadataForStoreAndKey(any(), any(), any()))
-            .thenReturn(Optional.of(newServerInfo("remote", false)));
+            .thenReturn(Optional.of(newKeyQueryMetadata("remote")));
+        when(streams.isSameHost(new HostInfo("remote", 1234))).thenReturn(false);
 
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
-        assertEquals(newServerInfo("local", true).hostAndPort(), result.getServer());
+        assertEquals(newServerMetadata("local", true).hostAndPort(), result.getServer());
 
         GlobalResultSet<String, Long> rs = result.getResult();
         List<SuccessResultSet<String, Long>> success = rs.getSuccess();
@@ -136,13 +141,13 @@ public class DistributedQueryTest {
         PreparedQuery<String, Long> query = all.prepare();
         distributed = new DistributedQuery<>(client, query);
         when(streams.applicationServer()).thenReturn("local:1234");
-        when(streams.getLocalServerInfo())
-            .thenReturn(Optional.of(newServerInfo("local", true)));
+        when(streams.localServerMetadata())
+            .thenReturn(Optional.of(newServerMetadata("local", true)));
 
         when(streams.allMetadataForStore(any()))
             .thenReturn(Arrays.asList(
-                newServerInfo("local", true),
-                newServerInfo("remote", false))
+                newServerMetadata("local", true),
+                newServerMetadata("remote", false))
             );
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
@@ -152,7 +157,7 @@ public class DistributedQueryTest {
         QueryResult<String, Long> result = distributed.query(streams, Queried.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
-        assertEquals(newServerInfo("local", true).hostAndPort(), result.getServer());
+        assertEquals(newServerMetadata("local", true).hostAndPort(), result.getServer());
 
         GlobalResultSet<String, Long> rs = result.getResult();
         List<SuccessResultSet<String, Long>> success = rs.getSuccess();
@@ -170,13 +175,20 @@ public class DistributedQueryTest {
         }}));
     }
 
-    private StreamsServerInfo newServerInfo(final String host, final boolean isLocal) {
-        return new StreamsServerInfo(
-        "app-id",
-            host,
-            1234,
+    public KeyQueryMetadata newKeyQueryMetadata(final String host) {
+        return new KeyQueryMetadata(
+            new HostInfo(host, 1234),
+            Collections.emptySet(),
+            0
+        );
+    }
+
+    private ServerMetadata newServerMetadata(final String host, final boolean isLocal) {
+        return new ServerMetadata(
+            new ServerHostInfo("app", host, 1234, isLocal),
             Collections.emptySet(),
             Collections.emptySet(),
-            isLocal);
+            Collections.emptySet(),
+            Collections.emptySet());
     }
 }

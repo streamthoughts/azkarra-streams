@@ -56,10 +56,12 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyQueryMetadata;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.processor.ThreadMetadata;
+import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -94,6 +96,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.joining;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
+import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 
 public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
 
@@ -666,12 +669,13 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
                 var storeName = entry.getKey();
                 var positions = new ArrayList<PartitionLogOffsetsAndLag>(entry.getValue().size());
                 entry.getValue().forEach((partition, lag) -> {
-                    positions.add(new PartitionLogOffsetsAndLag(
+                    var offsetsAndLag = new PartitionLogOffsetsAndLag(
                         partition,
                         lag.currentOffsetPosition(),
                         lag.endOffsetPosition(),
                         lag.offsetLag()
-                    ));
+                    );
+                    positions.add(offsetsAndLag);
                 });
                 return new LocalStorePartitionLags(storeName, positions);
             })
@@ -682,10 +686,10 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
      * {@inheritDoc}
      */
     @Override
-    public Optional<StreamsServerInfo> getLocalServerInfo() {
+    public Optional<ServerMetadata> localServerMetadata() {
         return allMetadata()
            .stream()
-           .filter(StreamsServerInfo::isLocal)
+           .filter(ServerMetadata::isLocal)
            .findFirst();
     }
 
@@ -693,7 +697,7 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
      * {@inheritDoc}
      */
     @Override
-    public Set<StreamsServerInfo> allMetadata() {
+    public Set<ServerMetadata> allMetadata() {
         if (!isRunning()) return Collections.emptySet();
 
         // allMetadata throw an IllegalAccessException if instance is not running
@@ -707,7 +711,7 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
      * {@inheritDoc}
      */
     @Override
-    public Collection<StreamsServerInfo> allMetadataForStore(final String storeName) {
+    public Collection<ServerMetadata> allMetadataForStore(final String storeName) {
         Objects.requireNonNull(storeName, "storeName cannot be null");
         if (!isRunning()) return Collections.emptySet();
 
@@ -721,7 +725,7 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
      * {@inheritDoc}
      */
     @Override
-    public <K> Optional<StreamsServerInfo> findMetadataForStoreAndKey(final String storeName,
+    public <K> Optional<KeyQueryMetadata> findMetadataForStoreAndKey(final String storeName,
                                                                       final K key,
                                                                       final Serializer<K> keySerializer) {
         Objects.requireNonNull(storeName, "storeName cannot be null");
@@ -730,9 +734,9 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
 
         if (!initialized()) return Optional.empty();
 
-        StreamsMetadata metadata = kafkaStreams.metadataForKey(storeName, key, keySerializer);
-        return metadata == null || metadata.equals(StreamsMetadata.NOT_AVAILABLE) ?
-            Optional.empty(): Optional.of(newServerInfoFor(metadata));
+        KeyQueryMetadata metadata = kafkaStreams.queryMetadataForKey(storeName, key, keySerializer);
+        return metadata == null || metadata.equals(KeyQueryMetadata.NOT_AVAILABLE) ?
+            Optional.empty(): Optional.of(metadata);
     }
 
     /**
@@ -779,7 +783,8 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
 
     private <T> LocalStoreAccessor<T> getLocalStoreAccess(final String storeName,
                                                           final QueryableStoreType<T> storeType) {
-        return new LocalStoreAccessor<>(() -> kafkaStreams.store(storeName, storeType));
+
+        return new LocalStoreAccessor<>(() -> kafkaStreams.store(fromNameAndType(storeName, storeType)));
     }
 
     Logger logger() {
@@ -832,19 +837,19 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
         lastObservedException = throwable;
     }
 
-    private StreamsServerInfo newServerInfoFor(final StreamsMetadata metadata) {
-        return new StreamsServerInfo(
-            applicationId(),
-            metadata.host(),
-            metadata.port(),
+    private ServerMetadata newServerInfoFor(final StreamsMetadata metadata) {
+        var hostInfo = new ServerHostInfo(applicationId(), metadata.host(), metadata.port(), isLocal(metadata));
+        return new ServerMetadata(
+            hostInfo,
             metadata.stateStoreNames(),
             groupByTopicThenGet(metadata.topicPartitions()),
-            isLocal(metadata)
+            metadata.standbyStateStoreNames(),
+            groupByTopicThenGet(metadata.standbyTopicPartitions())
         );
     }
 
     private boolean isLocal(final StreamsMetadata metadata) {
-        return (metadata.host() + ":" + metadata.port()).equals(applicationServer);
+        return isSameHost(new HostInfo(metadata.host(), metadata.port()));
     }
 
     private static Set<TopicPartitions> groupByTopicThenGet(final Set<TopicPartition> topicPartitions) {
@@ -891,6 +896,14 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
     public KafkaStreams kafkaStreams() {
         validateInitialized();
         return kafkaStreams;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isSameHost(final HostInfo info) {
+        return applicationServer.equals(info.host() + ":" + info.port());
     }
 
     private void validateInitialized() {

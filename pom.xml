@@ -1,5 +1,5 @@
 <!--
- Copyright 2019 StreamThoughts.
+ Copyright 2019-2020 StreamThoughts.
 
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements. See the NOTICE file distributed with
@@ -55,7 +55,7 @@
 
     <organization>
         <name>streamthoughts</name>
-        <url>http://streamthoughts.io</url>
+        <url>https://www.streamthoughts.io</url>
     </organization>
 
     <url>https://github.com/streamthoughts/azkarra-streams</url>
@@ -86,7 +86,7 @@
     </distributionManagement>
 
     <properties>
-        <kafka.streams.version>2.5.0</kafka.streams.version>
+        <kafka.streams.version>2.6.0</kafka.streams.version>
         <slf4j.version>1.7.28</slf4j.version>
         <log4j.version>2.13.3</log4j.version>
         <junit.version>4.12</junit.version>

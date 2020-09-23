@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 StreamThoughts.
+ * Copyright 2019-2020 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -19,7 +19,6 @@
 package io.streamthoughts.azkarra.commons.error;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Serializer;
@@ -122,9 +121,10 @@ public class DeadLetterTopicExceptionHandlerTest {
         }
 
         @Override
-        public void init(Producer<byte[], byte[]> producer) {
+        public void initialize() {
 
         }
+
 
         @Override
         public void flush() {
@@ -132,7 +132,12 @@ public class DeadLetterTopicExceptionHandlerTest {
         }
 
         @Override
-        public void close() {
+        public void closeClean() {
+
+        }
+
+        @Override
+        public void closeDirty() {
 
         }
 

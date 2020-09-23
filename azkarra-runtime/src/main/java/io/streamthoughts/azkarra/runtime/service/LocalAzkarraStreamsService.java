@@ -45,7 +45,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.streams.ServerMetadata;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
@@ -251,7 +251,7 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
      * {@inheritDoc}
      */
     @Override
-    public Set<StreamsServerInfo> getStreamsInstancesById(final String applicationId) {
+    public Set<ServerMetadata> getStreamsInstancesById(final String applicationId) {
         final KafkaStreamsContainer container = getStreamsById(applicationId);
         return container.allMetadata();
     }

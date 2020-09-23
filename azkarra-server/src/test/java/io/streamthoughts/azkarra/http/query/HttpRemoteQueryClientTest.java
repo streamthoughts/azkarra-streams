@@ -28,7 +28,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
 import io.streamthoughts.azkarra.http.APIVersions;
 import io.streamthoughts.azkarra.http.serialization.json.SpecificJsonSerdes;
 import io.streamthoughts.azkarra.serialization.Serdes;
@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 
 public class HttpRemoteQueryClientTest {
@@ -56,14 +55,14 @@ public class HttpRemoteQueryClientTest {
         QueryResult.class
     );
 
-    private static final StreamsServerInfo SERVER_INFO = new StreamsServerInfo(
+    private static final ServerHostInfo SERVER_INFO = new ServerHostInfo(
         "test",
         "localhost",
         8089,
-        emptySet(),
-        emptySet()
+        false
     );
-    public static final String TEST_STORE_NAME = "store";
+
+    private static final String TEST_STORE_NAME = "store";
 
     private HttpRemoteQueryClient client;
 

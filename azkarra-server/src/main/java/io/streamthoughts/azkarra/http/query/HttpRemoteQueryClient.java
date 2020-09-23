@@ -27,7 +27,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryError;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
 import io.streamthoughts.azkarra.serialization.Serdes;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -76,7 +76,7 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
      * {@inheritDoc}
      */
     @Override
-    public <K, V> CompletableFuture<QueryResult<K, V>> query(final StreamsServerInfo serverInfo,
+    public <K, V> CompletableFuture<QueryResult<K, V>> query(final ServerHostInfo serverInfo,
                                                              final QueryInfo query,
                                                              final Queried options) {
         final String server = serverInfo.hostAndPort();

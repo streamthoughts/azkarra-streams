@@ -33,9 +33,11 @@ import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyQueryMetadata;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.processor.ThreadMetadata;
+import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlySessionStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
@@ -184,6 +186,14 @@ public interface KafkaStreamsContainer {
     KafkaStreams kafkaStreams();
 
     /**
+     * Checks whether the given {@link HostInfo} is the same as this container.
+     *
+     * @param info  the {@link HostInfo} to verify.
+     * @return      {@code true} if the given host
+     */
+    boolean isSameHost(final HostInfo info);
+
+    /**
      * Gets the partition lag for all local state store.
      *
      * @see KafkaStreams#allLocalStorePartitionLags().
@@ -191,22 +201,21 @@ public interface KafkaStreamsContainer {
      */
     List<LocalStorePartitionLags> allLocalStorePartitionLags();
 
-    Optional<StreamsServerInfo> getLocalServerInfo();
+    Optional<ServerMetadata> localServerMetadata();
 
     /**
      * @see KafkaStreams#allMetadata().
      */
-    Set<StreamsServerInfo> allMetadata();
+    Set<ServerMetadata> allMetadata();
 
     /**
      * @see KafkaStreams#allMetadataForStore(String).
      */
-    Collection<StreamsServerInfo> allMetadataForStore(final String storeName);
+    Collection<ServerMetadata> allMetadataForStore(final String storeName);
 
-    <K> Optional<StreamsServerInfo> findMetadataForStoreAndKey(final String storeName,
-                                                               final K key,
-                                                               final Serializer<K> keySerializer);
-
+    <K> Optional<KeyQueryMetadata> findMetadataForStoreAndKey(final String storeName,
+                                                              final K key,
+                                                              final Serializer<K> keySerializer);
     /**
      * Gets a read-only access to a local key-value store.
      *

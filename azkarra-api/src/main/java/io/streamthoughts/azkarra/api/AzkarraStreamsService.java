@@ -34,7 +34,7 @@ import io.streamthoughts.azkarra.api.query.internal.Query;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import io.streamthoughts.azkarra.api.streams.StreamsServerInfo;
+import io.streamthoughts.azkarra.api.streams.ServerMetadata;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import org.apache.kafka.streams.StreamsConfig;
 
@@ -169,11 +169,11 @@ public interface AzkarraStreamsService {
      * Gets all local and remote streams instances for the specified streams application.
      *
      * @param applicationId the streams application id.
-     * @return              the set of {@link StreamsServerInfo} instances.
+     * @return              the set of {@link ServerMetadata} instances.
      *
      * @throws NotFoundException  if not application exists for the id.
      */
-    Set<StreamsServerInfo> getStreamsInstancesById(final String applicationId);
+    Set<ServerMetadata> getStreamsInstancesById(final String applicationId);
 
     /**
      * Stops the streams instance for the specified streams application.
