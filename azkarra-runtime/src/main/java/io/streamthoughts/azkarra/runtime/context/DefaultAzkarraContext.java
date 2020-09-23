@@ -51,7 +51,6 @@ import io.streamthoughts.azkarra.runtime.components.ClassComponentAliasesGenerat
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
-import io.streamthoughts.azkarra.runtime.config.AzkarraContextConfig;
 import io.streamthoughts.azkarra.runtime.context.internal.ClassLoaderAwareKafkaStreamsFactory;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareApplicationIdBuilderSupplier;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareKafkaStreamsFactorySupplier;
@@ -83,6 +82,7 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static io.streamthoughts.azkarra.api.components.condition.Conditions.onMissingComponent;
 import static io.streamthoughts.azkarra.api.components.condition.Conditions.onPropertyTrue;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withConditions;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withOrder;
@@ -147,7 +147,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
     private RestrictedComponentSupplierFactory componentSupplierFactory;
 
-    private AzkarraContextConfig contextConfig;
+    private Conf contextConfig;
 
     // contains the list of topologies to register when starting.
     private final List<TopologyRegistration> topologyRegistrations = new LinkedList<>();
@@ -162,7 +162,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
         Objects.requireNonNull(componentFactory, "componentFactory cannot be null");
         this.environments = new LinkedHashMap<>();
         this.listeners = new ArrayList<>();
-        this.contextConfig = new AzkarraContextConfig(configuration);
+        this.contextConfig = configuration;
         this.componentFactory = new ContextAwareComponentFactory(this, componentFactory);
         this.componentSupplierFactory = new RestrictedComponentSupplierFactory(this);
         setState(State.CREATED);
@@ -188,6 +188,12 @@ public class DefaultAzkarraContext implements AzkarraContext {
             WaitForSourceTopicsInterceptor.class,
             withConditions(onPropertyTrue(WAIT_FOR_TOPICS_ENABLE_CONFIG)),
             withOrder(Ordered.LOWEST_ORDER)
+        );
+
+        registerComponent(
+            StreamThreadExceptionHandler.class,
+            new DefaultStreamThreadExceptionHandlerFactory(),
+            withConditions(onMissingComponent(List.of(StreamThreadExceptionHandler.class)))
         );
     }
 
@@ -223,7 +229,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public Conf getConfiguration() {
-        return contextConfig.configs();
+        return contextConfig;
     }
 
     /**
@@ -231,7 +237,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public AzkarraContext setConfiguration(final Conf configuration) {
-        this.contextConfig = new AzkarraContextConfig(configuration);
+        contextConfig = configuration;
         return this;
     }
 
@@ -241,7 +247,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public AzkarraContext addConfiguration(final Conf configuration) {
         Objects.requireNonNull(configuration, "configuration cannot be null");
-        this.contextConfig.addConfiguration(configuration);
+        contextConfig = contextConfig.withFallback(configuration);
         return this;
     }
 
@@ -592,13 +598,10 @@ public class DefaultAzkarraContext implements AzkarraContext {
             .or(() -> componentSupplierFactory.findApplicationIdBuilder(componentResolutionConfig, Restriction.application()))
             .ifPresent(env::setApplicationIdBuilder);
 
-        final var azkarraContextConfig = new AzkarraContextConfig(env.getConfiguration()).addConfiguration(getConfiguration());
-
         // Inject environment, global or default StreamsThreadExceptionHandler
         Optional.ofNullable(env.getStreamThreadExceptionHandler())
             .or(() -> componentSupplierFactory.findStreamThreadExceptionHandler(componentResolutionConfig, Restriction.env(env.name())))
             .or(() -> componentSupplierFactory.findStreamThreadExceptionHandler(componentResolutionConfig, Restriction.application()))
-            .or(() -> Optional.of(azkarraContextConfig::getDefaultStreamsThreadExceptionHandler))
             .ifPresent(env::setStreamThreadExceptionHandler);
     }
 
