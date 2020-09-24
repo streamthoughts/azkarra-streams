@@ -25,14 +25,14 @@
 " />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/" />
-<meta property="article:published_time" content="2020-05-09T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-12T17:33:25+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:published_time" content="2020-09-24T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-24T12:45:36+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="StreamsLifecycleInterceptor">
 <meta itemprop="description" content="How to execute operations before/after a KafkaStreams instance starts/stops?
 ">
-<meta itemprop="datePublished" content="2020-05-09T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-12T17:33:25&#43;02:00" />
-<meta itemprop="wordCount" content="1288">
+<meta itemprop="datePublished" content="2020-09-24T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-09-24T12:45:36&#43;02:00" />
+<meta itemprop="wordCount" content="1464">
 
 
 
@@ -1652,7 +1652,11 @@
     <li><a href="#1-the-streamslifecycleinterceptor-interface">1 The StreamsLifecycleInterceptor Interface</a></li>
     <li><a href="#2-registering-an-interceptor">2 Registering an Interceptor</a></li>
     <li><a href="#3-configuring-an-interceptor">3 Configuring an Interceptor</a></li>
-    <li><a href="#4-waitforsourcetopicsinterceptor">4 WaitForSourceTopicsInterceptor</a></li>
+    <li><a href="#4-waitforsourcetopicsinterceptor">4 WaitForSourceTopicsInterceptor</a>
+      <ul>
+        <li><a href="#41-configuration-properties">4.1 Configuration properties</a></li>
+      </ul>
+    </li>
     <li><a href="#5-autocreatetopicsinterceptor">5 AutoCreateTopicsInterceptor</a>
       <ul>
         <li><a href="#51-configuration-properties">5.1 Configuration properties</a></li>
@@ -1660,10 +1664,15 @@
         <li><a href="#53-automatically-deleting-topics">5.3 Automatically deleting topics</a></li>
       </ul>
     </li>
-    <li><a href="#86-monitoringstreamsinterceptor">8.6 MonitoringStreamsInterceptor</a>
+    <li><a href="#6-monitoringstreamsinterceptor">6 MonitoringStreamsInterceptor</a>
       <ul>
         <li><a href="#61-the-event-format">6.1 The event format</a></li>
         <li><a href="#62-configuration-properties">6.2 Configuration properties</a></li>
+      </ul>
+    </li>
+    <li><a href="#7-kafkabrokerreaderinterceptor">7 KafkaBrokerReaderInterceptor</a>
+      <ul>
+        <li><a href="#71-configuration-properties">7.1 Configuration properties</a></li>
       </ul>
     </li>
   </ul>
@@ -1766,6 +1775,33 @@ The <code>Conf</code> object passed to the <code>configure()</code> method corre
 <p>The <code>WaitForSourceTopicsInterceptor</code> can be enable by setting the global application property <code>azkarra.context.enable.wait.for.topics</code> to true in
 your <em>application.conf</em> file.</p>
 <p>In addition, you can enable that interceptor per environment using the <code>StreamsExecutionEnvironment#setWaitForTopicsToBeCreated</code> method.</p>
+<h3 id="41-configuration-properties">4.1 Configuration properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wait.for.topics.timeout.enable        |  boolean            | If </code>true`, enable and configure the interceptor. |</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>wait.for.topics.timeout.ms</code></td>
+<td>boolean</td>
+<td>Wait until topics are created or this timeout is reached (Default is <code>LONG.MAX_VALUE</code>).</td>
+</tr>
+<tr>
+<td><code>wait.for.topics.exclude.patterns</code></td>
+<td>list</td>
+<td>A comma separated list of topics (regex) that the interceptor should not wait for (optional).</td>
+</tr>
+</tbody>
+</table>
 <h2 id="5-autocreatetopicsinterceptor">5 AutoCreateTopicsInterceptor</h2>
 <p>During the development phase, you may find yourself creating and deleting Kafka topics manually and before each run of your application.
 To ease this operation, Azkarra provides the built-in <code>AutoCreateTopicsInterceptor</code> which can be used to automatically create the source and sink topics
@@ -1855,7 +1891,7 @@ Note: This property should be used with care and not enable for production.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="86-monitoringstreamsinterceptor">8.6 MonitoringStreamsInterceptor</h2>
+<h2 id="6-monitoringstreamsinterceptor">6 MonitoringStreamsInterceptor</h2>
 <p>As of Azkarra v0.7.0, you can configure the built-in <code>MonitoringStreamsInterceptor</code> to periodically publish a state event of your <code>KafkaStreams</code> instance directly into a Kafka topic (default: <code>_azkarra-streams-monitoring</code>).</p>
 <p>The <code>MonitoringStreamsInterceptor</code> can be enable by setting the global application property <code>azkarra.context.monitoring.streams.interceptor.enable</code> to true in
 your <em>application.conf</em> file</p>
@@ -1865,15 +1901,16 @@ your <em>application.conf</em> file</p>
 <p>Currently, Azkarra only supports the <a href="https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md#33-structured-content-mode">Structuted Content</a> mode for mapping CloudEvents to Kafka message. That means that the message-value contains event metadata and data together in a single envelope, encoded in JSON.</p>
 <p>The following example shows a CloudEvent published by the <code>MonitoringStreamsInterceptor</code> using default configuration.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#000;font-weight:bold">{</span>
-  <span style="color:#204a87;font-weight:bold">&#34;id&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;appid:basic-word-count;appsrv:localhost:8082;ts:1588976019636&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#a40000">①</span>
-  <span style="color:#204a87;font-weight:bold">&#34;source&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;azkarra/ks/localhost:8082&#34;</span><span style="color:#000;font-weight:bold">,</span>                                 <span style="color:#a40000">②</span> 
+  <span style="color:#204a87;font-weight:bold">&#34;id&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;appid:basic-word-count-0-8-0;appsrv:localhost:8080;ts:1600951440046&#34;</span><span style="color:#000;font-weight:bold">,</span>   <span style="color:#a40000">①</span> 
+  <span style="color:#204a87;font-weight:bold">&#34;source&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;arn://kafka=CFPFUjoZQnWcST8Dhh5Grw/host=localhost/port=8080&#34;</span><span style="color:#000;font-weight:bold">,</span>       <span style="color:#a40000">②</span> 
+  <span style="color:#204a87;font-weight:bold">&#34;subject&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;arn://kafka=CFPFUjoZQnWcST8Dhh5Grw/host=localhost/port=8080/streams=basic-word-count-0-8-0&#34;</span><span style="color:#000;font-weight:bold">,</span>
   <span style="color:#204a87;font-weight:bold">&#34;specversion&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;1.0&#34;</span><span style="color:#000;font-weight:bold">,</span>                                                  <span style="color:#a40000">③</span>
   <span style="color:#204a87;font-weight:bold">&#34;type&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;io.streamthoughts.azkarra.streams.stateupdateevent&#34;</span><span style="color:#000;font-weight:bold">,</span>          <span style="color:#a40000">④</span>
   <span style="color:#204a87;font-weight:bold">&#34;time&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;2020-05-08T22:13:39.636+0000&#34;</span><span style="color:#000;font-weight:bold">,</span>                                <span style="color:#a40000">⑤</span>
   <span style="color:#204a87;font-weight:bold">&#34;datacontenttype&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;application/json&#34;</span><span style="color:#000;font-weight:bold">,</span>                                 <span style="color:#a40000">⑥</span> 
   <span style="color:#204a87;font-weight:bold">&#34;ioazkarramonitorintervalms&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">10000</span><span style="color:#000;font-weight:bold">,</span>                                   <span style="color:#a40000">⑦</span>
   <span style="color:#204a87;font-weight:bold">&#34;ioazkarrastreamsappid&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;basic-word-count&#34;</span><span style="color:#000;font-weight:bold">,</span>                           <span style="color:#a40000">⑧</span>
-  <span style="color:#204a87;font-weight:bold">&#34;ioazkarraversion&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;0.7.0-SNAPSHOT&#34;</span><span style="color:#000;font-weight:bold">,</span>                                  <span style="color:#a40000">⑨</span>
+  <span style="color:#204a87;font-weight:bold">&#34;ioazkarraversion&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;0.8.0&#34;</span><span style="color:#000;font-weight:bold">,</span>                                           <span style="color:#a40000">⑨</span>
   <span style="color:#204a87;font-weight:bold">&#34;ioazkarrastreamsappserver&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;localhost:8082&#34;</span>                          <span style="color:#a40000">⑩</span>
   <span style="color:#4e9a06">&#34;data&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>                                                              <span style="color:#a40000">⑪</span>
     <span style="color:#204a87;font-weight:bold">&#34;state&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;RUNNING&#34;</span><span style="color:#000;font-weight:bold">,</span>
@@ -1945,12 +1982,25 @@ your <em>application.conf</em> file</p>
         <span style="color:#000;font-weight:bold">}</span>
       <span style="color:#000;font-weight:bold">]</span>
     <span style="color:#000;font-weight:bold">}</span><span style="color:#000;font-weight:bold">,</span>
+    <span style="color:#204a87;font-weight:bold">&#34;stores&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">[</span>
+      <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#204a87;font-weight:bold">&#34;name&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;count&#34;</span><span style="color:#000;font-weight:bold">,</span>
+        <span style="color:#204a87;font-weight:bold">&#34;positions&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">[</span>
+          <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#204a87;font-weight:bold">&#34;partition&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span>
+            <span style="color:#204a87;font-weight:bold">&#34;current_offset&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span>
+            <span style="color:#204a87;font-weight:bold">&#34;log_end_offset&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">,</span>
+            <span style="color:#204a87;font-weight:bold">&#34;offset_lag&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">0</span>
+          <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">]</span>
+      <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">]</span><span style="color:#000;font-weight:bold">,</span>
     <span style="color:#204a87;font-weight:bold">&#34;state_changed_time&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">1588975839528</span>
   <span style="color:#000;font-weight:bold">}</span>
 <span style="color:#000;font-weight:bold">}</span>
 </code></pre></div><ul>
-<li><strong>①</strong> The unique id of the state change event, based on the application id, the application server and the Unix epoch</li>
-<li><strong>②</strong> The source of the event; i.e the application server.</li>
+<li><strong>①</strong> The unique id of the state change event, based on the : <code>application.id</code>, <code>application.server</code> and Unix epoch</li>
+<li><strong>②</strong> The source of the event based on the: Kafka Cluster ID and <code>application.server</code> (note: arn=Azkarra Resource Name)</li>
 <li><strong>③</strong> The CloudEvents specification versions</li>
 <li><strong>④</strong> The type of change state event</li>
 <li><strong>⑤</strong> Time of the state change or the event is emit</li>
@@ -1992,7 +2042,7 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 <tr>
 <td><code>monitoring.streams.interceptor.topic</code></td>
 <td>string</td>
-<td>The topic on which monitoring event will be sent (Default is _azkarra-streams-monitoring).</td>
+<td>The topic on which monitoring event will be sent (Default is <code>_azkarra-streams-monitoring</code>).</td>
 </tr>
 <tr>
 <td><code>monitoring.streams.interceptor.advertised.server</code></td>
@@ -2004,12 +2054,51 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 <td>list</td>
 <td>The list of extension attributes that should be included in monitoring events.</td>
 </tr>
+<tr>
+<td><code>monitoring.streams.interceptor.info.enabled.stores.lag</code></td>
+<td>boolean</td>
+<td>If <code>true</code>, the interceptor will also report offset-lag for local state stores</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-kafkabrokerreaderinterceptor">7 KafkaBrokerReaderInterceptor</h2>
+<p>This interceptor waits for a number of broker to be available before starting the Kafka Streams application.</p>
+<h3 id="71-configuration-properties">7.1 Configuration properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kafka.ready.interceptor.enable</code></td>
+<td>boolean</td>
+<td>If <code>true</code>, enable and configure the interceptor</td>
+</tr>
+<tr>
+<td><code>kafka.ready.interceptor.timeout.ms</code></td>
+<td>long</td>
+<td>Wait until brokers are available or this timeout is reached (Default is <code>60000</code>).</td>
+</tr>
+<tr>
+<td><code>kafka.ready.interceptor.retry.backoff.ms</code></td>
+<td>long</td>
+<td>The amount of time to wait before verifying that brokers are available (Default is <code>1000</code>).</td>
+</tr>
+<tr>
+<td><code>kafka.ready.interceptor.min.available.brokers</code></td>
+<td>int</td>
+<td>The minimal number of broker that should be alive for the interceptor stops waiting (Default is <code>1</code>)</td>
+</tr>
 </tbody>
 </table>
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 12, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/bde9eb946af4372c20db45faa7d2b3694589900e">fix(site): fix some typos (bde9eb9)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified September 24, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/9fd9e7106357bb7b7b682d60432160eccd648ca8">update(site): update docs for 0.8.0 (9fd9e71)</a>
 </div>
 </div>
 

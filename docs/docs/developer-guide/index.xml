@@ -750,7 +750,7 @@ This is for example the case for components that are directly used by your topol
     <item>
       <title>Docs: StreamsLifecycleInterceptor</title>
       <link>http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/</link>
-      <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Sep 2020 00:00:00 +0000</pubDate>
       
       <guid>http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/</guid>
       <description>
@@ -807,6 +807,33 @@ The &lt;code&gt;Conf&lt;/code&gt; object passed to the &lt;code&gt;configure()&l
 &lt;p&gt;The &lt;code&gt;WaitForSourceTopicsInterceptor&lt;/code&gt; can be enable by setting the global application property &lt;code&gt;azkarra.context.enable.wait.for.topics&lt;/code&gt; to true in
 your &lt;em&gt;application.conf&lt;/em&gt; file.&lt;/p&gt;
 &lt;p&gt;In addition, you can enable that interceptor per environment using the &lt;code&gt;StreamsExecutionEnvironment#setWaitForTopicsToBeCreated&lt;/code&gt; method.&lt;/p&gt;
+&lt;h3 id=&#34;41-configuration-properties&#34;&gt;4.1 Configuration properties&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Property&lt;/th&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;wait.for.topics.timeout.enable        |  boolean            | If &lt;/code&gt;true`, enable and configure the interceptor. |&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;wait.for.topics.timeout.ms&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;boolean&lt;/td&gt;
+&lt;td&gt;Wait until topics are created or this timeout is reached (Default is &lt;code&gt;LONG.MAX_VALUE&lt;/code&gt;).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;wait.for.topics.exclude.patterns&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;list&lt;/td&gt;
+&lt;td&gt;A comma separated list of topics (regex) that the interceptor should not wait for (optional).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 &lt;h2 id=&#34;5-autocreatetopicsinterceptor&#34;&gt;5 AutoCreateTopicsInterceptor&lt;/h2&gt;
 &lt;p&gt;During the development phase, you may find yourself creating and deleting Kafka topics manually and before each run of your application.
 To ease this operation, Azkarra provides the built-in &lt;code&gt;AutoCreateTopicsInterceptor&lt;/code&gt; which can be used to automatically create the source and sink topics
@@ -896,7 +923,7 @@ Note: This property should be used with care and not enable for production.&lt;/
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h2 id=&#34;86-monitoringstreamsinterceptor&#34;&gt;8.6 MonitoringStreamsInterceptor&lt;/h2&gt;
+&lt;h2 id=&#34;6-monitoringstreamsinterceptor&#34;&gt;6 MonitoringStreamsInterceptor&lt;/h2&gt;
 &lt;p&gt;As of Azkarra v0.7.0, you can configure the built-in &lt;code&gt;MonitoringStreamsInterceptor&lt;/code&gt; to periodically publish a state event of your &lt;code&gt;KafkaStreams&lt;/code&gt; instance directly into a Kafka topic (default: &lt;code&gt;_azkarra-streams-monitoring&lt;/code&gt;).&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;MonitoringStreamsInterceptor&lt;/code&gt; can be enable by setting the global application property &lt;code&gt;azkarra.context.monitoring.streams.interceptor.enable&lt;/code&gt; to true in
 your &lt;em&gt;application.conf&lt;/em&gt; file&lt;/p&gt;
@@ -906,15 +933,16 @@ your &lt;em&gt;application.conf&lt;/em&gt; file&lt;/p&gt;
 &lt;p&gt;Currently, Azkarra only supports the &lt;a href=&#34;https://github.com/cloudevents/spec/blob/v1.0/kafka-protocol-binding.md#33-structured-content-mode&#34;&gt;Structuted Content&lt;/a&gt; mode for mapping CloudEvents to Kafka message. That means that the message-value contains event metadata and data together in a single envelope, encoded in JSON.&lt;/p&gt;
 &lt;p&gt;The following example shows a CloudEvent published by the &lt;code&gt;MonitoringStreamsInterceptor&lt;/code&gt; using default configuration.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;appid:basic-word-count;appsrv:localhost:8082;ts:1588976019636&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#a40000&#34;&gt;①&lt;/span&gt;
-  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;source&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;azkarra/ks/localhost:8082&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                                 &lt;span style=&#34;color:#a40000&#34;&gt;②&lt;/span&gt; 
+  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;appid:basic-word-count-0-8-0;appsrv:localhost:8080;ts:1600951440046&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;   &lt;span style=&#34;color:#a40000&#34;&gt;①&lt;/span&gt; 
+  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;source&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;arn://kafka=CFPFUjoZQnWcST8Dhh5Grw/host=localhost/port=8080&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;       &lt;span style=&#34;color:#a40000&#34;&gt;②&lt;/span&gt; 
+  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;subject&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;arn://kafka=CFPFUjoZQnWcST8Dhh5Grw/host=localhost/port=8080/streams=basic-word-count-0-8-0&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
   &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;specversion&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;1.0&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                                                  &lt;span style=&#34;color:#a40000&#34;&gt;③&lt;/span&gt;
   &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;io.streamthoughts.azkarra.streams.stateupdateevent&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;          &lt;span style=&#34;color:#a40000&#34;&gt;④&lt;/span&gt;
   &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;time&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;2020-05-08T22:13:39.636+0000&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                                &lt;span style=&#34;color:#a40000&#34;&gt;⑤&lt;/span&gt;
   &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;datacontenttype&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;application/json&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                                 &lt;span style=&#34;color:#a40000&#34;&gt;⑥&lt;/span&gt; 
   &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;ioazkarramonitorintervalms&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;10000&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                                   &lt;span style=&#34;color:#a40000&#34;&gt;⑦&lt;/span&gt;
   &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;ioazkarrastreamsappid&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;basic-word-count&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                           &lt;span style=&#34;color:#a40000&#34;&gt;⑧&lt;/span&gt;
-  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;ioazkarraversion&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;0.7.0-SNAPSHOT&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                                  &lt;span style=&#34;color:#a40000&#34;&gt;⑨&lt;/span&gt;
+  &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;ioazkarraversion&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;0.8.0&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;                                           &lt;span style=&#34;color:#a40000&#34;&gt;⑨&lt;/span&gt;
   &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;ioazkarrastreamsappserver&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;localhost:8082&amp;#34;&lt;/span&gt;                          &lt;span style=&#34;color:#a40000&#34;&gt;⑩&lt;/span&gt;
   &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;data&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;                                                              &lt;span style=&#34;color:#a40000&#34;&gt;⑪&lt;/span&gt;
     &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;state&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;RUNNING&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
@@ -986,12 +1014,25 @@ your &lt;em&gt;application.conf&lt;/em&gt; file&lt;/p&gt;
         &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
       &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;]&lt;/span&gt;
     &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;stores&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;[&lt;/span&gt;
+      &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;count&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;positions&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;[&lt;/span&gt;
+          &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;
+            &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;partition&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;current_offset&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;log_end_offset&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+            &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;offset_lag&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;
+          &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
+        &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;]&lt;/span&gt;
+      &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
+    &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
     &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;state_changed_time&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;1588975839528&lt;/span&gt;
   &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
 &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;①&lt;/strong&gt; The unique id of the state change event, based on the application id, the application server and the Unix epoch&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;②&lt;/strong&gt; The source of the event; i.e the application server.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;①&lt;/strong&gt; The unique id of the state change event, based on the : &lt;code&gt;application.id&lt;/code&gt;, &lt;code&gt;application.server&lt;/code&gt; and Unix epoch&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;②&lt;/strong&gt; The source of the event based on the: Kafka Cluster ID and &lt;code&gt;application.server&lt;/code&gt; (note: arn=Azkarra Resource Name)&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;③&lt;/strong&gt; The CloudEvents specification versions&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;④&lt;/strong&gt; The type of change state event&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;⑤&lt;/strong&gt; Time of the state change or the event is emit&lt;/li&gt;
@@ -1033,7 +1074,7 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;monitoring.streams.interceptor.topic&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;string&lt;/td&gt;
-&lt;td&gt;The topic on which monitoring event will be sent (Default is _azkarra-streams-monitoring).&lt;/td&gt;
+&lt;td&gt;The topic on which monitoring event will be sent (Default is &lt;code&gt;_azkarra-streams-monitoring&lt;/code&gt;).&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;monitoring.streams.interceptor.advertised.server&lt;/code&gt;&lt;/td&gt;
@@ -1044,6 +1085,45 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 &lt;td&gt;&lt;code&gt;monitoring.streams.interceptor.ce.extensions&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;list&lt;/td&gt;
 &lt;td&gt;The list of extension attributes that should be included in monitoring events.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;monitoring.streams.interceptor.info.enabled.stores.lag&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;boolean&lt;/td&gt;
+&lt;td&gt;If &lt;code&gt;true&lt;/code&gt;, the interceptor will also report offset-lag for local state stores&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;7-kafkabrokerreaderinterceptor&#34;&gt;7 KafkaBrokerReaderInterceptor&lt;/h2&gt;
+&lt;p&gt;This interceptor waits for a number of broker to be available before starting the Kafka Streams application.&lt;/p&gt;
+&lt;h3 id=&#34;71-configuration-properties&#34;&gt;7.1 Configuration properties&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Property&lt;/th&gt;
+&lt;th&gt;Type&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;kafka.ready.interceptor.enable&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;boolean&lt;/td&gt;
+&lt;td&gt;If &lt;code&gt;true&lt;/code&gt;, enable and configure the interceptor&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;kafka.ready.interceptor.timeout.ms&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;long&lt;/td&gt;
+&lt;td&gt;Wait until brokers are available or this timeout is reached (Default is &lt;code&gt;60000&lt;/code&gt;).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;kafka.ready.interceptor.retry.backoff.ms&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;long&lt;/td&gt;
+&lt;td&gt;The amount of time to wait before verifying that brokers are available (Default is &lt;code&gt;1000&lt;/code&gt;).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;kafka.ready.interceptor.min.available.brokers&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;int&lt;/td&gt;
+&lt;td&gt;The minimal number of broker that should be alive for the interceptor stops waiting (Default is &lt;code&gt;1&lt;/code&gt;)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
