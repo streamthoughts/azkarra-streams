@@ -82,6 +82,7 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static io.streamthoughts.azkarra.api.components.condition.Conditions.any;
 import static io.streamthoughts.azkarra.api.components.condition.Conditions.onMissingComponent;
 import static io.streamthoughts.azkarra.api.components.condition.Conditions.onPropertyTrue;
 import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorModifiers.withConditions;
@@ -89,6 +90,7 @@ import static io.streamthoughts.azkarra.runtime.components.ComponentDescriptorMo
 import static io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptorConfig.AUTO_CREATE_TOPICS_ENABLE_CONFIG;
 import static io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptorConfig.KAFKA_READY_INTERCEPTOR_ENABLE_CONFIG;
 import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG;
+import static io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptorConfig.ENABLE_WAIT_FOR_TOPICS__CONFIG;
 import static io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptorConfig.WAIT_FOR_TOPICS_ENABLE_CONFIG;
 
 /**
@@ -186,7 +188,10 @@ public class DefaultAzkarraContext implements AzkarraContext {
         );
         registerComponent(
             WaitForSourceTopicsInterceptor.class,
-            withConditions(onPropertyTrue(WAIT_FOR_TOPICS_ENABLE_CONFIG)),
+            withConditions(any(
+                onPropertyTrue(WAIT_FOR_TOPICS_ENABLE_CONFIG),
+                onPropertyTrue(ENABLE_WAIT_FOR_TOPICS__CONFIG))
+            ),
             withOrder(Ordered.LOWEST_ORDER)
         );
 

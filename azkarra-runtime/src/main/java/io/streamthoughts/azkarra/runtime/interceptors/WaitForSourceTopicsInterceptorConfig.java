@@ -33,9 +33,10 @@ import java.util.stream.Collectors;
 public class WaitForSourceTopicsInterceptorConfig {
 
     /**
-     * {@code auto.create.topics.configs}
+     * {@code wait.for.topics.enable}
      */
-    public static String WAIT_FOR_TOPICS_ENABLE_CONFIG    = "enable.wait.for.topics";
+    public static String ENABLE_WAIT_FOR_TOPICS__CONFIG  = "enable.wait.for.topics";
+    public static String WAIT_FOR_TOPICS_ENABLE_CONFIG   = "wait.for.topics.enable";
 
     /**
      * {@code wait.for.topics.timeout.ms}

@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 public final class Conditions {
 
     /**
-     * Static helper method to create a {@link Condition} compose of the given ones.
+     * Specify that ALL of the given condition should be {@code true} for a component to be eligible for use.
      *
      * @param conditions    the {@link Condition}s to compose.
      *
@@ -43,7 +43,7 @@ public final class Conditions {
     }
 
     /**
-     * Static helper method to create a {@link Condition} compose of the given ones.
+     * Specify that ALL of the given condition should be {@code true} for a component to be eligible for use.
      *
      * @param conditions    the {@link Condition}s to compose.
      *
@@ -51,6 +51,27 @@ public final class Conditions {
      */
     public static Condition compose(final Condition ...conditions) {
         return new CompositeCondition(List.of(conditions));
+    }
+
+    /**
+     * Specify that ANY of the given condition should be {@code true} for a component to be eligible for use.
+     *
+     * @param conditions    the {@link Condition}s to compose.
+     *
+     * @return              the new {@link Condition} object.
+     */
+    public static Condition any(final List<? extends Condition> conditions) {
+        return new AnyCondition(conditions);
+    }
+
+    /**
+     * Specify that ANY of the given condition should be {@code true} for a component to be eligible for use.
+     *
+     * @param conditions the conditions.
+     * @return           the {@link Condition} object.
+     */
+    public static Condition any(final Condition ...conditions) {
+        return new AnyCondition(List.of(conditions));
     }
 
 
@@ -154,6 +175,26 @@ public final class Conditions {
         @Override
         public boolean matches(final ConditionContext context) {
             return conditions.stream().allMatch(cond -> cond.matches(context));
+        }
+    }
+
+    /**
+     * Composite condition.
+     */
+    private static class AnyCondition implements Condition {
+
+        final List<? extends Condition> conditions;
+
+        private AnyCondition(final List<? extends Condition> conditions) {
+            this.conditions = Objects.requireNonNull(conditions);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean matches(final ConditionContext context) {
+            return conditions.stream().anyMatch(cond -> cond.matches(context));
         }
     }
 
