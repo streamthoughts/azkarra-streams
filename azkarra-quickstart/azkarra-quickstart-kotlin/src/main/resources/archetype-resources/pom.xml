@@ -167,7 +167,7 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>${package}.SimpleStreamsApp</mainClass>
+                                    <mainClass>${package}.StreamingApp</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

@@ -48,7 +48,7 @@ import java.util.Arrays;
 public class StreamingApp {
 
     public static void main(final String[] args) {
-        AzkarraApplication.run(SimpleStreamsApp.class, args);
+        AzkarraApplication.run(StreamingApp.class, args);
     }
 
     @Component

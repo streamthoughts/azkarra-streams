@@ -1,5 +1,5 @@
 ---
-date: 2020-06-26
+date: 2020-09-24
 title: "Getting Started"
 linkTitle: "Getting Started"
 weight: 10
@@ -22,16 +22,22 @@ The prerequisites for this tutorial are :
 
 We are going to use a Azkarra Streams Maven Archetype for creating a simple project structure.
 First, run this following command : 
+
+*For Java*
 ```bash
 $> mvn archetype:generate -DarchetypeGroupId=io.streamthoughts \
 -DarchetypeArtifactId=azkarra-quickstart-java \
--DarchetypeVersion=0.7.4 \
+-DarchetypeVersion=0.8.0 \
 -DgroupId=azkarra.streams \
 -DartifactId=azkarra-getting-started \
 -Dversion=1.0-SNAPSHOT \
 -Dpackage=azkarra \
 -DinteractiveMode=false
 ```
+
+*For Kotlin*
+
+Kotlin users can use the archetype `azkarra-quickstart-kotlin`.
 
 Maven will create a new project with the following structure : 
 
@@ -40,12 +46,11 @@ $> tree azkarra-getting-started
  azkarra-getting-started
 ├── docker-compose.yml
 ├── pom.xml
-├── quickstart-create-wordcount-topics.sh
 └── src
     └── main
         ├── java
         │   └── azkarra
-        │       ├── SimpleStreamsApp.java
+        │       ├── StreamingApp.java
         │       └── Version.java
         └── resources
             ├── application.conf
@@ -60,16 +65,24 @@ The `pom.xml` already contains the Azkarra Streams and Kafka Streams dependencie
     <dependency>
         <groupId>org.apache.kafka</groupId>
         <artifactId>kafka-streams</artifactId>
-        <version>2.5.0</version>
+        <version>${kafka.streams.version}</version>
     </dependency>
 
     <dependency>
         <groupId>io.streamthoughts</groupId>
         <artifactId>azkarra-streams</artifactId>
-        <version>0.7.4</version>
+        <version>${azkarra.streams.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>io.streamthoughts</groupId>
+        <artifactId>azkarra-metrics</artifactId>
+        <version>${azkarra.streams.version}</version>
+        <scope>compile</scope>
     </dependency>
 </dependencies>
 ```
+
+*Note: The Azkarra project tries to keep up to date with the latest version available for Kafka Streams*
 
 By default, Maven resources files are add to `src/main/resources`
 The archetype contains a default configuration file `application.conf` that we can ignore for the moment. We will come back to this later.
@@ -86,17 +99,17 @@ $> cd azkarra-getting-started
 $> rm -rf src/main/java/azkarra/*.java
 ```
 
-First, let's create a new file `src/main/java/azkarra/SimpleStreamsApp.java` with a basic java `main(String[] args)` method.
+First, let's create a new file `src/main/java/azkarra/StreamingApp.java` with a basic java `main(String[] args)` method.
 
 ```java
-public class SimpleStreamsApp {
+public class StreamingApp {
     public static void main(final String[] args) {
     }
 }
 ```
-In Azkarra, we have to implement the `TopologyProvider` interface in order to return a `Topology` instance through a method `get()`.
+In Azkarra, we have to implement the `TopologyProvider` interface in order to return a `Topology` instance through a method `topology()`.
 For our example, we will start by creating a new class named `WordCountTopologyProvider` which implements this interface.
-To keep it simple, you can declare a nested class into `SimpleStreamsApp`.
+To keep it simple, you can declare a nested class into `StreamingApp`.
  
 ```java
 public static class WordCountTopologyProvider implements TopologyProvider {
@@ -105,7 +118,7 @@ public static class WordCountTopologyProvider implements TopologyProvider {
     public String version() { return "1.0-SNAPSHOT"; }
 
     @Override
-    public Topology get() {
+    public Topology topology() {
         final StreamsBuilder builder = new StreamsBuilder();
 
         final KStream<String, String> source = builder.stream("streams-plaintext-input");
@@ -151,7 +164,7 @@ Add the following lines of code in the `main()` method :
 
 ```java
 // Then, define the Kafka Streams configuration.
-Map<String, Object> props = new HashMap<>();
+var props = new HashMap<String, Object>();
 props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -160,7 +173,7 @@ props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getCla
 Then, we can register the `WordCountTopologyProvider` previously define to our environment.
 
 ```java
-Conf config = Conf.with("streams", props);
+Conf config = Conf.of("streams", props);
 env.addTopology(WordCountTopologyProvider::new, Executed.as("wordcount").withConfig(config));
 ```
 
@@ -196,21 +209,21 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-public class SimpleStreamsApp {
+
+public class StreamingApp {
 
     public static void main(final String[] args) {
         // First, create an environment for executing our Topology.
         StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create();
 
         // Then, define the Kafka Streams configuration,
-        Map<String, Object> props = new HashMap<>();
+        var props = new HashMap<String, Object>();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
         // And register the TopologyProvider to the environment.
-        Conf config = Conf.with("streams", props);
+        var config = Conf.of("streams", props);
         env.addTopology(
             WordCountTopologyProvider::new,
             Executed.as("wordcount").withConfig(config)
@@ -224,7 +237,7 @@ public class SimpleStreamsApp {
         public String version() { return "1.0"; }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             final StreamsBuilder builder = new StreamsBuilder();
 
             final KStream<String, String> source = builder.stream("streams-plaintext-input");
@@ -271,7 +284,7 @@ public static class WordCountTopologyProvider implements TopologyProvider, Confi
     public String version() { return "1.0"; }
 
     @Override
-    public Topology get() {
+    public Topology topology() {
         final StreamsBuilder builder = new StreamsBuilder();
 
         final KStream<String, String> source = builder.stream(topicSource);
@@ -292,21 +305,19 @@ public static class WordCountTopologyProvider implements TopologyProvider, Confi
 Now, we can update the configuration defined above in order to configure our `WordCountTopologyProvider` class.
 The `StreamsExecutionEnvironment` will be responsible for invoking the method `configure()` before retrieving the `Topology`.
 
-For doing this, we can use the helper class `ConfBuilder`.
-
 ```java
-Conf config = ConfBuilder.newConf()
-    .with("streams", props)
-    .with("topic.source", "streams-plaintext-input")
-    .with("topic.sink", "streams-wordcount-output")
-    .with("state.store.name", "WordCount")
-    .build();
+var config = Conf.of(
+    "streams", props,
+    "topic.source", "streams-plaintext-input",
+    "topic.sink", "streams-wordcount-output",
+    "state.store.name", "WordCount"
+);
 
-    // And register the TopologyProvider to the environment.
-    env.addTopology(
-        WordCountTopologyProvider::new,
-        Executed.as("wordcount").withConfig(config)
-    );
+// And register the TopologyProvider to the environment.
+env.addTopology(
+    WordCountTopologyProvider::new,
+    Executed.as("wordcount").withConfig(config)
+);
 ```
 
 Instead of configuring our streams and our provider on the topology-level, we can passed the configuration to the `StreamsExecutionEnvironment`. 
@@ -326,7 +337,6 @@ package azkarra;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.ConfBuilder;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
@@ -341,23 +351,22 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
-public class SimpleStreamsApp {
+public class StreamingApp {
 
     public static void main(final String[] args) {
         // First, define the Kafka Streams configuration,
-        Map<String, Object> props = new HashMap<>();
+        var props = new HashMap<String, Object>();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
-        final Conf config = ConfBuilder.newConf()
-            .with("streams", props)
-            .with("topic.source", "streams-plaintext-input")
-            .with("topic.sink", "streams-wordcount-output")
-            .with("state.store.name", "WordCount")
-            .build();
+        var config = Conf.of(
+            "streams", props,
+            "topic.source", "streams-plaintext-input",
+            "topic.sink", "streams-wordcount-output",
+            "state.store.name", "WordCount"
+        );
 
         // Then, create an environment for executing our Topology.
         StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create(config);
@@ -386,7 +395,7 @@ public class SimpleStreamsApp {
         public String version() { return "1.0"; }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             final StreamsBuilder builder = new StreamsBuilder();
 
             final KStream<String, String> source = builder.stream(topicSource);
@@ -416,17 +425,17 @@ Replace your `main()` method with the code below :
 ```java
 public static void main(final String[] args) {
     // First, define the Kafka Streams configuration,
-    Map<String, Object> props = new HashMap<>();
+    var props = new HashMap<String, Object>();
     props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
     props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
-    final Conf config = ConfBuilder.newConf()
-        .with("streams", props)
-        .with("topic.source", "streams-plaintext-input")
-        .with("topic.sink", "streams-wordcount-output")
-        .with("state.store.name", "WordCount")
-        .build();
+    var config = Conf.of(
+        "streams", props,
+        "topic.source", "streams-plaintext-input",
+        "topic.sink", "streams-wordcount-output",
+        "state.store.name", "WordCount"
+    );
 
     // Then, create an environment for executing our Topology.
     StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create();
@@ -466,14 +475,7 @@ $> docker-compose up -d
 ```
 
 Next, we have to create the two source and sink topics used by the topology.
-For that, you can run the provided script : 
-
-```bash
-$> chmod u+x ./quickstart-create-wordcount-topics.sh
-$> ./quickstart-create-wordcount-topics.sh
-```
-
-Or directly run those commands :
+For that, you can run the following commands :
 
 ```bash
 $> docker exec -it azkarra-cp-broker /usr/bin/kafka-topics \
@@ -486,7 +488,7 @@ $> docker exec -it azkarra-cp-broker /usr/bin/kafka-topics \
 As a last step, we will package and run the Maven project :
 
 ```bash
-$> mvn clean package && java -jar target/azkarra-quickstart-java-0.7.4.jar
+$> mvn clean package && java -jar target/azkarra-getting-started-1.0-SNAPSHOT.jar
 ```
 
 Let's produce some input messages to Kafka topic `streams-plaintext-input` : 
@@ -575,7 +577,7 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.util.Arrays;
 
-public class SimpleStreamsApp {
+public class StreamingApp {
 
     public static void main(final String[] args) {
         // Create a new AzkarraConf from the classpath file application.conf
@@ -621,7 +623,7 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.util.Arrays;
 
-public class SimpleStreamsApp {
+public class StreamingApp {
 
     public static void main(final String[] args) {
         // Create configuration from externalized file.
@@ -695,7 +697,7 @@ The HTTP-Server can be enable and configured via the `AzkarraApplication` as fol
 ```java
 AzkarraConf config = AzkarraConf.create();
 
-new AzkarraApplication(SimpleStreamsApp.class)
+new AzkarraApplication(StreamingApp.class)
     .setConfiguration(config)
      // Enable http server and set the context.
     .enableHttpServer(true, HttpServerConf.with("localhost", 8080))
@@ -755,10 +757,10 @@ import org.apache.kafka.streams.kstream.Produced;
 import java.util.Arrays;
 
 @AzkarraStreamsApplication
-public class SimpleStreamsApp {
+public class StreamingApp {
 
     public static void main(final String[] args) {
-        AzkarraApplication.run(SimpleStreamsApp.class, args);
+        AzkarraApplication.run(StreamingApp.class, args);
     }
 
     @Component
@@ -781,7 +783,7 @@ public class SimpleStreamsApp {
         }
 
         @Override
-        public Topology get() {
+        public Topology topology() {
             final StreamsBuilder builder = new StreamsBuilder();
 
             final KStream<String, String> source = builder.stream(topicSource);

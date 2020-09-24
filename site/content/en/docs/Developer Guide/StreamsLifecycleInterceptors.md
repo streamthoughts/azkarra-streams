@@ -1,5 +1,5 @@
 ---
-date: 2020-05-09
+date: 2020-09-24
 title: "StreamsLifecycleInterceptor"
 linkTitle: "The StreamsLifecycle Intercepting Chain"
 weight: 70
@@ -83,6 +83,14 @@ your *application.conf* file.
 
 In addition, you can enable that interceptor per environment using the `StreamsExecutionEnvironment#setWaitForTopicsToBeCreated` method.
 
+### 4.1 Configuration properties
+
+| Property                                | Type                | Description                                                         |
+|-----------------------------------------|-------------------- |---------------------------------------------------------------------|
+|  `wait.for.topics.timeout.enable        |  boolean            | If `true`, enable and configure the interceptor. |
+|  `wait.for.topics.timeout.ms`           |  boolean            | Wait until topics are created or this timeout is reached (Default is `LONG.MAX_VALUE`). |
+|  `wait.for.topics.exclude.patterns`     |  list               | A comma separated list of topics (regex) that the interceptor should not wait for (optional). |
+
 ## 5 AutoCreateTopicsInterceptor
 
 During the development phase, you may find yourself creating and deleting Kafka topics manually and before each run of your application.
@@ -156,7 +164,7 @@ Note: This property should be used with care and not enable for production.
 |-----------------------------------------|-------------------- |---------------------------------------------------------------------|
 |  `auto.delete.topics.enable`            |  boolean            | If `true`, deletes all topics after the streams is stopped (should only be used for development) |
 
-## 8.6 MonitoringStreamsInterceptor
+## 6 MonitoringStreamsInterceptor
 
 As of Azkarra v0.7.0, you can configure the built-in `MonitoringStreamsInterceptor` to periodically publish a state event of your `KafkaStreams` instance directly into a Kafka topic (default: `_azkarra-streams-monitoring`).
 
@@ -175,15 +183,16 @@ The following example shows a CloudEvent published by the `MonitoringStreamsInte
 
 ```json
 {
-  "id": "appid:basic-word-count;appsrv:localhost:8082;ts:1588976019636", ①
-  "source": "azkarra/ks/localhost:8082",                                 ② 
+  "id": "appid:basic-word-count-0-8-0;appsrv:localhost:8080;ts:1600951440046",   ① 
+  "source": "arn://kafka=CFPFUjoZQnWcST8Dhh5Grw/host=localhost/port=8080",       ② 
+  "subject": "arn://kafka=CFPFUjoZQnWcST8Dhh5Grw/host=localhost/port=8080/streams=basic-word-count-0-8-0",
   "specversion": "1.0",                                                  ③
   "type": "io.streamthoughts.azkarra.streams.stateupdateevent",          ④
   "time": "2020-05-08T22:13:39.636+0000",                                ⑤
   "datacontenttype": "application/json",                                 ⑥ 
   "ioazkarramonitorintervalms": 10000,                                   ⑦
   "ioazkarrastreamsappid": "basic-word-count",                           ⑧
-  "ioazkarraversion": "0.7.0-SNAPSHOT",                                  ⑨
+  "ioazkarraversion": "0.8.0",                                           ⑨
   "ioazkarrastreamsappserver": "localhost:8082"                          ⑩
   "data": {                                                              ⑪
     "state": "RUNNING",
@@ -255,13 +264,26 @@ The following example shows a CloudEvent published by the `MonitoringStreamsInte
         }
       ]
     },
+    "stores": [
+      {
+        "name": "count",
+        "positions": [
+          {
+            "partition": 0,
+            "current_offset": 0,
+            "log_end_offset": 0,
+            "offset_lag": 0
+          }
+        ]
+      }
+    ],
     "state_changed_time": 1588975839528
   }
 }
 ```
 
-* **①** The unique id of the state change event, based on the application id, the application server and the Unix epoch
-* **②** The source of the event; i.e the application server.
+* **①** The unique id of the state change event, based on the : `application.id`, `application.server` and Unix epoch
+* **②** The source of the event based on the: Kafka Cluster ID and `application.server` (note: arn=Azkarra Resource Name)
 * **③** The CloudEvents specification versions
 * **④** The type of change state event
 * **⑤** Time of the state change or the event is emit
@@ -282,8 +304,22 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 
 | Property                                | Type                | Description                                                         |
 |-----------------------------------------|-------------------- |---------------------------------------------------------------------|
-|  `monitoring.streams.interceptor.enable`           | boolean  | If `true`, enable and configure the interceptor |
-|  `monitoring.streams.interceptor.interval.ms`      | long     | The period the interceptor should use to send a streams state event (Default is 10 seconds).
-|  `monitoring.streams.interceptor.topic`            | string   | The topic on which monitoring event will be sent (Default is _azkarra-streams-monitoring). |
-| `monitoring.streams.interceptor.advertised.server` | string   | The server name that will be included in monitoring events. If not specified, the streams `application.server` property is used. |
-| `monitoring.streams.interceptor.ce.extensions`     | list     | The list of extension attributes that should be included in monitoring events. |
+| `monitoring.streams.interceptor.enable`                 | boolean  | If `true`, enable and configure the interceptor |
+| `monitoring.streams.interceptor.interval.ms`             | long     | The period the interceptor should use to send a streams state event (Default is 10 seconds).
+| `monitoring.streams.interceptor.topic`                   | string   | The topic on which monitoring event will be sent (Default is `_azkarra-streams-monitoring`). |
+| `monitoring.streams.interceptor.advertised.server`       | string   | The server name that will be included in monitoring events. If not specified, the streams `application.server` property is used. |
+| `monitoring.streams.interceptor.ce.extensions`           | list     | The list of extension attributes that should be included in monitoring events. |
+| `monitoring.streams.interceptor.info.enabled.stores.lag` | boolean     |  If `true`, the interceptor will also report offset-lag for local state stores |
+
+## 7 KafkaBrokerReaderInterceptor
+
+This interceptor waits for a number of broker to be available before starting the Kafka Streams application.
+
+### 7.1 Configuration properties
+
+| Property                                | Type                | Description                                                         |
+|-----------------------------------------|-------------------- |---------------------------------------------------------------------|
+| `kafka.ready.interceptor.enable`                 | boolean  | If `true`, enable and configure the interceptor |
+| `kafka.ready.interceptor.timeout.ms`             | long     | Wait until brokers are available or this timeout is reached (Default is `60000`).
+| `kafka.ready.interceptor.retry.backoff.ms`       | long     | The amount of time to wait before verifying that brokers are available (Default is `1000`). |
+| `kafka.ready.interceptor.min.available.brokers`  | int      | The minimal number of broker that should be alive for the interceptor stops waiting (Default is `1`) |
