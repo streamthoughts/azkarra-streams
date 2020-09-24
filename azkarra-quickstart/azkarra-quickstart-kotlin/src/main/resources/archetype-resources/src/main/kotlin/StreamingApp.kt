@@ -53,9 +53,9 @@ object StreamingApp {
     @Component
     class WordCountTopologyProvider: TopologyProvider, Configurable {
 
-        lateinit var topicSource: String
-        lateinit var topicSink: String
-        lateinit var stateStoreName: String
+        private lateinit var topicSource: String
+        private lateinit var topicSink: String
+        private lateinit var stateStoreName: String
 
         override fun configure(conf: Conf) {
             topicSource = conf.getOptionalString("topic.source")
