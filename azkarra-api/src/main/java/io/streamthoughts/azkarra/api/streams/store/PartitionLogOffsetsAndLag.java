@@ -54,22 +54,22 @@ public class PartitionLogOffsetsAndLag {
         this.lag = offsetLag;
     }
 
-    @JsonProperty
-    public int topicPartition() {
+    @JsonProperty("partition")
+    public int partition() {
         return partition;
     }
 
-    @JsonProperty
+    @JsonProperty("current_offset")
     public long currentOffset() {
         return currentOffset;
     }
 
-    @JsonProperty
+    @JsonProperty("log_end_offset")
     public long logEndOffset() {
         return logEndOffset;
     }
 
-    @JsonProperty
+    @JsonProperty("offset_lag")
     public long offsetLag() {
         return lag;
     }
