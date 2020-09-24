@@ -75,7 +75,7 @@ object StreamingApp {
             val source: KStream<String, String> = builder.stream(topicSource)
 
             val counts: KTable<String, Long> = source
-                .flatMapValues { value -> value.toLowerCase().split("\\W+") }
+                .flatMapValues { value -> value.toLowerCase().split("\\W+".toRegex()) }
                 .groupBy { _, value -> value }
                 .count(Materialized.`as`(stateStoreName))
 
