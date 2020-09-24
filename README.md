@@ -30,7 +30,7 @@ Azkarra is available in [Maven Central](https://mvnrepository.com/artifact/io.st
 <dependency>
   <groupId>io.streamthoughts</groupId>
   <artifactId>azkarra-streams</artifactId>
-  <version>0.7.4</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
