@@ -38,7 +38,7 @@ public class LimitHandlers {
     };
 
     /**
-     * @return a new {@link LimitHandler} that log anc continue when queue limit is reached.
+     * @return a new {@link LimitHandler} that logs and continues when queue limit is reached.
      */
     public static LimitHandler logAndContinueOnLimitReached() {
         return new LogAndContinueOnLimitReached();
@@ -53,7 +53,7 @@ public class LimitHandlers {
     }
 
     /**
-     * @return a new {@link LimitHandler} that retrieves and drop the head of the when queue limit is reached.
+     * @return a new {@link LimitHandler} that retrieves and drops the head of the queue when limit is reached.
      */
     public static LimitHandler dropHeadOnLimitReached() {
         return new FailOnLimitReached();

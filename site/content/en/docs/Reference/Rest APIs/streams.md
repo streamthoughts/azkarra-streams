@@ -288,3 +288,7 @@ Host: localhost:8080
 ```
 RESPONSE 200/OK
 ```
+
+## GET /api/v1/streams/(string: applicationId)/subscribe/(string: eventType)
+
+Establish a new Server-sent events (SSE) connection to receive a stream of updates from a local Kafka Streams instance.

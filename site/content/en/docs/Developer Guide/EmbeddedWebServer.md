@@ -1,5 +1,5 @@
 ---
-date: 2020-05-11
+date: 2020-09-25
 title: "Embedded Web Server"
 linkTitle: "Embedded Web Server"
 weight: 85
@@ -7,7 +7,6 @@ description: >
   Configuring Azkarra embedded web server
 
 ---
-
 
 ## 1 Introduction
 
@@ -226,4 +225,121 @@ Therefore, for the REST extensions to be found, you will have to create a file `
 ```
 com.example.StopKafkaRestExtensionContext
 ```
+
+## 5 Server-Sent-Event (SSE)
+     
+ Server-Sent Events is a technology that allows a client to receive a stream of events from a server over one persistent HTTP connection. SSE is a lightweight alternative to Websocket that provides an efficient unidirectional communication protocol with standard mechanisms for handling errors.
+ 
+ SSE can be a perfect solution :
+ 
+ * When you need to stream state-changes (i.e: records) directly to a target system with low-latency.
+ * When you want to use a unidirectional HTTP connection.
+ * When data loss is acceptable.
+ * When you don’t need or want to stream state-changes to an output Kafka topic.
+ 
+ Here’s a few examples where SSE can be used : 
+ * Updating real-time dashboard web application
+ * Keeping a target system up-to-date with very fast changing data
+ * Alerting
+     
+Azkarra provides the efficient and simple API called **Event Stream** to stream records 
+from your local topology to HTTP-clients using SSE (since 0.8).
+     
+### 5.1 The Event Stream API
+
+An `EventStream` object is used to capture and expose KeyValue records outside of a `KafkaStreams` topology.
+
+Each `EventStream` is attached to a named type and a `BlockingRecordQueue` which is used to buffer 
+records to be sent to HTTP-clients.
+
+There is no limit to the number of `EventStream` you can create.
+
+Here's how to build a new `EventStream` instance : 
+
+```java
+var eventStream = new EventStream.Builder("event-type-name")
+    .withQueueSize(1000)
+    .withQueueLimitHandler(LimitHandlers.dropHeadOnLimitReached())
+    .build();
+```
+
+In addition to the `queue size`, you can also specify a `LimitHandler` that will be invoked each time a record cannot 
+be offered to the internal queue because it's full. 
+
+Azkarra provides three built-in `LimitHandler`s: 
+
+* `LimitHandlers.dropHeadOnLimitReached()`: Retrieves and drops the head of the queue.
+* `LimitHandlers.logAndContinueOnLimitReached()`: Logs the rejected record and continues.
+* `LimitHandlers.throwExceptionOnLimitReached()`: Throws an exception when limit is reached. 
+
+All `EventStream` objects must be provided through the `eventStreams` method of the `EventStreamProvider` interface
+implemented by your `Topology` provider (i.e: `TopologyProvider`).
+
+The `EventStreamProvider` interface : 
+
+```java
+public interface EventStreamProvider {
+    List<EventStream> eventStreams();
+}
+```
+
+In general, you will directly extend the `EventStreamSupport` class that exposes some convenient methods.
+     
+Here’s a complete topology example :
+     
+```java
+@Component
+// (O) Extend EventStreamSupport or implement the EventStreamProvider interface
+public class ServerSentEventsWordCountTopology 
+        extends EventStreamSupport 
+        implements TopologyProvider {
+
+    private EventStream<String, Long> wordCountStream;
+
+    public ServerSentEventsWordCountTopology() {
+        // (1) Create a new EventStream for word counts updates.
+        wordCountStream = new EventStream.Builder("word-count")
+            .withQueueSize(10_000)
+            .withQueueLimitHandler(LimitHandlers.dropHeadOnLimitReached())
+            .build();
+        // (2) Register the EventStream
+        addEventStream(wordCountStream);
+    }
+
+    @Override
+    public Topology topology() {
+        var builder = new StreamsBuilder();
+        builder.<String, String>stream("text-lines")
+            .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
+            .groupBy((key, value) -> value)
+            .count(Materialized.as("WordCount"))
+            .toStream()
+            // (3) send record to the EventStream      
+            .foreach( (k, v) -> wordCountStream.send(k, v));  
+
+        return builder.build();
+    }
+
+    @Override
+    public String version() { return Version.getVersion(); }
+}
+```
+     
+### 5.2 The REST Endpoint
+
+To subscribe to an event-streams and start receiving records from a specific stream application you can 
+initialize an SSE connection thought the following REST endpoint : 
+
+```
+GET /api/v1/streams/(string: applicationId)/subscribe/(string: eventType)
+```
+     
+### 5.2 How to deal with multiple instances of Kafka Streams ?
+
+When subscribing to an event-stream only records from the local Kafka Streams instance are sent over the HTTP-Connection.
+Thus you will have to establish one SSE connections for each Kafka Streams application.
+     
+### 5.3 Multiple HTTP-clients subscribing to the same event stream
+
+One or more HTTP clients can subscribe to the same event stream. All clients will receive all records sent in the event stream.
 

@@ -1,5 +1,5 @@
 ---
-date: 2020-02-12
+date: 2020-09-25
 title: "Configuration"
 linkTitle: "Configuration"
 weight: 30
@@ -33,3 +33,27 @@ The Azkarra project provides some built-in `Conf` implementations which are used
 * **Property** : A single key-value with configuration.
 
 The `Conf` interface define methods : `getConfAsMap` and `getConfAsProperties` which be can used to easily creating a Consumer/Producer/KafkaStreams instance.
+
+## 3 The `@ConfValue` annotation
+
+The `@ConfValue` annotation can be used to set default config values to a configurable component.
+
+```java
+@ConfValue("key", "value")
+@Component
+public MyComponent implements Configurable {
+    public void configure(final Conf configuration);
+}
+```
+
+## 3.1 `@ExactlyOnce`
+
+Set the default stream property `processing.guarantee` to ` StreamsConfig.EXACTLY_ONCE`.
+
+The `@ExactlyOnce` annotation must be used on a `TopologyProvider`.
+
+## 3.2 `@AtLeastOnce`
+
+Set the default stream property `processing.guarantee` to ` StreamsConfig.AT_LEAST_ONCE`.
+
+The `@ExactlyOnce` annotation must be used on a `TopologyProvider`.

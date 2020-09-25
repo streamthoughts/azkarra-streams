@@ -87,9 +87,9 @@ In addition, you can enable that interceptor per environment using the `StreamsE
 
 | Property                                | Type                | Description                                                         |
 |-----------------------------------------|-------------------- |---------------------------------------------------------------------|
-|  `wait.for.topics.timeout.enable        |  boolean            | If `true`, enable and configure the interceptor. |
+|  `wait.for.topics.timeout.enable`       |  boolean            | If `true`, enable and configure the interceptor. |
 |  `wait.for.topics.timeout.ms`           |  boolean            | Wait until topics are created or this timeout is reached (Default is `LONG.MAX_VALUE`). |
-|  `wait.for.topics.exclude.patterns`     |  list               | A comma separated list of topics (regex) that the interceptor should not wait for (optional). |
+|  `wait.for.topics.exclude.patterns`     |  list               | The list list of topics (regex) that the interceptor should not wait for (optional). |
 
 ## 5 AutoCreateTopicsInterceptor
 
