@@ -25,14 +25,14 @@
 " />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/" />
-<meta property="article:published_time" content="2020-05-11T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-12T17:33:25+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:published_time" content="2020-09-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-25T23:44:26+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Embedded Web Server">
 <meta itemprop="description" content="Configuring Azkarra embedded web server
 ">
-<meta itemprop="datePublished" content="2020-05-11T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-12T17:33:25&#43;02:00" />
-<meta itemprop="wordCount" content="808">
+<meta itemprop="datePublished" content="2020-09-25T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-09-25T23:44:26&#43;02:00" />
+<meta itemprop="wordCount" content="1340">
 
 
 
@@ -1658,6 +1658,14 @@
       </ul>
     </li>
     <li><a href="#4-rest-extensions">4 REST Extensions</a></li>
+    <li><a href="#5-serversentevent-sse">5 Server-Sent-Event (SSE)</a>
+      <ul>
+        <li><a href="#51-the-event-stream-api">5.1 The Event Stream API</a></li>
+        <li><a href="#52-the-rest-endpoint">5.2 The REST Endpoint</a></li>
+        <li><a href="#52-how-to-deal-with-multiple-instances-of-kafka-streams-">5.2 How to deal with multiple instances of Kafka Streams ?</a></li>
+        <li><a href="#53-multiple-httpclients-subscribing-to-the-same-event-stream">5.3 Multiple HTTP-clients subscribing to the same event stream</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
 
@@ -1873,10 +1881,97 @@ The <code>AzkarraRestExtension</code> interface extends the <code>Configurable</
 <p>Therefore, for the REST extensions to be found, you will have to create a file <code>META-INF/services/io.streamthoughts.azkarra.api.server.AzkarraRestExtension</code> that contains the fully-qualified names of classes that implements the <code>StopKafkaRestExtensionContext</code> interface.</p>
 <p><strong>Example</strong>:</p>
 <pre><code>com.example.StopKafkaRestExtensionContext
-</code></pre>
+</code></pre><h2 id="5-serversentevent-sse">5 Server-Sent-Event (SSE)</h2>
+<p>Server-Sent Events is a technology that allows a client to receive a stream of events from a server over one persistent HTTP connection. SSE is a lightweight alternative to Websocket that provides an efficient unidirectional communication protocol with standard mechanisms for handling errors.</p>
+<p>SSE can be a perfect solution :</p>
+<ul>
+<li>When you need to stream state-changes (i.e: records) directly to a target system with low-latency.</li>
+<li>When you want to use a unidirectional HTTP connection.</li>
+<li>When data loss is acceptable.</li>
+<li>When you don’t need or want to stream state-changes to an output Kafka topic.</li>
+</ul>
+<p>Here’s a few examples where SSE can be used :</p>
+<ul>
+<li>Updating real-time dashboard web application</li>
+<li>Keeping a target system up-to-date with very fast changing data</li>
+<li>Alerting</li>
+</ul>
+<p>Azkarra provides the efficient and simple API called <strong>Event Stream</strong> to stream records
+from your local topology to HTTP-clients using SSE (since 0.8).</p>
+<h3 id="51-the-event-stream-api">5.1 The Event Stream API</h3>
+<p>An <code>EventStream</code> object is used to capture and expose KeyValue records outside of a <code>KafkaStreams</code> topology.</p>
+<p>Each <code>EventStream</code> is attached to a named type and a <code>BlockingRecordQueue</code> which is used to buffer
+records to be sent to HTTP-clients.</p>
+<p>There is no limit to the number of <code>EventStream</code> you can create.</p>
+<p>Here's how to build a new <code>EventStream</code> instance :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">var</span> <span style="color:#000">eventStream</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">EventStream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">Builder</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;event-type-name&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">withQueueSize</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">1000</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">withQueueLimitHandler</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">LimitHandlers</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">dropHeadOnLimitReached</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+</code></pre></div><p>In addition to the <code>queue size</code>, you can also specify a <code>LimitHandler</code> that will be invoked each time a record cannot
+be offered to the internal queue because it's full.</p>
+<p>Azkarra provides three built-in <code>LimitHandler</code>s:</p>
+<ul>
+<li><code>LimitHandlers.dropHeadOnLimitReached()</code>: Retrieves and drops the head of the queue.</li>
+<li><code>LimitHandlers.logAndContinueOnLimitReached()</code>: Logs the rejected record and continues.</li>
+<li><code>LimitHandlers.throwExceptionOnLimitReached()</code>: Throws an exception when limit is reached.</li>
+</ul>
+<p>All <code>EventStream</code> objects must be provided through the <code>eventStreams</code> method of the <code>EventStreamProvider</code> interface
+implemented by your <code>Topology</code> provider (i.e: <code>TopologyProvider</code>).</p>
+<p>The <code>EventStreamProvider</code> interface :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">interface</span> <span style="color:#000">EventStreamProvider</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+    <span style="color:#000">List</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">EventStream</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">eventStreams</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><p>In general, you will directly extend the <code>EventStreamSupport</code> class that exposes some convenient methods.</p>
+<p>Here’s a complete topology example :</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@Component</span>
+<span style="color:#8f5902;font-style:italic">// (O) Extend EventStreamSupport or implement the EventStreamProvider interface
+</span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">ServerSentEventsWordCountTopology</span> 
+        <span style="color:#204a87;font-weight:bold">extends</span> <span style="color:#000">EventStreamSupport</span> 
+        <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">TopologyProvider</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+
+    <span style="color:#204a87;font-weight:bold">private</span> <span style="color:#000">EventStream</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Long</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">wordCountStream</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">ServerSentEventsWordCountTopology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#8f5902;font-style:italic">// (1) Create a new EventStream for word counts updates.
+</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">wordCountStream</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">EventStream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">Builder</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;word-count&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">withQueueSize</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">10_000</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">withQueueLimitHandler</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">LimitHandlers</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">dropHeadOnLimitReached</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#8f5902;font-style:italic">// (2) Register the EventStream
+</span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">addEventStream</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">wordCountStream</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+        <span style="color:#000">var</span> <span style="color:#000">builder</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">StreamsBuilder</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+        <span style="color:#000">builder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;text-lines&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">flatMapValues</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">Arrays</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">asList</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">toLowerCase</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">split</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;\\W+&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">groupBy</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">key</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">count</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">Materialized</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">as</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;WordCount&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">toStream</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
+            <span style="color:#8f5902;font-style:italic">// (3) send record to the EventStream      
+</span><span style="color:#8f5902;font-style:italic"></span>            <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">foreach</span><span style="color:#ce5c00;font-weight:bold">(</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">k</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">v</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">wordCountStream</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">send</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">k</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">v</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>  
+
+        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">builder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+    <span style="color:#ce5c00;font-weight:bold">}</span>
+
+    <span style="color:#5c35cc;font-weight:bold">@Override</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">String</span> <span style="color:#000">version</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span> <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">Version</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getVersion</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> <span style="color:#ce5c00;font-weight:bold">}</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><h3 id="52-the-rest-endpoint">5.2 The REST Endpoint</h3>
+<p>To subscribe to an event-streams and start receiving records from a specific stream application you can
+initialize an SSE connection thought the following REST endpoint :</p>
+<pre><code>GET /api/v1/streams/(string: applicationId)/subscribe/(string: eventType)
+</code></pre><h3 id="52-how-to-deal-with-multiple-instances-of-kafka-streams-">5.2 How to deal with multiple instances of Kafka Streams ?</h3>
+<p>When subscribing to an event-stream only records from the local Kafka Streams instance are sent over the HTTP-Connection.
+Thus you will have to establish one SSE connections for each Kafka Streams application.</p>
+<h3 id="53-multiple-httpclients-subscribing-to-the-same-event-stream">5.3 Multiple HTTP-clients subscribing to the same event stream</h3>
+<p>One or more HTTP clients can subscribe to the same event stream. All clients will receive all records sent in the event stream.</p>
+
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 12, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/bde9eb946af4372c20db45faa7d2b3694589900e">fix(site): fix some typos (bde9eb9)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified September 25, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/69182c5e4891dff21d49e9cd1eab68c7bd67ee43">update(site): add docs for SSE (69182c5)</a>
 </div>
 </div>
 

@@ -25,14 +25,14 @@
 " />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/configuration/" />
-<meta property="article:published_time" content="2020-02-12T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-09T00:43:49+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:published_time" content="2020-09-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-25T23:44:26+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Configuration">
 <meta itemprop="description" content="How to configure your application ?
 ">
-<meta itemprop="datePublished" content="2020-02-12T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-09T00:43:49&#43;02:00" />
-<meta itemprop="wordCount" content="161">
+<meta itemprop="datePublished" content="2020-09-25T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-09-25T23:44:26&#43;02:00" />
+<meta itemprop="wordCount" content="232">
 
 
 
@@ -1651,6 +1651,9 @@
   <ul>
     <li><a href="#1-the-configurable-interface">1 The Configurable interface</a></li>
     <li><a href="#2-the-conf-interface">2 The Conf interface</a></li>
+    <li><a href="#3-the-confvalue-annotation">3 The @ConfValue annotation</a></li>
+    <li><a href="#31-exactlyonce">3.1 @ExactlyOnce</a></li>
+    <li><a href="#32-atleastonce">3.2 @AtLeastOnce</a></li>
   </ul>
 </nav>
 
@@ -1718,10 +1721,23 @@ with the <code>Conf</code> provided through the <code>Executed</code> object.</p
 <li><strong>Property</strong> : A single key-value with configuration.</li>
 </ul>
 <p>The <code>Conf</code> interface define methods : <code>getConfAsMap</code> and <code>getConfAsProperties</code> which be can used to easily creating a Consumer/Producer/KafkaStreams instance.</p>
+<h2 id="3-the-confvalue-annotation">3 The <code>@ConfValue</code> annotation</h2>
+<p>The <code>@ConfValue</code> annotation can be used to set default config values to a configurable component.</p>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@ConfValue</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;key&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;value&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<span style="color:#5c35cc;font-weight:bold">@Component</span>
+<span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">MyComponent</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">Configurable</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">configuration</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+<span style="color:#ce5c00;font-weight:bold">}</span>
+</code></pre></div><h2 id="31-exactlyonce">3.1 <code>@ExactlyOnce</code></h2>
+<p>Set the default stream property <code>processing.guarantee</code> to <code> StreamsConfig.EXACTLY_ONCE</code>.</p>
+<p>The <code>@ExactlyOnce</code> annotation must be used on a <code>TopologyProvider</code>.</p>
+<h2 id="32-atleastonce">3.2 <code>@AtLeastOnce</code></h2>
+<p>Set the default stream property <code>processing.guarantee</code> to <code> StreamsConfig.AT_LEAST_ONCE</code>.</p>
+<p>The <code>@ExactlyOnce</code> annotation must be used on a <code>TopologyProvider</code>.</p>
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 9, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/0b26ef6365dfa6a71542b67ae96b4261e0bbb735">docs(site): update Azkarra website for release 0.7.0 (0b26ef6)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified September 25, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/69182c5e4891dff21d49e9cd1eab68c7bd67ee43">update(site): add docs for SSE (69182c5)</a>
 </div>
 </div>
 

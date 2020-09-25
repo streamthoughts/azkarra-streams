@@ -502,7 +502,9 @@ Host: localhost:8080
 }
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Example Response&lt;/strong&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;RESPONSE 200/OK
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;get-apiv1streamsstring-applicationidsubscribestring-eventtype&#34;&gt;GET /api/v1/streams/(string: applicationId)/subscribe/(string: eventType)&lt;/h2&gt;
+&lt;p&gt;Establish a new Server-sent events (SSE) connection to receive a stream of updates from a local Kafka Streams instance.&lt;/p&gt;
+
       </description>
     </item>
     

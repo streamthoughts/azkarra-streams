@@ -193,6 +193,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/developer-guide/configuration/</loc>
+    <lastmod>2020-09-25T23:44:26+02:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/azkarra-dashboard/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
   </url>
@@ -205,11 +210,6 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/configuration/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://www.azkarrastreams.io/docs/developer-guide/configuration/</loc>
-    <lastmod>2020-05-09T00:43:49+02:00</lastmod>
   </url>
   
   <url>
@@ -274,7 +274,7 @@
   
   <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/</loc>
-    <lastmod>2020-09-24T12:45:36+02:00</lastmod>
+    <lastmod>2020-09-25T23:44:26+02:00</lastmod>
   </url>
   
   <url>
@@ -293,13 +293,13 @@
   </url>
   
   <url>
-    <loc>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/embeddedwebserver/</loc>
-    <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+    <loc>http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/</loc>
+    <lastmod>2020-09-25T23:44:26+02:00</lastmod>
   </url>
   
   <url>
-    <loc>http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/</loc>
-    <lastmod>2020-05-12T17:33:25+02:00</lastmod>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/embeddedwebserver/</loc>
+    <lastmod>2020-06-17T21:51:25+02:00</lastmod>
   </url>
   
   <url>
@@ -469,7 +469,7 @@
   
   <url>
     <loc>http://www.azkarrastreams.io/docs/reference/rest-apis/streams/</loc>
-    <lastmod>2020-05-09T00:43:49+02:00</lastmod>
+    <lastmod>2020-09-25T23:44:26+02:00</lastmod>
   </url>
   
   <url>

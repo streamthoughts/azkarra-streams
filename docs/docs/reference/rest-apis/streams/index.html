@@ -26,13 +26,13 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/reference/rest-apis/streams/" />
 <meta property="article:published_time" content="2019-11-29T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-09T00:43:49+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:modified_time" content="2020-09-25T23:44:26+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Streams">
 <meta itemprop="description" content="Endpoints for retrieving information about streams instances running locally.
 ">
 <meta itemprop="datePublished" content="2019-11-29T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-09T00:43:49&#43;02:00" />
-<meta itemprop="wordCount" content="508">
+<meta itemprop="dateModified" content="2020-09-25T23:44:26&#43;02:00" />
+<meta itemprop="wordCount" content="531">
 
 
 
@@ -1660,6 +1660,7 @@
     <li><a href="#get-apiv1streamsstring-applicationidmetricsgroupgroupnamenamevalue">GET /api/v1/streams/(string: applicationId)/metrics/group/{group}/name/{name}/value</a></li>
     <li><a href="#post-apiv1streamsstring-applicationidrestart">POST /api/v1/streams/(string: applicationId)/restart</a></li>
     <li><a href="#delete-apiv1streamsstring-applicationidstop">DELETE /api/v1/streams/(string: applicationId)/stop</a></li>
+    <li><a href="#get-apiv1streamsstring-applicationidsubscribestring-eventtype">GET /api/v1/streams/(string: applicationId)/subscribe/(string: eventType)</a></li>
   </ul>
 </nav>
 
@@ -1955,10 +1956,12 @@ Host: localhost:8080
 }
 </code></pre><p><strong>Example Response</strong></p>
 <pre><code>RESPONSE 200/OK
-</code></pre>
+</code></pre><h2 id="get-apiv1streamsstring-applicationidsubscribestring-eventtype">GET /api/v1/streams/(string: applicationId)/subscribe/(string: eventType)</h2>
+<p>Establish a new Server-sent events (SSE) connection to receive a stream of updates from a local Kafka Streams instance.</p>
+
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 9, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/0b26ef6365dfa6a71542b67ae96b4261e0bbb735">docs(site): update Azkarra website for release 0.7.0 (0b26ef6)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified September 25, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/69182c5e4891dff21d49e9cd1eab68c7bd67ee43">update(site): add docs for SSE (69182c5)</a>
 </div>
 </div>
 
