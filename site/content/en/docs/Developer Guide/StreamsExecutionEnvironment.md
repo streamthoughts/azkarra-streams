@@ -1,5 +1,5 @@
 ---
-date: 2020-02-12
+date: 2020-09-26
 title: "StreamsExecutionEnvironment"
 linkTitle: "StreamsExecutionEnvironment"
 weight: 20
@@ -24,7 +24,7 @@ Using Azkarra Streams, you no longer need to call the `KafkaStreams#start()` met
 ## 2 Configuring a `StreamsExecutionEnvironment`
 
 Each `StreamsExecutionEnvironment` can be configured with any property of your choice.
-The configuration can be passed direcly while creating a new instance: 
+The configuration can be passed directly while creating a new instance: 
 
 ```java
 Map<String, Object> props = new HashMap<>(); 
@@ -32,7 +32,7 @@ props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass()); (1)
 
-Conf streamsConfig = Conf.with("streams", props) (2)
+Conf streamsConfig = Conf.of("streams", props) (2)
 
 StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create(streamsConfig); (3)
 ```
@@ -40,7 +40,7 @@ StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create(stre
 or using the `setConfiguration` method: 
 
 ```java
-env.setConfiguration(Conf.with("streams", props)) (4)
+env.setConfiguration(Conf.of("streams", props)) (4)
 ```
 
 1. Create the `Map` to be used for configuring the `StreamsExecutionEnvironment`.
@@ -149,7 +149,7 @@ env.setKafkaStreamsFactory(() -> new KafkaStreamsFactory() {
 
 Azkarra provides the `StreamsExecutionEnvironmentAware` interface that components can implement to be notified of the `StreamsExecutionEnvironment` that it runs in.
 
-Below are the list of components that currenlty support the `StreamsExecutionEnvironmentAware` interface:
+Below are the list of components that currently support the `StreamsExecutionEnvironmentAware` interface:
 
 * `TopologyProvider`
 * `ApplicationIdBuilder`

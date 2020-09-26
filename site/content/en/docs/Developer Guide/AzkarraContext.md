@@ -1,5 +1,5 @@
 ---
-date: 2020-02-12
+date: 2020-09-26
 title: "AzkarraContext"
 linkTitle: "AzkarraContext"
 weight: 40
@@ -27,7 +27,7 @@ You should ensure that only one `AzkarraContext` instance is created.
 
 The `AzkarraContext` can be configured using a `Conf` object.
 
-The configuration can be passed direcly while creating a new instance: 
+The configuration can be passed directly while creating a new instance: 
 
 ```java
 Map<String, Object> props = new HashMap<>(); 
@@ -35,7 +35,7 @@ props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass()); (1)
 
-Conf streamsConfig = Conf.with("streams", props) (2)
+Conf streamsConfig = Conf.of("streams", props) (2)
 
 AzkarraContext context = DefaultAzkarraContext.create(streamsConfig); (3)
 ```
@@ -43,13 +43,13 @@ AzkarraContext context = DefaultAzkarraContext.create(streamsConfig); (3)
 or using the `setConfiguration` method: 
 
 ```java
-context.setConfiguration(Conf.with("streams", props)) (4)
+context.setConfiguration(Conf.of("streams", props)) (4)
 ```
 
 1. Create the `Map` to be used for configuring the `context`.
 2. The streams properties must be prefixed with `streams.`.
 3. The configuration is passed to `create` method.
-4. Optionally, the configuration is setted using the `setConfiguration` method.
+4. Optionally, the configuration is set using the `setConfiguration` method.
 
 Note that all `StreamsExecutionEnvironment` registered into the `AzkarraContext` will automatically inherit its configuration.
 
@@ -63,7 +63,7 @@ context.addExecutionEnvironment(env);
 
 By default, the `AzkarraContext` will always create a default `StreamsExecutionEnvironment` named **__default**.
 
-You can retrivied the default environment as follows:
+You can retrieved the default environment as follows:
 
 ```java
 StreamsExecutionEnvironment defaultExecutionEnvironment = context.defaultExecutionEnvironment();
@@ -78,7 +78,7 @@ In Azkarra, any object that forms your streams application (e.g: `TopologyProvid
 More generally, a component is an object that is instantiated, assembled, and configured by an  `AzkarraContext` instance.
 
 {{% alert title="Dependency Injection" color="primary" %}}
-The concepts of component enable the implementation of the [dependency injection](./dependency-injection) pattern in Azkarra.
+The concepts of component enable the implementation of the [dependency injection](/docs/developer-guide/dependencyinjection/) pattern in Azkarra.
 {{% /alert %}}
 
 ```java
@@ -110,22 +110,21 @@ Registering a `TopoloyProvider` at the context level allows you to use the  anno
 Currently, the `TopologyProvider` supports the following annotations :
 
  * `@TopologyInfo`: Set the topology description and custom alias.
- * `@DefaultStreamsConfig`: Set a default streams configuration (_repeatable_).
+ * `@ConfValue`: Set a default streams configuration (_repeatable_).
  
 
 **Example:**
 
 ```java
 @TopologyInfo( description = "Kafka Streams WordCount Demo", aliases = "custom")
-@DefaultStreamsConfig(name = StreamsConfig.NUM_STREAM_THREADS_CONFIG, value = "4")
-@DefaultStreamsConfig(name = StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, value = "2")
+@ConfValue(name = "streams." + StreamsConfig.NUM_STREAM_THREADS_CONFIG, value = "4")
+@ConfValue(name = "streams." + StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, value = "2")
 class MyCustomTopologyProvider implements TopologyProvider, Configureable {
 
     public void configure(final Conf conf) {
-        ...
     }   
     
-    public Topology get() {
+    public Topology topology() {
         return ...;
     }
 }

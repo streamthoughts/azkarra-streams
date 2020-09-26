@@ -12,7 +12,7 @@ description: >
 
 Azkarra packs with an embedded web server that exposes several REST endpoints allowing you to deploy, manage and monitor your Kafka Streams topologies. In addition, the embedded web server is also used to execute interactive queries.
 
-Internally Azkarras relies on [Undertow](http://undertow.io/) a high performance non-blocking webserver.
+Internally Azkarra relies on [Undertow](http://undertow.io/) a high performance non-blocking web-server.
 
 ## 2 Enabling Web Server
 
@@ -33,7 +33,13 @@ public class SimpleStreamsApp {
 In addition, the embedded web server can be enable using the `AzkarraApplication#enableHttpServer()` method.
 
 ```java
-application.enableHttpServer(true, HttpServerConf.with("localhost", 8080))
+var serverConfig = ServerConfig
+    .newBuilder()
+    .setListener("localhost")
+    .setPort(8080)
+    .build();
+
+application.enableHttpServer(true, serverConfig)
 ```
 
 {{% alert title="StreamsConfig.APPLICATION_SERVER_CONFIG" color="info" %}}
@@ -78,7 +84,7 @@ Azkarra defines several JSON serializers that are provided by the module `azkarr
 <dependency>
 	<groupId>io.streamthoughts</groupId>
 	<artifactId>azkarra-json-serializers</artifactId>
-	<version>${azkarra.version}
+	<version>${azkarra.version}</version>
 </dependency>
 ``` 
 

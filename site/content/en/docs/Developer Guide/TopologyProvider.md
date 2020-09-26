@@ -1,5 +1,5 @@
 ---
-date: 2020-02-12
+date: 2020-09-26
 title: "TopologyProvider"
 linkTitle: "TopologyProvider"
 weight: 10
@@ -23,7 +23,7 @@ Here is a simple example :
     public class WordCountTopology implements TopologyProvider {
 
         @Override
-        public Topology get() {                       
+        public Topology topology() {                       
             StreamsBuilder builder = new StreamsBuilder();
             KStream<String, String> textLines = 
                           builder.stream("streams-plaintext-input");
