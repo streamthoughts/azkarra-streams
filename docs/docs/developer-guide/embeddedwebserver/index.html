@@ -26,13 +26,13 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/" />
 <meta property="article:published_time" content="2020-09-25T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-09-25T23:44:26+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:modified_time" content="2020-09-26T22:32:46+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Embedded Web Server">
 <meta itemprop="description" content="Configuring Azkarra embedded web server
 ">
 <meta itemprop="datePublished" content="2020-09-25T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-09-25T23:44:26&#43;02:00" />
-<meta itemprop="wordCount" content="1340">
+<meta itemprop="dateModified" content="2020-09-26T22:32:46&#43;02:00" />
+<meta itemprop="wordCount" content="1347">
 
 
 
@@ -1717,7 +1717,7 @@
 	       
 	<h2 id="1-introduction">1 Introduction</h2>
 <p>Azkarra packs with an embedded web server that exposes several REST endpoints allowing you to deploy, manage and monitor your Kafka Streams topologies. In addition, the embedded web server is also used to execute interactive queries.</p>
-<p>Internally Azkarras relies on <a href="http://undertow.io/">Undertow</a> a high performance non-blocking webserver.</p>
+<p>Internally Azkarra relies on <a href="http://undertow.io/">Undertow</a> a high performance non-blocking web-server.</p>
 <h2 id="2-enabling-web-server">2 Enabling Web Server</h2>
 <p>The embedded web server will be automatically enabled if your main Java class is annotated with either <code>@AzkarraStreamsApplication</code> or <code>@EnableEmbeddedHttpServer</code>.</p>
 <p><strong>Example</strong> :</p>
@@ -1729,7 +1729,13 @@
     <span style="color:#ce5c00;font-weight:bold">}</span>
 <span style="color:#ce5c00;font-weight:bold">}</span>
 </code></pre></div><p>In addition, the embedded web server can be enable using the <code>AzkarraApplication#enableHttpServer()</code> method.</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">application</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">enableHttpServer</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">HttpServerConf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;localhost&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">8080</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">var</span> <span style="color:#000">serverConfig</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">ServerConfig</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">newBuilder</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setListener</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;localhost&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setPort</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">8080</span><span style="color:#ce5c00;font-weight:bold">)</span>
+    <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">build</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
+
+<span style="color:#000">application</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">enableHttpServer</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">true</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">serverConfig</span><span style="color:#ce5c00;font-weight:bold">)</span>
 </code></pre></div>
 
 <div class="alert alert-info" role="alert">
@@ -1765,7 +1771,7 @@ Records are returned in JSON format, using the <a href="https://github.com/Faste
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#204a87;font-weight:bold">&lt;dependency</span><span style="color:#204a87;font-weight:bold">&gt;</span>
 	<span style="color:#204a87;font-weight:bold">&lt;groupId</span><span style="color:#204a87;font-weight:bold">&gt;</span>io.streamthoughts<span style="color:#204a87;font-weight:bold">&lt;/groupId&gt;</span>
 	<span style="color:#204a87;font-weight:bold">&lt;artifactId</span><span style="color:#204a87;font-weight:bold">&gt;</span>azkarra-json-serializers<span style="color:#204a87;font-weight:bold">&lt;/artifactId&gt;</span>
-	<span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>${azkarra.version}
+	<span style="color:#204a87;font-weight:bold">&lt;version</span><span style="color:#204a87;font-weight:bold">&gt;</span>${azkarra.version}<span style="color:#204a87;font-weight:bold">&lt;/version&gt;</span>
 <span style="color:#204a87;font-weight:bold">&lt;/dependency&gt;</span>
 </code></pre></div><p>While these serializers are sufficient in most of the cases, you may have the need to provide your own custom
 serializers in order to use the interactive queries.</p>
@@ -1971,7 +1977,7 @@ Thus you will have to establish one SSE connections for each Kafka Streams appli
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified September 25, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/69182c5e4891dff21d49e9cd1eab68c7bd67ee43">update(site): add docs for SSE (69182c5)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified September 26, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/66659f77a3d75b68656ff69712125bbb9f133219">docs(site): fix typo and code samples (66659f7)</a>
 </div>
 </div>
 

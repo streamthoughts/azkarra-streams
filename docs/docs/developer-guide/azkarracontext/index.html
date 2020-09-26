@@ -24,19 +24,19 @@
 <meta property="og:description" content="1 Creating a new AzkarraContext The AzkarraContext is the main interface to configure, manage and run one ore more StreamsExecutionEnvironment.
 Azkarra provides the default implementation DefaultAzkarraContext that you can instantiate as follows :
 AzkarraContext context = DefaultAzkarraContext.create()  WARN You should ensure that only one AzkarraContext instance is created.  2 Configuring a AzkarraContext The AzkarraContext can be configured using a Conf object.
-The configuration can be passed direcly while creating a new instance:" />
+The configuration can be passed directly while creating a new instance:" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/azkarracontext/" />
-<meta property="article:published_time" content="2020-02-12T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-09T00:43:49+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:published_time" content="2020-09-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-26T22:32:46+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="AzkarraContext">
 <meta itemprop="description" content="1 Creating a new AzkarraContext The AzkarraContext is the main interface to configure, manage and run one ore more StreamsExecutionEnvironment.
 Azkarra provides the default implementation DefaultAzkarraContext that you can instantiate as follows :
 AzkarraContext context = DefaultAzkarraContext.create()  WARN You should ensure that only one AzkarraContext instance is created.  2 Configuring a AzkarraContext The AzkarraContext can be configured using a Conf object.
-The configuration can be passed direcly while creating a new instance:">
-<meta itemprop="datePublished" content="2020-02-12T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-09T00:43:49&#43;02:00" />
-<meta itemprop="wordCount" content="496">
+The configuration can be passed directly while creating a new instance:">
+<meta itemprop="datePublished" content="2020-09-26T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-09-26T22:32:46&#43;02:00" />
+<meta itemprop="wordCount" content="499">
 
 
 
@@ -45,7 +45,7 @@ The configuration can be passed direcly while creating a new instance:">
 <meta name="twitter:description" content="1 Creating a new AzkarraContext The AzkarraContext is the main interface to configure, manage and run one ore more StreamsExecutionEnvironment.
 Azkarra provides the default implementation DefaultAzkarraContext that you can instantiate as follows :
 AzkarraContext context = DefaultAzkarraContext.create()  WARN You should ensure that only one AzkarraContext instance is created.  2 Configuring a AzkarraContext The AzkarraContext can be configured using a Conf object.
-The configuration can be passed direcly while creating a new instance:"/>
+The configuration can be passed directly while creating a new instance:"/>
 
 
 
@@ -1724,29 +1724,29 @@ You should ensure that only one <code>AzkarraContext</code> instance is created.
 
 <h2 id="2-configuring-a-azkarracontext">2 Configuring a <code>AzkarraContext</code></h2>
 <p>The <code>AzkarraContext</code> can be configured using a <code>Conf</code> object.</p>
-<p>The configuration can be passed direcly while creating a new instance:</p>
+<p>The configuration can be passed directly while creating a new instance:</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">Map</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Object</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">props</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">HashMap</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#ce5c00;font-weight:bold">&gt;</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> 
 <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">put</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">BOOTSTRAP_SERVERS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;localhost:9092&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">put</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">DEFAULT_KEY_SERDE_CLASS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Serdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">String</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getClass</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">put</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">DEFAULT_VALUE_SERDE_CLASS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Serdes</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">String</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getClass</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">1</span><span style="color:#ce5c00;font-weight:bold">)</span>
 
-<span style="color:#000">Conf</span> <span style="color:#000">streamsConfig</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">2</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<span style="color:#000">Conf</span> <span style="color:#000">streamsConfig</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">Conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">of</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">2</span><span style="color:#ce5c00;font-weight:bold">)</span>
 
 <span style="color:#000">AzkarraContext</span> <span style="color:#000">context</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">DefaultAzkarraContext</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">create</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">streamsConfig</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">3</span><span style="color:#ce5c00;font-weight:bold">)</span>
 </code></pre></div><p>or using the <code>setConfiguration</code> method:</p>
-<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setConfiguration</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">Conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">with</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">4</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">setConfiguration</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">Conf</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">of</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">props</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">4</span><span style="color:#ce5c00;font-weight:bold">)</span>
 </code></pre></div><ol>
 <li>Create the <code>Map</code> to be used for configuring the <code>context</code>.</li>
 <li>The streams properties must be prefixed with <code>streams.</code>.</li>
 <li>The configuration is passed to <code>create</code> method.</li>
-<li>Optionally, the configuration is setted using the <code>setConfiguration</code> method.</li>
+<li>Optionally, the configuration is set using the <code>setConfiguration</code> method.</li>
 </ol>
 <p>Note that all <code>StreamsExecutionEnvironment</code> registered into the <code>AzkarraContext</code> will automatically inherit its configuration.</p>
 <h2 id="3-registering-streamsexecutionenvironment">3 Registering <code>StreamsExecutionEnvironment</code></h2>
 <p>A <code>StreamsExecutionEnvironment</code> can be registered to the <code>AzkarraContext</code> using the <code>addExecutionEnvironment</code> method.</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">addExecutionEnvironment</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">env</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 </code></pre></div><p>By default, the <code>AzkarraContext</code> will always create a default <code>StreamsExecutionEnvironment</code> named <strong>__default</strong>.</p>
-<p>You can retrivied the default environment as follows:</p>
+<p>You can retrieved the default environment as follows:</p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">StreamsExecutionEnvironment</span> <span style="color:#000">defaultExecutionEnvironment</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">defaultExecutionEnvironment</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 </code></pre></div><p>Note that all registered environments must have a distinct name.</p>
 <h2 id="4-registering-components">4 Registering components</h2>
@@ -1756,7 +1756,7 @@ You should ensure that only one <code>AzkarraContext</code> instance is created.
 
 <div class="alert alert-primary" role="alert">
 <h4 class="alert-heading">Dependency Injection</h4>
-The concepts of component enable the implementation of the <a href="./dependency-injection">dependency injection</a> pattern in Azkarra.
+The concepts of component enable the implementation of the <a href="/docs/developer-guide/dependencyinjection/">dependency injection</a> pattern in Azkarra.
 </div>
 
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000">context</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">registerComponent</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">WordCountTopologyProvider</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">class</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
@@ -1773,19 +1773,18 @@ The concepts of component enable the implementation of the <a href="./dependency
 <p>Currently, the <code>TopologyProvider</code> supports the following annotations :</p>
 <ul>
 <li><code>@TopologyInfo</code>: Set the topology description and custom alias.</li>
-<li><code>@DefaultStreamsConfig</code>: Set a default streams configuration (<em>repeatable</em>).</li>
+<li><code>@ConfValue</code>: Set a default streams configuration (<em>repeatable</em>).</li>
 </ul>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#5c35cc;font-weight:bold">@TopologyInfo</span><span style="color:#ce5c00;font-weight:bold">(</span> <span style="color:#000">description</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;Kafka Streams WordCount Demo&#34;</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">aliases</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;custom&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-<span style="color:#5c35cc;font-weight:bold">@DefaultStreamsConfig</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">name</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">NUM_STREAM_THREADS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;4&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
-<span style="color:#5c35cc;font-weight:bold">@DefaultStreamsConfig</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">name</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">NUM_STANDBY_REPLICAS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;2&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<span style="color:#5c35cc;font-weight:bold">@ConfValue</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">name</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;streams.&#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">NUM_STREAM_THREADS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;4&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
+<span style="color:#5c35cc;font-weight:bold">@ConfValue</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">name</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;streams.&#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#000">StreamsConfig</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">NUM_STANDBY_REPLICAS_CONFIG</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;2&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span>
 <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">MyCustomTopologyProvider</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">TopologyProvider</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">Configureable</span> <span style="color:#ce5c00;font-weight:bold">{</span>
 
     <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">void</span> <span style="color:#000">configure</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">Conf</span> <span style="color:#000">conf</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
-        <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">.</span>
     <span style="color:#ce5c00;font-weight:bold">}</span>   
     
-    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">get</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
         <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#ce5c00;font-weight:bold">;</span>
     <span style="color:#ce5c00;font-weight:bold">}</span>
 <span style="color:#ce5c00;font-weight:bold">}</span>
@@ -1799,7 +1798,7 @@ The concepts of component enable the implementation of the <a href="./dependency
 </code></pre></div>
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 9, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/0b26ef6365dfa6a71542b67ae96b4261e0bbb735">docs(site): update Azkarra website for release 0.7.0 (0b26ef6)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified September 26, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/66659f77a3d75b68656ff69712125bbb9f133219">docs(site): fix typo and code samples (66659f7)</a>
 </div>
 </div>
 

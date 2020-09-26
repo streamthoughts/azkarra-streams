@@ -25,13 +25,13 @@
 " />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/topologyprovider/" />
-<meta property="article:published_time" content="2020-02-12T00:00:00+00:00" />
-<meta property="article:modified_time" content="2020-05-09T00:43:49+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:published_time" content="2020-09-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-26T22:32:46+02:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="TopologyProvider">
 <meta itemprop="description" content="The main interface to provide the Topology to be executed
 ">
-<meta itemprop="datePublished" content="2020-02-12T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2020-05-09T00:43:49&#43;02:00" />
+<meta itemprop="datePublished" content="2020-09-26T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-09-26T22:32:46&#43;02:00" />
 <meta itemprop="wordCount" content="203">
 
 
@@ -1700,7 +1700,7 @@
 <div class="highlight"><pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#204a87;font-weight:bold">class</span> <span style="color:#000">WordCountTopology</span> <span style="color:#204a87;font-weight:bold">implements</span> <span style="color:#000">TopologyProvider</span> <span style="color:#ce5c00;font-weight:bold">{</span>
 
         <span style="color:#5c35cc;font-weight:bold">@Override</span>
-        <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">get</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>                       
+        <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>                       
             <span style="color:#000">StreamsBuilder</span> <span style="color:#000">builder</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">StreamsBuilder</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
             <span style="color:#000">KStream</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">textLines</span> <span style="color:#ce5c00;font-weight:bold">=</span> 
                           <span style="color:#000">builder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">stream</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
@@ -1743,7 +1743,7 @@ One of the current limitations of Azkarra is that <code>TopologyProvider</code> 
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified May 9, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/0b26ef6365dfa6a71542b67ae96b4261e0bbb735">docs(site): update Azkarra website for release 0.7.0 (0b26ef6)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified September 26, 2020: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/66659f77a3d75b68656ff69712125bbb9f133219">docs(site): fix typo and code samples (66659f7)</a>
 </div>
 </div>
 
