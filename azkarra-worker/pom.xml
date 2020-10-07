@@ -23,7 +23,7 @@
     <parent>
         <artifactId>azkarra-streams-reactor</artifactId>
         <groupId>io.streamthoughts</groupId>
-        <version>0.8.0</version>
+        <version>0.9.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>azkarra-worker</artifactId>
