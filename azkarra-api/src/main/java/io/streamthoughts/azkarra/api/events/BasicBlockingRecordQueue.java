@@ -41,11 +41,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class BasicBlockingRecordQueue<K, V> implements BlockingRecordQueue<K, V> {
 
-    private static final int DEFAULT_QUEUE_SIZE_LIMIT = 10_000;
+    static final int DEFAULT_QUEUE_SIZE_LIMIT = 10_000;
+
+    static final Duration DEFAULT_MAX_BLOCK_DURATION = Duration.ofMillis(100);
 
     private final BlockingQueue<KV<K, V>> blockingQueue;
 
-    private final Duration offerWaitDuration;
+    private final Duration maxBlockDuration;
 
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
@@ -64,22 +66,35 @@ public class BasicBlockingRecordQueue<K, V> implements BlockingRecordQueue<K, V>
      * @param queueSizeLimit    the queue max capacity.
      */
     public BasicBlockingRecordQueue(final int queueSizeLimit) {
-        this(queueSizeLimit, Duration.ofMillis(100), LimitHandlers.NO_OP);
+        this(queueSizeLimit, DEFAULT_MAX_BLOCK_DURATION);
     }
 
     /**
+     * Creates a new {@link BasicBlockingRecordQueue} instance.
+     *
+     * @param queueSizeLimit    the queue max capacity.
+     * @param maxBlockDuration  the maximum duration to wait to wait before giving up,  when the queue is full.
+     */
+    public BasicBlockingRecordQueue(final int queueSizeLimit, final Duration maxBlockDuration) {
+        this(queueSizeLimit, maxBlockDuration, LimitHandlers.NO_OP);
+    }
+
+
+    /**
+     * Creates a new {@link BasicBlockingRecordQueue} instance.
      *
      * @param queueSizeLimit    the blocking size limit;
-     * @param offerWaitDuration the time to wait if necessary for space to become available.
+     * @param maxBlockDuration  the maximum duration to wait to wait before giving up,  when the queue is full.
+     * @param limitHandler      the {@link LimitHandler} to invoke after {@code maxBlockDuration} has been reached.
      */
-    private BasicBlockingRecordQueue(final int queueSizeLimit,
-                                     final Duration offerWaitDuration,
-                                     final LimitHandler limitHandler) {
+    public BasicBlockingRecordQueue(final int queueSizeLimit,
+                                    final Duration maxBlockDuration,
+                                    final LimitHandler limitHandler) {
         if (queueSizeLimit <= 0)
             throw new IllegalArgumentException("queueSizeLimit must be superior to 0, was :" + queueSizeLimit);
 
         this.blockingQueue = new LinkedBlockingQueue<>(queueSizeLimit);
-        this.offerWaitDuration = offerWaitDuration;
+        this.maxBlockDuration = maxBlockDuration;
         this.callback = new LimitedQueueCallback(queueSizeLimit);
         this.callback.setQueue(this);
         this.callback.setLimitHandler(limitHandler);
@@ -193,7 +208,7 @@ public class BasicBlockingRecordQueue<K, V> implements BlockingRecordQueue<K, V>
 
         try {
             while (!isClosed.get()) {
-                if (blockingQueue.offer(record, offerWaitDuration.toMillis(), TimeUnit.MILLISECONDS)) {
+                if (blockingQueue.offer(record, maxBlockDuration.toMillis(), TimeUnit.MILLISECONDS)) {
                     if (callback != null) callback.onQueued();
                     break;
                 }

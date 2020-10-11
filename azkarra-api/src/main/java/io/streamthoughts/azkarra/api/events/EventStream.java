@@ -20,7 +20,9 @@ package io.streamthoughts.azkarra.api.events;
 
 import io.streamthoughts.azkarra.api.model.KV;
 
+import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -43,6 +45,7 @@ public class EventStream<K, V> {
         private String eventType;
         private Integer queueSize;
         private LimitHandler queueLimitHandler;
+        private Duration maxBlockingTime;
 
         /**
          * Creates a new {@link Builder} instance.
@@ -53,23 +56,39 @@ public class EventStream<K, V> {
             this.eventType = eventType;
         }
 
+        /**
+         * @param queueSize the queue size.
+         * @return  the {@link Builder}
+         */
         public Builder withQueueSize(final int queueSize) {
             this.queueSize = queueSize;
             return this;
         }
 
+        /**
+         * @param maxBlockingTime the maximum duration to wait to wait before giving up when the queue is full.
+         * @return  the {@link Builder}
+         */
+        public Builder withMaxBlockingTime(final Duration maxBlockingTime) {
+            this.maxBlockingTime = maxBlockingTime;
+            return this;
+        }
+
+        /**
+         * @param queueLimitHandler the handler to be invoked when the limit queue is reached.
+         * @return  the {@link Builder}
+         */
         public Builder withQueueLimitHandler(final LimitHandler queueLimitHandler) {
             this.queueLimitHandler = queueLimitHandler;
             return this;
         }
 
         public <K, V> EventStream<K, V> build() {
-            var queue = queueSize != null ?
-                new BasicBlockingRecordQueue<K, V>(queueSize) :
-                new BasicBlockingRecordQueue<K, V>();
-
-            if (queueLimitHandler != null)
-                queue.setLimitHandler(queueLimitHandler);
+            var queue = new BasicBlockingRecordQueue<K, V>(
+                Optional.ofNullable(queueSize).orElse(BasicBlockingRecordQueue.DEFAULT_QUEUE_SIZE_LIMIT),
+                Optional.ofNullable(maxBlockingTime).orElse(BasicBlockingRecordQueue.DEFAULT_MAX_BLOCK_DURATION),
+                Optional.ofNullable(queueLimitHandler).orElse(LimitHandlers.NO_OP)
+            );
             return new EventStream<>(eventType, queue);
         }
     }

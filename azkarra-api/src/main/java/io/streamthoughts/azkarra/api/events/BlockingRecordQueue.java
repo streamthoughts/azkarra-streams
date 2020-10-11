@@ -53,7 +53,7 @@ public interface BlockingRecordQueue<K, V> {
     /**
      * @see BlockingQueue#poll(long, TimeUnit)
      */
-    KV<K, V> poll(final Duration timeout) throws InterruptedException;
+    KV<K, V> poll(final Duration tmaxBlockingTimeimeout) throws InterruptedException;
 
     /**
      * @see BlockingQueue#poll()
