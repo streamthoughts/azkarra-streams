@@ -22,14 +22,19 @@ import io.streamthoughts.azkarra.http.data.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 /**
  * The default JAX-RS {@link ExceptionMapper} implementation.
  */
+@Provider
+@Singleton
 public class AzkarraExceptionMapper implements ExceptionMapper<Exception> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AzkarraExceptionMapper.class);
@@ -44,6 +49,9 @@ public class AzkarraExceptionMapper implements ExceptionMapper<Exception> {
         if (statusCode == 500) {
             LOG.error("Uncaught server exception in REST call to /{}", uriInfo.getPath(), exception);
         }
-        return Response.status(statusCode).entity(errorMessage).build();
+        return Response
+                .status(statusCode)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(errorMessage).build();
     }
 }
