@@ -16,28 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.handler;
 
-import io.streamthoughts.azkarra.http.ExchangeHelper;
-import io.streamthoughts.azkarra.api.AzkarraStreamsService;
-import io.undertow.server.HttpServerExchange;
+package io.streamthoughts.azkarra.api.errors;
 
-public class TopologyListHandler extends AbstractStreamHttpHandler {
+import io.streamthoughts.azkarra.api.components.Qualifier;
 
-    /**
-     * Creates a new {@link TopologyListHandler} instance.
-     *
-     * @param service   the {@link AzkarraStreamsService} instance.
-     */
-    public TopologyListHandler(final AzkarraStreamsService service) {
-        super(service);
+public class NoSuchComponentException extends NotFoundException {
+
+    public static NoSuchComponentException forAlias(final String alias) {
+        return new NoSuchComponentException(
+            "No such component for alias '" + alias + "'");
+    }
+
+    public static NoSuchComponentException forAliasAndQualifier(final String alias, final Qualifier qualifier) {
+        return new NoSuchComponentException(
+            "No such component for alias '" + alias + "' and qualifier '" + qualifier + "'");
     }
 
     /**
-     * {@inheritDoc}
+     * Creates a new {@link NotFoundException} instance.
+     *
+     * @param message the error message.
      */
-    @Override
-    public void handleRequest(final HttpServerExchange exchange) {
-        ExchangeHelper.sendJsonResponse(exchange, service.getTopologyProviders());
+    public NoSuchComponentException(final String message) {
+        super(message);
     }
 }

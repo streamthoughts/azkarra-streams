@@ -18,14 +18,17 @@
  */
 package io.streamthoughts.azkarra.api;
 
+import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
+import io.streamthoughts.azkarra.api.errors.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.Environment;
 import io.streamthoughts.azkarra.api.model.Metric;
 import io.streamthoughts.azkarra.api.model.MetricGroup;
 import io.streamthoughts.azkarra.api.model.StreamsStatus;
 import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
+import io.streamthoughts.azkarra.api.model.TopologyAndAliases;
 import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.query.Queried;
@@ -35,10 +38,13 @@ import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.ServerMetadata;
+import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
+import io.streamthoughts.azkarra.api.util.Version;
 import org.apache.kafka.streams.StreamsConfig;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -118,6 +124,44 @@ public interface AzkarraStreamsService {
      * @return  a set of {@link TopologyDescriptor} instance.
      */
     Set<TopologyDescriptor> getTopologyProviders();
+
+    /**
+     * Gets the list of all topologies.
+     *
+     * @return  the list {@link TopologyAndAliases}.
+     */
+    List<TopologyAndAliases> getAllTopologies();
+
+    /**
+     * Gets the {@link TopologyDescriptor} for the specified alias and version.
+     *
+     * @param alias     the topology alias.
+     * @param version   the topology version.
+     * @return          the {@link TopologyDescriptor}.
+     * @throws NoSuchComponentException  if no topology exist for the given parameters.
+     * @throws IllegalArgumentException  if the component for the given parameters is not a Topology.
+     */
+    TopologyDescriptor getTopologyByAliasAndVersion(final String alias, final String version);
+
+    /**
+     * Gets the {@link TopologyDescriptor} for the specified alias and qualifier.
+     *
+     * @param alias     the topology alias.
+     * @param qualifier the topology qualifier.
+     * @return          the {@link TopologyDescriptor}.
+     * @throws NoSuchComponentException  if no topology exist for the given parameters.
+     * @throws IllegalArgumentException  if the component for the given parameters is not a Topology.
+     */
+    TopologyDescriptor getTopologyByAliasAndQualifiers(final String alias,
+                                                       final Qualifier<? extends TopologyProvider> qualifier);
+
+    /**
+     * Gets all versions of {@link TopologyDescriptor} for the specified alias.
+     *
+     * @param alias     the topology alias.
+     * @throws NoSuchComponentException  if no topology exist for the given parameters.
+     */
+    List<Version> getTopologyVersionsByAlias(final String alias);
 
     /**
      * Gets all metrics for the specified streams application.

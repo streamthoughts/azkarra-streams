@@ -23,7 +23,7 @@ import io.undertow.server.HttpHandler;
 
 import java.util.Objects;
 
-abstract class AbstractStreamHttpHandler implements HttpHandler {
+public abstract class AbstractStreamHttpHandler implements HttpHandler {
 
     protected final AzkarraStreamsService service;
 
@@ -32,7 +32,7 @@ abstract class AbstractStreamHttpHandler implements HttpHandler {
      *
      * @param service   the {@link AzkarraStreamsService} instance.
      */
-    AbstractStreamHttpHandler(final AzkarraStreamsService service) {
+    public AbstractStreamHttpHandler(final AzkarraStreamsService service) {
         Objects.requireNonNull(service, "service cannot be null");
         this.service = service;
     }

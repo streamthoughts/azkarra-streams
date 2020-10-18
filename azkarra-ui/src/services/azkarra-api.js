@@ -198,16 +198,35 @@ class AzkarraApi {
     }
 
     createEnvironment(data) {
-     return this.client.post(apiBasePath + '/environments', data);
+      return this.client.post(apiBasePath + '/environments', data);
     }
 
+    fetchTopology(type, version) {
+      return this.client
+        .get(apiBasePath + "/topologies/" + type + "/versions/" + version)
+        .then(function(response) { return response.data; });
+    }
 
-    fetchAvailableTopologies() {
-     var that = this
-     return this.client.get(apiBasePath + '/topologies')
-       .then(function (response) {
-         return response.data;
-       })
+    fetchTopologyVersions(type) {
+      return this.client
+        .get(apiBasePath + "/topologies/" + type + "/versions")
+        .then(function(response) { return response.data; });
+    }
+
+    fetchAllTopologies() {
+      var that = this
+      return this.client
+        .get(apiBasePath + '/topologies')
+        .then(function (response) {
+          return Promise.all(
+            response.data.map( (topology) => {
+              return that
+                .fetchTopologyVersions(topology.type)
+                .then(function(versions) {
+                  return {type: topology.type, aliases: topology.aliases, versions: versions}
+                });
+            }));
+        });
     }
 
     sendQueryStateStore(query) {
@@ -223,7 +242,7 @@ class AzkarraApi {
     getQueryStateStoreAsCurl(query) {
         let url = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
         url = url +  apiBasePath + '/applications/' + query.application + "/stores/" + query.store;
-        let data = {set_options: query.options, type: query.type, query : { [query.operation] : query.params } };
+        let data = { set_options: query.options, type: query.type, query : { [query.operation] : query.params } };
         return 'curl -H "Accept: application/json" -H "Content-Type:application/json" -sX POST ' + url + " --data '" + JSON.stringify(data) + "'";
     }
 }

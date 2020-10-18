@@ -26,24 +26,31 @@
                         <thead>
                         <tr>
                             <th>Type</th>
-                            <th>Version</th>
-                            <th>Description</th>
                             <th>Aliases</th>
+                            <th>Versions</th>
                             <th></th>
                         </tr>
                         </thead>
                         <tbody>
-                            <template v-for="t in topologies">
+                            <template v-for="topology in topologies">
                                 <tr>
-                                    <td>{{ t.name }}</td>
-                                    <td>{{ t.version }}</td>
-                                    <td>{{ t.description }}</td>
-                                    <td>{{ t.aliases }}</td>
+                                    <td>{{ topology.type }}</td>
+                                    <td>{{ topology.aliases }}</td>
+                                    <td>
+                                        <select class="custom-select"
+                                                v-on:change="selectTopologyVersion($event, topology)">
+                                            <option selected disabled>Select a version</option>
+                                            <template v-for="version in topology.versions">
+                                                <option v-bind:value="version">{{ version }}</option>
+                                            </template>
+                                        </select>
+                                    </td>
                                     <td>
                                         <div class="btn-group" role="group" aria-label="operations">
                                             <button type="button"
                                                 class="btn btn-primary"
-                                                v-on:click="configure(t)">Deploy
+                                                v-bind:disabled="topology.disabled"
+                                                v-on:click="configure(topology)">Deploy
                                             </button>
                                         </div>
                                     </td>
@@ -66,7 +73,7 @@
             </div>
             <div class="form-group mb-3">
               <label for="version">Version</label>
-              <input v-model="form.version" readonly type="text" class="form-control" id="version" aria-describedby="nameHelp">
+              <input v-model="form.version" readonly type="text" class="form-control" id="version" aria-describedby="versionHelp">
             </div>
             <div class="form-group mb-3">
               <label for="name">Name</label>
@@ -101,7 +108,7 @@
           </form>
         </template>
         <template v-slot:footer>
-          <button class="btn btn-primary" v-bind:disabled="disableDeployBtn()" v-on:click="deploy">Deploy</button>
+          <button class="btn btn-primary" v-bind:disabled="disableModalDeployBtn()" v-on:click="deploy">Deploy</button>
           <button class="btn btn-dark" v-on:click="toggleModal()">Close</button>
         </template>
       </vue-modal>
@@ -130,6 +137,7 @@ export default {
       selected : {},
       openCreateModal : false,
       environments : [],
+      versions : [],
     }
   },
   created () {
@@ -141,14 +149,18 @@ export default {
   methods: {
     load() {
       let that = this;
-      azkarra.fetchAvailableTopologies().then(function(data){ that.topologies = data });
+      azkarra.fetchAllTopologies().then(function(data){
+        data.map(function(topology){ topology.disabled = true} );
+        that.topologies = data
+      });
       azkarra.fetchEnvironments().then(function(data){ that.environments = data });
     },
 
     configure(topology) {
       this.form.version = topology.version;
-      this.form.type = topology.name;
+      this.form.type = topology.type;
       this.form.config = topology.config;
+      this.form.description = topology.description;
       this.toggleModal();
     },
 
@@ -158,15 +170,24 @@ export default {
     },
 
     goto(app) {
-        this.$router.push({ path: `/streams/${app.id}` });
+      this.$router.push({ path: `/streams/${app.id}` });
     },
 
     toggleModal() {
       this.openCreateModal = ! this.openCreateModal;
     },
 
-    disableDeployBtn() {
-        return this.form.name == '';
+    selectTopologyVersion(event, topology) {
+      topology.version = event.target.value;
+      azkarra.fetchTopology(topology.type, topology.version).then(function(data) {
+        topology.config = data.config;
+        topology.description = data.description;
+        topology.disabled = false;
+      });
+    },
+
+    disableModalDeployBtn() {
+      return this.form.name == '';
     },
   }
 }

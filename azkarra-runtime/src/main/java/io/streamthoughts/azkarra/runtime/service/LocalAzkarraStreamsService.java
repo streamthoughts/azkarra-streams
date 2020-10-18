@@ -32,7 +32,6 @@ import io.streamthoughts.azkarra.api.model.MetricGroup;
 import io.streamthoughts.azkarra.api.model.StreamsStatus;
 import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
 import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.query.DistributedQuery;
 import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.QueryParams;
@@ -67,9 +66,7 @@ import java.util.stream.Collectors;
 /**
  * The default {@link AzkarraStreamsService} implementations.
  */
-public class LocalAzkarraStreamsService implements AzkarraStreamsService {
-
-    private final AzkarraContext context;
+public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
 
     private RemoteQueryClient remoteQueryClient;
 
@@ -81,10 +78,8 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
      */
     public LocalAzkarraStreamsService(final AzkarraContext context,
                                       final RemoteQueryClient remoteQueryClient) {
-        Objects.requireNonNull(context, "context cannot be null");
-        Objects.requireNonNull(remoteQueryClient, "remoteQueryClient cannot be null");
-        this.context = context;;
-        this.remoteQueryClient = remoteQueryClient;
+        super(context);
+        this.remoteQueryClient = Objects.requireNonNull(remoteQueryClient, "remoteQueryClient cannot be null");
     }
 
     /**
@@ -152,14 +147,6 @@ public class LocalAzkarraStreamsService implements AzkarraStreamsService {
                                               final String env,
                                               final Executed executed) {
         return context.addTopology(topologyType, topologyVersion, env, executed);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<TopologyDescriptor> getTopologyProviders() {
-        return context.topologyProviders();
     }
 
     /**
