@@ -147,7 +147,7 @@ export default {
             return new Topology(topologiesLayouts);
         },
 
-        buildTopologyNodes(grouped, nodes, layouts = [], level = 0) {
+        buildTopologyNodes(grouped, nodes, layouts = [], level = 0, visited = new Map()) {
             if (nodes.length == 0) return layouts;
             layouts.push(nodes);
             let layout = [];
@@ -155,12 +155,13 @@ export default {
                 node.id = i; node.level = level;
                 node.successors.forEach(s => {
                     let successor = grouped.get(s);
-                    if (successor.isDrawable()) {
+                    if (successor.isDrawable() && !visited.get(s)) {
                         layout.push(successor);
+                        visited.set(s, true);
                     }
                 });
             });
-            return this.buildTopologyNodes(grouped, layout, layouts, level + 1);
+            return this.buildTopologyNodes(grouped, layout, layouts, level + 1, visited);
         },
 
         createSVG(objectTopology) {
