@@ -20,14 +20,14 @@ package io.streamthoughts.azkarra.streams.components.scan.factory;
 
 import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.annotations.Factory;
-import io.streamthoughts.azkarra.streams.components.ComponentScannerTest;
+import io.streamthoughts.azkarra.streams.components.ReflectiveComponentScannerTest;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
  * Class used for testing purpose.
- * @see ComponentScannerTest
+ * @see ReflectiveComponentScannerTest
  */
 @Factory
 public class TestAnnotatedFactory {

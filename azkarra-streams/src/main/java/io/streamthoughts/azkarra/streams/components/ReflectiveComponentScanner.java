@@ -29,6 +29,7 @@ import io.streamthoughts.azkarra.api.annotations.Secondary;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
+import io.streamthoughts.azkarra.api.components.ComponentScanner;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.util.AnnotationResolver;
@@ -82,12 +83,12 @@ import static org.reflections.ReflectionUtils.getAllMethods;
 import static org.reflections.ReflectionUtils.withAnnotation;
 
 /**
- * The {@link ComponentScanner} class can be used used to scan the classpath for automatically
+ * The {@link ReflectiveComponentScanner} class can be used to scan the classpath for automatically
  * registering declared classes annotated with {@link Component} and {@link ComponentFactory} classes.
  */
-public class ComponentScanner {
+public class ReflectiveComponentScanner implements ComponentScanner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ComponentScanner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReflectiveComponentScanner.class);
 
     private static final Predicate<Method> GET_METHOD = ReflectionUtils.withName("get")::apply;
 
@@ -98,11 +99,11 @@ public class ComponentScanner {
     private final ComponentRegistry registry;
 
     /**
-     * Creates a new {@link ComponentScanner} instance.
+     * Creates a new {@link ReflectiveComponentScanner} instance.
      *
      * @param registry  the {@link ComponentRegistry} used to register providers.
      */
-    public ComponentScanner(final ComponentRegistry registry) {
+    public ReflectiveComponentScanner(final ComponentRegistry registry) {
         Objects.requireNonNull(registry, "registry cannot be null");
         this.registry = registry;
         descriptorModifierResolvers = new LinkedList<>();
@@ -124,10 +125,27 @@ public class ComponentScanner {
     }
 
     /**
-     * Scans external component for the specified paths.
-     *
-     * @param componentPaths   the comma-separated list of top-level components directories.
+     * {@inheritDoc}
      */
+    @Override
+    public void scanComponentPath(final Path componentPath) {
+        ComponentResolver resolver = new ComponentResolver(componentPath);
+        for (ExternalComponent component : resolver.resolves()) {
+            ReflectiveComponentScanner.LOG.info("Loading components from path : {}", component.location());
+            final ComponentClassLoader classLoader = ComponentClassLoader.newClassLoader(
+                    component.location(),
+                    component.resources(),
+                    ReflectiveComponentScanner.class.getClassLoader()
+            );
+            ReflectiveComponentScanner.LOG.info("Initialized new ClassLoader: {}", classLoader);
+            scanUrlsForComponents(component.resources(), classLoader, ReflectiveComponentScanner.DEFAULT_FILTER_BY);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void scan(final String componentPaths) {
        final List<String> paths = Arrays
            .stream(componentPaths.split(","))
@@ -137,16 +155,15 @@ public class ComponentScanner {
     }
 
     /**
-     * Scans external component for the specified paths.
-     *
-     * @param componentPaths   the list of top-level components directories.
+     * {@inheritDoc}
      */
+    @Override
     public void scan(final List<String> componentPaths) {
 
         for (final String path : componentPaths) {
             try {
                 final Path componentPath = Paths.get(path).toAbsolutePath();
-                scanComponentPaths(componentPath);
+                scanComponentPath(componentPath);
             } catch (InvalidPathException e) {
                 LOG.error("Ignoring top-level component location '{}', invalid path.", path);
             }
@@ -154,46 +171,24 @@ public class ComponentScanner {
     }
 
     /**
-     * Scans the specified top-level component directory for components.
-     *
-     * @param componentPaths   the absolute path to a top-level component directory.
+     * {@inheritDoc}
      */
-    private void scanComponentPaths(final Path componentPaths) {
-
-        ComponentResolver resolver = new ComponentResolver(componentPaths);
-        for (ExternalComponent component : resolver.resolves()) {
-            LOG.info("Loading components from path : {}", component.location());
-            final ComponentClassLoader classLoader = ComponentClassLoader.newClassLoader(
-                component.location(),
-                component.resources(),
-                ComponentScanner.class.getClassLoader()
-            );
-            LOG.info("Initialized new ClassLoader: {}", classLoader);
-            scanUrlsForComponents(component.resources(), classLoader, DEFAULT_FILTER_BY);
-        }
-    }
-
-    /**
-     * Scans the specified package for components.
-     *
-     * @param source    the {@link Package} to be scanned; must not be {@code null}.
-     */
+    @Override
     public void scanForPackage(final Package source) {
         Objects.requireNonNull(source, "source package cannot be null");
         scanForPackage(source.getName());
     }
 
     /**
-     * Scans the specified package for components.
-     *
-     * @param source    the package to be scanned; must not be {@code null}.
+     * {@inheritDoc}
      */
+    @Override
     public void scanForPackage(final String source) {
         Objects.requireNonNull(source, "source package cannot be null");
         LOG.info("Looking for paths to scan from source package {}", source);
         final URL[] urls = ClasspathHelper.forPackage(source).toArray(new URL[0]);
         final FilterBuilder filterBy =  new FilterBuilder().includePackage(source);
-        scanUrlsForComponents(urls, ComponentScanner.class.getClassLoader(), filterBy);
+        scanUrlsForComponents(urls, ReflectiveComponentScanner.class.getClassLoader(), filterBy);
     }
 
     private void scanUrlsForComponents(final URL[] urls,

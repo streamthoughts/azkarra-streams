@@ -16,18 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.streams.components.scan.secondary;
+package io.streamthoughts.azkarra.api.components;
 
-import io.streamthoughts.azkarra.api.annotations.Component;
-import io.streamthoughts.azkarra.api.annotations.Secondary;
-import io.streamthoughts.azkarra.streams.components.ReflectiveComponentScannerTest;
+import java.net.URL;
 
-/**
- * Class used for testing purpose.
- * @see ReflectiveComponentScannerTest
- */
-@Component
-@Secondary
-public class TestSecondaryComponent {
+public interface ExternalComponentClassLoader {
 
+    URL componentLocation();
 }

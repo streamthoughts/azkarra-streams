@@ -35,7 +35,7 @@ import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.streams.autoconfigure.AutoConfigure;
 import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
 import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
-import io.streamthoughts.azkarra.streams.components.ComponentScanner;
+import io.streamthoughts.azkarra.streams.components.ReflectiveComponentScanner;
 import io.streamthoughts.azkarra.streams.context.AzkarraContextLoader;
 import org.apache.kafka.streams.StreamsConfig;
 import org.slf4j.Logger;
@@ -272,7 +272,8 @@ public class AzkarraApplication {
         }
 
         if (enableComponentScan) {
-            ComponentScanner scanner = new ComponentScanner(context.getComponentFactory());
+            var scanner = new ReflectiveComponentScanner(context.getComponentFactory());
+            context.registerSingleton(scanner);
 
             // Scan all sub-packages of the root package of Azkarra for declared components.
             scanner.scanForPackage("io.streamthoughts.azkarra");

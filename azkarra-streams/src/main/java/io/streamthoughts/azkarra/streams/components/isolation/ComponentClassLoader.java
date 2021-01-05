@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.streams.components.isolation;
 
+import io.streamthoughts.azkarra.api.components.ExternalComponentClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
  * Default ClassLoader for loading components using a 'child-first strategy'. In other words, this ClassLoader
  * attempts to find the class in its own context before delegating to the parent ClassLoader.
  */
-public class ComponentClassLoader extends URLClassLoader {
+public class ComponentClassLoader extends URLClassLoader implements ExternalComponentClassLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(ComponentClassLoader.class);
 
@@ -194,6 +195,14 @@ public class ComponentClassLoader extends URLClassLoader {
     @Override
     public String toString() {
         return "ComponentClassLoader[location=" + componentLocation + "] ";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public URL componentLocation() {
+        return componentLocation;
     }
 
     static final class CompoundEnumeration<E> implements Enumeration<E> {

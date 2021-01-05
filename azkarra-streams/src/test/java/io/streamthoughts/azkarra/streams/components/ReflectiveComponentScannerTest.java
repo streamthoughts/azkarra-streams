@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.streams.components;
 import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
+import io.streamthoughts.azkarra.api.components.ComponentScanner;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.Version;
@@ -50,7 +51,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ComponentScannerTest {
+public class ReflectiveComponentScannerTest {
 
     @TempDir
     static Path COMPONENT_PATH;
@@ -61,7 +62,7 @@ public class ComponentScannerTest {
     @BeforeEach
     public void setUp() {
         factory = Mockito.spy(new DefaultComponentFactory(new DefaultComponentDescriptorFactory()));
-        scanner = new ComponentScanner(factory);
+        scanner = new ReflectiveComponentScanner(factory);
     }
 
     @Test
