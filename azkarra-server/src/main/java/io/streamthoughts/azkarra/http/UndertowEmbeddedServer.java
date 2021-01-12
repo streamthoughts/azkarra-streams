@@ -36,6 +36,7 @@ import io.streamthoughts.azkarra.http.error.AzkarraExceptionMapper;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultHandler;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultResponseListener;
 import io.streamthoughts.azkarra.http.handler.HeadlessHttpHandler;
+import io.streamthoughts.azkarra.http.query.DefaultInteractiveQueryService;
 import io.streamthoughts.azkarra.http.query.HttpRemoteQueryBuilder;
 import io.streamthoughts.azkarra.http.routes.WebUIHttpRoutes;
 import io.streamthoughts.azkarra.http.security.SSLContextFactory;
@@ -45,7 +46,6 @@ import io.streamthoughts.azkarra.http.security.handler.SecurityHandler;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandlerFactory;
 import io.streamthoughts.azkarra.http.serialization.json.SpecificJsonSerdes;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
-import io.streamthoughts.azkarra.runtime.service.LocalAzkarraStreamsService;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -86,11 +86,9 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private ServerInfo serverInfo;
 
-    private AzkarraStreamsService service;
-
     private Undertow server;
 
-    private RoutingHandler routing;
+    private final RoutingHandler routing;
 
     private DeploymentManager manager;
 
@@ -102,7 +100,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private ServerConfig serverConfig;
 
-    private Collection<AzkarraRestExtension> registeredExtensions = new LinkedList<>();
+    private final Collection<AzkarraRestExtension> registeredExtensions = new LinkedList<>();
 
     /**
      * Creates a new {@link UndertowEmbeddedServer} instance.
@@ -170,8 +168,8 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private void initializeAzkarraStreamsServiceComponent() {
         HttpRemoteQueryBuilder httpRemoteQueryBuilder = new HttpRemoteQueryBuilder()
-                .setBasePath(APIVersions.PATH_V1)
-                .setSerdes(new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class));
+            .setBasePath(APIVersions.PATH_V1)
+            .setSerdes(new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class));
 
         if (serverConfig.isSslEnable()) {
             httpRemoteQueryBuilder.setSSLContextFactory(sslContextFactory);
@@ -182,8 +180,8 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
             httpRemoteQueryBuilder.enablePasswordAuthentication(true);
         }
 
-        service = new LocalAzkarraStreamsService(context, httpRemoteQueryBuilder.build());
-        context.registerSingleton(service);
+        final AzkarraStreamsService service = context.getComponent(AzkarraStreamsService.class);
+        context.registerSingleton(new DefaultInteractiveQueryService(service, httpRemoteQueryBuilder.build()));
     }
 
     private HttpHandler initializeRouterPathHandler(final HttpHandler fallbackHandler) {
@@ -276,6 +274,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
             ((AzkarraContextAware) provider).setAzkarraContext(context);
         }
         LOG.info("Loading HTTP routes from provided class '{}'", provider.getClass().getName());
+        final AzkarraStreamsService service = context.getComponent(AzkarraStreamsService.class);
         routing.addAll(provider.handler(service));
     }
 

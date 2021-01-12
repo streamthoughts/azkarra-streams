@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.http.handler;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Tuple;
+import io.streamthoughts.azkarra.api.query.InteractiveQueryService;
 import io.streamthoughts.azkarra.api.query.Queried;
 import io.streamthoughts.azkarra.api.query.QueryInfo;
 import io.streamthoughts.azkarra.api.query.internal.Query;
@@ -33,9 +34,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ApplicationQueryStoreHandler extends AbstractStreamHttpHandler implements WithApplication {
+public class ApplicationQueryStoreHandler implements WithApplication {
 
     private static final String QUERY_PARAM_STORE_NAME = "storeName";
+
+    private final InteractiveQueryService service;
 
     private final boolean onlySuccessKVRecords;
 
@@ -44,9 +47,9 @@ public class ApplicationQueryStoreHandler extends AbstractStreamHttpHandler impl
      *
      * @param service   the {@link AzkarraStreamsService} instance.
      */
-    public ApplicationQueryStoreHandler(final AzkarraStreamsService service,
+    public ApplicationQueryStoreHandler(final InteractiveQueryService service,
                                         final boolean onlySuccessKVRecords) {
-        super(service);
+        this.service = service;
         this.onlySuccessKVRecords = onlySuccessKVRecords;
     }
 

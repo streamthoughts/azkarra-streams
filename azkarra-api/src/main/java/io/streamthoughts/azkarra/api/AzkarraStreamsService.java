@@ -246,21 +246,4 @@ public interface AzkarraStreamsService {
      * @throws NotFoundException  if not application exists for the id.
      */
     void deleteStreams(final String applicationId);
-
-    /**
-     * Executes an interactive query for the specified streams application.
-     *
-     * @param applicationId the streams application id.
-     * @param query         the {@link Query} instance.
-     * @param parameters    the query parameters.
-     * @param options       the query execution options.
-     *
-     * @return              the {@link QueryResult} instance.
-     *
-     * @throws InvalidStreamsStateException if the streams is not running for the given applicationId.
-     */
-    <K, V> QueryResult<K, V>  query(final String applicationId,
-                                    final Query<K, V> query,
-                                    final QueryParams parameters,
-                                    final Queried options);
 }

@@ -18,7 +18,10 @@
  */
 package io.streamthoughts.azkarra.http.routes;
 
+import io.streamthoughts.azkarra.api.AzkarraContext;
+import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
+import io.streamthoughts.azkarra.api.query.InteractiveQueryService;
 import io.streamthoughts.azkarra.http.APIVersions;
 import io.streamthoughts.azkarra.http.handler.ApplicationGetInstancesHandler;
 import io.streamthoughts.azkarra.http.handler.ApplicationGetTopologyHandler;
@@ -31,9 +34,11 @@ import io.undertow.server.handlers.BlockingHandler;
 /**
  * This class defines all routes for API '/applications'.
  */
-public class ApiApplicationsRoutes implements RoutingHandlerProvider {
+public class ApiApplicationsRoutes implements RoutingHandlerProvider, AzkarraContextAware {
 
     private static final String APPLICATIONS_PREFIX_PATH = APIVersions.PATH_V1 + "/applications/";
+
+    private AzkarraContext context;
 
     /**
      * Creates a new {@link ApiApplicationsRoutes} instance.
@@ -45,23 +50,30 @@ public class ApiApplicationsRoutes implements RoutingHandlerProvider {
      */
     @Override
     public RoutingHandler handler(final AzkarraStreamsService service) {
-
+        final InteractiveQueryService queryService = context.getComponent(InteractiveQueryService.class);
         return Handlers.routing()
-            .get(templatePath("{id}"),
-                new ApplicationGetInstancesHandler(service))
+                .get(templatePath("{id}"),
+                        new ApplicationGetInstancesHandler(service))
 
-            .get(templatePath("{id}/topology"),
-                new ApplicationGetTopologyHandler(service))
+                .get(templatePath("{id}/topology"),
+                        new ApplicationGetTopologyHandler(service))
 
-            .post(templatePath("{id}/stores/{storeName}"),
-                new BlockingHandler(new ApplicationQueryStoreHandler(service, false)))
+                .post(templatePath("{id}/stores/{storeName}"),
+                        new BlockingHandler(new ApplicationQueryStoreHandler(queryService, false)))
 
-            .post(templatePath("{id}/stores/{storeName}/records"),
-                new BlockingHandler(new ApplicationQueryStoreHandler(service, true)));
+                .post(templatePath("{id}/stores/{storeName}/records"),
+                        new BlockingHandler(new ApplicationQueryStoreHandler(queryService, true)));
     }
 
     private String templatePath(final String assignments) {
         return APPLICATIONS_PREFIX_PATH + assignments;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setAzkarraContext(final AzkarraContext context) {
+        this.context = context;
+    }
 }

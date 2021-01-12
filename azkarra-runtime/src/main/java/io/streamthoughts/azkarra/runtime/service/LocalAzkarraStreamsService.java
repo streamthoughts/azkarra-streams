@@ -18,13 +18,10 @@
  */
 package io.streamthoughts.azkarra.runtime.service;
 
-import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.errors.Error;
-import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.Environment;
 import io.streamthoughts.azkarra.api.model.Metric;
@@ -32,21 +29,10 @@ import io.streamthoughts.azkarra.api.model.MetricGroup;
 import io.streamthoughts.azkarra.api.model.StreamsStatus;
 import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
 import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.query.DistributedQuery;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.QueryParams;
-import io.streamthoughts.azkarra.api.query.RemoteQueryClient;
-import io.streamthoughts.azkarra.api.query.internal.Query;
-import io.streamthoughts.azkarra.api.query.result.ErrorResultSet;
-import io.streamthoughts.azkarra.api.query.result.QueryError;
-import io.streamthoughts.azkarra.api.query.result.QueryResult;
-import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
-import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.ServerMetadata;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
-import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
 import org.apache.kafka.common.MetricName;
 
@@ -67,20 +53,6 @@ import java.util.stream.Collectors;
  * The default {@link AzkarraStreamsService} implementations.
  */
 public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
-
-    private RemoteQueryClient remoteQueryClient;
-
-    /**
-     * Creates a new {@link LocalAzkarraStreamsService} instance.
-     *
-     * @param context  the {@link AzkarraContext} instance.
-     * @param context  the {@link RemoteQueryClient} instance.
-     */
-    public LocalAzkarraStreamsService(final AzkarraContext context,
-                                      final RemoteQueryClient remoteQueryClient) {
-        super(context);
-        this.remoteQueryClient = Objects.requireNonNull(remoteQueryClient, "remoteQueryClient cannot be null");
-    }
 
     /**
      * {@inheritDoc}
@@ -287,45 +259,6 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
         } else {
             throw new NotFoundException(
                 "Can't find streams environment running an application with id'" + applicationId+ "'.");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <K, V> QueryResult<K, V> query(final String applicationId,
-                                          final Query<K, V> query,
-                                          final QueryParams parameters,
-                                          final Queried options) {
-        final long now = Time.SYSTEM.milliseconds();
-
-        final KafkaStreamsContainer streams = getStreamsById(applicationId);
-
-        checkIsRunning(streams);
-
-        final Optional<List<Error>> errors = query.validate(parameters);
-        if (errors.isPresent()) {
-            QueryResultBuilder<K, V> queryBuilder = QueryResultBuilder.newBuilder();
-            final String server = streams.applicationServer();
-            return queryBuilder
-            .setServer(server)
-            .setTook(Time.SYSTEM.milliseconds() - now)
-            .setStatus(QueryStatus.INVALID)
-            .setFailedResultSet(new ErrorResultSet(server, false, QueryError.allOf(errors.get())))
-            .build();
-        }
-
-        final DistributedQuery<K, V> distributed = new DistributedQuery<>(remoteQueryClient, query.prepare(parameters));
-        return distributed.query(streams, options);
-    }
-
-    private void checkIsRunning(final KafkaStreamsContainer streams) {
-        if (!streams.isRunning()) {
-            throw new InvalidStreamsStateException(
-                "streams instance for id '" + streams.applicationId() +
-                "' is not running (" + streams.state().value() + ")"
-            );
         }
     }
 

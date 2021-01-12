@@ -20,6 +20,7 @@
 package io.streamthoughts.azkarra.runtime.service;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
+import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
@@ -39,16 +40,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsService {
+public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsService, AzkarraContextAware {
 
-    protected final AzkarraContext context;
-    /**
-     * Creates a new {@link AbstractAzkarraStreamsService} instance.
-     * @param context   the {@link AzkarraContext} instance.
-     */
-    AbstractAzkarraStreamsService(final AzkarraContext context) {
-        this.context = Objects.requireNonNull(context, "context cannot be null");
-    }
+    protected AzkarraContext context;
 
     /**
      * {@inheritDoc}
@@ -58,6 +52,10 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
         return context.topologyProviders();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<TopologyAndAliases> getAllTopologies() {
         Map<String, Set<String>> topologies = new HashMap<>();
         var factory = context.getComponentFactory();
@@ -115,7 +113,6 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
         return new TopologyDescriptor(descriptor);
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -133,5 +130,13 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
             .map(ComponentDescriptor::version)
             .sorted()
             .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setAzkarraContext(final AzkarraContext context) {
+        this.context = context;
     }
 }

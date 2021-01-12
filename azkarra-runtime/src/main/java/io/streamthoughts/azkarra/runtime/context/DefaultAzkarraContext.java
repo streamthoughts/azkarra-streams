@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.runtime.context;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraContextListener;
+import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
@@ -63,6 +64,7 @@ import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInter
 import io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
+import io.streamthoughts.azkarra.runtime.service.LocalAzkarraStreamsService;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.util.ShutdownHook;
 import org.slf4j.Logger;
@@ -139,15 +141,15 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
     private StreamsExecutionEnvironment defaultEnvironment;
 
-    private Map<String, StreamsExecutionEnvironment> environments;
+    private final Map<String, StreamsExecutionEnvironment> environments;
 
-    private ComponentFactory componentFactory;
+    private final ComponentFactory componentFactory;
 
     private final List<AzkarraContextListener> listeners;
 
     private State state;
 
-    private RestrictedComponentSupplierFactory componentSupplierFactory;
+    private final RestrictedComponentSupplierFactory componentSupplierFactory;
 
     private Conf contextConfig;
 
@@ -194,11 +196,15 @@ public class DefaultAzkarraContext implements AzkarraContext {
             ),
             withOrder(Ordered.LOWEST_ORDER)
         );
-
         registerComponent(
             StreamThreadExceptionHandler.class,
             new DefaultStreamThreadExceptionHandlerFactory(),
             withConditions(onMissingComponent(List.of(StreamThreadExceptionHandler.class)))
+        );
+        registerSingleton(
+            AzkarraStreamsService.class,
+            LocalAzkarraStreamsService::new,
+            withConditions(onMissingComponent(List.of(AzkarraStreamsService.class)))
         );
     }
 

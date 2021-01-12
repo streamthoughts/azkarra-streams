@@ -47,9 +47,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class HttpRemoteQueryClient implements RemoteQueryClient {
 
-    private static Logger LOG = LoggerFactory.getLogger(HttpRemoteQueryClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpRemoteQueryClient.class);
 
-    private OkHttpClient client;
+    private final OkHttpClient client;
 
     private final QueryURLBuilder queryURLBuilder;
 
