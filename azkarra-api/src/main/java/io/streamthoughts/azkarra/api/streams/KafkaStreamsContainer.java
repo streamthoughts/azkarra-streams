@@ -21,20 +21,23 @@ package io.streamthoughts.azkarra.api.streams;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.events.EventStream;
 import io.streamthoughts.azkarra.api.events.reactive.EventStreamPublisher;
+import io.streamthoughts.azkarra.api.model.Metric;
+import io.streamthoughts.azkarra.api.model.MetricGroup;
+import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
+import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.common.Metric;
-import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyQueryMetadata;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.apache.kafka.streams.state.HostInfo;
@@ -49,17 +52,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
+import java.util.function.Predicate;
 
 public interface KafkaStreamsContainer {
-
-    /**
-     * Asynchronously start the underlying {@link KafkaStreams} instance.
-     *
-     * @param executor the {@link Executor} instance to be used for starting the streams.
-     */
-    Future<State> start(final Executor executor);
 
     /**
      * Restarts this container.
@@ -141,20 +136,32 @@ public interface KafkaStreamsContainer {
     TopologyMetadata topologyMetadata();
 
     /**
-     * Gets the {@link TopologyDescription} for this {@link KafkaStreams} instance.
+     * Gets the {@link StreamsTopologyGraph} for this {@link KafkaStreams} instance.
      *
      * @return  a new {@link TopologyDescription} instance.
      */
-    TopologyDescription topologyDescription();
+    StreamsTopologyGraph topologyGraph();
 
     /**
-     * Gets all the current {@link Metric}s for this {@link KafkaStreams} instance.
+     * Gets all {@link Metric}s for this {@link KafkaStreams} instance.
      *
      * @see KafkaStreams#metrics()
      *
-     * @return  a map of {@link Metric}.
+     * @return  a {@code Set} of {@link Metric}.
      */
-    Map<MetricName, ? extends Metric> metrics();
+    default Set<MetricGroup> metrics() {
+        return metrics(KafkaMetricFilter.all());
+    }
+
+    /**
+     * Gets all {@link Metric}s for this {@link KafkaStreams} instance matching the specified {@link KafkaMetricFilter}.
+     *
+     * @see KafkaStreams#metrics()
+     *
+     * @param   filter the {@link KafkaMetricFilter} to be used.
+     * @return         a {@code Set} of {@link Metric}.
+     */
+    Set<MetricGroup> metrics(final KafkaMetricFilter filter);
 
     /**
      * Gets the offsets for the topic/partitions assigned to this {@link KafkaStreams} instance.
@@ -181,9 +188,25 @@ public interface KafkaStreamsContainer {
     /**
      * Returns the wrapped {@link KafkaStreams} instance.
      *
+     * This method can throw an {@link UnsupportedOperationException} if the {@link KafkaStreamsContainer}
+     * implementation doesn't manage the {@link KafkaStreams} locally.
+     *
      * @return  the {@link KafkaStreams}.
      */
-    KafkaStreams kafkaStreams();
+    default KafkaStreams getKafkaStreams() {
+        throw new UnsupportedOperationException();
+    }
+   /**
+     * Returns the wrapped {@link Topology} instance.
+     *
+     * This method can throw an {@link UnsupportedOperationException} if the {@link KafkaStreamsContainer}
+     * implementation doesn't manage the {@link KafkaStreams} locally.
+     *
+     * @return  the {@link Topology} instance.
+     */
+    default Topology getTopology() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Checks whether the given {@link HostInfo} is the same as this container.
@@ -315,5 +338,27 @@ public interface KafkaStreamsContainer {
          * @param event the {@link StateChangeEvent}
          */
         void onChange(final StateChangeEvent event);
+    }
+
+    /**
+     * A {@code KafkaMetricFilter} can be used to only get specific metrics.
+     */
+    interface KafkaMetricFilter extends Predicate<Tuple<String, Metric>> {
+
+        static KafkaMetricFilter of(final Predicate<Tuple<String, Metric>> predicate) {
+            return predicate::test;
+        }
+
+        static KafkaMetricFilter all() {
+            return candidate -> true;
+        }
+
+        static KafkaMetricFilter filterByGroup(final String groupName) {
+            return candidate -> candidate.left().equals(groupName);
+        }
+
+        static KafkaMetricFilter filterByGroupAndMetricName(final String groupName, final String metricName) {
+            return candidate -> candidate.left().equals(groupName) && candidate.right().name().equals(metricName);
+        }
     }
 }

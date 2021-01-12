@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Helper class which can be used for building new {@link Conf} instance.
@@ -49,6 +50,22 @@ public class ConfBuilder implements Conf {
     public ConfBuilder with(final String key, Object value) {
         this.parameters.put(key, value);
         return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(final String path) {
+        return build().getValue(path);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> keySet() {
+        return build().keySet();
     }
 
     /**

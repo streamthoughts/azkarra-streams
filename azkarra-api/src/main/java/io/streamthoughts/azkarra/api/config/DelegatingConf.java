@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Delegates to a {@link Conf}.
@@ -37,6 +38,22 @@ public class DelegatingConf implements Conf  {
      */
     public DelegatingConf(final Conf originals) {
         this.originals = originals;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(String path) {
+        return originals.getValue(path);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> keySet() {
+        return originals.keySet();
     }
 
     /**

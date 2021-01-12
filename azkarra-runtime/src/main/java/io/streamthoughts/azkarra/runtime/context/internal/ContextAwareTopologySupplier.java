@@ -20,8 +20,8 @@ package io.streamthoughts.azkarra.runtime.context.internal;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
+import io.streamthoughts.azkarra.api.StreamsTopologyMeta;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
-import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
@@ -29,7 +29,6 @@ import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.config.ConfigurableSupplier;
 import io.streamthoughts.azkarra.api.events.EventStream;
 import io.streamthoughts.azkarra.api.events.EventStreamProvider;
-import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.ClassUtils;
 import org.apache.kafka.streams.Topology;
@@ -39,18 +38,18 @@ import java.util.List;
 
 public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyProvider> {
 
-    private final ComponentDescriptor<? extends TopologyProvider>  descriptor;
+    private final StreamsTopologyMeta meta;
     private final AzkarraContext context;
 
     /**
      * Creates a new {@link ContextAwareTopologySupplier} instance.
      *
      * @param context       the {@link AzkarraContext} instance.
-     * @param descriptor    the {@link TopologyDescriptor} instance.
+     * @param meta    the {@link StreamsTopologyMeta} instance.
      */
     public ContextAwareTopologySupplier(final AzkarraContext context,
-                                        final ComponentDescriptor<? extends TopologyProvider> descriptor) {
-        this.descriptor = descriptor;
+                                        final StreamsTopologyMeta meta) {
+        this.meta = meta;
         this.context = context;
     }
 
@@ -62,9 +61,9 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
         final ComponentFactory factory = context.getComponentFactory();
 
         final TopologyProvider provider = factory.getComponent(
-            descriptor.type(),
+                meta.type(),
             configs,
-            Qualifiers.byVersion(descriptor.version())
+            Qualifiers.byVersion(meta.version())
         );
 
         if (provider instanceof AzkarraContextAware) {
@@ -73,8 +72,8 @@ public class ContextAwareTopologySupplier extends ConfigurableSupplier<TopologyP
 
         // The components returned from the registry may be already configured.
         // Thus, here we need to wrap the component into a non-configurable one so that the configure method
-        // will be not invoke a second time by the StreamsExecutionEnvironment.
-        return new ClassLoaderAwareTopologyProvider(provider, descriptor.classLoader());
+        // will be not invoked a second time by the StreamsExecutionEnvironment.
+        return new ClassLoaderAwareTopologyProvider(provider, meta.classLoader());
     }
 
     /**

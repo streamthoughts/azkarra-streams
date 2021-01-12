@@ -41,7 +41,7 @@ public class EnvironmentAwareComponentSupplier<T> {
         this.componentSupplier = componentSupplier;
     }
 
-    public T get(final StreamsExecutionEnvironment environment, final Conf componentConf) {
+    public T get(final StreamsExecutionEnvironment<?> environment, final Conf componentConf) {
         mayConfigure(componentSupplier, componentConf);
         T component = componentSupplier.get();
         mayConfigure(component, componentConf);
@@ -50,7 +50,7 @@ public class EnvironmentAwareComponentSupplier<T> {
     }
 
     private void maySetStreamsExecutionEnvironmentAware(final Object component,
-                                                        final StreamsExecutionEnvironment environment) {
+                                                        final StreamsExecutionEnvironment<?> environment) {
         if (StreamsExecutionEnvironmentAware.class.isAssignableFrom(component.getClass())) {
             ((StreamsExecutionEnvironmentAware)component).setExecutionEnvironment(environment);
         }

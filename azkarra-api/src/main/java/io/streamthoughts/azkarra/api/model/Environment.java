@@ -31,6 +31,7 @@ public class Environment {
 
     private final String name;
     private final State state;
+    private final String type;
     private final Map<String, Object> config;
     private final Set<String> applications;
     private final boolean isDefault;
@@ -39,17 +40,20 @@ public class Environment {
      * Creates a new {@link Environment} instance.
      *
      * @param name              the environment name.
+     * @param type              the environment type.
      * @param state             the environment state.
      * @param config            the environment configuration.
      * @param applications      the list of active streams applications.
      * @param isDefault         is the default environment.
      */
     public Environment(final String name,
+                       final String type,
                        final State state,
                        final Map<String, Object> config,
                        final Set<String> applications,
                        final boolean isDefault) {
         this.name = name;
+        this.type = type;
         this.state = state;
         this.config = config;
         this.applications = new TreeSet<>(applications);
@@ -59,6 +63,11 @@ public class Environment {
     @JsonProperty("name")
     public String name() {
         return name;
+    }
+
+    @JsonProperty("type")
+    public String type() {
+        return type;
     }
 
     @JsonProperty("state")
@@ -90,6 +99,7 @@ public class Environment {
         Environment that = (Environment) o;
         return isDefault == that.isDefault &&
                 Objects.equals(name, that.name) &&
+                Objects.equals(type, that.type) &&
                 Objects.equals(config, that.config) &&
                 Objects.equals(applications, that.applications);
     }
@@ -109,6 +119,7 @@ public class Environment {
     public String toString() {
         return "Environment{" +
                 "name='" + name + '\'' +
+                "name='" + type + '\'' +
                 ", config=" + config +
                 ", applications=" + applications +
                 ", isDefault=" + isDefault +

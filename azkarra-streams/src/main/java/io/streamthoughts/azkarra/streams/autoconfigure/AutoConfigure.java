@@ -55,7 +55,7 @@ public class AutoConfigure {
         LOG.info("Loading application configuration");
         Objects.requireNonNull(application, "application cannot be null");
 
-        AzkarraContext context = application.getContext();
+        final AzkarraContext context = application.getContext();
 
         if (context == null) {
             LOG.info("No AzkarraContext provided, initializing default provided implementation");
@@ -74,7 +74,7 @@ public class AutoConfigure {
             }
         });
         isHttpServerEnable(mainApplicationClass)
-            .ifPresent(application::enableHttpServer);
+            .ifPresent(application::setHttpServerEnable);
 
         loadAutoStartEnvironmentNameIfEnable(mainApplicationClass)
             .ifPresent(env -> application.setAutoStart(true, env));

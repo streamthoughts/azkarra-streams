@@ -21,7 +21,9 @@ package io.streamthoughts.azkarra.runtime.service;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentFactory;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.Environment;
 import io.streamthoughts.azkarra.api.model.Metric;
@@ -33,16 +35,10 @@ import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.ServerMetadata;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
-import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
-import org.apache.kafka.common.MetricName;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -59,9 +55,9 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public Collection<String> getAllStreams() {
-        return containers()
+        return context.getAllEnvironments()
             .stream()
-            .map(KafkaStreamsContainer::applicationId)
+            .flatMap(environment -> environment.applicationIds().stream())
             .collect(Collectors.toList());
     }
 
@@ -78,8 +74,10 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public KafkaStreamsContainer getStreamsById(final String applicationId) {
-        final Optional<KafkaStreamsContainer> container = containers()
+        final Optional<KafkaStreamsContainer> container = context
+            .getAllEnvironments()
             .stream()
+            .flatMap(environment -> environment.applications().stream())
             .filter(o -> o.applicationId().equals(applicationId))
             .findFirst();
 
@@ -106,8 +104,7 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public StreamsTopologyGraph getStreamsTopologyById(final String applicationId) {
-        KafkaStreamsContainer streams = getStreamsById(applicationId);
-        return StreamsTopologyGraph.build(streams.topologyDescription());
+        return getStreamsById(applicationId).topologyGraph();
     }
 
     /**
@@ -126,7 +123,7 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public Set<MetricGroup> getStreamsMetricsById(final String applicationId) {
-        return getStreamsMetricsById(applicationId, m -> true);
+        return getStreamsById(applicationId).metrics();
     }
 
     /**
@@ -135,32 +132,7 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     @Override
     public Set<MetricGroup> getStreamsMetricsById(final String applicationId,
                                                   final Predicate<Tuple<String, Metric>> filter) {
-        KafkaStreamsContainer container = getStreamsById(applicationId);
-
-        Map<MetricName, ? extends org.apache.kafka.common.Metric> metrics = container.metrics();
-
-        Map<String, List<Metric>> m = new HashMap<>(metrics.size());
-        for (Map.Entry<MetricName, ? extends org.apache.kafka.common.Metric> elem : metrics.entrySet()) {
-            final MetricName metricName = elem.getKey();
-            final org.apache.kafka.common.Metric metricValue = elem.getValue();
-
-            final Metric metric = new Metric(
-                metricName.name(),
-                metricName.group(),
-                metricName.description(),
-                metricName.tags(),
-                metricValue.metricValue()
-            );
-            final boolean filtered = filter.test(Tuple.of(metricName.group(), metric));
-            if (filtered) {
-                m.computeIfAbsent(metricName.group(), k -> new LinkedList<>()).add(metric);
-            }
-        }
-
-        return m.entrySet()
-                .stream()
-                .map(e -> new MetricGroup(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
+        return getStreamsById(applicationId).metrics(KafkaStreamsContainer.KafkaMetricFilter.of(filter));
     }
 
     /**
@@ -185,25 +157,33 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public Set<Environment> getAllEnvironments() {
-        StreamsExecutionEnvironment defaultEnv = context.defaultExecutionEnvironment();
-        return context.environments()
-              .stream()
-              .map( env -> new Environment(
-                  env.name(),
-                  env.state(),
-                  env.getConfiguration().getConfAsMap(),
-                  env.applications().stream().map(KafkaStreamsContainer::applicationId).collect(Collectors.toSet()),
-                  env.name().equals(defaultEnv.name())
-                  )
-              ).collect(Collectors.toSet());
+        return context.getAllEnvironments()
+            .stream()
+            .map( env -> new Environment(
+                env.name(),
+                env.type(),
+                env.state(),
+                env.getConfiguration().getConfAsMap(),
+                env.applicationIds(),
+                env.isDefault()
+            )
+          ).collect(Collectors.toSet());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void addNewEnvironment(final String name, final Conf conf) {
-        this.context.addExecutionEnvironment(DefaultStreamsExecutionEnvironment.create(conf, name));
+    public void addNewEnvironment(final String name, final String type, final Conf conf) {
+        var factories = context.getAllComponents(StreamsExecutionEnvironmentFactory.class);
+        var opt = factories
+            .stream()
+            .filter(factory -> factory.type().equals(type))
+            .findAny();
+        if (opt.isEmpty()) {
+            throw new InvalidStreamsEnvironmentException("Cannot find factory for environment type " + type);
+        }
+        context.addExecutionEnvironment(opt.get().create(name, conf));
     }
 
     /**
@@ -241,15 +221,15 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     @Override
     public void deleteStreams(final String applicationId) {
 
-        StreamsExecutionEnvironment env = null;
-        Iterator<StreamsExecutionEnvironment> it = context.environments().iterator();
+        StreamsExecutionEnvironment<?> env = null;
+        Iterator<StreamsExecutionEnvironment<?>> it = context.getAllEnvironments().iterator();
         while (it.hasNext() && env == null) {
-            StreamsExecutionEnvironment e = it.next();
+            StreamsExecutionEnvironment<?> e = it.next();
             boolean exists = e.applications()
-                    .stream()
-                    .map(KafkaStreamsContainer::applicationId)
-                    .collect(Collectors.toList())
-                    .contains(applicationId);
+                .stream()
+                .map(KafkaStreamsContainer::applicationId)
+                .collect(Collectors.toList())
+                .contains(applicationId);
             if (exists) {
                 env = e;
             }
@@ -260,11 +240,5 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
             throw new NotFoundException(
                 "Can't find streams environment running an application with id'" + applicationId+ "'.");
         }
-    }
-
-    private Collection<KafkaStreamsContainer> containers() {
-        return context.environments().stream()
-                .flatMap(environment -> environment.applications().stream())
-                .collect(Collectors.toList());
     }
 }

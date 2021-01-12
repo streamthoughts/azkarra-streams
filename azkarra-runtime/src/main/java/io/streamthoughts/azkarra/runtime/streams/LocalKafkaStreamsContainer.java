@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.runtime.streams;
 
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
@@ -26,9 +26,19 @@ import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.events.EventStream;
 import io.streamthoughts.azkarra.api.events.reactive.AsyncMulticastEventStreamPublisher;
 import io.streamthoughts.azkarra.api.events.reactive.EventStreamPublisher;
+import io.streamthoughts.azkarra.api.model.MetricGroup;
+import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
+import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.api.streams.ServerMetadata;
+import io.streamthoughts.azkarra.api.streams.State;
+import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
+import io.streamthoughts.azkarra.api.streams.TopicPartitions;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerClientOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerLogOffsets;
@@ -58,7 +68,7 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyQueryMetadata;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.TopologyDescription;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.processor.ThreadMetadata;
 import org.apache.kafka.streams.state.HostInfo;
@@ -98,9 +108,9 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
 import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 
-public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
+public class LocalKafkaStreamsContainer implements KafkaStreamsContainer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaStreamsContainer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocalKafkaStreamsContainer.class);
 
     private final KafkaStreamsFactory streamsFactory;
 
@@ -160,22 +170,22 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
     }
 
     /**
-     * @return a new {@link KafkaStreamsContainerBuilder} instance.
+     * @return a new {@link LocalKafkaStreamsContainerBuilder} instance.
      */
-    public static KafkaStreamsContainerBuilder newBuilder() {
-        return new KafkaStreamsContainerBuilder();
+    public static LocalKafkaStreamsContainerBuilder newBuilder() {
+        return new LocalKafkaStreamsContainerBuilder();
     }
 
     /**
-     * Creates a new {@link DefaultKafkaStreamsContainer} instance.
+     * Creates a new {@link LocalKafkaStreamsContainer} instance.
      *
      * @param topologyDefinition the {@link TopologyDefinition} instance.
      * @param streamsFactory     the {@link KafkaStreamsFactory} instance.
      */
-    DefaultKafkaStreamsContainer(final Conf streamsConfig,
-                                 final TopologyDefinition topologyDefinition,
-                                 final KafkaStreamsFactory streamsFactory,
-                                 final List<StreamsLifecycleInterceptor> interceptors) {
+    LocalKafkaStreamsContainer(final Conf streamsConfig,
+                               final TopologyDefinition topologyDefinition,
+                               final KafkaStreamsFactory streamsFactory,
+                               final List<StreamsLifecycleInterceptor> interceptors) {
         Objects.requireNonNull(topologyDefinition, "topologyDefinition cannot be null");
         Objects.requireNonNull(streamsFactory, "streamsFactory cannot be null");
         this.streamsConfig = Objects.requireNonNull(streamsConfig, "streamConfigs cannot be null");
@@ -192,10 +202,11 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
     }
 
     /**
-     * {@inheritDoc}
+     *Asynchronously start the underlying {@link KafkaStreams} instance.
+     *
+     * @param executor the {@link Executor} instance to be used for starting the streams.
      */
-    @Override
-    public synchronized Future<State> start(final Executor executor) {
+    public Future<State> start(final Executor executor) {
         LOG.info("Starting KafkaStreams container for name='{}', version='{}', id='{}'.",
             topologyDefinition.getName(),
             topologyDefinition.getVersion(),
@@ -374,17 +385,41 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public TopologyDescription topologyDescription() {
-        return topologyDefinition.getTopology().describe();
+    public StreamsTopologyGraph topologyGraph() {
+        return StreamsTopologyGraph.build(topologyDefinition.getTopology().describe());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Map<MetricName, ? extends Metric> metrics() {
-       return initialized() ? kafkaStreams.metrics() : Collections.emptyMap();
+    public Set<MetricGroup> metrics(final KafkaMetricFilter filter) {
+        final Map<MetricName, ? extends Metric> kafkaMetrics = initialized()
+            ? kafkaStreams.metrics() :
+            Collections.emptyMap();
+
+        Map<String, List<io.streamthoughts.azkarra.api.model.Metric>> m = new HashMap<>(kafkaMetrics.size());
+        for (Map.Entry<MetricName, ? extends org.apache.kafka.common.Metric> elem : kafkaMetrics.entrySet()) {
+            final MetricName metricName = elem.getKey();
+            final org.apache.kafka.common.Metric metricValue = elem.getValue();
+
+            final io.streamthoughts.azkarra.api.model.Metric metric = new io.streamthoughts.azkarra.api.model.Metric(
+                metricName.name(),
+                metricName.group(),
+                metricName.description(),
+                metricName.tags(),
+                metricValue.metricValue()
+            );
+            final boolean filtered = filter.test(Tuple.of(metricName.group(), metric));
+            if (filtered) {
+                m.computeIfAbsent(metricName.group(), k -> new LinkedList<>()).add(metric);
+            }
+        }
+
+        return m.entrySet()
+            .stream()
+            .map(e -> new MetricGroup(e.getKey(), e.getValue()))
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -587,12 +622,12 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
         return new StreamsLifecycleContext() {
             @Override
             public void setState(final State state) {
-                DefaultKafkaStreamsContainer.this.setState(state);
+                LocalKafkaStreamsContainer.this.setState(state);
             }
 
             @Override
             public KafkaStreamsContainer container() {
-                return DefaultKafkaStreamsContainer.this;
+                return LocalKafkaStreamsContainer.this;
             }
         };
     }
@@ -889,13 +924,20 @@ public class DefaultKafkaStreamsContainer implements KafkaStreamsContainer {
     }
 
     /**
-     * Returns the wrapper {@link KafkaStreams} instance.
-     *
-     * @return  the {@link KafkaStreams}.
+     * {@inheritDoc}
      */
-    public KafkaStreams kafkaStreams() {
+    @Override
+    public KafkaStreams getKafkaStreams() {
         validateInitialized();
         return kafkaStreams;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Topology getTopology() {
+        return topologyDefinition.getTopology();
     }
 
     /**

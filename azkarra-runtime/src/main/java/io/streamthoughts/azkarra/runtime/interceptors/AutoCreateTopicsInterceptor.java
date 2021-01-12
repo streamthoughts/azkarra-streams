@@ -96,9 +96,9 @@ public class AutoCreateTopicsInterceptor
     /**
      * The list of topics actually created for the topology.
      */
-    private Set<String> createdTopics = new HashSet<>();
+    private final Set<String> createdTopics = new HashSet<>();
 
-    private AtomicBoolean topicListed = new AtomicBoolean(false);
+    private final AtomicBoolean topicListed = new AtomicBoolean(false);
 
     private final AdminClient adminClient;
 

@@ -18,9 +18,27 @@
  */
 package io.streamthoughts.azkarra.api;
 
-public interface AzkarraContextListener {
+import io.streamthoughts.azkarra.api.components.Ordered;
 
-    void onContextStart(final AzkarraContext context);
+/**
+ * @see AzkarraContext
+ */
+public interface AzkarraContextListener extends Ordered {
 
-    void onContextStop(final AzkarraContext context);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default int order() {
+        return Ordered.LOWEST_ORDER - 100;
+    }
+
+    default void onContextStart(final AzkarraContext context) {
+
+    }
+
+    default void onContextStop(final AzkarraContext context) {
+
+    }
 }

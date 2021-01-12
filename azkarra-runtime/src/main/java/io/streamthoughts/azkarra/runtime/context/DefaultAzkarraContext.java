@@ -25,16 +25,15 @@ import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
-import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentFactory;
+import io.streamthoughts.azkarra.api.StreamsTopologyMeta;
 import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptorModifier;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentRegistry;
 import io.streamthoughts.azkarra.api.components.ContextAwareComponentFactory;
-import io.streamthoughts.azkarra.api.components.GettableComponent;
 import io.streamthoughts.azkarra.api.components.Ordered;
-import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.components.Restriction;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
@@ -44,23 +43,15 @@ import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
-import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
+import io.streamthoughts.azkarra.runtime.StreamsExecutionEnvironmentAbstractFactory;
 import io.streamthoughts.azkarra.runtime.components.ClassComponentAliasesGenerator;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentDescriptorFactory;
 import io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory;
 import io.streamthoughts.azkarra.runtime.components.condition.ConfigConditionalContext;
-import io.streamthoughts.azkarra.runtime.context.internal.ClassLoaderAwareKafkaStreamsFactory;
-import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareApplicationIdBuilderSupplier;
-import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareKafkaStreamsFactorySupplier;
-import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareLifecycleInterceptorSupplier;
-import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareThreadExceptionHandlerSupplier;
-import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySupplier;
-import io.streamthoughts.azkarra.runtime.env.DefaultStreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.runtime.env.LocalStreamsExecutionEnvironmentFactory;
 import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsInterceptor;
-import io.streamthoughts.azkarra.runtime.interceptors.ClassloadingIsolationInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
@@ -73,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,7 +102,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      *
      * @return a new {@link AzkarraContext} instance.
      */
-    public static AzkarraContext create() {
+    public static DefaultAzkarraContext create() {
         return create(Conf.empty());
     }
 
@@ -120,7 +112,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      *
      * @return a new {@link AzkarraContext} instance.
      */
-    public static AzkarraContext create(final ComponentFactory factory) {
+    public static DefaultAzkarraContext create(final ComponentFactory factory) {
         return new DefaultAzkarraContext(Conf.empty(), factory);
     }
 
@@ -130,7 +122,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      *
      * @return a new {@link AzkarraContext} instance.
      */
-    public static AzkarraContext create(final Conf configuration) {
+    public static DefaultAzkarraContext create(final Conf configuration) {
         // Set all default implementations
         DefaultComponentFactory factory = new DefaultComponentFactory(new DefaultComponentDescriptorFactory());
         factory.setComponentAliasesGenerator(new ClassComponentAliasesGenerator());
@@ -139,17 +131,15 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
     private boolean registerShutdownHook;
 
-    private StreamsExecutionEnvironment defaultEnvironment;
+    private StreamsExecutionEnvironment<?> defaultEnvironment;
 
-    private final Map<String, StreamsExecutionEnvironment> environments;
+    private final Map<String, StreamsExecutionEnvironment<?>> environments;
 
     private final ComponentFactory componentFactory;
 
     private final List<AzkarraContextListener> listeners;
 
     private State state;
-
-    private final RestrictedComponentSupplierFactory componentSupplierFactory;
 
     private Conf contextConfig;
 
@@ -168,7 +158,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
         this.listeners = new ArrayList<>();
         this.contextConfig = configuration;
         this.componentFactory = new ContextAwareComponentFactory(this, componentFactory);
-        this.componentSupplierFactory = new RestrictedComponentSupplierFactory(this);
+
         setState(State.CREATED);
         initialize();
     }
@@ -205,6 +195,15 @@ public class DefaultAzkarraContext implements AzkarraContext {
             AzkarraStreamsService.class,
             LocalAzkarraStreamsService::new,
             withConditions(onMissingComponent(List.of(AzkarraStreamsService.class)))
+        );
+        registerSingleton(
+            StreamsExecutionEnvironmentFactory.class,
+            LocalStreamsExecutionEnvironmentFactory::new,
+            withConditions(onMissingComponent(List.of(StreamsExecutionEnvironmentFactory.class)))
+        );
+        registerComponent(
+            StreamsExecutionEnvironmentAbstractFactory.class,
+            () -> new StreamsExecutionEnvironmentAbstractFactory(getAllComponents(StreamsExecutionEnvironmentFactory.class))
         );
     }
 
@@ -266,7 +265,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      * {@inheritDoc}
      */
     @Override
-    public AzkarraContext addExecutionEnvironment(final StreamsExecutionEnvironment env)
+    public AzkarraContext addExecutionEnvironment(final StreamsExecutionEnvironment<?> env)
             throws AlreadyExistsException {
         Objects.requireNonNull(env, "env cannot be null.");
         LOG.debug("Adding new streams environment for name '{}'", env.name());
@@ -284,11 +283,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
             if (env instanceof AzkarraContextAware)
                 ((AzkarraContextAware)env).setAzkarraContext(this);
 
-            if (env.name().equals(DEFAULT_ENV_NAME))
-                defaultEnvironment = env;
-
             if (state == State.STARTED) {
-                initializeEnvironment(env);
                 env.start();
             }
         } else {
@@ -388,7 +383,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
         }
 
         final var streamConfig = registration.executed.config();
-        final var conditionalContext = new ConfigConditionalContext(
+        final var conditionalContext = new ConfigConditionalContext<>(
             streamConfig
                 .withFallback(environment.getConfiguration())
                 .withFallback(getConfiguration())
@@ -399,8 +394,16 @@ public class DefaultAzkarraContext implements AzkarraContext {
             componentFactory.findDescriptorByAlias(registration.type, conditionalContext, Qualifiers.byVersion(registration.version));
 
         if (opt.isPresent()) {
-            final TopologyDescriptor descriptor = new TopologyDescriptor<>(opt.get());
-            return addTopologyToEnvironment(descriptor, environment, registration.executed);
+            final TopologyDescriptor<TopologyProvider> descriptor = new TopologyDescriptor<>(opt.get());
+            final StreamsTopologyMeta meta = new StreamsTopologyMeta(
+                descriptor.name(),
+                descriptor.version(),
+                descriptor.description(),
+                descriptor.type(),
+                descriptor.classLoader(),
+                descriptor.configuration()
+            );
+            return environment.newTopologyExecution(meta, registration.executed).start();
 
         } else {
             final String loggedVersion = registration.version != null ? registration.version : "latest";
@@ -412,68 +415,11 @@ public class DefaultAzkarraContext implements AzkarraContext {
         }
     }
 
-    @VisibleForTesting
-    ApplicationId addTopologyToEnvironment(final TopologyDescriptor<?> descriptor,
-                                           final StreamsExecutionEnvironment env,
-                                           final InternalExecuted executed) {
-
-        // Gets user-defined streams name or fallback on descriptor cannot be null).
-        final var streamName = executed.nameOrElseGet(descriptor.name());
-
-        // Gets user-defined description or fallback on descriptor (can be null).
-        final var description = executed.descriptionOrElseGet(descriptor.description());
-
-        // Gets user-defined configuration and fallback on inherited configurations.
-        final var streamsConfig = Conf.of(
-            executed.config(),          // (1) Executed
-            env.getConfiguration(),     // (2) Environment
-            getConfiguration(),         // (3) Context
-            descriptor.configuration()  // (4) Descriptor (i.e: default)
-        );
-
-        final var interceptors = executed.interceptors();
-        // Register StreamsLifeCycleInterceptor for class-loading isolation (must always be registered first)
-        interceptors.add(() -> new ClassloadingIsolationInterceptor(descriptor.classLoader()));
-
-        // Get and register all StreamsLifeCycleInterceptors component for any scopes: Application, Env, Streams
-        interceptors.addAll(componentSupplierFactory.findLifecycleInterceptors(
-            streamsConfig,
-            Restriction.application(),
-            Restriction.env(env.name()),
-            Restriction.streams(streamName))
-        );
-
-        // Get and register KafkaStreamsFactory for one the scopes: Application, Env, Streams
-        final var factory =  executed.factory()
-            .or(() -> componentSupplierFactory.findKafkaStreamsFactory(streamsConfig, Restriction.streams(streamName)))
-            .or(() -> componentSupplierFactory.findKafkaStreamsFactory(streamsConfig, Restriction.env(env.name())))
-            .or(() -> componentSupplierFactory.findKafkaStreamsFactory(streamsConfig, Restriction.application()))
-            .orElse(() -> KafkaStreamsFactory.DEFAULT);
-
-        LOG.info(
-            "Registered new topology to environment '{}' for type='{}', version='{}', name='{}'.",
-            env.name(),
-            descriptor.className() ,
-            descriptor.version(),
-            streamName
-        );
-
-        final var completedExecuted = Executed.as(streamName)
-            .withConfig(streamsConfig)
-            .withDescription(Optional.ofNullable(description).orElse(""))
-            .withInterceptors(interceptors)
-            .withKafkaStreamsFactory(
-                () -> new ClassLoaderAwareKafkaStreamsFactory(factory.get(), descriptor.classLoader())
-            );
-
-        return env.addTopology(new ContextAwareTopologySupplier(this, descriptor), completedExecuted);
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<TopologyDescriptor> topologyProviders() {
+    public Set<TopologyDescriptor> getTopologyDescriptors() {
         Collection<ComponentDescriptor<TopologyProvider>> descriptors =
             componentFactory.findAllDescriptorsByClass(TopologyProvider.class);
         return descriptors.stream().map(TopologyDescriptor::new).collect(Collectors.toSet());
@@ -483,12 +429,26 @@ public class DefaultAzkarraContext implements AzkarraContext {
      * {@inheritDoc}
      */
     @Override
-    public Set<TopologyDescriptor> topologyProviders(final StreamsExecutionEnvironment env) {
+    public Set<TopologyDescriptor> getTopologyDescriptors(final String environmentName) {
+        return getTopologyDescriptors(getEnvironmentForName(environmentName));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<TopologyDescriptor> getTopologyDescriptors(final StreamsExecutionEnvironment<?> env) {
         final Conf componentConfig = env.getConfiguration()
                 .withFallback(getConfiguration());
-        ConfigConditionalContext conditionalContext = new ConfigConditionalContext(componentConfig);
+        var conditionalContext = new ConfigConditionalContext<>(componentConfig);
         Collection<ComponentDescriptor<TopologyProvider>> descriptors =
-                componentFactory.findAllDescriptorsByClass(TopologyProvider.class, conditionalContext);
+            componentFactory.findAllDescriptorsByClass(
+                TopologyProvider.class,
+                conditionalContext, Qualifiers.byAnyRestrictions(
+                    Restriction.application(),
+                    Restriction.env(env.name())
+                )
+            );
         return descriptors.stream().map(TopologyDescriptor::new).collect(Collectors.toSet());
     }
 
@@ -496,8 +456,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
      * {@inheritDoc}
      */
     @Override
-    public List<StreamsExecutionEnvironment> environments() {
-        initializeDefaultEnvironment();
+    public List<StreamsExecutionEnvironment<?>> getAllEnvironments() {
         return List.copyOf(environments.values());
     }
 
@@ -505,35 +464,18 @@ public class DefaultAzkarraContext implements AzkarraContext {
      * {@inheritDoc}
      */
     @Override
-    public StreamsExecutionEnvironment getEnvironmentForNameOrCreate(final String envName) {
-        Objects.requireNonNull(envName, "envName cannot be null");
-        StreamsExecutionEnvironment environment = environments.get(envName);
-        if (environment == null) {
-            environment = DefaultStreamsExecutionEnvironment.create(envName);
-            addExecutionEnvironment(environment);
-        }
-        return environment;
+    public StreamsExecutionEnvironment<?> getEnvironmentForName(final String name) {
+        Objects.requireNonNull(name, "name cannot be null");
+        checkIfEnvironmentExists(name, "No environment can be found for name " + name);
+        return environments.get(name);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StreamsExecutionEnvironment defaultExecutionEnvironment() {
-        initializeDefaultEnvironment();
+    public StreamsExecutionEnvironment<?> getDefaultEnvironment() {
         return defaultEnvironment;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public TopologyDescriptor getTopology(final String type) {
-        Optional<ComponentDescriptor<TopologyProvider>> descriptor = componentFactory.findDescriptorByAlias(type);
-        if (descriptor.isPresent()) {
-            return new TopologyDescriptor<>(descriptor.get());
-        }
-        throw new AzkarraException("Cannot find topology for given alias or class '" + type + "'");
     }
 
     /**
@@ -546,30 +488,26 @@ public class DefaultAzkarraContext implements AzkarraContext {
                 "The context is either already started or already stopped, cannot re-start");
         }
         LOG.info("Starting AzkarraContext");
-        preStart();
         componentFactory.init(getConfiguration());
+        registerShutdownHook();
         try {
-            listeners.forEach(listeners -> listeners.onContextStart(this));
-            registerShutdownHook();
+            listeners.addAll(getAllComponents(AzkarraContextListener.class));
+            Collections.sort(listeners);
+            listeners.forEach(listener -> {
+                LOG.debug("Executing context listener {}#onContextStart", listener.getClass());
+                listener.onContextStart(this);
+            });
+            preStart();
             // Initialize and start all streams environments.
-            for (StreamsExecutionEnvironment env : environments()) {
-                initializeEnvironment(env);
-                LOG.info("Starting streams environment: {}", env.name());
+            for (StreamsExecutionEnvironment<?> env : getAllEnvironments()) {
+                LOG.info("Starting streams execution environment: {}", env.name());
                 env.start();
             }
             setState(State.STARTED);
         } catch (Exception e) {
             LOG.error("Unexpected error happens while starting AzkarraContext", e);
             stop(); // stop properly to close potentially open resources.
-        }
-    }
-
-    @VisibleForTesting
-    void preStart() {
-        initializeDefaultEnvironment();
-        if (!topologyRegistrations.isEmpty()) {
-            LOG.info("Adding all registered topologies to declared streams environments");
-            topologyRegistrations.forEach(this::mayAddTopologyToEnvironment);
+            throw e;
         }
     }
 
@@ -579,17 +517,21 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public void stop(boolean cleanUp) {
         LOG.info("Stopping AzkarraContext");
+        Collections.sort(listeners);
         listeners.forEach(listener -> {
             try {
+                LOG.debug("Executing context listener {}#onContextStop", listener.getClass());
                 listener.onContextStop(this);
             } catch (Exception e) {
-                LOG.error("Unexpected error happens while invoking listener '{}#onContextStop' : ",
+                LOG.error(
+                    "Unexpected error happens while invoking listener '{}#onContextStop' : ",
                     listener.getClass().getName(),
-                    e);
+                    e
+                );
             }
         });
         if (state == State.STARTED) {
-            environments().forEach(env -> env.stop(cleanUp));
+            getAllEnvironments().forEach(env -> env.stop(cleanUp));
         }
         try {
             componentFactory.close();
@@ -599,21 +541,13 @@ public class DefaultAzkarraContext implements AzkarraContext {
         LOG.info("AzkarraContext stopped completely");
     }
 
-    private void initializeEnvironment(final StreamsExecutionEnvironment env) {
-
-        final Conf componentResolutionConfig = env.getConfiguration().withFallback(getConfiguration());
-
-        // Inject environment or application scoped ApplicationIdBuilder
-        Optional.ofNullable(env.getApplicationIdBuilder())
-            .or(() -> componentSupplierFactory.findApplicationIdBuilder(componentResolutionConfig,  Restriction.env(env.name())))
-            .or(() -> componentSupplierFactory.findApplicationIdBuilder(componentResolutionConfig, Restriction.application()))
-            .ifPresent(env::setApplicationIdBuilder);
-
-        // Inject environment, global or default StreamsThreadExceptionHandler
-        Optional.ofNullable(env.getStreamThreadExceptionHandler())
-            .or(() -> componentSupplierFactory.findStreamThreadExceptionHandler(componentResolutionConfig, Restriction.env(env.name())))
-            .or(() -> componentSupplierFactory.findStreamThreadExceptionHandler(componentResolutionConfig, Restriction.application()))
-            .ifPresent(env::setStreamThreadExceptionHandler);
+    @VisibleForTesting
+    void preStart() {
+        initDefaultStreamsExecutionEnvironment();
+        if (!topologyRegistrations.isEmpty()) {
+            LOG.info("Adding all registered topologies to declared streams environments");
+            topologyRegistrations.forEach(this::mayAddTopologyToEnvironment);
+        }
     }
 
     private void checkIfEnvironmentExists(final String name, final String errorMessage) {
@@ -622,9 +556,26 @@ public class DefaultAzkarraContext implements AzkarraContext {
         }
     }
 
-    private void initializeDefaultEnvironment() {
-        if (defaultEnvironment == null) {
-            defaultEnvironment = DefaultStreamsExecutionEnvironment.create(DEFAULT_ENV_NAME);
+    private void initDefaultStreamsExecutionEnvironment() {
+        final List<StreamsExecutionEnvironment<?>> defaults = environments
+            .values()
+            .stream()
+            .filter(env -> env.isDefault() || env.name().equals(DEFAULT_ENV_NAME))
+            .collect(Collectors.toList());
+
+        if (defaults.size() > 1) {
+            final String strDefault = defaults
+                .stream()
+                .map(StreamsExecutionEnvironment::name)
+                .collect(Collectors.joining(",", "[", "]"));
+            throw new AzkarraContextException("Too many default environments " + strDefault);
+        }
+
+        if (defaults.size() == 1) {
+            defaultEnvironment = defaults.get(0);
+        } else {
+            LOG.warn("No default environment can be found, initializing a new one with name {}", DEFAULT_ENV_NAME);
+            defaultEnvironment = getComponent(StreamsExecutionEnvironmentFactory.class).create(DEFAULT_ENV_NAME);
             addExecutionEnvironment(defaultEnvironment);
         }
     }
@@ -715,9 +666,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
             if (!(o instanceof TopologyRegistration)) return false;
             TopologyRegistration that = (TopologyRegistration) o;
             return Objects.equals(type, that.type) &&
-                    Objects.equals(version, that.version) &&
-                    Objects.equals(environment, that.environment) &&
-                    Objects.equals(executed, that.executed);
+                Objects.equals(version, that.version) &&
+                Objects.equals(environment, that.environment) &&
+                Objects.equals(executed, that.executed);
         }
 
         /**
@@ -726,68 +677,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
         @Override
         public int hashCode() {
             return Objects.hash(type, version, environment, executed);
-        }
-    }
-
-    @VisibleForTesting
-    static class RestrictedComponentSupplierFactory {
-
-        private final ComponentFactory factory;
-        private final AzkarraContext context;
-
-        RestrictedComponentSupplierFactory(final AzkarraContext context) {
-            this.context = context;
-            this.factory = context.getComponentFactory();
-        }
-
-        List<Supplier<StreamsLifecycleInterceptor>> findLifecycleInterceptors(final Conf componentConfig,
-                                                                              final Restriction... restrictions) {
-            final Qualifier<StreamsLifecycleInterceptor> qualifier = Qualifiers.byAnyRestrictions(restrictions);
-            return factory.getAllComponentProviders(StreamsLifecycleInterceptor.class, qualifier)
-                .stream()
-                .filter(ConfigConditionalContext.of(componentConfig))
-                .map(provider -> new ContextAwareLifecycleInterceptorSupplier(context, provider))
-                .collect(Collectors.toList());
-        }
-
-        Optional<Supplier<ApplicationIdBuilder>> findApplicationIdBuilder(final Conf componentConfig,
-                                                                          final Restriction restriction) {
-            return findComponentByRestriction(ApplicationIdBuilder.class, componentConfig, restriction)
-                    .map(gettable -> new ContextAwareApplicationIdBuilderSupplier(context, gettable));
-        }
-
-        Optional<Supplier<KafkaStreamsFactory>> findKafkaStreamsFactory(final Conf componentConfig,
-                                                                        final Restriction restriction) {
-            return findComponentByRestriction(KafkaStreamsFactory.class, componentConfig, restriction)
-                    .map(gettable -> new ContextAwareKafkaStreamsFactorySupplier(context, gettable));
-        }
-
-        Optional<Supplier<StreamThreadExceptionHandler>> findStreamThreadExceptionHandler(final Conf conf,
-                                                                                          final Restriction restriction) {
-            return findComponentByRestriction(StreamThreadExceptionHandler.class, conf, restriction)
-                    .map(gettable -> new ContextAwareThreadExceptionHandlerSupplier(context, gettable));
-        }
-
-        /**
-         * Finds a component for the given type that is available for the given config and restriction.
-         *
-         * @param componentType        the {@link Class } of the component.
-         * @param componentConfig      the {@link Conf} object to be used for resolved available components.
-         * @param restriction          the {@link Restriction}.
-         * @param <T>                  the component type.
-         * @return                     an optional {@link GettableComponent}.
-         */
-        private <T> Optional<GettableComponent<T>> findComponentByRestriction(final Class<T> componentType,
-                                                                              final Conf componentConfig,
-                                                                              final Restriction restriction) {
-
-            final Qualifier<T> qualifier = Qualifiers.byRestriction(restriction);
-            if (factory.containsComponent(componentType, qualifier)) {
-                GettableComponent<T> provider = factory.getComponentProvider(componentType, qualifier);
-                if (provider.isEnable(new ConfigConditionalContext<>(componentConfig)))
-                    return Optional.of(provider);
-            }
-            return Optional.empty();
         }
     }
 }

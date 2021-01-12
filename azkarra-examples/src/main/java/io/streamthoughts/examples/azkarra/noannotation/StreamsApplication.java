@@ -60,7 +60,8 @@ public class StreamsApplication {
             .setConfiguration(AzkarraConf.create())
             .setBannerMode(Banner.Mode.OFF)
             .setContext(context)
-            .enableHttpServer(true, serverConfig)
+            .setHttpServerEnable(true)
+            .setHttpServerConf(serverConfig)
             .setAutoStart(true) // mandatory for auto-starting ConfigurableWordCountTopology.
             .setEnableComponentScan(false)
             .run(args);

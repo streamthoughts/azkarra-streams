@@ -38,12 +38,25 @@ public class ServerConfigBuilder {
 
     private final Map<String, Object> configs;
 
-
     /**
      * Creates a new {@link ServerConfigBuilder}.
      */
     ServerConfigBuilder() {
-        configs = new HashMap<>();
+        this(new HashMap<>());
+    }
+
+    /**
+     * Creates a new {@link ServerConfigBuilder}.
+     */
+    ServerConfigBuilder(final Conf configs) {
+        this(configs.getConfAsMap());
+    }
+
+    /**
+     * Creates a new {@link ServerConfigBuilder}.
+     */
+    ServerConfigBuilder(final Map<String, Object> configs) {
+        this.configs = configs;
     }
 
     /**

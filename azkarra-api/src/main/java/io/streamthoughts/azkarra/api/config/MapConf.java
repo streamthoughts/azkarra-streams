@@ -23,9 +23,11 @@ import io.streamthoughts.azkarra.api.errors.MissingConfException;
 import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.util.TypeConverter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,9 +86,27 @@ public class MapConf extends AbstractConf {
     protected MapConf(final Map<String, ?> parameters,
                       final Conf fallback,
                       final boolean explode) {
-        Objects.requireNonNull(parameters, "parameters Conf cannot be null");
+        Objects.requireNonNull(parameters, "parameters cannot be null");
         this.parameters = explode ? explode(parameters).unwrap() : parameters;
         this.fallback =  fallback;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> keySet() {
+        final HashSet<String> keySet = new HashSet<>(parameters.keySet());
+        keySet.addAll(fallback.keySet());
+        return keySet;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(final String path) {
+        return findForPathOrThrow(path, Conf::getValue);
     }
 
     /**
@@ -179,7 +199,16 @@ public class MapConf extends AbstractConf {
      */
     @Override
     public Conf getSubConf(final String path) {
-        Conf conf = (Conf) findForPathOrThrow(path, Conf::getSubConf);
+        Object o = findForPathOrThrow(path, Conf::getSubConf);
+        Conf conf;
+        if(o instanceof Map)
+            conf = Conf.of((Map)o) ;
+        else if (o instanceof Conf)
+            conf = (Conf)o;
+        else {
+            throw new InvalidConfException(
+                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> [Map, Conf]");
+        }
         if (fallback != null && fallback.hasPath(path)) {
             conf = conf.withFallback(fallback.getSubConf(path));
         }
@@ -192,7 +221,19 @@ public class MapConf extends AbstractConf {
     @Override
     @SuppressWarnings("unchecked")
     public List<Conf> getSubConfList(final String path) {
-        return (List<Conf>) findForPathOrThrow(path, Conf::getSubConfList);
+        List<Object> ol = (List<Object>) findForPathOrThrow(path, Conf::getSubConfList);
+        List<Conf> subConfList = new ArrayList<>(ol.size());
+        for (Object o : ol) {
+            if(o instanceof Map)
+                subConfList.add(Conf.of((Map)o));
+            else if (o instanceof Conf)
+                subConfList.add((Conf)o);
+            else {
+                throw new InvalidConfException(
+                   "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> [Map, Conf]");
+            }
+        }
+        return subConfList;
     }
 
     /**

@@ -189,6 +189,14 @@ class AzkarraApi {
        })
     }
 
+    fetchEnvironmentTypes() {
+     var that = this
+     return this.client.get(apiBasePath + '/environment-types')
+       .then(function (response) {
+          return response.data;
+       })
+    }
+
     fetchEnvironments() {
      var that = this
      return this.client.get(apiBasePath + '/environments')

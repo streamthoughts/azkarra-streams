@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,33 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.config;
 
-import java.util.Collections;
-import java.util.Objects;
+package io.streamthoughts.azkarra.api;
+
+import io.streamthoughts.azkarra.api.streams.ApplicationId;
+
+import java.util.concurrent.Callable;
 
 /**
- * A single key-value with configuration.
+ * TopologyExecution provide a way for topology to be executed in an specific environment.
+ *
+ * @see StreamsExecutionEnvironment
  */
-public class Property extends MapConf implements Conf {
+public interface StreamsTopologyExecution extends Callable<ApplicationId> {
 
-    private final String key;
     /**
-     * Creates a new {@link Property} instance.
+     * Starts the streams-topology encapsulated by this object.
      *
-     * @param key   the string property key.
-     * @param value the property value.
+     * @return  the {@link ApplicationId}.
      */
-    Property(final String key, Object value) {
-        super(Collections.singletonMap(Objects.requireNonNull(key, "key cannot be null"), value));
-        this.key = key;
-    }
+    ApplicationId start();
 
-    public Object get() {
-        return unwrap().get(key);
-    }
-
-    public String key() {
-        return key;
+    @Override
+    default ApplicationId call() {
+        return start();
     }
 }

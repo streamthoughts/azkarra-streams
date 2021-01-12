@@ -30,7 +30,7 @@ import io.streamthoughts.azkarra.api.components.ComponentFactory;
  * @see io.streamthoughts.azkarra.api.components.ConditionalDescriptorRegistry
  */
 @FunctionalInterface
-public interface ComponentConditionalContext<T extends ComponentDescriptor>{
+public interface ComponentConditionalContext<T extends ComponentDescriptor<?>>{
 
     /**
      * Verify if this component is enabled for the given context.
@@ -38,7 +38,7 @@ public interface ComponentConditionalContext<T extends ComponentDescriptor>{
      * @param factory       the {@link ComponentFactory}; cannot be {@code null}.
      * @param descriptor    the {@link ComponentDescriptor}; cannot be {@code null}.
      *
-     * @return              {@code true} if the compoenent is enable.
+     * @return              {@code true} if the component is enable.
      */
     boolean isEnable(final ComponentFactory factory,
                      final T descriptor);

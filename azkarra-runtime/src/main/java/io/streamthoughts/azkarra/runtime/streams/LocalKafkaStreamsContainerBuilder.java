@@ -16,10 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.runtime.streams;
 
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
+import io.streamthoughts.azkarra.api.streams.State;
+import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
 import io.streamthoughts.azkarra.api.streams.consumer.MonitorOffsetsConsumerInterceptor;
 import io.streamthoughts.azkarra.api.streams.errors.DelegatingUncaughtExceptionHandler;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
@@ -44,7 +48,7 @@ import static org.apache.kafka.streams.StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS
 /**
  * Default builder class for creating and configuring a new wrapped {@link KafkaStreams} instance.
  */
-public class KafkaStreamsContainerBuilder {
+public class LocalKafkaStreamsContainerBuilder {
 
     private final static List<StreamsConfigDecorator> CONFIG_DECORATORS = List.of(
         new RocksDBConfigDecorator(),
@@ -59,38 +63,38 @@ public class KafkaStreamsContainerBuilder {
     private List<StreamThreadExceptionHandler> exceptionHandlers = Collections.emptyList();
     private List<StreamsLifecycleInterceptor> interceptors = Collections.emptyList();
 
-    public KafkaStreamsContainerBuilder withStreamsConfig(final Conf streamsConfig) {
+    public LocalKafkaStreamsContainerBuilder withStreamsConfig(final Conf streamsConfig) {
         this.streamsConfig = streamsConfig;
         return this;
     }
 
-    public KafkaStreamsContainerBuilder withInterceptors(final List<StreamsLifecycleInterceptor> interceptors) {
+    public LocalKafkaStreamsContainerBuilder withInterceptors(final List<StreamsLifecycleInterceptor> interceptors) {
         this.interceptors = interceptors;
         return this;
     }
 
-    public KafkaStreamsContainerBuilder withKafkaStreamsFactory(final KafkaStreamsFactory kafkaStreamsFactory) {
+    public LocalKafkaStreamsContainerBuilder withKafkaStreamsFactory(final KafkaStreamsFactory kafkaStreamsFactory) {
         this.kafkaStreamsFactory = kafkaStreamsFactory;
         return this;
     }
 
-    public KafkaStreamsContainerBuilder withTopologyDefinition(final TopologyDefinition topologyDefinition) {
+    public LocalKafkaStreamsContainerBuilder withTopologyDefinition(final TopologyDefinition topologyDefinition) {
         this.topologyDefinition = topologyDefinition;
         return this;
     }
 
-    public KafkaStreamsContainerBuilder withRestoreListeners(final List<StateRestoreListener> listeners) {
+    public LocalKafkaStreamsContainerBuilder withRestoreListeners(final List<StateRestoreListener> listeners) {
         this.restoreListeners = listeners;
         return this;
     }
 
-    public KafkaStreamsContainerBuilder withStreamThreadExceptionHandlers(
+    public LocalKafkaStreamsContainerBuilder withStreamThreadExceptionHandlers(
             final List<StreamThreadExceptionHandler> handlers) {
         this.exceptionHandlers = handlers;
         return this;
     }
 
-    public KafkaStreamsContainerBuilder withStateListeners(final List<KafkaStreams.StateListener> listeners) {
+    public LocalKafkaStreamsContainerBuilder withStateListeners(final List<KafkaStreams.StateListener> listeners) {
         this.stateListeners = listeners;
         return this;
     }
@@ -100,14 +104,14 @@ public class KafkaStreamsContainerBuilder {
      *
      * @return a new {@link KafkaStreamsContainer} instance.
      */
-    public KafkaStreamsContainer build() {
+    public LocalKafkaStreamsContainer build() {
         Conf enrichedStreamsConfig = streamsConfig;
         for (StreamsConfigDecorator decorator : CONFIG_DECORATORS) {
             enrichedStreamsConfig = decorator.apply(enrichedStreamsConfig);
         }
 
         final var delegatingKafkaStreamsFactory = new DelegatingKafkaStreamsFactory(kafkaStreamsFactory);
-        final var container = new DefaultKafkaStreamsContainer(
+        final var container = new LocalKafkaStreamsContainer(
             enrichedStreamsConfig,
             topologyDefinition,
             delegatingKafkaStreamsFactory,
@@ -162,7 +166,7 @@ public class KafkaStreamsContainerBuilder {
     private class DelegatingKafkaStreamsFactory implements KafkaStreamsFactory {
 
         private final KafkaStreamsFactory factory;
-        private DefaultKafkaStreamsContainer container;
+        private LocalKafkaStreamsContainer container;
 
         /**
          * Creates a new {@link DelegatingKafkaStreamsFactory} instance.
@@ -173,7 +177,7 @@ public class KafkaStreamsContainerBuilder {
             this.factory = Objects.requireNonNull(factory, "factory cannot be null");
         }
 
-        void setKafkaStreamsContainer(final DefaultKafkaStreamsContainer container) {
+        void setKafkaStreamsContainer(final LocalKafkaStreamsContainer container) {
             this.container = container;
         }
 

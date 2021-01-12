@@ -22,6 +22,7 @@ import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.http.APIVersions;
 import io.streamthoughts.azkarra.http.handler.EnvironmentGetListHandler;
 import io.streamthoughts.azkarra.http.handler.EnvironmentPostHandler;
+import io.streamthoughts.azkarra.http.handler.EnvironmentTypesGetListHandler;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
 import io.undertow.server.RoutingHandler;
@@ -29,7 +30,8 @@ import io.undertow.server.handlers.BlockingHandler;
 
 public class ApiEnvironmentRoutes implements RoutingHandlerProvider {
 
-    public static final String PATH = APIVersions.PATH_V1 + "/environments";
+    public static final String PATH_ENVIRONMENTS = APIVersions.PATH_V1 + "/environments";
+    public static final String PATH_ENVIRONMENT_TYPES = APIVersions.PATH_V1 + "/environment-types";
 
     /**
      * {@inheritDoc}
@@ -37,7 +39,8 @@ public class ApiEnvironmentRoutes implements RoutingHandlerProvider {
     @Override
     public RoutingHandler handler(final AzkarraStreamsService service) {
         return Handlers.routing()
-            .get(PATH, new EnvironmentGetListHandler(service))
-            .post(PATH, new BlockingHandler(new EnvironmentPostHandler(service)));
+            .get(PATH_ENVIRONMENTS, new EnvironmentGetListHandler(service))
+            .get(PATH_ENVIRONMENT_TYPES, new EnvironmentTypesGetListHandler(service))
+            .post(PATH_ENVIRONMENTS, new BlockingHandler(new EnvironmentPostHandler(service)));
     }
 }

@@ -22,7 +22,6 @@ import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
-import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyDescription;
 import org.junit.jupiter.api.Test;
@@ -30,9 +29,9 @@ import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DefaultStreamsExecutionEnvironmentTest {
+public class LocalStreamsExecutionEnvironmentTest {
 
-    private static Topology MOCK = Mockito.mock(Topology.class);
+    private static final Topology MOCK = Mockito.mock(Topology.class);
 
     static {
         Mockito.when(MOCK.describe()).thenReturn(Mockito.mock(TopologyDescription.class));
@@ -41,8 +40,7 @@ public class DefaultStreamsExecutionEnvironmentTest {
     @Test
     public void shouldFallbackToEnvCongWhenInitializingTopologies() {
 
-        DefaultStreamsExecutionEnvironment environment = (DefaultStreamsExecutionEnvironment)
-                DefaultStreamsExecutionEnvironment.create();
+        LocalStreamsExecutionEnvironment environment = LocalStreamsExecutionEnvironment.create();
 
         var envConf = Conf.of(
             "streams.prop", "value",

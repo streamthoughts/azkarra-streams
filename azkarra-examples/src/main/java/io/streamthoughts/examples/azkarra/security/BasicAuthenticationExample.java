@@ -69,7 +69,8 @@ public class BasicAuthenticationExample {
         new AzkarraApplication()
             .setConfiguration(AzkarraConf.create("application"))
             .addSource(BasicWordCountTopology.class)
-            .enableHttpServer(true, serverConfig)
+            .setHttpServerEnable(true)
+            .setHttpServerConf(serverConfig)
             .run(args);
     }
 }

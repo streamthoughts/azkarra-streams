@@ -82,7 +82,7 @@ public class MeterKafkaStreamsInterceptor extends BaseComponentModule implements
                 @Override
                 public void onChange(final StateChangeEvent event) {
                     final List<Tag> tags = List.of(Tag.of(TAG_APPLICATION_ID, context.applicationId()));
-                    final var kafkaStreams =  streamsContainer.kafkaStreams();
+                    final var kafkaStreams =  streamsContainer.getKafkaStreams();
                     MeterRegistry registry = getComponent(MeterRegistry.class, Qualifiers.byPrimary());
                     metrics = new KafkaStreamsMetrics(kafkaStreams, tags);
                     metrics.bindTo(registry);

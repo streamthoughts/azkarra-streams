@@ -21,6 +21,8 @@ package io.streamthoughts.azkarra.http;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
 
+import java.util.Map;
+
 /**
  * The server configuration.
  */
@@ -32,13 +34,19 @@ public class ServerConfig extends SecurityConfig {
     public static final String HTTP_SERVER_LISTENER_CONFIG  = "listener";
     private static final String HTTP_SERVER_LISTENER_DEFAULT = "localhost";
 
-    public static final String HTTP_SERVER_UI_ENABLE_CONFIG = "enable.ui";
+    public static final String HTTP_SERVER_WEB_UI_ENABLE_CONFIG = "webui.enable";
     public static final String HTTP_SERVER_REST_EXTENSIONS_ENABLE = "rest.extensions.enable";
-
-
 
     public static ServerConfigBuilder newBuilder() {
         return new ServerConfigBuilder();
+    }
+
+    public static ServerConfigBuilder newBuilder(final Conf configs) {
+        return new ServerConfigBuilder(configs);
+    }
+
+    public static ServerConfigBuilder newBuilder(final Map<String, Object> configs) {
+        return new ServerConfigBuilder(configs);
     }
 
     public static ServerConfig of(final Conf conf) {
@@ -66,7 +74,7 @@ public class ServerConfig extends SecurityConfig {
 
     public boolean isUIEnable()  {
         // by default Web UI should always be enable.
-        return getOptionalBoolean(HTTP_SERVER_UI_ENABLE_CONFIG).orElse(true);
+        return getOptionalBoolean(HTTP_SERVER_WEB_UI_ENABLE_CONFIG).orElse(true);
     }
 
     public boolean isRestExtensionEnable() {

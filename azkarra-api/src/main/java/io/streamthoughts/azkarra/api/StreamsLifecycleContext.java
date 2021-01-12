@@ -39,10 +39,10 @@ public interface StreamsLifecycleContext {
     }
 
     /**
-     * @see KafkaStreamsContainer#topologyDescription()
+     * @see KafkaStreamsContainer#getTopology()
      */
     default TopologyDescription topologyDescription() {
-        return container().topologyDescription();
+        return container().getTopology().describe();
     }
 
     /**

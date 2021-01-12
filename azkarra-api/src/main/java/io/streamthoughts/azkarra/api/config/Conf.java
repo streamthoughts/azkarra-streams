@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Class which can be used for configuring components.
@@ -131,10 +132,12 @@ public interface Conf {
         Conf config = empty();
         for (Conf conf : configurations) {
             if (conf != null) {
-                config = config.withFallback(conf);
+                Conf copy = Conf.of(conf.getConfAsMap());
+                config = config.withFallback(copy);
             }
         }
-        return Conf.of(config.getConfAsMap()); // This will have the effect to flatten the configuration.
+        // This will have the effect to flatten the configuration.
+        return Conf.of(config.getConfAsMap());
     }
 
     /**
@@ -147,10 +150,25 @@ public interface Conf {
     }
 
     /**
-     * Gets a required parameter a a string.
+     * Gets a required parameter value.
      *
      * @param path   the parameter path.
-     * @return      the parameter value as a string.
+     *
+     * @return       the object value.
+     */
+    Object getValue(final String path);
+
+    /**
+     * Returns a {@link Set} view of the keys contained in this conf.
+     * @return a set view of the keys contained in this conf
+     */
+    Set<String> keySet();
+
+    /**
+     * Gets a required parameter as a string.
+     *
+     * @param path   the parameter path.
+     * @return       the parameter value as a string.
      *
      * @throws MissingConfException if no parameter can be found for the specified path.
      */

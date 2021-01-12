@@ -32,7 +32,7 @@
                           </button>
                           <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item" href="#" v-on:click="toggleModal()">
-                                <i class="fas fa-plus"></i></i>Create
+                                <i class="fas fa-plus"></i></i>Create Environment
                             </a>
                           </div>
                         </div>
@@ -58,7 +58,7 @@
                 </div>
                 <template v-for="env in environments">
                     <div class="my-3 p-3 bg-white rounded box-shadow">
-                        <h4 class="border-bottom border-gray pb-2 mb-3">{{ env.name }}</h4>
+                        <h4 class="border-bottom border-gray pb-2 mb-3">{{ env.name }}(type={{ env.type }})</h4>
                         <div class="row">
                             <div class="col-8">
                                 <h6 class="border-bottom border-gray pb-2 mb-3">Configuration</h6>
@@ -95,6 +95,15 @@
                         <label for="envName">Name</label>
                         <input v-model="form.name" type="text" class="form-control" id="envName" aria-describedby="envNameHelp">
                         <small id="envNameHelp" class="form-text text-muted">The name to identify this environment</small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="env-type">Type</label>
+                        <select v-model="form.type" class="custom-select" id="env-type" aria-describedby="envTypeHelp">>
+                          <template v-for="type in environmentTypes">
+                            <option v-bind:value="type">{{ type }}</option>
+                          </template>
+                        </select>
+                        <small id="envTypeHelp" class="form-text text-muted">The type of this environment</small>
                     </div>
                     <div class="form-group mb-3">
                         <label for="envConfig">Configuration</label>
@@ -146,6 +155,7 @@ export default {
         }
       },
       environments: [],
+      environmentTypes: [],
       context: {},
       openCreateModal : false,
       disableCreateBtn : false,
@@ -178,6 +188,7 @@ export default {
       let that = this;
       azkarra.fetchEnvironments().then(function(data){ that.environments = data;});
       azkarra.fetchContext().then(function(data){ that.context = data;});
+      azkarra.fetchEnvironmentTypes().then(function(data) { that.environmentTypes = data;});
     },
 
     goto(app) {

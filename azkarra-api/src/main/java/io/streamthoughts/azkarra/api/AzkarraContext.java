@@ -96,7 +96,7 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      * @throws AlreadyExistsException   if a {@link StreamsExecutionEnvironment}
      *                                  is already registered for the given name.
      */
-    AzkarraContext addExecutionEnvironment(final StreamsExecutionEnvironment environment)
+    AzkarraContext addExecutionEnvironment(final StreamsExecutionEnvironment<?> environment)
             throws AlreadyExistsException;
 
     /**
@@ -168,7 +168,16 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      *
      * @return a set of {@link TopologyDescriptor}.
      */
-    Set<TopologyDescriptor> topologyProviders();
+    Set<TopologyDescriptor> getTopologyDescriptors();
+
+    /**
+     * Gets all topologies registered into this {@link AzkarraContext} which are available for the given environment.
+     *
+     * @param environmentName the {@link StreamsExecutionEnvironment}
+     * @return                a set of {@link TopologyDescriptor}.
+     */
+    Set<TopologyDescriptor> getTopologyDescriptors(final String environmentName);
+
 
     /**
      * Gets all topologies registered into this {@link AzkarraContext} which are available for the given environment.
@@ -176,37 +185,30 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      * @param env the {@link StreamsExecutionEnvironment}
      * @return    a set of {@link TopologyDescriptor}.
      */
-    Set<TopologyDescriptor> topologyProviders(final StreamsExecutionEnvironment env);
+    Set<TopologyDescriptor> getTopologyDescriptors(final StreamsExecutionEnvironment<?> env);
 
     /**
      * Gets all {@link StreamsExecutionEnvironment} registered to this context.
      *
      * @return  a list of {@link StreamsExecutionEnvironment} instance.
      */
-    List<StreamsExecutionEnvironment> environments();
+    List<StreamsExecutionEnvironment<?>> getAllEnvironments();
 
     /**
-     * Gets the {@link StreamsExecutionEnvironment} for the specified name or create a new one.
+     * Gets the {@link StreamsExecutionEnvironment} for the specified name.
      *
      * @param envName   the environment name.
      * @return          a {@link StreamsExecutionEnvironment} instance with the specified name.
      */
-    StreamsExecutionEnvironment getEnvironmentForNameOrCreate(final String envName);
+    StreamsExecutionEnvironment<?> getEnvironmentForName(final String envName);
 
     /**
      * Gets the default {@link StreamsExecutionEnvironment}.
+     * This method can return {@code null} while the context is not started.
      *
      * @return a {@link StreamsExecutionEnvironment} instance.
      */
-    StreamsExecutionEnvironment defaultExecutionEnvironment();
-
-    /**
-     * Gets the topology for the specified class name or alias.
-     *
-     * @param type  the topology type.
-     * @return      the {@link TopologyDescriptor}.
-     */
-    TopologyDescriptor getTopology(final String type);
+    StreamsExecutionEnvironment<?> getDefaultEnvironment();
 
     /**
      * Starts this {@link AzkarraContext} instance.

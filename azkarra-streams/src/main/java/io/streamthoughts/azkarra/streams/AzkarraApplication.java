@@ -23,20 +23,26 @@ import io.streamthoughts.azkarra.api.AzkarraContextListener;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.banner.Banner;
 import io.streamthoughts.azkarra.api.banner.BannerPrinter;
+import io.streamthoughts.azkarra.api.components.Ordered;
 import io.streamthoughts.azkarra.api.config.ArgsConf;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
 import io.streamthoughts.azkarra.api.server.ServerInfo;
 import io.streamthoughts.azkarra.api.spi.EmbeddedHttpServerProvider;
 import io.streamthoughts.azkarra.api.util.Network;
 import io.streamthoughts.azkarra.http.ServerConfig;
+import io.streamthoughts.azkarra.http.ServerConfigBuilder;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.streams.autoconfigure.AutoConfigure;
 import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
 import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
 import io.streamthoughts.azkarra.streams.components.ReflectiveComponentScanner;
-import io.streamthoughts.azkarra.streams.context.AzkarraContextLoader;
+import io.streamthoughts.azkarra.streams.config.loader.AutoStartConfigEntryLoader;
+import io.streamthoughts.azkarra.streams.config.loader.ComponentConfigEntryLoader;
+import io.streamthoughts.azkarra.streams.config.loader.EnvironmentsConfigEntryLoader;
+import io.streamthoughts.azkarra.streams.config.loader.ServerConfigEntryLoader;
 import org.apache.kafka.streams.StreamsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +50,12 @@ import org.slf4j.event.Level;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 /**
  * {@link AzkarraApplication} is the high-level class which can be used to deploy a simple server for managing multiple
@@ -76,8 +84,19 @@ public class AzkarraApplication {
 
     private static final Logger LOG = LoggerFactory.getLogger(AzkarraApplication.class);
 
-    private static final String HTTP_SERVER_CONFIG = "azkarra.server";
-    private static final String COMPONENT_PATHS_CONFIG = "azkarra.component.paths";
+    public static final String AZKARRA_ROOT_CONFIG_KEY = "azkarra";
+    private static final String COMPONENT_PATHS_CONFIG_KEY = "component.paths";
+    private static final String CONTEXT_CONFIG_KEY = "context";
+
+    /**
+     * Helper method to prefix a key property with the root property prefix (i.e {@code "azkarra"}.
+     *
+     * @param key   the key propery to prefix.
+     * @return      the prefixed key.
+     */
+    public static String withAzkarraPrefix(final String key) {
+        return AZKARRA_ROOT_CONFIG_KEY + "." + key;
+    }
 
     public static AzkarraContext run() {
         return run(new Class<?>[0], new String[0]);
@@ -97,9 +116,7 @@ public class AzkarraApplication {
 
     private boolean enableComponentScan;
 
-    private boolean enableHttpServer;
-
-    private Conf httpServerConf;
+    private boolean isHttpServerEnable;
 
     private Banner banner;
 
@@ -109,9 +126,13 @@ public class AzkarraApplication {
 
     private Conf configuration;
 
-    private Class<?> mainApplicationClass;
+    private final Class<?> mainApplicationClass;
 
     private AutoStart autoStart;
+
+    private Conf httpServerConf;
+
+    private final List<ApplicationConfigEntryLoader> applicationConfigEntryLoaders;
 
     /**
      * Creates a new {@link AzkarraApplication} instance.
@@ -120,27 +141,52 @@ public class AzkarraApplication {
      */
     public AzkarraApplication(final Class<?>... sources) {
         this.sources = new ArrayList<>(Arrays.asList(sources));
-        this.enableHttpServer = false;
+        this.isHttpServerEnable = false;
         this.enableComponentScan = false;
         this.registerShutdownHook = true;
         this.autoStart = new AutoStart(false, null);
         this.banner = new AzkarraBanner();
         this.bannerMode =  Banner.Mode.CONSOLE;
         this.mainApplicationClass = deduceMainApplicationClass();
+        this.applicationConfigEntryLoaders = new ArrayList<>();
         this.configuration = Conf.empty();
-        this.httpServerConf = ServerConfig.newBuilder().setListener(Network.HOSTNAME).build();
     }
 
-    public AzkarraApplication enableHttpServer(final boolean enableHttpServer) {
-        this.enableHttpServer = enableHttpServer;
+    /**
+     * Sets whether the HTTP server should be enable.
+     *
+     * @param httpServerEnable set to {@code true} to enable the server.
+     */
+    public AzkarraApplication setHttpServerEnable(boolean httpServerEnable) {
+        isHttpServerEnable = httpServerEnable;
+        if (this.isHttpServerEnable) {
+            this.httpServerConf = ServerConfig.newBuilder().setListener(Network.HOSTNAME).build();
+        }
         return this;
     }
 
-    public AzkarraApplication enableHttpServer(final boolean enableHttpServer,
-                                               final Conf conf) {
-        this.enableHttpServer = enableHttpServer;
-        this.httpServerConf = conf;
+    /**
+     * Sets the HTTP server configuration.
+     *
+     * @param httpServerConf    the http server configuration.
+     * @return                  this {@link AzkarraApplication} instance.
+     */
+    public AzkarraApplication setHttpServerConf(final Conf httpServerConf) {
+        final ServerConfigBuilder builder = ServerConfig.newBuilder(httpServerConf);
+        if (!httpServerConf.hasPath(ServerConfig.HTTP_SERVER_LISTENER_CONFIG)) {
+            builder.setListener(Network.HOSTNAME);
+        }
+        this.httpServerConf = builder.build();
         return this;
+    }
+
+    /**
+     * Checks whether the HTTP Server is enable.
+     *
+     * @return  {@code true} is the HTTP Server is enable, {@code false} otherwise.
+     */
+    private boolean isHttpServerEnable() {
+        return isHttpServerEnable;
     }
 
     /**
@@ -198,7 +244,7 @@ public class AzkarraApplication {
      * @return           this {@link AzkarraApplication} instance.
      */
     public AzkarraApplication setAutoStart(final boolean enable) {
-        setAutoStart(enable, "__default");
+        setAutoStart(enable, null);
         return this;
     }
 
@@ -244,6 +290,18 @@ public class AzkarraApplication {
     }
 
     /**
+     * Adds a new {@link ApplicationConfigEntryLoader} to be used for reading the application configuration.
+     *
+     * @param configEntryLoader the {@link ApplicationConfigEntryLoader} to be added.
+     * @return                  this {@link AzkarraApplication} instance.
+     */
+    public AzkarraApplication addConfigEntryLoader(final ApplicationConfigEntryLoader configEntryLoader) {
+        Objects.requireNonNull(configEntryLoader, "ApplicationConfigEntryLoader cannot be null");
+        this.applicationConfigEntryLoaders.add(configEntryLoader);
+        return this;
+    }
+
+    /**
      * Gets the configuration for this {@link AzkarraApplication}.
      *
      * @return  the {@link Conf} instance.
@@ -270,45 +328,40 @@ public class AzkarraApplication {
         if (registerShutdownHook) {
             context.setRegisterShutdownHook(true);
         }
+        context.addConfiguration(configuration.getSubConf(withAzkarraPrefix(CONTEXT_CONFIG_KEY)));
 
-        if (enableComponentScan) {
+        if (isComponentScanEnable()) {
             var scanner = new ReflectiveComponentScanner(context.getComponentFactory());
             context.registerSingleton(scanner);
 
             // Scan all sub-packages of the root package of Azkarra for declared components.
             scanner.scanForPackage("io.streamthoughts.azkarra");
 
-            final Optional<String> componentPaths = configuration.getOptionalString(COMPONENT_PATHS_CONFIG);
-            componentPaths.ifPresent(scanner::scan);
+            configuration.getOptionalString(withAzkarraPrefix(COMPONENT_PATHS_CONFIG_KEY))
+                         .ifPresent(scanner::scan);
 
-            for (Class source : sources) {
-                scanner.scanForPackage(source.getPackage());
-            }
+            sources.stream().map(Class::getPackage).forEach(scanner::scanForPackage);
         }
+
+        final List<ApplicationConfigEntryLoader> configLoaders = new ArrayList<>();
+        configLoaders.add(new NoopConfigEntryLoader(Set.of(CONTEXT_CONFIG_KEY, COMPONENT_PATHS_CONFIG_KEY)));
+        configLoaders.add(new ComponentConfigEntryLoader());
+        configLoaders.add(new ServerConfigEntryLoader());
+        configLoaders.add(new AutoStartConfigEntryLoader());
+        configLoaders.add(new EnvironmentsConfigEntryLoader());
+        configLoaders.addAll(applicationConfigEntryLoaders);
+        configLoaders.addAll(context.getAllComponents(ApplicationConfigEntryLoader.class));
 
         // Initializing context from the application configuration.
-        AzkarraContextLoader.load(context, configuration);
+        new ApplicationConfigLoader(configLoaders).load(this);
 
-        if (enableHttpServer) {
-            List<EmbeddedHttpServer> result = loadEmbeddedHttpServerImplementations();
-            if (result.isEmpty()) {
-                throw new AzkarraException(
-                    "Cannot find implementation for service provider : " + EmbeddedHttpServerProvider.class.getName());
-            }
-            final EmbeddedHttpServer embeddedHttpServer = result.get(0);
-            context.addListener(new EmbeddedServerLifecycle(embeddedHttpServer, loadHttpServerConf()));
-        }
+        // Automatically start all streams topology for the specified environment.
+        if (autoStart.isEnable())
+            context.addListener(new AutoStartContextListener());
 
-        if (autoStart.isEnable()) {
-            StreamsExecutionEnvironment target = context.getEnvironmentForNameOrCreate(autoStart.targetEnvironment());
-            context.topologyProviders(target).forEach(desc ->
-                context.addTopology(
-                    desc.className(),
-                    desc.version().toString(),
-                    target.name(),
-                    new InternalExecuted()
-                )
-            );
+        if (isHttpServerEnable()) {
+            final EmbeddedHttpServer embeddedHttpServer = loadEmbeddedHttpServerImplementation();
+            context.addListener(new EmbeddedServerLifecycle(embeddedHttpServer, buildHttpServerConfig()));
         }
 
         context.start();
@@ -316,25 +369,8 @@ public class AzkarraApplication {
         return context;
     }
 
-    private List<EmbeddedHttpServer> loadEmbeddedHttpServerImplementations() {
-        ServiceLoader<EmbeddedHttpServerProvider> serviceLoader = ServiceLoader.load(EmbeddedHttpServerProvider.class);
-        List<EmbeddedHttpServer> result = new ArrayList<>();
-        for (EmbeddedHttpServerProvider embeddedServerImpl : serviceLoader) {
-            final EmbeddedHttpServer server = embeddedServerImpl.get(context);
-            result.add(server);
-            LOG.info(
-                "Loading io.streamthoughts.azkarra.api.server.EmbeddedHttpServer: {}",
-                server.getClass().getName()
-            );
-        }
-        return result;
-    }
-
-    private Conf loadHttpServerConf() {
-        if (configuration.hasPath(HTTP_SERVER_CONFIG)) {
-            httpServerConf = configuration.getSubConf(HTTP_SERVER_CONFIG).withFallback(httpServerConf);
-        }
-        return httpServerConf;
+    private boolean isComponentScanEnable() {
+        return enableComponentScan;
     }
 
     /**
@@ -379,6 +415,11 @@ public class AzkarraApplication {
         return context;
     }
 
+    /**
+     * Gets the {@link Class} containing the main method.
+     *
+     * @return  the main application {@link Class}.
+     */
     public Class<?> getMainApplicationClass() {
         return mainApplicationClass;
     }
@@ -391,42 +432,6 @@ public class AzkarraApplication {
             .setMode(bannerMode)
             .build();
         printer.print(banner);
-    }
-
-    private static final class EmbeddedServerLifecycle implements AzkarraContextListener {
-
-        private final Conf conf;
-        private final EmbeddedHttpServer embeddedHttpServer;
-
-        EmbeddedServerLifecycle(final EmbeddedHttpServer embeddedHttpServer,
-                                final Conf conf) {
-            this.embeddedHttpServer = embeddedHttpServer;
-            this.conf = conf;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onContextStart(final AzkarraContext context) {
-            embeddedHttpServer.configure(conf);
-            embeddedHttpServer.start();
-
-            // configure streams discovery if http server is enable
-            final ServerInfo info = embeddedHttpServer.info();
-            final String server = info.getHost() + ":" + info.getPort();
-            final Conf serverConfig = Conf.of(StreamsConfig.APPLICATION_SERVER_CONFIG, server);
-            context.addConfiguration(Conf.of("streams", serverConfig));
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onContextStop(final AzkarraContext context) {
-            embeddedHttpServer.stop();
-        }
-
     }
 
     private Class<?> deduceMainApplicationClass() {
@@ -444,22 +449,150 @@ public class AzkarraApplication {
         return null;
     }
 
+    private Conf buildHttpServerConfig() {
+        // Get the user-defined configuration.
+        Conf applicationHttpServerConf = httpServerConf;
+
+        // Get all declared server configurations.
+        final Collection<ServerConfig> allServerConfigs = context.getAllComponents(ServerConfig.class);
+
+        // Merge all configurations.
+        for (ServerConfig config : allServerConfigs) {
+            applicationHttpServerConf = applicationHttpServerConf.withFallback(config);
+        }
+
+        return applicationHttpServerConf;
+    }
+
+    private EmbeddedHttpServer loadEmbeddedHttpServerImplementation() {
+        ServiceLoader<EmbeddedHttpServerProvider> serviceLoader = ServiceLoader.load(EmbeddedHttpServerProvider.class);
+        List<EmbeddedHttpServer> result = new ArrayList<>();
+        for (EmbeddedHttpServerProvider embeddedServerImpl : serviceLoader) {
+            final EmbeddedHttpServer server = embeddedServerImpl.get(context);
+            result.add(server);
+            LOG.info(
+                "Loading io.streamthoughts.azkarra.api.server.EmbeddedHttpServer: {}",
+                server.getClass().getName()
+            );
+        }
+        if (result.isEmpty()) {
+            throw new AzkarraException(
+                "Cannot find implementation for service provider : " + EmbeddedHttpServerProvider.class.getName());
+        }
+        return result.get(0);
+    }
+
+    private class AutoStartContextListener implements AzkarraContextListener {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int order() {
+            return Ordered.LOWEST_ORDER - 1;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void onContextStart(final AzkarraContext context) {
+            final String environment = selectExecutionEnvironmentForAutoStart(context);
+            final Set<TopologyDescriptor> topologies = context.getTopologyDescriptors(environment);
+            for (TopologyDescriptor desc : topologies) {
+                context.addTopology(
+                    desc.className(),
+                    desc.version().toString(),
+                    environment,
+                    new InternalExecuted()
+                );
+            }
+        }
+
+        private String selectExecutionEnvironmentForAutoStart(final AzkarraContext context) {
+            return autoStart
+                .environment()
+                .or(() -> context.getAllEnvironments()
+                    .stream().filter(StreamsExecutionEnvironment::isDefault)
+                    .findFirst()
+                    .map(StreamsExecutionEnvironment::name))
+                .orElseThrow(() ->
+                    new AzkarraException("Cannot auto-start topology, no default environment can be found")
+                );
+        }
+    }
+
+    /**
+     * Wrapper class.
+     */
     private static class AutoStart {
 
         private final boolean enable;
-        private final String targetEnvironment;
+        private final String environment;
 
-        AutoStart(final boolean enable, final String targetEnvironment) {
+        /**
+         * Creates a new {@link AutoStart} instance.
+         *
+         * @param enable        is all topologies should be started automatically.
+         * @param environment   the environment that should be used to topologies.
+         */
+        AutoStart(final boolean enable, final String environment) {
             this.enable = enable;
-            this.targetEnvironment = targetEnvironment;
+            this.environment = environment;
         }
 
         boolean isEnable(){
             return enable;
         }
 
-        String targetEnvironment() {
-            return targetEnvironment;
+        Optional<String> environment() {
+            return Optional.ofNullable(environment);
+        }
+    }
+
+    private static final class EmbeddedServerLifecycle implements AzkarraContextListener {
+
+        private final Conf conf;
+        private final EmbeddedHttpServer embeddedHttpServer;
+
+        EmbeddedServerLifecycle(final EmbeddedHttpServer embeddedHttpServer,
+                                final Conf conf) {
+            this.embeddedHttpServer = embeddedHttpServer;
+            this.conf = conf;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int order() {
+            return Ordered.LOWEST_ORDER;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void onContextStart(final AzkarraContext context) {
+
+            embeddedHttpServer.configure(conf);
+            embeddedHttpServer.start();
+
+            // configure streams discovery if http server is enable
+            final String streamsApplicationServerConfigKey = "streams." + StreamsConfig.APPLICATION_SERVER_CONFIG;
+            if (!context.getConfiguration().hasPath(streamsApplicationServerConfigKey)) {
+                final ServerInfo info = embeddedHttpServer.info();
+                final String server = info.getHost() + ":" + info.getPort();
+                context.addConfiguration(Conf.of(streamsApplicationServerConfigKey, server));
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void onContextStop(final AzkarraContext context) {
+            embeddedHttpServer.stop();
         }
     }
 }

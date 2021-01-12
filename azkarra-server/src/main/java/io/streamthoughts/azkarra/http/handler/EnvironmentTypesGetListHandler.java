@@ -16,33 +16,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.config;
+package io.streamthoughts.azkarra.http.handler;
 
-import java.util.Collections;
-import java.util.Objects;
+import io.streamthoughts.azkarra.api.AzkarraStreamsService;
+import io.streamthoughts.azkarra.http.ExchangeHelper;
+import io.undertow.server.HttpServerExchange;
 
-/**
- * A single key-value with configuration.
- */
-public class Property extends MapConf implements Conf {
+import java.util.Set;
 
-    private final String key;
+public class EnvironmentTypesGetListHandler extends AbstractStreamHttpHandler {
+
     /**
-     * Creates a new {@link Property} instance.
+     * Creates a new {@link EnvironmentTypesGetListHandler} instance.
      *
-     * @param key   the string property key.
-     * @param value the property value.
+     * @param service   the {@link AzkarraStreamsService} instance.
      */
-    Property(final String key, Object value) {
-        super(Collections.singletonMap(Objects.requireNonNull(key, "key cannot be null"), value));
-        this.key = key;
+    public EnvironmentTypesGetListHandler(final AzkarraStreamsService service) {
+        super(service);
     }
 
-    public Object get() {
-        return unwrap().get(key);
-    }
-
-    public String key() {
-        return key;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleRequest(final HttpServerExchange exchange) {
+        final Set<String> environments = service.getSupportedEnvironmentTypes();
+        ExchangeHelper.sendJsonResponse(exchange, environments);
     }
 }

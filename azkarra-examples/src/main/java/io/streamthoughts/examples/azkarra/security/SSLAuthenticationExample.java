@@ -59,7 +59,8 @@ public class SSLAuthenticationExample {
         new AzkarraApplication()
             .setConfiguration(AzkarraConf.create("application"))
             .addSource(BasicWordCountTopology.class)
-            .enableHttpServer(true, securedServer)
+            .setHttpServerEnable(true)
+            .setHttpServerConf(securedServer)
             .run(args);
     }
 }

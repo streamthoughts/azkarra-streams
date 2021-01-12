@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  */
 public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
 
-    private String name;
+    private final String name;
 
     private final Version version;
 
@@ -45,7 +45,7 @@ public class SimpleComponentDescriptor<T> implements ComponentDescriptor<T> {
 
     private final Set<String> aliases;
 
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
     private ComponentMetadata metadata;
 

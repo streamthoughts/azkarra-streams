@@ -16,10 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.streams.context.internal;
+package io.streamthoughts.azkarra.streams.config.loader.internal;
 
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.runtime.env.LocalStreamsExecutionEnvironment;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,7 @@ public class EnvironmentConfig {
 
     public final static String ENVIRONMENT_CONFIG           = "config";
     public final static String ENVIRONMENT_NAME_CONFIG      = "name";
+    public final static String ENVIRONMENT_TYPE_CONFIG      = "type";
     public static final String ENVIRONMENT_STREAMS_CONFIG   = "jobs";
 
     /**
@@ -47,6 +49,7 @@ public class EnvironmentConfig {
     }
 
     private final String name;
+    private final String type;
     private final Conf config;
     private final List<TopologyConfig> topologyStreamSettings;
 
@@ -54,16 +57,27 @@ public class EnvironmentConfig {
      * Creates a new {@link }
      *
      * @param name              the environment name.
+     * @param type              the environment type.
      * @param topologyConfigs   the environment topologies.
      * @param config            the environment configuration.
      */
     private EnvironmentConfig(final String name,
+                              final String type,
                               final List<TopologyConfig> topologyConfigs,
                               final Conf config) {
-        Objects.requireNonNull(name, "name cannot be null");
-        this.name = name;
+        this.name = Objects.requireNonNull(name, "name cannot be null");;
+        this.type = Objects.requireNonNull(type, "type cannot be null");;
         this.config = config;
         this.topologyStreamSettings = topologyConfigs;
+    }
+
+    /**
+     * Gets the environment type.
+     *
+     * @return  a string type.
+     */
+    public String type() {
+        return type;
     }
 
     /**
@@ -98,6 +112,7 @@ public class EnvironmentConfig {
         EnvironmentConfig read(final Conf conf) {
             return new EnvironmentConfig(
                 conf.getString(ENVIRONMENT_NAME_CONFIG),
+                conf.getOptionalString(ENVIRONMENT_TYPE_CONFIG).orElse(LocalStreamsExecutionEnvironment.TYPE),
                 mayGetEnvironmentStreams(conf),
                 mayGetConfiguredDefaultsConf(conf)
             );

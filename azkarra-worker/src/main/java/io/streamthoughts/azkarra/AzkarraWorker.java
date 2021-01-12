@@ -36,7 +36,7 @@ public class AzkarraWorker {
             .setConfiguration(azkarraConf)
             .setEnableComponentScan(true)
             .setRegisterShutdownHook(true)
-            .enableHttpServer(true)
+            .setHttpServerEnable(true)
             .run(args);
     }
 }

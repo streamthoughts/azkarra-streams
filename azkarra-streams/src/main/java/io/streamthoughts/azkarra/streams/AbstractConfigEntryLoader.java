@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,33 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.config;
 
-import java.util.Collections;
+package io.streamthoughts.azkarra.streams;
+
 import java.util.Objects;
 
-/**
- * A single key-value with configuration.
- */
-public class Property extends MapConf implements Conf {
+public abstract class AbstractConfigEntryLoader implements ApplicationConfigEntryLoader {
 
-    private final String key;
+    private final String configEntryKey;
+
     /**
-     * Creates a new {@link Property} instance.
+     * Creates a new {@link AbstractConfigEntryLoader} instance.
      *
-     * @param key   the string property key.
-     * @param value the property value.
+     * @param configEntryKey    the configuration entry key accepted by this loader.
      */
-    Property(final String key, Object value) {
-        super(Collections.singletonMap(Objects.requireNonNull(key, "key cannot be null"), value));
-        this.key = key;
+    public AbstractConfigEntryLoader(final String configEntryKey) {
+        this.configEntryKey = Objects.requireNonNull(configEntryKey, "configEntryKey cannot be null");
     }
 
-    public Object get() {
-        return unwrap().get(key);
-    }
-
-    public String key() {
-        return key;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean accept(final String configEntryKey) {
+        return this.configEntryKey.equalsIgnoreCase(configEntryKey);
     }
 }

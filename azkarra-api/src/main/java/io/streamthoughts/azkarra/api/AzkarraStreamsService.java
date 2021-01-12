@@ -20,7 +20,6 @@ package io.streamthoughts.azkarra.api;
 
 import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
 import io.streamthoughts.azkarra.api.errors.NoSuchComponentException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.Environment;
@@ -31,10 +30,6 @@ import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
 import io.streamthoughts.azkarra.api.model.TopologyAndAliases;
 import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.QueryParams;
-import io.streamthoughts.azkarra.api.query.internal.Query;
-import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.ServerMetadata;
@@ -202,12 +197,20 @@ public interface AzkarraStreamsService {
     Set<Environment> getAllEnvironments();
 
     /**
+     * Gets all supported environment types.
+     *
+     * @return  the set of the environment types.
+     */
+    Set<String> getSupportedEnvironmentTypes();
+
+    /**
      * Adds a new environment to this application.
      *
      * @param name  the environment name.
+     * @param type  the environment type.
      * @param conf  the environment configuration.
      */
-    void addNewEnvironment(final String name, final Conf conf);
+    void addNewEnvironment(final String name, final String type, final Conf conf);
 
     /**
      * Gets all local and remote streams instances for the specified streams application.

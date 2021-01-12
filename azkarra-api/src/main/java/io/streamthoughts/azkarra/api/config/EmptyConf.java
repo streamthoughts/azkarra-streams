@@ -25,8 +25,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 public class EmptyConf implements Conf {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(String path) {
+        throw new MissingConfException(path);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> keySet() {
+        return Collections.emptySet();
+    }
 
     /**
      * {@inheritDoc}

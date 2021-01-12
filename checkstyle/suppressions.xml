@@ -28,6 +28,7 @@
     <suppress checks="Header" files="logback.properties"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.http.UndertowEmbeddedServer"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
+    <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig" />
@@ -36,7 +37,6 @@
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptorConfig" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer" />
     <suppress checks="NPathComplexity" files="io.streamthoughts.azkarra.commons.error.SafeDeserializerConfig"/>
-    <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.api.streams.DefaultKafkaStreamsContainer"/>
     <suppress checks="ParameterNumber" files="SimpleComponentDescriptor" />
     <suppress checks="ParameterNumber" files="Conf" />
     <suppress checks="BooleanExpressionComplexity" files="io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils" />

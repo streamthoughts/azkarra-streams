@@ -31,6 +31,7 @@ import io.streamthoughts.azkarra.api.model.TopologyAndAliases;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.Version;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,17 +46,19 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
     protected AzkarraContext context;
 
     /**
-     * {@inheritDoc}
+     * Creates a new {@link AbstractAzkarraStreamsService} instance.
+     * 
      */
-    @Override
-    public Set<TopologyDescriptor> getTopologyProviders() {
-        return context.topologyProviders();
-    }
+    protected AbstractAzkarraStreamsService() { }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    public Set<TopologyDescriptor> getTopologyProviders() {
+        return context.getTopologyDescriptors();
+    }
+
     public List<TopologyAndAliases> getAllTopologies() {
         Map<String, Set<String>> topologies = new HashMap<>();
         var factory = context.getComponentFactory();
@@ -113,6 +116,7 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
         return new TopologyDescriptor(descriptor);
     }
 
+
     /**
      * {@inheritDoc}
      */
@@ -130,6 +134,17 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
             .map(ComponentDescriptor::version)
             .sorted()
             .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> getSupportedEnvironmentTypes() {
+        return context.getAllComponents(StreamsExecutionEnvironmentFactory.class)
+            .stream()
+            .map(StreamsExecutionEnvironmentFactory::type)
+            .collect(Collectors.toSet());
     }
 
     /**

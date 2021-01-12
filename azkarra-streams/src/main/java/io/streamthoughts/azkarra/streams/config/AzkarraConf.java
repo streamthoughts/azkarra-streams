@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -106,6 +107,22 @@ public class AzkarraConf extends AbstractConf {
      */
     protected AzkarraConf(final Config config) {
         this.config = config;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> keySet() {
+        return config.root().unwrapped().keySet();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object getValue(String path) {
+        return config.getValue(path).unwrapped();
     }
 
     /**

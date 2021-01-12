@@ -30,7 +30,6 @@ import java.util.Map;
 
 import static io.streamthoughts.azkarra.api.util.Utils.isNullOrEmpty;
 
-
 public class EnvironmentPostHandler extends AbstractStreamHttpHandler {
 
     /**
@@ -47,22 +46,25 @@ public class EnvironmentPostHandler extends AbstractStreamHttpHandler {
      */
     @Override
     public void handleRequest(final HttpServerExchange exchange) {
-        final EnvironmentPayload env = ExchangeHelper.readJsonRequest(exchange, EnvironmentPayload.class);
-        if (isNullOrEmpty(env.name)) {
+        final EnvironmentRequestBody request = ExchangeHelper.readJsonRequest(exchange, EnvironmentRequestBody.class);
+        if (isNullOrEmpty(request.name)) {
             throw new BadRequestException("Invalid JSON field, 'name' cannot be null.");
         }
-        service.addNewEnvironment(env.name, Conf.of(env.config));
+        service.addNewEnvironment(request.name, request.type, Conf.of(request.config));
     }
 
-    public static final class EnvironmentPayload {
+    public static final class EnvironmentRequestBody {
 
         public final String name;
+        public final String type;
         public final Map<String, Object> config;
 
         @JsonCreator
-        public EnvironmentPayload(@JsonProperty("name") final String name,
-                                  @JsonProperty("config") final Map<String, Object> config) {
+        public EnvironmentRequestBody(@JsonProperty("name") final String name,
+                                      @JsonProperty("type") final String type,
+                                      @JsonProperty("config") final Map<String, Object> config) {
             this.name = name;
+            this.type = type;
             this.config = config;
         }
     }

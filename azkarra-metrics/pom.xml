@@ -52,8 +52,9 @@
 
         <dependency>
             <groupId>io.streamthoughts</groupId>
-            <artifactId>azkarra-api</artifactId>
+            <artifactId>azkarra-streams</artifactId>
             <version>${project.parent.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
