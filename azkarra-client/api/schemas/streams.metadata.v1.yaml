@@ -1,0 +1,35 @@
+v1.StreamsMetadata:
+  type: object
+  properties:
+    state_stores:
+      type: array
+      default: []
+      items:
+        type: string
+      uniqueItems: true
+
+    standby_state_stores:
+      type: array
+      default: []
+      items:
+        type: string
+      uniqueItems: true
+
+    assignments:
+      type: array
+      default: []
+      items:
+        $ref: '../api.yaml#/components/schemas/v1.TopicPartition'
+      uniqueItems: true
+
+    standby_assignments:
+      type: array
+      default: []
+      items:
+        $ref: '../api.yaml#/components/schemas/v1.TopicPartition'
+      uniqueItems: true
+  required:
+    - state_stores
+    - name
+    - standby_state_stores
+    - standby_sssignments

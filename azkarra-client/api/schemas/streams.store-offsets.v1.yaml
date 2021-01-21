@@ -1,0 +1,31 @@
+v1.LocalStorePartitionLags:
+  required:
+    - name
+    - positions
+  properties:
+    name:
+      type: string
+    positions:
+      type: array
+      items:
+        $ref: '#/v1.PartitionLogOffsetsAndLag'
+      default: [ ]
+
+v1.PartitionLogOffsetsAndLag:
+  required:
+    - name
+    - current_offset
+    - log_end_offset
+    - offset_lag
+  properties:
+    partition:
+      type: integer
+    current_offset:
+      type: integer
+      format: int64
+    log_end_offset:
+      type: integer
+      format: int64
+    offset_lag:
+      type: integer
+      format: int64

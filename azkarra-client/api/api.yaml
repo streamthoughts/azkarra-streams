@@ -1,0 +1,83 @@
+openapi: 3.0.1
+info:
+  title: Azkarra
+  version: ${project.version}
+servers:
+- url: /
+paths:
+  /version:
+    get:
+      description: get the API current version
+      operationId: getCurrentVersion
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: version of Azkarra
+      tags:
+      - azkarra_version
+      x-accepts: application/json
+      x-contentType: application/json
+  /api/v1/streams:
+    $ref: "./paths/streams.getAllStreamsInstanceIds.yaml"
+  /api/v1/streams/{containerId}:
+    $ref: "./paths/streams.getStreamsInstanceDetails.yaml"
+  /api/v1/streams/{containerId}/stop:
+    $ref: "./paths/streams.postStreamsInstanceStop.yaml"
+  /api/v1/streams/{containerId}/restart:
+    $ref: "./paths/streams.postStreamsInstanceRestart.yaml"
+  /api/v1/streams/{containerId}/status:
+    $ref: "./paths/streams.getStreamsInstanceStatus.yaml"
+  /api/v1/streams/{containerId}/config:
+    $ref: "./paths/streams.getStreamsInstanceConfig.yaml"
+  /api/v1/streams/{containerId}/offsets:
+    $ref: "./paths/streams.getStreamsInstanceConsumerOffsets.yaml"
+  /api/v1/streams/{containerId}/topology:
+    $ref: "./paths/streams.getStreamsInstanceTopology.yaml"
+  /api/v1/streams/{containerId}/metadata:
+    $ref: "./paths/streams.getStreamsInstanceMetadata.yaml"
+  /api/v1/streams/{containerId}/store-offsets:
+    $ref: "./paths/streams.getStreamsInstanceStoreOffsets.yaml"
+  /api/v1/streams/{containerId}/metrics:
+    $ref: "./paths/streams.getStreamsInstanceMetrics.yaml"
+  /api/v1/streams/{containerId}/metrics/group/{group}:
+    $ref: "./paths/streams.getStreamsInstanceMetricsByGroup.yaml"
+  /api/v1/streams/{containerId}/metrics/group/{group}/name/{name}:
+    $ref: "./paths/streams.getStreamsInstanceMetricsByGroupAndName.yaml"
+  /api/v1/streams/{containerId}/metrics/group/{group}/name/{name}/value:
+    $ref: "./paths/streams.getStreamsInstanceMetricValue.yaml"
+  /api/v1/applications:
+    $ref: "./paths/applications.getAllKafkaStreamsApplicationIds.yaml"
+  /api/v1/applications/{applicationId}/stores/{storeName}:
+    $ref: "./paths/applications.postQueryStateStore.yaml"
+components:
+  schemas:
+    Version:
+      properties:
+        azkarraVersion:
+          description: Version of Azkarra Framework
+          type: string
+        commitId:
+          description: Commit id of Azkarra Framework
+          type: string
+        branch:
+          description: Branch of Azkarra Framework
+          type: string
+    v1.TopicPartition:
+      properties:
+        topic:
+          description: The name of the topic
+          type: string
+        partition:
+          description: The partition of the topic
+          type: integer
+      required:
+        - topic
+        - partition
+  securitySchemes:
+    basicAuth:
+      scheme: basic
+      type: http
+

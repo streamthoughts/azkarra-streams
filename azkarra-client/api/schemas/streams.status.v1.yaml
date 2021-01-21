@@ -1,0 +1,68 @@
+v1.StreamsStatus:
+  type: object
+  required:
+    - id
+    - threads
+  properties:
+    id:
+      type: string
+    state:
+      type: string
+    threads:
+      default: []
+      items:
+        $ref: '#/v1.ThreadMetadata'
+      type: array
+
+v1.ThreadMetadata:
+  type: object
+  required:
+    - thread_name
+    - thread_state
+    - main_consumer_client_id
+    - restore_consumer_client_id
+    - producer_client_ids
+    - admin_client_id
+  properties:
+    thread_name:
+      type: string
+    thread_state:
+      type: string
+    active_tasks:
+      type: array
+      items:
+        $ref: '#/v1.TaskMetadata'
+      default: []
+    standby_tasks:
+      type: array
+      items:
+        $ref: '#/v1.TaskMetadata'
+      default: []
+    main_consumer_client_id:
+      type: string
+    restore_consumer_client_id:
+      type: string
+    producer_client_ids:
+      type: array
+      items:
+        type: string
+      default: []
+      uniqueItems: true
+    admin_client_id:
+      type: string
+
+v1.TaskMetadata:
+  type: object
+  required:
+    - taskId
+    - topicPartitions
+  properties:
+    task_id:
+      description: The single task-id running within the KafkaStreams application
+      type: string
+    topic_partitions:
+      description: The assigned Topic/Partition
+      type: array
+      items:
+        $ref: '../api.yaml#/components/schemas/v1.TopicPartition'
+      default: []

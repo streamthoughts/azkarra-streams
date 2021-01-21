@@ -1,0 +1,30 @@
+v1.MetricGroup:
+  type: object
+  properties:
+    name:
+      type: string
+    metrics:
+      type: array
+      items:
+        $ref: '#/v1.Metric'
+      default: []
+  required:
+    - name
+
+v1.Metric:
+  type: object
+  properties:
+    name:
+      type: string
+    description:
+      type: string
+    tags:
+      type: object
+      additionalProperties:
+        type: string
+    value:
+      type: object
+  required:
+    - name
+    - description
+    - value

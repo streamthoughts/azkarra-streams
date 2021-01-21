@@ -1,0 +1,28 @@
+get:
+  description: get the configuration of the KafkaStreams instance
+  operationId: getStreamsInstanceConfig
+  parameters:
+    - description: identifier of the KafkaStreams instance, also known as the 'containerId.id'
+      explode: false
+      in: path
+      name: containerId
+      required: true
+      schema:
+        type: string
+      style: simple
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            additionalProperties: true
+            type: object
+      description: OK
+    "401":
+      content: {}
+      description: Unauthorized
+  security:
+    - basicAuth: []
+  tags:
+    - azkarra_v1
+  x-accepts: application/json

@@ -1,0 +1,27 @@
+get:
+  description: get the offset posititions for the consumers of the Kafka Streams instance
+  operationId: getStreamsInstanceConsumerOffsets
+  parameters:
+    - description: identifier of the KafkaStreams instance, also known as the 'container.id'
+      explode: false
+      in: path
+      name: containerId
+      required: true
+      schema:
+        type: string
+      style: simple
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/streams.offsets.v1.yaml#/v1.StreamsConsumerGroupOffsets'
+      description: OK
+    "401":
+      content: {}
+      description: Unauthorized
+  security:
+    - basicAuth: []
+  tags:
+    - azkarra_v1
+  x-accepts: application/json

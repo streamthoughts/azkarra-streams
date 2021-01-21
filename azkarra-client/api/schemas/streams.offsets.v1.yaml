@@ -1,0 +1,53 @@
+v1.StreamsConsumerGroupOffsets:
+  type: object
+  properties:
+    group:
+      type: string
+    consumers:
+      type: array
+      items:
+        $ref: '#/v1.StreamsConsumerClientOffsets'
+
+v1.StreamsConsumerClientOffsets:
+  type: object
+  properties:
+    client_id:
+      type: string
+    stream_thread:
+      type: string
+    positions:
+      type: array
+      items:
+        $ref: '#/v1.StreamsConsumerLogOffsets'
+
+v1.StreamsConsumerLogOffsets:
+  type: object
+  properties:
+    topic_partition:
+      $ref: '../api.yaml#/components/schemas/v1.TopicPartition'
+    long_end_offset:
+      type: integer
+      format: int64
+    long_start:offset:
+      type: integer
+      format: int64
+    lag:
+      type: integer
+      format: int64
+    consumed_offset:
+      type: integer
+      format: int64
+    consumed_timestamp:
+      type: integer
+      format: int64
+    committed_offset:
+      type: integer
+      format: int64
+    committed_timestamp:
+      type: integer
+      format: int64
+  required:
+    - consumed_offset
+    - consumed_timestamp
+    - committed_offset
+    - committed_timestamp

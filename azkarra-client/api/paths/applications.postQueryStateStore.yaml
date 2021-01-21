@@ -1,0 +1,44 @@
+post:
+  description: Query a Kafka Streams state store, also known as executing an 'Interactive
+    Query'.
+  operationId: queryStateStore
+  parameters:
+    - description: identifier of the KafkaStreams application, also known as the
+        'application.id'
+      explode: false
+      in: path
+      name: applicationId
+      required: true
+      schema:
+        type: string
+      style: simple
+    - description: name of the state store to query
+      explode: false
+      in: path
+      name: storeName
+      required: true
+      schema:
+        type: string
+      style: simple
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/applications.query.v1.yaml#/v1.Query'
+    required: true
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/applications.query.v1.yaml#/v1.QueryResult'
+      description: OK
+    "401":
+      content: {}
+      description: Unauthorized
+  security:
+    - basicAuth: []
+  tags:
+    - azkarra_v1
+  x-accepts: application/json
+  x-contentType: application/json

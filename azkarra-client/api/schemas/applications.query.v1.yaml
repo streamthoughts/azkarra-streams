@@ -1,0 +1,251 @@
+v1.Query:
+  properties:
+    query:
+      $ref: '#/v1.Query.Operation'
+    type:
+      enum:
+        - key_value
+        - session
+        - window
+        - timestamped_key_value
+        - timestamped_window
+      type: string
+    set_options:
+      $ref: '#/v1.Query.Options'
+  required:
+    - query
+    - type
+
+v1.Query.Options:
+  properties:
+    retries:
+      description: The maximum number of attempts to run after failed access to
+        a given local state store
+      type: integer
+    retry_backoff_ms:
+      description: The time to wait before attempting to retry a failed access
+        to a given local state store
+      format: int64
+      type: integer
+    query_timeout_ms:
+      description: This limit the total time of state store execute.
+      format: int64
+      type: integer
+    remote_access_allowed:
+      description: Is remote access is allowed for this execute
+      type: boolean
+    limit:
+      description: Only return the first n records
+      format: int64
+      type: integer
+
+v1.Query.FetchParams:
+  properties:
+    key:
+      type: string
+    time:
+      format: int64
+      type: integer
+  required:
+    - key
+    - type
+
+v1.Query.Fetch:
+  properties:
+    fetch:
+      $ref: '#/v1.Query.FetchParams'
+
+v1.Query.GetParams:
+  properties:
+    key:
+      type: string
+  required:
+    - key
+
+v1.Query.Get:
+  properties:
+    get:
+      $ref: '#/v1.Query.GetParams'
+
+v1.Query.RangeParams:
+  properties:
+    keyFrom:
+      type: string
+    keyTo:
+      type: string
+  required:
+    - keyFrom
+    - keyTo
+
+v1.Query.Range:
+  properties:
+    range:
+      $ref: '#/v1.Query.RangeParams'
+
+v1.Query.FetchKeyRangeParams:
+  properties:
+    keyFrom:
+      type: string
+    keyTo:
+      type: string
+    timeFrom:
+      format: int64
+      type: integer
+    timeTo:
+      format: int64
+      type: integer
+  required:
+    - keyFrom
+    - keyTo
+    - timeFrom
+    - timeTo
+
+v1.Query.FetchKeyRange:
+  properties:
+    fetch_key_range:
+      $ref: '#/v1.Query.FetchKeyRangeParams'
+
+v1.Query.FetchTimeRangeParams:
+  properties:
+    key:
+      type: string
+    timeFrom:
+      format: int64
+      type: integer
+    timeTo:
+      format: int64
+      type: integer
+  required:
+    - key
+    - timeFrom
+    - timeTo
+
+v1.Query.FetchTimeRange:
+  properties:
+    fetch_time_range:
+      $ref: '#/v1.Query.FetchTimeRangeParams'
+
+v1.Query.FetchAllParams:
+  properties:
+    timeFrom:
+      format: int64
+      type: integer
+    timeTo:
+      format: int64
+      type: integer
+  required:
+    - timeFrom
+    - timeTo
+
+v1.Query.FetchAll:
+  properties:
+    fetch_all:
+      $ref: '#/v1.Query.FetchAllParams'
+
+v1.Query.All:
+  properties:
+    all:
+      additionalProperties: true
+      type: object
+
+v1.Query.Count:
+  properties:
+    count:
+      additionalProperties: true
+      type: object
+
+v1.Query.Operation:
+  oneOf:
+    - $ref: '#/v1.Query.Get'
+    - $ref: '#/v1.Query.Range'
+    - $ref: '#/v1.Query.All'
+    - $ref: '#/v1.Query.Count'
+    - $ref: '#/v1.Query.Fetch'
+    - $ref: '#/v1.Query.FetchKeyRange'
+    - $ref: '#/v1.Query.FetchTimeRange'
+    - $ref: '#/v1.Query.FetchAll'
+
+v1.QueryResult:
+  properties:
+    timeout:
+      type: boolean
+    server:
+      type: string
+    took:
+      format: int64
+      type: integer
+    status:
+      enum:
+        - SUCCESS
+        - NO_RESULT
+        - PARTIAL
+        - NOT_AVAILABLE
+        - ERROR
+        - INVALID
+      type: string
+    result:
+      $ref: '#/v1.Query.GlobalResultSet'
+  required:
+    - server
+    - status
+    - timeout
+    - took
+
+v1.Error:
+  properties:
+    message:
+      type: string
+
+v1.Query.ErrorResultSet:
+  properties:
+    remote:
+      type: boolean
+    server:
+      type: string
+    errors:
+      items:
+        $ref: '#/v1.Error'
+      type: array
+
+v1.Record:
+  properties:
+    key:
+      type: object
+    value:
+      type: object
+
+v1.Query.SuccessResultSet:
+  properties:
+    remote:
+      type: boolean
+    server:
+      type: string
+    total:
+      type: integer
+    records:
+      items:
+        $ref: '#/v1.Record'
+      type: array
+
+v1.Query.GlobalResultSet:
+  properties:
+    total:
+      type: integer
+    error:
+      type: string
+    store:
+      type: string
+    type:
+      type: string
+    failure:
+      items:
+        $ref: '#/v1.Query.ErrorResultSet'
+      type: array
+    success:
+      items:
+        $ref: '#/v1.Query.SuccessResultSet'
+      type: array
+  required:
+    - store
+    - total
+    - type

@@ -76,7 +76,7 @@ public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironme
      * Sets whether this execution environment should be the default.
      *
      * @param isDefault {@code true} to set this environment as default.
-     *                              
+     *
      * @return this {@link StreamsExecutionEnvironment} instance.
      */
     T isDefault(final boolean isDefault);

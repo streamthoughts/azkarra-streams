@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.security;
+package io.streamthoughts.azkarra.client.security;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;

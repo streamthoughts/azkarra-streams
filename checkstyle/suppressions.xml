@@ -46,5 +46,7 @@
     <suppress checks="ParameterNumber" files="StreamsInstanceInfo" />
     <suppress checks="ParameterNumber" files="Conf" />
     <suppress checks="BooleanExpressionComplexity" files="io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils" />
-
+    <!-- suppress all check for openapi generated classes -->
+    <suppress checks="." files="io.streamthoughts.azkarra.client.openapi.*" />
+    <suppress checks="." files="io.streamthoughts.azkarra.client.security.SSLUtils" />
 </suppressions>

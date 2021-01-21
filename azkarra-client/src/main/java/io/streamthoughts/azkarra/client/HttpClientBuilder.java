@@ -16,10 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.client;
+package io.streamthoughts.azkarra.client;
 
-import io.streamthoughts.azkarra.http.security.SSLContextFactory;
-import io.streamthoughts.azkarra.http.security.SSLUtils;
+import io.streamthoughts.azkarra.client.security.SSLContextFactory;
+import io.streamthoughts.azkarra.client.security.SSLUtils;
 import okhttp3.Authenticator;
 import okhttp3.OkHttpClient;
 import okhttp3.internal.tls.OkHostnameVerifier;
@@ -163,13 +163,13 @@ public class HttpClientBuilder {
     }
 
     private void applySslConfigs() {
-        HostnameVerifier hostnameVerifier = verifyingSsl ? OkHostnameVerifier.INSTANCE : NO_HOST_NAME_VERIFIER;
-        SSLContext sslContext = this.sslContext;
+            HostnameVerifier hostnameVerifier = verifyingSsl ? OkHostnameVerifier.INSTANCE : NO_HOST_NAME_VERIFIER;
+            SSLContext sslContext = this.sslContext;
 
-        if (sslContext == null) {
-            TrustManager[] trustManagers;
-            if (!verifyingSsl) {
-                trustManagers = new TrustManager[]{
+            if (sslContext == null) {
+                TrustManager[] trustManagers;
+                if (!verifyingSsl) {
+                    trustManagers = new TrustManager[]{
                         new X509TrustManager() {
                             @Override
                             public void checkClientTrusted(X509Certificate[] chain, String authType) {
@@ -184,14 +184,14 @@ public class HttpClientBuilder {
                                 return new X509Certificate[]{};
                             }
                         }
-                };
-            } else {
-                trustManagers = this.trustManagers;
+                    };
+                } else {
+                    trustManagers = this.trustManagers;
+                }
+                sslContext = new SSLContextFactory().getSSLContext(keyManagers, trustManagers);
             }
-            sslContext = new SSLContextFactory().getSSLContext(keyManagers, trustManagers);
-        }
 
-        httpClient = httpClient.newBuilder()
+            httpClient = httpClient.newBuilder()
                 .sslSocketFactory(sslContext.getSocketFactory(), SSLUtils.getX509TrustManager(trustManagers))
                 .hostnameVerifier(hostnameVerifier)
                 .build();
@@ -210,4 +210,5 @@ public class HttpClientBuilder {
             return true;
         }
     }
+
 }

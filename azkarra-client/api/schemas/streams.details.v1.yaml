@@ -1,0 +1,34 @@
+v1.StreamsDetails:
+  type: object
+  properties:
+    id:
+      type: string
+    since:
+      type: string
+    name:
+      type: string
+    version:
+      type: string
+    description:
+      type: string
+    state:
+      $ref: '#/v1.StreamsState'
+    exception:
+      type: string
+  required:
+    - id
+    - name
+    - since
+    - state
+    - version
+
+v1.StreamsState:
+  type: object
+  required:
+    - state
+    - since
+  properties:
+    state:
+      type: string
+    since:
+      type: string

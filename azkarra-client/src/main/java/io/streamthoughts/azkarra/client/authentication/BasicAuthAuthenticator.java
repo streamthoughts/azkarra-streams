@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.authentication;
+package io.streamthoughts.azkarra.client.authentication;
 
 import okhttp3.Authenticator;
 import okhttp3.Credentials;

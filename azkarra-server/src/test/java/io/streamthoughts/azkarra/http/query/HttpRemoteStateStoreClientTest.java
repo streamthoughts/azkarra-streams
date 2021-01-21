@@ -29,9 +29,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
 import io.streamthoughts.azkarra.api.util.Endpoint;
-import io.streamthoughts.azkarra.http.APIVersions;
-import io.streamthoughts.azkarra.http.ExchangeHelper;
-import io.streamthoughts.azkarra.http.client.HttpClientBuilder;
+import io.streamthoughts.azkarra.client.HttpClientBuilder;
 import io.streamthoughts.azkarra.http.serialization.json.SpecificJsonSerdes;
 import io.streamthoughts.azkarra.serialization.Serdes;
 import io.streamthoughts.azkarra.serialization.json.Json;
@@ -50,7 +48,7 @@ import java.util.concurrent.ExecutionException;
 
 import static java.util.Collections.singletonList;
 
-public class HttpRemoteQueryClientTest {
+public class HttpRemoteStateStoreClientTest {
 
     private static final Serdes<QueryResult> SERDES = new SpecificJsonSerdes<>(
         Json.getDefault(),
@@ -61,17 +59,13 @@ public class HttpRemoteQueryClientTest {
 
     private static final String TEST_STORE_NAME = "store";
 
-    private HttpRemoteQueryClient client;
+    private HttpRemoteStateStoreClient client;
 
     private MockWebServer server;
 
     @BeforeEach
     public void beforeEach() throws IOException {
-        client = new HttpRemoteQueryClient(
-            HttpClientBuilder.newBuilder().build(),
-            new QueryURLBuilder.DefaultQueryURLBuilder("http", APIVersions.PATH_V1),
-            new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class)
-        );
+        client = new HttpRemoteStateStoreClient(HttpClientBuilder.newBuilder().build());
         server = new MockWebServer();
         server.start(SERVER_INFO.port());
     }

@@ -1,0 +1,95 @@
+v1.StreamsTopology:
+  properties:
+    globalStores:
+      type: array
+      items:
+        $ref: '#/v1.StreamsGlobalStore'
+    subTopologies:
+      type: array
+      items:
+        $ref: '#/v1.StreamsSubTopology'
+v1.StreamsGlobalStore:
+  required:
+    - id
+    - source
+    - processor
+  properties:
+    id:
+      type: integer
+    source:
+      $ref: '#/v1.StreamsTopologySourceNode'
+    processor:
+      $ref: '#/v1.StreamsTopologyProcessorNode'
+v1.StreamsSubTopology:
+  required:
+    - id
+  properties:
+    id:
+      type: integer
+    nodes:
+      type: array
+      items:
+        $ref: '#/v1.StreamsTopologyNode'
+v1.StreamsTopologyNode:
+  required:
+    - name
+    - type
+  type: object
+  properties:
+    type:
+      type: string
+    name:
+      type: string
+  discriminator:
+    propertyName: 'type'
+    mapping:
+      SOURCE: '#/v1.StreamsTopologySourceNode'
+      SINK: '#/v1.StreamsTopologySinkNode'
+      PROCESSOR: '#/v1.StreamsTopologyProcessorNode'
+v1.StreamsTopologySourceNode:
+  allOf:
+    - $ref: '#/v1.StreamsTopologyNode'
+    - type: object
+      properties:
+        successors:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        topics:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+v1.StreamsTopologySinkNode:
+  allOf:
+    - $ref: '#/v1.StreamsTopologyNode'
+    - type: object
+      properties:
+        predecessors:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        topic:
+          type: string
+v1.StreamsTopologyProcessorNode:
+  allOf:
+    - $ref: '#/v1.StreamsTopologyNode'
+    - type: object
+      properties:
+        predecessors:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        successors:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        stores:
+          type: array
+          items:
+            type: string
+          uniqueItems: true

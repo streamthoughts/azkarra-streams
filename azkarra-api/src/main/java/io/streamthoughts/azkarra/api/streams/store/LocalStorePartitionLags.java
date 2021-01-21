@@ -19,11 +19,12 @@
 package io.streamthoughts.azkarra.api.streams.store;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.streamthoughts.azkarra.api.model.HasName;
 
 import java.util.List;
 import java.util.Objects;
 
-public class LocalStorePartitionLags {
+public class LocalStorePartitionLags implements HasName {
 
     private final String name;
 
@@ -41,6 +42,10 @@ public class LocalStorePartitionLags {
         this.positions = Objects.requireNonNull(positions, "positions cannot be null");
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @JsonProperty
     public String name() {
         return name;

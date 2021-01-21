@@ -1,0 +1,22 @@
+get:
+  description: list the KafkaStreams instances currently active on the local Azkarra
+    application
+  operationId: listStreamsInstanceIds
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            items:
+              type: string
+            type: array
+      description: Array of Kafka Streams instance ids
+    "401":
+      content: {}
+      description: Unauthorized
+  security:
+    - basicAuth: []
+  tags:
+    - azkarra_v1
+  x-accepts: application/json
+  x-contentType: application/json

@@ -27,22 +27,20 @@ import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
-import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.server.AzkarraRestExtension;
 import io.streamthoughts.azkarra.api.server.AzkarraRestExtensionContext;
 import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
 import io.streamthoughts.azkarra.api.server.ServerInfo;
-import io.streamthoughts.azkarra.http.authentication.BasicAuthAuthenticator;
-import io.streamthoughts.azkarra.http.client.HttpClientBuilder;
+import io.streamthoughts.azkarra.client.HttpClientBuilder;
+import io.streamthoughts.azkarra.client.authentication.BasicAuthAuthenticator;
+import io.streamthoughts.azkarra.client.security.SSLContextFactory;
+import io.streamthoughts.azkarra.client.security.SSLUtils;
 import io.streamthoughts.azkarra.http.error.AzkarraExceptionMapper;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultHandler;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultResponseListener;
 import io.streamthoughts.azkarra.http.handler.HeadlessHttpHandler;
-import io.streamthoughts.azkarra.http.query.HttpRemoteQueryClient;
-import io.streamthoughts.azkarra.http.query.QueryURLBuilder;
+import io.streamthoughts.azkarra.http.query.HttpRemoteStateStoreClient;
 import io.streamthoughts.azkarra.http.routes.WebUIHttpRoutes;
-import io.streamthoughts.azkarra.http.security.SSLContextFactory;
-import io.streamthoughts.azkarra.http.security.SSLUtils;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
 import io.streamthoughts.azkarra.http.security.auth.Authentication;
@@ -51,7 +49,6 @@ import io.streamthoughts.azkarra.http.security.auth.AuthenticationContextHolder;
 import io.streamthoughts.azkarra.http.security.auth.PasswordCredentials;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandler;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandlerFactory;
-import io.streamthoughts.azkarra.http.serialization.json.SpecificJsonSerdes;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -209,10 +206,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         }
         final OkHttpClient httpClient = httpClientBuilder.build();
         final String protocol = serverConfig.isSslEnable() ? "https" : "http";
-        context.registerSingleton(new HttpRemoteQueryClient(
-            httpClient,
-            new QueryURLBuilder.DefaultQueryURLBuilder(protocol, APIVersions.PATH_V1),
-            new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class)));
+        context.registerSingleton(new HttpRemoteStateStoreClient(httpClient, protocol));
     }
 
     private Undertow buildUndertowServer() {

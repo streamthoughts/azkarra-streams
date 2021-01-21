@@ -1,0 +1,9 @@
+.gitignore
+.travis.yml
+*gradle*
+*sbt*
+**/gradle
+git_push.sh
+README.md
+pom.xml
+**/AndroidManifest.xml

@@ -1,0 +1,46 @@
+get:
+  description: get the current metric for the streams instance, metric group and
+    name
+  operationId: getStreamsInstanceMetricByGroupAndName
+  parameters:
+    - description: identifier of the KafkaStreams application, also known as the
+        'container.id'
+      explode: false
+      in: path
+      name: containerId
+      required: true
+      schema:
+        type: string
+      style: simple
+    - description: name of the group
+      explode: false
+      in: path
+      name: group
+      required: true
+      schema:
+        type: string
+      style: simple
+    - description: name of the metric
+      explode: false
+      in: path
+      name: name
+      required: true
+      schema:
+        type: string
+      style: simple
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/streams.metrics.v1.yaml#/v1.MetricGroup'
+      description: OK
+    "401":
+      content: {}
+      description: Unauthorized
+  security:
+    - basicAuth: []
+  tags:
+    - azkarra_v1
+  x-accepts: application/json
+  x-contentType: application/json

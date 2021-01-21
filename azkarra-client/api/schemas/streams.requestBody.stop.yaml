@@ -1,0 +1,7 @@
+v1.Options:
+  required:
+    - cleanup
+  properties:
+    cleanup:
+      type: boolean
+      default: false

@@ -1,0 +1,22 @@
+get:
+  description: list all ids for the Kafka Streams applications for which at least one instance
+    is currently running. application
+  operationId: listKafkaStreamsApplicationIds
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            items:
+              type: string
+            type: array
+      description: Array of Kafka Streams application ids
+    "401":
+      content: {}
+      description: Unauthorized
+  security:
+    - basicAuth: []
+  tags:
+    - azkarra_v1
+  x-accepts: application/json
+  x-contentType: application/json

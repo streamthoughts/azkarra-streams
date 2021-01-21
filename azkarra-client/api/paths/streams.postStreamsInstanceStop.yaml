@@ -1,0 +1,30 @@
+post:
+  description: stop a running KafkaStreams instance
+  operationId: stopStreamsInstance
+  parameters:
+    - description: identifier of the KafkaStreams instance, also known as the 'container.id'
+      explode: false
+      in: path
+      name: containerId
+      required: true
+      schema:
+        type: string
+      style: simple
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/streams.requestBody.stop.yaml#/v1.Options'
+    required: true
+  responses:
+    "200":
+      content: {}
+      description: OK
+    "401":
+      content: {}
+      description: Unauthorized
+  security:
+    - basicAuth: []
+  tags:
+    - azkarra_v1
+  x-accepts: application/json
