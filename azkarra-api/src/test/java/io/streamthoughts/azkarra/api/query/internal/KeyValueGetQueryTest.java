@@ -20,8 +20,8 @@ package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.jupiter.api.Assertions;
@@ -41,7 +41,7 @@ public class KeyValueGetQueryTest {
     @Test
     public void shouldGetGivenKey() {
         KeyValueGetQuery<String, String> query = new KeyValueGetQuery<>(STORE_NAME, "key", Serdes.String().serializer());
-        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(LocalStoreAccessProvider.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn("value");

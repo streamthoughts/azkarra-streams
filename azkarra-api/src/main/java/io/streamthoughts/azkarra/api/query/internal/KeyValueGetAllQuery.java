@@ -21,55 +21,45 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.Query;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import java.util.List;
 
-public class KeyValueGetAllQuery<K, V> implements LocalStoreQuery<K, V> {
-
-    private String storeName;
+public class KeyValueGetAllQuery<K, V> extends DecorateQuery<Query> implements LocalExecutableQuery<K, V> {
 
     /**
      * Creates a new {@link KeyValueGetAllQuery} instance.
      *
-     * @param storeName     the name of the store.
+     * @param store         the name of the store.
      */
-    KeyValueGetAllQuery(final String storeName) {
-        this.storeName = storeName;
+    KeyValueGetAllQuery(final String store) {
+        super(
+            new QueryRequest()
+                .storeName(store)
+                .storeOperation(StoreOperation.ALL)
+                .storeType(StoreType.KEY_VALUE)
+        );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StoreType storeType() {
-        return StoreType.KEY_VALUE;
-    }
+    public Try<List<KV<K, V>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreOperation operationType() {
-        return StoreOperation.ALL;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
-
-        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.localKeyValueStore(storeName);
+        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = provider.localKeyValueStore(getStoreName());
 
         final Reader<ReadOnlyKeyValueStore<K, V>, List<KV<K, V>>> reader = reader()
-            .map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));
+            .map(iterator -> LocalExecutableQuery.toKeyValueListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

@@ -20,9 +20,10 @@ package io.streamthoughts.azkarra.http.query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.QueryInfo;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.QueryOptions;
 import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.http.data.QueryOptionsRequest;
@@ -54,7 +55,7 @@ public class JsonQuerySerde {
 
     private static final Json JSON = Json.getDefault();
 
-    public static Tuple<QueryInfo, Queried> deserialize(final String storeName, final byte[] data) {
+    public static Tuple<QueryRequest, QueryOptions> deserialize(final String storeName, final byte[] data) {
 
         try {
             JsonNode jsonNode = JSON.deserialize(data);
@@ -94,7 +95,7 @@ public class JsonQuerySerde {
                         .stream(spliteratorUnknownSize(entry.getValue().fields(), 0), false)
                         .collect(Collectors.toMap(Map.Entry::getKey, e -> getJsonNodeValue(e.getValue())));
 
-                queries.add(Tuple.of(storeOperation.get(), new QueryParams(params)));
+                queries.add(Tuple.of(storeOperation.get(), new GenericQueryParams(params)));
             }
 
             final JsonNode optionNode = jsonNode.get(SET_OPTIONS_JSON_FIELD);
@@ -103,13 +104,13 @@ public class JsonQuerySerde {
                 null :
                     JSON.deserialize(optionNode, QueryOptionsRequest.class);
 
-            final QueryInfo queryInfo = new QueryInfo(
+            final QueryRequest queryObject = new QueryRequest(
                 storeName,
                 storeType,
                 queries.get(0).left(),
                 queries.get(0).right());
             // only support a single query
-            return Tuple.of(queryInfo, newQueried(options));
+            return Tuple.of(queryObject, newQueried(options));
 
         } catch (final SerializationException e) {
             throw new InvalidStateStoreQueryException("Invalid JSON query: " + e.getMessage(), e);
@@ -129,27 +130,27 @@ public class JsonQuerySerde {
         return jsonNode.asText();
     }
 
-    public static String serialize(final QueryInfo query, final Queried options) {
+    public static String serialize(final QueryRequest query, final QueryOptions options) {
 
         Map<String, Object> json = new HashMap<>();
-        json.put(QUERY_TYPE_JSON_FIELD, query.type().prettyName());
+        json.put(QUERY_TYPE_JSON_FIELD, query.getStoreType().prettyName());
         json.put(QUERY_JSON_FIELD, Collections.singletonMap(
-            query.operation().prettyName(), query.parameters().originals())
+            query.getStoreOperation().prettyName(), query.getParams().getAsMap())
         );
         json.put(SET_OPTIONS_JSON_FIELD, new QueryOptionsRequest(
-                options.retries(),
-                options.retryBackoff().toMillis(),
-                options.queryTimeout().toMillis(),
-                options.remoteAccessAllowed(),
-                options.limit()
+            options.retries(),
+            options.retryBackoff().toMillis(),
+            options.queryTimeout().toMillis(),
+            options.remoteAccessAllowed(),
+            options.limit()
         ));
         return JSON.serialize(json);
     }
 
-    private static Queried newQueried(final QueryOptionsRequest options) {
+    private static QueryOptions newQueried(final QueryOptionsRequest options) {
         return options == null ?
-            Queried.immediately() :
-            new Queried(
+            QueryOptions.immediately() :
+            new QueryOptions(
                 Optional.ofNullable(options.getRetries()).orElse(0),
                 Duration.ofMillis(Optional.ofNullable(options.getRetryBackoff()).orElse(0L)),
                 Duration.ofMillis(Optional.ofNullable(options.getQueryTimeout()).orElse(0L)),

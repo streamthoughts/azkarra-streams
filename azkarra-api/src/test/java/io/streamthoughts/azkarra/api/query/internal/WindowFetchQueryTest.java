@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serdes;
@@ -44,7 +45,7 @@ public class WindowFetchQueryTest {
     public void shouldFetchGivenKeyAndTime() {
         WindowFetchQuery<String, String> query = new WindowFetchQuery<>(
                 STORE_NAME, KEY, Serdes.String().serializer(), TIME);
-        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(LocalStoreAccessProvider.class);
 
         ReadOnlyWindowStore store = mock(ReadOnlyWindowStore.class);
         when(store.fetch(KEY, TIME)).thenReturn("value");

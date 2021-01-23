@@ -21,11 +21,16 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.Query;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.util.Utils;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
@@ -34,9 +39,10 @@ import org.apache.kafka.streams.state.ValueAndTimestamp;
 import java.time.Instant;
 import java.util.List;
 
-public class TimestampedWindowFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed<K>, V> {
+public class TimestampedWindowFetchKeyRangeQuery<K, V>
+        extends DecorateQuery<Query>
+        implements LocalExecutableQuery<Windowed<K>, V> {
 
-    private final String store;
     private final K keyFrom;
     private final K keyTo;
     private final Instant timeFrom;
@@ -45,18 +51,28 @@ public class TimestampedWindowFetchKeyRangeQuery<K, V> implements LocalStoreQuer
     /**
      * Creates a new {@link TimestampedWindowFetchKeyRangeQuery} instance.
      *
-     * @param storeName     the name of the store.
+     * @param store         the name of the store.
      * @param keyFrom       the query param key from.
      * @param keyTo         the query param key to.
      * @param timeFrom      the query param time from.
      * @param timeTo        the query param time to.
      */
-    TimestampedWindowFetchKeyRangeQuery(final String storeName,
+    TimestampedWindowFetchKeyRangeQuery(final String store,
                                         final K keyFrom,
                                         final K keyTo,
                                         final Instant timeFrom,
                                         final Instant timeTo) {
-        this.store = storeName;
+        super(new QueryRequest()
+                .storeName(store)
+                .storeType(StoreType.WINDOW)
+                .storeOperation(StoreOperation.FETCH_TIME_RANGE)
+                .params(new GenericQueryParams()
+                        .put(QueryConstants.QUERY_PARAM_KEY_FROM, keyFrom)
+                        .put(QueryConstants.QUERY_PARAM_KEY_TO, keyTo)
+                        .put(QueryConstants.QUERY_PARAM_TIME_FROM, Utils.capped(timeFrom).toEpochMilli())
+                        .put(QueryConstants.QUERY_PARAM_TIME_TO, Utils.capped(timeTo).toEpochMilli())
+                )
+        );
         this.keyFrom = keyFrom;
         this.keyTo = keyTo;
         this.timeFrom = timeFrom;
@@ -67,30 +83,14 @@ public class TimestampedWindowFetchKeyRangeQuery<K, V> implements LocalStoreQuer
      * {@inheritDoc}
      */
     @Override
-    public StoreType storeType() {
-        return StoreType.TIMESTAMPED_WINDOW;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreOperation operationType() {
-        return StoreOperation.FETCH_KEY_RANGE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container, final long limit) {
+    public Try<List<KV<Windowed<K>, V>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> accessor =
-                container.localTimestampedWindowStore(store);
+                provider.localTimestampedWindowStore(getStoreName());
 
         final Reader<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>, List<KV<Windowed<K>, V>>> reader =
             reader(keyFrom, keyTo, timeFrom, timeTo)
-            .map(iterator -> LocalStoreQuery.toKeyValueAndTimestampListAndClose(iterator, limit));
+            .map(iterator -> LocalExecutableQuery.toKeyValueAndTimestampListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

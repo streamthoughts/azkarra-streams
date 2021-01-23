@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serdes;
@@ -42,7 +43,7 @@ public class TimestampedKeyValueGetQueryTest {
     @Test
     public void shouldGetGivenKey() {
         TimestampedKeyValueGetQuery<String, String> query = new TimestampedKeyValueGetQuery<>(STORE_NAME, "key", Serdes.String().serializer());
-        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(LocalStoreAccessProvider.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn(ValueAndTimestamp.make("value", 1L));

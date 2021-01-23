@@ -20,42 +20,45 @@ package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.errors.Error;
 import io.streamthoughts.azkarra.api.monad.Validator;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
-import io.streamthoughts.azkarra.api.query.StoreOperation;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.StoreOperation;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.time.Instant;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_FROM;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_TO;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME_FROM;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME_TO;
+
 public class WindowQueryBuilder implements QueryOperationBuilder {
 
-    public static final String QUERY_PARAM_KEY = "key";
-    public static final String QUERY_PARAM_KEY_FROM = "keyFrom";
-    public static final String QUERY_PARAM_KEY_TO = "keyTo";
-    public static final String QUERY_PARAM_TIME = "time";
-    public static final String QUERY_PARAM_TIME_FROM = "timeFrom";
-    public static final String QUERY_PARAM_TIME_TO = "timeTo";
     public static final Error INVALID_TIME_ERROR = new Error(
         "invalid parameters: 'timeFrom' must be inferior to 'timeTo'");
 
-    protected final String storeName;
+    protected final String store;
 
     /**
      * Creates a new {@link WindowQueryBuilder} instance.
-     * @param storeName         the name of the store.
+     *
+     * @param store     the name of the store.
      */
-    WindowQueryBuilder(final String storeName) {
-        Objects.requireNonNull(storeName, "storeName cannot be null");
-        this.storeName = storeName;
+    WindowQueryBuilder(final String store) {
+        this.store = store;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Query operation(final StoreOperation operation) {
+    public LocalPreparedQuery<?, ?> prepare(final StoreOperation operation) {
 
         if (operation == StoreOperation.FETCH)
             return fetch();
@@ -75,34 +78,40 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
         throw new InvalidQueryException("Operation not supported '" + operation.name() + "'");
     }
 
-    public <K, V> Query<K, V> fetch() {
-        return new Query<>(storeName, new FetchWindowQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<K, V> fetch() {
+        return new FetchWindowQueryBuilder<>(store);
     }
 
-    public <K, V> Query<Windowed<K>, V> fetchKeyRange() {
-        return new Query<>(storeName, new WindowFetchKeyRangeQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> fetchKeyRange() {
+        return new WindowFetchKeyRangeQueryBuilder<>(store);
     }
 
-    public <V> Query<Long, V> fetchTimeRange() {
-        return new Query<>(storeName, new WindowFetchTimeRangeQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<Long, V> fetchTimeRange() {
+        return new WindowFetchTimeRangeQueryBuilder<>(store);
     }
 
-    public <K, V> Query<Windowed<K>, V> fetchAll() {
-        return new Query<>(storeName, new WindowFetchAllQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> fetchAll() {
+        return new WindowFetchAllQueryBuilder<>(store);
     }
 
-    public <K, V> Query<Windowed<K>, V> all() {
-        return new Query<>(storeName, (store, parameters) -> new WindowGetAllQuery<>(store));
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> all() {
+        return params -> new WindowGetAllQuery<>(store);
     }
 
-    static class FetchWindowQueryBuilder<K, V> implements LocalStoreQueryBuilder<K, V> {
+    static class FetchWindowQueryBuilder<K, V> implements LocalPreparedQuery<K, V> {
+
+        protected final String store;
+
+        public FetchWindowQueryBuilder(final String store) {
+            this.store = Objects.requireNonNull(store, "store should not be null");
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
+        public Validator<QueryParams> validator(final QueryParams params) {
+            return Validator.of(params)
                 .validates(p -> p.contains(QUERY_PARAM_KEY), MissingRequiredKeyError.of(QUERY_PARAM_KEY))
                 .validates(p -> p.contains(QUERY_PARAM_TIME), MissingRequiredKeyError.of(QUERY_PARAM_TIME));
         }
@@ -111,8 +120,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<K, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<K, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new WindowFetchQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY),
@@ -122,14 +131,20 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
         }
     }
 
-    static class WindowFetchKeyRangeQueryBuilder<K, V> implements LocalStoreQueryBuilder<Windowed<K>, V> {
+    static class WindowFetchKeyRangeQueryBuilder<K, V> implements LocalPreparedQuery<Windowed<K>, V> {
+
+        protected final String store;
+
+        public WindowFetchKeyRangeQueryBuilder(final String store) {
+            this.store = Objects.requireNonNull(store, "store should not be null");
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
+        public Validator<QueryParams> validator(final QueryParams params) {
+            return Validator.of(params)
                 .validates(p -> p.contains(QUERY_PARAM_KEY_FROM), MissingRequiredKeyError.of(QUERY_PARAM_KEY_FROM))
                 .validates(p -> p.contains(QUERY_PARAM_KEY_TO), MissingRequiredKeyError.of(QUERY_PARAM_KEY_TO))
                 .validates(p -> p.contains(QUERY_PARAM_TIME_FROM), MissingRequiredKeyError.of(QUERY_PARAM_TIME_FROM))
@@ -141,8 +156,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Windowed<K>, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<Windowed<K>, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new WindowFetchKeyRangeQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY_FROM),
@@ -153,14 +168,20 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
         }
     }
 
-    static class WindowFetchTimeRangeQueryBuilder<V> implements LocalStoreQueryBuilder<Long, V> {
+    static class WindowFetchTimeRangeQueryBuilder<K, V> implements LocalPreparedQuery<Long, V> {
+
+        protected final String store;
+
+        public WindowFetchTimeRangeQueryBuilder(final String store) {
+            this.store = Objects.requireNonNull(store, "store should not be null");
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
+        public Validator<QueryParams> validator(final QueryParams params) {
+            return Validator.of(params)
                 .validates(p -> p.contains(QUERY_PARAM_KEY), MissingRequiredKeyError.of(QUERY_PARAM_KEY))
                 .validates(p -> p.contains(QUERY_PARAM_TIME_FROM), MissingRequiredKeyError.of(QUERY_PARAM_TIME_FROM))
                 .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO))
@@ -171,8 +192,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Long, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<Long, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new WindowFetchTimeRangeQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY),
@@ -182,14 +203,20 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
         }
     }
 
-    static class WindowFetchAllQueryBuilder<K, V> implements LocalStoreQueryBuilder<Windowed<K>, V> {
+    static class WindowFetchAllQueryBuilder<K, V> implements LocalPreparedQuery<Windowed<K>, V> {
+
+        protected final String store;
+
+        public WindowFetchAllQueryBuilder(final String store) {
+            this.store = Objects.requireNonNull(store, "store should not be null");
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
+        public Validator<QueryParams> validator(final QueryParams params) {
+            return Validator.of(params)
                 .validates(p -> p.contains(QUERY_PARAM_TIME_FROM), MissingRequiredKeyError.of(QUERY_PARAM_TIME_FROM))
                 .validates(p -> p.contains(QUERY_PARAM_TIME_TO), MissingRequiredKeyError.of(QUERY_PARAM_TIME_TO))
                 .validates(new TimeValidator(), INVALID_TIME_ERROR);
@@ -199,8 +226,8 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Windowed<K>, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<Windowed<K>, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new WindowFetchAllQuery<>(
                 store,
                 Instant.ofEpochMilli(p.getValue(QUERY_PARAM_TIME_FROM)),

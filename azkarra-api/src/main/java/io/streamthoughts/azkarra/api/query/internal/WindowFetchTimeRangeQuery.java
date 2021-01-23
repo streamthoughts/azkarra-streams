@@ -21,20 +21,23 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.Query;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.apache.kafka.streams.state.WindowStoreIterator;
 
 import java.time.Instant;
 import java.util.List;
 
-public class WindowFetchTimeRangeQuery<K, V> implements LocalStoreQuery<Long, V> {
+public class WindowFetchTimeRangeQuery<K, V> extends DecorateQuery<Query> implements LocalExecutableQuery<Long, V> {
 
-    private final String store;
     private final K key;
     private final Instant timeFrom;
     private final Instant timeTo;
@@ -42,48 +45,47 @@ public class WindowFetchTimeRangeQuery<K, V> implements LocalStoreQuery<Long, V>
     /**
      * Creates a new {@link WindowFetchTimeRangeQuery} instance.
      *
-     * @param storeName     the name of the store.
+     * @param store         the name of the store
      * @param key           the query param key.
      * @param timeFrom      the query param time from.
      * @param timeTo        the query param time to.
      */
-    WindowFetchTimeRangeQuery(final String storeName,
+    WindowFetchTimeRangeQuery(final String store,
                               final K key,
                               final Instant timeFrom,
                               final Instant timeTo) {
-        this.store = storeName;
+        super(createQuery(store, key, timeFrom, timeTo));
         this.key = key;
         this.timeFrom = timeFrom;
         this.timeTo = timeTo;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreType storeType() {
-        return StoreType.WINDOW;
+    private static QueryRequest createQuery(final String store,
+                                                  final Object key,
+                                                  final Instant timeFrom,
+                                                  final Instant timeTo) {
+        return new QueryRequest()
+            .storeName(store)
+            .storeType(StoreType.WINDOW)
+            .storeOperation(StoreOperation.FETCH_TIME_RANGE)
+            .params(new GenericQueryParams()
+                    .put(QueryConstants.QUERY_PARAM_KEY, key)
+                    .put(QueryConstants.QUERY_PARAM_TIME_FROM, timeFrom.toEpochMilli())
+                    .put(QueryConstants.QUERY_PARAM_TIME_TO, timeTo.toEpochMilli())
+            );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StoreOperation operationType() {
-        return StoreOperation.FETCH_TIME_RANGE;
-    }
+    public Try<List<KV<Long, V>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<Long, V>>> execute(final KafkaStreamsContainer container, final long limit) {
-
-        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.localWindowStore(store);
+        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = provider.localWindowStore(getStoreName());
 
         final Reader<ReadOnlyWindowStore<K, V>, List<KV<Long, V>>> reader =
             reader(key, timeFrom, timeTo)
-            .map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));
+            .map(iterator -> LocalExecutableQuery.toKeyValueListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

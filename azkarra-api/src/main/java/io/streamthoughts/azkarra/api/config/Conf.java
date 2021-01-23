@@ -119,7 +119,7 @@ public interface Conf {
      *
      * @return a new {@link Conf} instance.
      */
-    static Conf of(final Map<String, ?> map) {
+    static Conf of(final Map<String, Object> map) {
         return new MapConf(map);
     }
 

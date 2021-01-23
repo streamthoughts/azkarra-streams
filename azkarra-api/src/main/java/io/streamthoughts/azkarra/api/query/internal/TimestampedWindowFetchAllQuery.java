@@ -21,11 +21,15 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.Query;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
@@ -34,55 +38,54 @@ import org.apache.kafka.streams.state.ValueAndTimestamp;
 import java.time.Instant;
 import java.util.List;
 
-public class TimestampedWindowFetchAllQuery<K, V> implements LocalStoreQuery<Windowed<K>, V> {
+public class TimestampedWindowFetchAllQuery<K, V>
+        extends DecorateQuery<Query>
+        implements LocalExecutableQuery<Windowed<K>, V> {
 
-    private final String store;
     private final Instant timeFrom;
     private final Instant timeTo;
 
     /**
      * Creates a new {@link TimestampedWindowFetchAllQuery} instance.
      *
-     * @param storeName     the name of the store.
+     * @param store         the name of the store.
      * @param timeFrom      the query param time from.
      * @param timeTo        the query param time to.
      */
-    TimestampedWindowFetchAllQuery(final String storeName,
+    TimestampedWindowFetchAllQuery(final String store,
                                    final Instant timeFrom,
                                    final Instant timeTo) {
-        this.store = storeName;
+        super(createQuery(store, timeFrom, timeTo)
+        );
         this.timeFrom = timeFrom;
         this.timeTo = timeTo;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreType storeType() {
-        return StoreType.TIMESTAMPED_WINDOW;
+    private static QueryRequest createQuery(final String store,
+                                            final Instant timeFrom,
+                                            final Instant timeTo) {
+        return new QueryRequest()
+                .storeName(store)
+                .storeType(StoreType.WINDOW)
+                .storeOperation(StoreOperation.FETCH_ALL)
+                .params(new GenericQueryParams()
+                        .put(QueryConstants.QUERY_PARAM_TIME_FROM, timeFrom.toEpochMilli())
+                        .put(QueryConstants.QUERY_PARAM_KEY_TO, timeTo.toEpochMilli())
+                );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StoreOperation operationType() {
-        return StoreOperation.FETCH_ALL;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container, final long limit) {
+    public Try<List<KV<Windowed<K>, V>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> accessor =
-                container.localTimestampedWindowStore(store);
+                provider.localTimestampedWindowStore(getStoreName());
 
         final Reader<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>, List<KV<Windowed<K>, V>>> reader =
             reader(timeFrom, timeTo)
-            .map(iterator -> LocalStoreQuery.toKeyValueAndTimestampListAndClose(iterator, limit));
+            .map(iterator -> LocalExecutableQuery.toKeyValueAndTimestampListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

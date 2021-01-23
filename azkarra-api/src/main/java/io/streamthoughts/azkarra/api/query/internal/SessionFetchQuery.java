@@ -21,11 +21,13 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -33,47 +35,43 @@ import org.apache.kafka.streams.state.ReadOnlySessionStore;
 
 import java.util.List;
 
-public class SessionFetchQuery<K, V>  extends KeyedLocalStoreQuery<K, Windowed<K>, V> {
+public class SessionFetchQuery<K, V> extends BaseKeyedLocalStoreQuery<K, Windowed<K>, V> {
 
     /**
      * Creates a new {@link SessionFetchQuery} instance.
      *
-     * @param store     the store name.
-     * @param key           the record key.
+     * @param store         the name of the store.
+     * @param key           the key parameter.
+     * @param keySerializer the key serializer.
      */
     SessionFetchQuery(final String store,
                       final K key,
-                      final Serializer<K> keySserializer) {
-        super(store, key, keySserializer);
+                      final Serializer<K> keySerializer) {
+        super(createQuery(store, key), key, keySerializer);
     }
+
+    private static QueryRequest createQuery(final String storeName, final Object key) {
+        return new QueryRequest()
+            .storeName(storeName)
+            .storeType(StoreType.SESSION)
+            .storeOperation(StoreOperation.GET)
+            .params(new GenericQueryParams()
+                    .put(QueryConstants.QUERY_PARAM_KEY, key)
+            );
+    }
+
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StoreType storeType() {
-        return StoreType.SESSION;
-    }
+    public Try<List<KV<Windowed<K>, V>>>  execute(final LocalStoreAccessProvider provider, final long limit) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreOperation operationType() {
-        return StoreOperation.FETCH;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<Windowed<K>, V>>>  execute(final KafkaStreamsContainer container, final long limit) {
-
-        final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = container.localSessionStore(storeName());
+        final LocalStoreAccessor<ReadOnlySessionStore<K, V>> accessor = provider.localSessionStore(getStoreName());
 
         final Reader<ReadOnlySessionStore<K, V>, List<KV<Windowed<K>, V>>> reader =
-            reader(key())
-           .map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));
+            reader(getKey())
+           .map(iterator -> LocalExecutableQuery.toKeyValueListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

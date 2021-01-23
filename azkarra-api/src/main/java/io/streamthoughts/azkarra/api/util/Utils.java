@@ -18,6 +18,9 @@
  */
 package io.streamthoughts.azkarra.api.util;
 
+import java.time.Instant;
+import java.util.Arrays;
+
 public class Utils {
 
     public static boolean isNullOrEmpty(final String str) {
@@ -58,5 +61,15 @@ public class Utils {
             }
         }
         return true;
+    }
+
+    /**
+     * Instant.toEpochMilli() could result in an arithmetic overflow/underflow
+     * (e.g. Instant.MAX.toEpochMilli() or Instant.MIN.toEpochMilli()).
+     */
+    public static Instant capped(final Instant instant) {
+        Instant[] instants = {Instant.ofEpochMilli(Long.MIN_VALUE), instant, Instant.ofEpochMilli(Long.MAX_VALUE)};
+        Arrays.sort(instants);
+        return instants[1];
     }
 }

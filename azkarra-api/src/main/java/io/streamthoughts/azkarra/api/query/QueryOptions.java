@@ -21,23 +21,48 @@ package io.streamthoughts.azkarra.api.query;
 import java.time.Duration;
 import java.util.Objects;
 
-public class Queried {
+/**
+ * The {@code QueryOptions} cane be used to set the options to be used
+ * for querying a state store.
+ */
+public class QueryOptions {
 
-    public static Queried with(final Duration timeout) {
-        return new Queried(0, Duration.ZERO, timeout, true, -1L);
+    /**
+     * Helper method to create a new {@link QueryOptions} with the given {@code timeout}.
+     * @param timeout   the total time of state store execute.
+     *
+     * @return   a new {@link QueryOptions} instance.
+     */
+    public static QueryOptions with(final Duration timeout) {
+        return new QueryOptions(0, Duration.ZERO, timeout, true, -1L);
     }
 
-    public static Queried locally() {
-        return new Queried(0, Duration.ZERO, Duration.ZERO,false, -1L);
+    /**
+     * Helper method to create a new {@link QueryOptions} with remote access disable.
+     * @return   a new {@link QueryOptions} instance.
+     */
+    public static QueryOptions locally() {
+        return new QueryOptions(0, Duration.ZERO, Duration.ZERO,false, -1L);
     }
 
-    public static Queried immediately() {
-        return new Queried(0, Duration.ZERO, Duration.ZERO,true, -1L);
+    /**
+     * Helper method a create a new {@link QueryOptions} with the a  zero {@code timeout}.
+     * @return   a new {@link QueryOptions} instance.
+     */
+    public static QueryOptions immediately() {
+        return new QueryOptions(0, Duration.ZERO, Duration.ZERO,true, -1L);
     }
 
-    public static Queried retries(final int retries, final Duration retryBackoff) {
+    /**
+     * Helper method to create a new {@link QueryOptions} with the given {@code retries} and {@code retryBackoff}.
+     *
+     * @param retries           number of attempts to run after failed access.
+     * @param retryBackoff      time to wait before attempting to retry a failed access.
+     * @return   a new {@link QueryOptions} instance.
+     */
+    public static QueryOptions retries(final int retries, final Duration retryBackoff) {
         Duration queryTimeout = retryBackoff.multipliedBy(retries + 1);
-        return new Queried(retries, retryBackoff, queryTimeout, true, -1L);
+        return new QueryOptions(retries, retryBackoff, queryTimeout, true, -1L);
     }
 
     /**
@@ -66,7 +91,7 @@ public class Queried {
     private final Long limit;
 
     /**
-     * Creates a new {@link Queried} instance.
+     * Creates a new {@link QueryOptions} instance.
      *
      * @param retries               {@link #retries}.
      * @param retryBackoff          {@link #retryBackoff}.
@@ -74,11 +99,11 @@ public class Queried {
      * @param remoteAccessAllowed   {@link #retryBackoff}.
      * @param limit                 {@link #limit}.
      */
-    public Queried(final int retries,
-                   final Duration retryBackoff,
-                   final Duration queryTimeout,
-                   final boolean remoteAccessAllowed,
-                   final Long limit) {
+    public QueryOptions(final int retries,
+                        final Duration retryBackoff,
+                        final Duration queryTimeout,
+                        final boolean remoteAccessAllowed,
+                        final Long limit) {
         this.retries = retries;
         this.retryBackoff = retryBackoff;
         this.queryTimeout = queryTimeout;
@@ -86,24 +111,24 @@ public class Queried {
         this.limit = limit;
     }
 
-    public Queried withRemoteAccessAllowed(final boolean remoteAccessAllowed) {
-        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
+    public QueryOptions withRemoteAccessAllowed(final boolean remoteAccessAllowed) {
+        return new QueryOptions(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
-    public Queried withQueryTimeout(final Duration timeout) {
-        return new Queried(retries, retryBackoff, timeout, remoteAccessAllowed, limit);
+    public QueryOptions withQueryTimeout(final Duration timeout) {
+        return new QueryOptions(retries, retryBackoff, timeout, remoteAccessAllowed, limit);
     }
 
-    public Queried withRetries(final int retries) {
-        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
+    public QueryOptions withRetries(final int retries) {
+        return new QueryOptions(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
-    public Queried withRetryBackoffMs(final Duration retryBackoff) {
-        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
+    public QueryOptions withRetryBackoffMs(final Duration retryBackoff) {
+        return new QueryOptions(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
-    public Queried withLimit(final Long limit) {
-        return new Queried(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
+    public QueryOptions withLimit(final Long limit) {
+        return new QueryOptions(retries, retryBackoff, queryTimeout, remoteAccessAllowed, limit);
     }
 
     /**
@@ -157,8 +182,8 @@ public class Queried {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Queried)) return false;
-        Queried queried = (Queried) o;
+        if (!(o instanceof QueryOptions)) return false;
+        QueryOptions queried = (QueryOptions) o;
         return retries == queried.retries &&
                 remoteAccessAllowed == queried.remoteAccessAllowed &&
                 Objects.equals(retryBackoff, queried.retryBackoff) &&

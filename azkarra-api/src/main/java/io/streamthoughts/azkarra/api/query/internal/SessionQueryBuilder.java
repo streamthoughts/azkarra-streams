@@ -19,35 +19,38 @@
 package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.monad.Validator;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.util.Objects;
 
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_FROM;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_TO;
+
 public class SessionQueryBuilder implements QueryOperationBuilder {
 
-    public static final String QUERY_PARAM_KEY = "key";
-    public static final String QUERY_PARAM_KEY_FROM = "keyFrom";
-    public static final String QUERY_PARAM_KEY_TO = "keyTo";
-
-    private final String storeName;
+    private final String store;
 
     /**
      * Creates a new {@link SessionQueryBuilder} instance.
-     * @param storeName     the storeName name.
+     *
+     * @param store   the name of the store.
      */
-    SessionQueryBuilder(final String storeName) {
-        Objects.requireNonNull(storeName, "storeName cannot be null");
-        this.storeName = storeName;
+    SessionQueryBuilder(final String store) {
+
+        this.store = Objects.requireNonNull(store, "store should not be null");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Query operation(final StoreOperation operation) {
+    public LocalPreparedQuery prepare(final StoreOperation operation) {
 
         if (operation == StoreOperation.FETCH)
             return fetch();
@@ -58,21 +61,23 @@ public class SessionQueryBuilder implements QueryOperationBuilder {
         throw new InvalidQueryException("Operation not supported '" + operation.name() + "'");
     }
 
-    public <K, V> Query<Windowed<K>, V> fetch() {
-        return new Query<>(storeName, new FetchSessionQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> fetch() {
+        return new SessionFetchPreparedQuery<>();
     }
 
-    public <K, V> Query<Windowed<K>, V> fetchKeyRange() {
-        return new Query<>(storeName, new SessionFetKeyRangeQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> fetchKeyRange() {
+        return new SessionFetKeyRangePreparedQuery<>();
     }
-    static class FetchSessionQueryBuilder<K, V> implements LocalStoreQueryBuilder<Windowed<K>, V> {
+
+    class SessionFetchPreparedQuery<K, V> implements LocalPreparedQuery<Windowed<K>, V> {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
+        public Validator<QueryParams> validator(final QueryParams params) {
+            return Validator
+                .of(params)
                 .validates(p -> p.contains(QUERY_PARAM_KEY), MissingRequiredKeyError.of(QUERY_PARAM_KEY));
         }
 
@@ -80,34 +85,30 @@ public class SessionQueryBuilder implements QueryOperationBuilder {
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Windowed<K>, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
-            return new SessionFetchQuery<>(
-                store,
-                p.getValue(QUERY_PARAM_KEY),
-                null
-            );
+        public LocalExecutableQuery<Windowed<K>, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
+            return new SessionFetchQuery<>(store, p.getValue(QUERY_PARAM_KEY), null);
         }
     }
 
-    static class SessionFetKeyRangeQueryBuilder<K, V> implements LocalStoreQueryBuilder<Windowed<K>, V> {
+    class SessionFetKeyRangePreparedQuery<K, V> implements LocalPreparedQuery<Windowed<K>, V> {
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
+        public Validator<QueryParams> validator(final QueryParams parameters) {
             return Validator.of(parameters)
-                .validates(p -> p.contains(QUERY_PARAM_KEY_FROM), MissingRequiredKeyError.of(QUERY_PARAM_KEY_FROM))
-                .validates(p -> p.contains(QUERY_PARAM_KEY_TO), MissingRequiredKeyError.of(QUERY_PARAM_KEY_TO));
+                    .validates(p -> p.contains(QUERY_PARAM_KEY_FROM), MissingRequiredKeyError.of(QUERY_PARAM_KEY_FROM))
+                    .validates(p -> p.contains(QUERY_PARAM_KEY_TO), MissingRequiredKeyError.of(QUERY_PARAM_KEY_TO));
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Windowed<K>, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<Windowed<K>, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new SessionFetchKeyRangeQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY_FROM),

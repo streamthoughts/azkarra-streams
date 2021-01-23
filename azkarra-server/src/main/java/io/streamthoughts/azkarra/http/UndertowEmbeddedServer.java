@@ -32,16 +32,23 @@ import io.streamthoughts.azkarra.api.server.AzkarraRestExtension;
 import io.streamthoughts.azkarra.api.server.AzkarraRestExtensionContext;
 import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
 import io.streamthoughts.azkarra.api.server.ServerInfo;
+import io.streamthoughts.azkarra.http.authentication.BasicAuthAuthenticator;
+import io.streamthoughts.azkarra.http.client.HttpClientBuilder;
 import io.streamthoughts.azkarra.http.error.AzkarraExceptionMapper;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultHandler;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultResponseListener;
 import io.streamthoughts.azkarra.http.handler.HeadlessHttpHandler;
-import io.streamthoughts.azkarra.http.query.DefaultInteractiveQueryService;
-import io.streamthoughts.azkarra.http.query.HttpRemoteQueryBuilder;
+import io.streamthoughts.azkarra.http.query.HttpRemoteQueryClient;
+import io.streamthoughts.azkarra.http.query.QueryURLBuilder;
 import io.streamthoughts.azkarra.http.routes.WebUIHttpRoutes;
 import io.streamthoughts.azkarra.http.security.SSLContextFactory;
+import io.streamthoughts.azkarra.http.security.SSLUtils;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
+import io.streamthoughts.azkarra.http.security.auth.Authentication;
+import io.streamthoughts.azkarra.http.security.auth.AuthenticationContext;
+import io.streamthoughts.azkarra.http.security.auth.AuthenticationContextHolder;
+import io.streamthoughts.azkarra.http.security.auth.PasswordCredentials;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandler;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandlerFactory;
 import io.streamthoughts.azkarra.http.serialization.json.SpecificJsonSerdes;
@@ -58,6 +65,7 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
+import okhttp3.OkHttpClient;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -66,7 +74,16 @@ import org.slf4j.LoggerFactory;
 import org.xnio.Options;
 import org.xnio.SslClientAuthMode;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.servlet.ServletException;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.ServiceLoader;
@@ -92,13 +109,13 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
 
     private DeploymentManager manager;
 
-    private SSLContextFactory sslContextFactory;
-
     private volatile boolean started = false;
 
     private Conf config;
 
     private ServerConfig serverConfig;
+
+    private SSLContext sslContext;
 
     private final Collection<AzkarraRestExtension> registeredExtensions = new LinkedList<>();
 
@@ -121,26 +138,91 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
     public void configure(final Conf configuration) {
         config = configuration;
         serverConfig = ServerConfig.of(config);
-        if (serverConfig.isSslEnable()) {
-            sslContextFactory = new SSLContextFactory(serverConfig);
-        }
         serverInfo = new ServerInfo(serverConfig.getListener(), serverConfig.getPort(), serverConfig.isSslEnable());
 
         // Find and register all user-specified Jackson modules
         Collection<Module> jacksonModules = context.getAllComponents(Module.class);
         ExchangeHelper.JSON.registerModules(jacksonModules);
 
-        initializeAzkarraStreamsServiceComponent();
+        initializeSslContext();
+        registerHttpRemoteStateStoreClient();
+    }
+
+    private void initializeSslContext() {
+        if (serverConfig.isSslEnable()) {
+            TrustManager[] trustManagers;
+            try {
+                trustManagers = SSLUtils.createTrustManagers(
+                        serverConfig.getTrustStoreLocation(),
+                        serverConfig.getTruststorePassword(),
+                        serverConfig.getTruststoreType(),
+                        KeyManagerFactory.getDefaultAlgorithm()
+                );
+            } catch (CertificateException |
+                    NoSuchAlgorithmException |
+                    KeyStoreException |
+                    IOException e) {
+                LOG.error("Could not create trust managers for Client Certificate authentication.", e);
+                throw new AzkarraException(e);
+            }
+            KeyManager[] keyManagers;
+            try {
+                keyManagers = SSLUtils.createKeyManagers(
+                        serverConfig.getKeystoreLocation(),
+                        serverConfig.getKeystorePassword(),
+                        serverConfig.getKeystoreType(),
+                        KeyManagerFactory.getDefaultAlgorithm()
+                );
+            } catch (CertificateException |
+                    NoSuchAlgorithmException |
+                    UnrecoverableKeyException |
+                    KeyStoreException |
+                    IOException e) {
+                LOG.error("Could not create key managers for Client Certificate authentication.", e);
+                throw new AzkarraException(e);
+            }
+            SSLContextFactory sslContextFactory = new SSLContextFactory();
+            sslContext = sslContextFactory.getSSLContext(keyManagers, trustManagers);
+        }
+    }
+
+    private void registerHttpRemoteStateStoreClient() {
+        final HttpClientBuilder httpClientBuilder = HttpClientBuilder.newBuilder();
+        if (serverConfig.isSslEnable()) {
+            httpClientBuilder
+                .sslContext(sslContext)
+                .verifyingSsl(serverConfig.isHostnameVerificationIgnored());
+        }
+        if (serverConfig.isRestAuthenticationEnable()) {
+            httpClientBuilder
+                .authenticator(new BasicAuthAuthenticator(() -> {
+                    AuthenticationContext context = AuthenticationContextHolder.getAuthenticationContext();
+                    SecurityMechanism securityMechanism = context.getSecurityMechanism();
+                    if (securityMechanism == SecurityMechanism.BASIC_AUTH) {
+                        Authentication authentication = context.getAuthentication();
+                        final String password = ((PasswordCredentials) authentication.getCredentials()).password();
+                        final String username = authentication.getPrincipal().getName();
+                        return new BasicAuthAuthenticator.Credential(username, password);
+                    }
+                    return BasicAuthAuthenticator.Credential.empty();
+                }));
+        }
+        final OkHttpClient httpClient = httpClientBuilder.build();
+        final String protocol = serverConfig.isSslEnable() ? "https" : "http";
+        context.registerSingleton(new HttpRemoteQueryClient(
+            httpClient,
+            new QueryURLBuilder.DefaultQueryURLBuilder(protocol, APIVersions.PATH_V1),
+            new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class)));
     }
 
     private Undertow buildUndertowServer() {
-        final Undertow.Builder sb = Undertow.builder().setServerOption(UndertowOptions.ENABLE_HTTP2, true);
+        final Undertow.Builder sb = Undertow.builder()
+            .setServerOption(UndertowOptions.ENABLE_HTTP2, true);
 
-        if (serverConfig.isSslEnable()) {
-            sb.addHttpsListener(serverInfo.getPort(), serverInfo.getHost(), sslContextFactory.getSSLContext());
-        } else {
+        if (sslContext != null)
+            sb.addHttpsListener(serverInfo.getPort(), serverInfo.getHost(), sslContext);
+        else
             sb.addHttpListener(serverInfo.getPort(), serverInfo.getHost());
-        }
 
         HttpHandler handler;
 
@@ -164,24 +246,6 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         handler = new DefaultResponseHandler(handler);
 
         return sb.setHandler(handler).build();
-    }
-
-    private void initializeAzkarraStreamsServiceComponent() {
-        HttpRemoteQueryBuilder httpRemoteQueryBuilder = new HttpRemoteQueryBuilder()
-            .setBasePath(APIVersions.PATH_V1)
-            .setSerdes(new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class));
-
-        if (serverConfig.isSslEnable()) {
-            httpRemoteQueryBuilder.setSSLContextFactory(sslContextFactory);
-            httpRemoteQueryBuilder.setIgnoreHostnameVerification(serverConfig.isHostnameVerificationIgnored());
-        }
-
-        if (serverConfig.isRestAuthenticationEnable()) {
-            httpRemoteQueryBuilder.enablePasswordAuthentication(true);
-        }
-
-        final AzkarraStreamsService service = context.getComponent(AzkarraStreamsService.class);
-        context.registerSingleton(new DefaultInteractiveQueryService(service, httpRemoteQueryBuilder.build()));
     }
 
     private HttpHandler initializeRouterPathHandler(final HttpHandler fallbackHandler) {

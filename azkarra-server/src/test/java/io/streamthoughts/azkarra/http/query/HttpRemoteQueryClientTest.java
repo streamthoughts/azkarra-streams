@@ -19,9 +19,9 @@
 package io.streamthoughts.azkarra.http.query;
 
 import io.streamthoughts.azkarra.api.model.KV;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.QueryInfo;
-import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.QueryOptions;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
@@ -30,6 +30,8 @@ import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
 import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
 import io.streamthoughts.azkarra.http.APIVersions;
+import io.streamthoughts.azkarra.http.ExchangeHelper;
+import io.streamthoughts.azkarra.http.client.HttpClientBuilder;
 import io.streamthoughts.azkarra.http.serialization.json.SpecificJsonSerdes;
 import io.streamthoughts.azkarra.serialization.Serdes;
 import io.streamthoughts.azkarra.serialization.json.Json;
@@ -70,10 +72,11 @@ public class HttpRemoteQueryClientTest {
 
     @BeforeEach
     public void beforeEach() throws IOException {
-        client = new HttpRemoteQueryBuilder()
-            .setSerdes(SERDES)
-            .setBasePath(APIVersions.PATH_V1)
-            .build();
+        client = new HttpRemoteQueryClient(
+            HttpClientBuilder.newBuilder().build(),
+            new QueryURLBuilder.DefaultQueryURLBuilder("http", APIVersions.PATH_V1),
+            new SpecificJsonSerdes<>(ExchangeHelper.JSON, QueryResult.class)
+        );
         server = new MockWebServer();
         server.start(SERVER_INFO.port());
     }
@@ -85,11 +88,11 @@ public class HttpRemoteQueryClientTest {
 
     @Test
     public void shouldQueryRemoteServerSuccessfully() throws ExecutionException, InterruptedException {
-        QueryInfo query = new QueryInfo(
+        QueryRequest query = new QueryRequest(
             TEST_STORE_NAME,
             StoreType.KEY_VALUE,
             StoreOperation.ALL,
-            QueryParams.empty()
+            GenericQueryParams.empty()
         );
 
         QueryResult<String, String> queryResult = newQueryResult();
@@ -99,7 +102,7 @@ public class HttpRemoteQueryClientTest {
             .setBody(new String(SERDES.serialize(queryResult)))
         );
 
-        CompletableFuture<QueryResult<Object, Object>> future = client.query(SERVER_INFO, query, Queried.immediately());
+        CompletableFuture<QueryResult<Object, Object>> future = client.query(SERVER_INFO, query, QueryOptions.immediately());
         QueryResult<Object, Object> response = future.get();
         Assertions.assertEquals(queryResult, response);
     }

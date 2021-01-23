@@ -31,7 +31,12 @@ import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Try;
 import io.streamthoughts.azkarra.api.monad.Tuple;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
+import io.streamthoughts.azkarra.api.query.QueryableKafkaStreams;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
@@ -50,6 +55,7 @@ import io.streamthoughts.azkarra.api.streams.store.PartitionLogOffsetsAndLag;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
+import io.streamthoughts.azkarra.runtime.query.LocalQueryCall;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -108,15 +114,18 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS
 import static org.apache.kafka.clients.consumer.ConsumerConfig.CLIENT_ID_CONFIG;
 import static org.apache.kafka.streams.StoreQueryParameters.fromNameAndType;
 
-public class LocalKafkaStreamsContainer implements KafkaStreamsContainer {
+public class LocalKafkaStreamsContainer implements
+        KafkaStreamsContainer,
+        LocalStoreAccessProvider,
+        QueryableKafkaStreams {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalKafkaStreamsContainer.class);
 
-    private final KafkaStreamsFactory streamsFactory;
+    protected final KafkaStreamsFactory streamsFactory;
 
     private KafkaStreams kafkaStreams;
 
-    private final Conf streamsConfig;
+    protected final Conf streamsConfig;
 
     private long started = -1;
 
@@ -124,7 +133,7 @@ public class LocalKafkaStreamsContainer implements KafkaStreamsContainer {
 
     private volatile TimestampedValue<State> state;
 
-    private final TopologyDefinition topologyDefinition;
+    protected final TopologyDefinition topologyDefinition;
 
     private volatile Set<ThreadMetadata> threadMetadata = Collections.emptySet();
 
@@ -132,7 +141,7 @@ public class LocalKafkaStreamsContainer implements KafkaStreamsContainer {
 
     private final LinkedBlockingQueue<StateChangeWatcher> stateChangeWatchers = new LinkedBlockingQueue<>();
 
-    private final List<StreamsLifecycleInterceptor> interceptors;
+    protected final List<StreamsLifecycleInterceptor> interceptors;
 
     private KafkaConsumer<byte[], byte[]> consumer;
 
@@ -199,6 +208,15 @@ public class LocalKafkaStreamsContainer implements KafkaStreamsContainer {
             .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
             .orElse(null);
         topologyDefinition.getEventStreams().forEach(this::registerEventStream);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalQueryCall<K, V> newQueryCall(final QueryRequest request)  throws InvalidQueryException {
+        final LocalExecutableQuery<K, V> executable = request.compile();
+        return new LocalQueryCall<>(this, executable);
     }
 
     /**

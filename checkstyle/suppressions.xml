@@ -36,6 +36,9 @@
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptorConfig" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer" />
+    <suppress checks="LineLength" files="io.streamthoughts.azkarra.http.query.HttpRemoteStateStoreClient" />
+    <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider" />
+    <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.query.internal.QueryResultUtils" />
     <suppress checks="NPathComplexity" files="io.streamthoughts.azkarra.commons.error.SafeDeserializerConfig"/>
     <suppress checks="ParameterNumber" files="SimpleComponentDescriptor" />
     <suppress checks="ParameterNumber" files="Conf" />

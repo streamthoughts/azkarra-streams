@@ -21,93 +21,58 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.Query;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import java.util.List;
-import java.util.Objects;
 
-public class KeyValueGetRangeQuery<K, V> implements LocalStoreQuery<K, V> {
+public class KeyValueGetRangeQuery<K, V>
+        extends DecorateQuery<Query>
+        implements LocalExecutableQuery<K, V> {
 
-    private final String store;
     private final K keyFrom;
     private final K keyTo;
 
     /**
      * Creates a new {@link KeyValueGetRangeQuery} instance.
      *
-     * @param keyFrom   the params key from.
-     * @param keyTo     the params key to.
+     * @param store         the name of the store.
+     * @param keyFrom       the keyFrom param.
+     * @param keyTo         the keyTo param.
      */
     KeyValueGetRangeQuery(final String store, final K keyFrom, final K keyTo) {
-        this.store = store;
+        super(new QueryRequest()
+                .storeName(store)
+                .storeType(StoreType.KEY_VALUE)
+                .storeOperation(StoreOperation.RANGE)
+                .params(new GenericQueryParams()
+                        .put(QueryConstants.QUERY_PARAM_KEY_FROM, keyFrom)
+                        .put(QueryConstants.QUERY_PARAM_KEY_TO, keyTo)
+                )
+        );
         this.keyFrom = keyFrom;
         this.keyTo = keyTo;
     }
 
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public StoreType storeType() {
-        return StoreType.KEY_VALUE;
-    }
+    public Try<List<KV<K, V>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreOperation operationType() {
-        return StoreOperation.RANGE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof KeyValueGetRangeQuery)) return false;
-        KeyValueGetRangeQuery<?, ?> that = (KeyValueGetRangeQuery<?, ?>) o;
-        return Objects.equals(keyFrom, that.keyFrom) &&
-                Objects.equals(keyTo, that.keyTo);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(keyFrom, keyTo);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return "GetKeyValueRangeQuery{" +
-                "keyFrom=" + keyFrom +
-                ", keyTo=" + keyTo +
-                '}';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
-
-        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = container.localKeyValueStore(store);
+        final LocalStoreAccessor<ReadOnlyKeyValueStore<K, V>> accessor = provider.localKeyValueStore(getStoreName());
 
         final Reader<ReadOnlyKeyValueStore<K, V>, List<KV<K, V>>> reader =
-                reader(keyFrom, keyTo).map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));
+                reader(keyFrom, keyTo).map(iterator -> LocalExecutableQuery.toKeyValueListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

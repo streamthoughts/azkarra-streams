@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.InMemoryKeyValueIterator;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.kstream.Windowed;
@@ -47,7 +48,7 @@ public class WindowFetchKeyRangeQueryTest {
     public void shouldFetchKeyRange() {
         WindowFetchKeyRangeQuery<String, String> query = new WindowFetchKeyRangeQuery<>(
             STORE_NAME, KEY_FROM, KEY_TO, Instant.MIN, Instant.MAX);
-        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(LocalStoreAccessProvider.class);
 
         Windowed<String> windowed = new Windowed<>(KEY_FROM, new TimeWindow(0L, 1L));
         ReadOnlyWindowStore store = mock(ReadOnlyWindowStore.class);

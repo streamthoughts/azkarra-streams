@@ -21,10 +21,12 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.apache.kafka.streams.state.ValueAndTimestamp;
@@ -33,22 +35,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class TimestampedWindowFetchQuery<K, V> extends KeyedLocalStoreQuery<K, K, V> {
+public class TimestampedWindowFetchQuery<K, V> extends BaseKeyedLocalStoreQuery<K, K, V> {
 
     private final long time;
 
     /**
      * Creates a new {@link TimestampedWindowFetchQuery} instance.
      *
-     * @param storeName     the name of store.
      * @param key           the record key.
      * @param keySerializer the key serializer.
      */
-    TimestampedWindowFetchQuery(final String storeName,
+    TimestampedWindowFetchQuery(final String store,
                                 final K key,
                                 final Serializer<K> keySerializer,
                                 final long time) {
-        super(storeName, key, keySerializer);
+        super(new QueryRequest()
+                .storeName(store)
+                .storeType(StoreType.WINDOW)
+                .storeOperation(StoreOperation.FETCH)
+                .params(new GenericQueryParams()
+                        .put(QueryConstants.QUERY_PARAM_KEY, key)
+                        .put(QueryConstants.QUERY_PARAM_TIME, time)
+                )
+                , key, keySerializer);
         this.time = time;
     }
 
@@ -56,30 +65,14 @@ public class TimestampedWindowFetchQuery<K, V> extends KeyedLocalStoreQuery<K, K
      * {@inheritDoc}
      */
     @Override
-    public StoreType storeType() {
-        return StoreType.TIMESTAMPED_WINDOW;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreOperation operationType() {
-        return StoreOperation.FETCH;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, final long limit) {
+    public Try<List<KV<K, V>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>> accessor =
-                container.localTimestampedWindowStore(storeName());
+                provider.localTimestampedWindowStore(getStoreName());
 
         final Reader<ReadOnlyWindowStore<K, ValueAndTimestamp<V>>, List<KV<K, V>>> reader =
-            reader(key(), time).map(value -> Optional.ofNullable(value)
-                .map(v -> Collections.singletonList(new KV<>(key(), v.value(), v.timestamp())))
+            reader(getKey(), time).map(value -> Optional.ofNullable(value)
+                .map(v -> Collections.singletonList(new KV<>(getKey(), v.value(), v.timestamp())))
                 .orElse(Collections.emptyList()));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);

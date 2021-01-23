@@ -18,8 +18,14 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 import org.junit.jupiter.api.Test;
 
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME_TO;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class WindowQueryBuilderTest {
@@ -28,25 +34,25 @@ public class WindowQueryBuilderTest {
 
     @Test
     public void shouldThrowInvalidQueryWhenBuildingWindowFetchGivenNoKeyParam() {
-        final Query query = new WindowQueryBuilder(STORE_NAME).fetch();
-        InvalidQueryException exception = assertThrows(InvalidQueryException.class, query::prepare);
+        final LocalPreparedQuery query = new WindowQueryBuilder(STORE_NAME).fetch();
+        InvalidQueryException exception = assertThrows(InvalidQueryException.class, () -> query.compile(new GenericQueryParams()));
         assertEquals(
                 exception.getMessage(),
                 "Missing requires parameters : [" +
-                        WindowQueryBuilder.QUERY_PARAM_KEY + ", " +
-                        WindowQueryBuilder.QUERY_PARAM_TIME +  "]");
+                        QUERY_PARAM_KEY + ", " +
+                        QUERY_PARAM_TIME +  "]");
     }
 
     @Test
     public void shouldThrowInvalidQueryWhenBuildingWindowFetchKeyRangeGivenNoKeyParam() {
-        final Query query = new WindowQueryBuilder(STORE_NAME).fetchKeyRange();
-        InvalidQueryException exception = assertThrows(InvalidQueryException.class, query::prepare);
+        final LocalPreparedQuery query = new WindowQueryBuilder(STORE_NAME).fetchKeyRange();
+        InvalidQueryException exception = assertThrows(InvalidQueryException.class, () -> query.compile(new GenericQueryParams()));
         assertEquals(
                 exception.getMessage(),
                 "Missing requires parameters : [" +
-                        WindowQueryBuilder.QUERY_PARAM_KEY_FROM + ", " +
-                        WindowQueryBuilder.QUERY_PARAM_KEY_TO + ", " +
-                        WindowQueryBuilder.QUERY_PARAM_TIME_FROM+ ", " +
-                        WindowQueryBuilder.QUERY_PARAM_TIME_TO +  "]");
+                        QueryConstants.QUERY_PARAM_KEY_FROM + ", " +
+                        QueryConstants.QUERY_PARAM_KEY_TO + ", " +
+                        QueryConstants.QUERY_PARAM_TIME_FROM+ ", " +
+                        QueryConstants.QUERY_PARAM_TIME_TO +  "]");
     }
 }

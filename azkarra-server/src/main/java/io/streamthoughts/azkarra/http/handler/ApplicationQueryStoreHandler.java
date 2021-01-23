@@ -22,9 +22,8 @@ import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.query.InteractiveQueryService;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.QueryInfo;
-import io.streamthoughts.azkarra.api.query.internal.Query;
+import io.streamthoughts.azkarra.api.query.QueryOptions;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.query.JsonQuerySerde;
@@ -60,17 +59,9 @@ public class ApplicationQueryStoreHandler implements WithApplication {
     public void handleRequest(final HttpServerExchange exchange, final String applicationId) throws IOException {
         final String store = ExchangeHelper.getQueryParam(exchange, QUERY_PARAM_STORE_NAME);
         byte[] data = exchange.getInputStream().readAllBytes();
-        Tuple<QueryInfo, Queried> deserialized = JsonQuerySerde.deserialize(store, data);
+        Tuple<QueryRequest, QueryOptions> query = JsonQuerySerde.deserialize(store, data);
 
-        QueryInfo queryInfo = deserialized.left();
-
-        Query<Object, Object> query = queryInfo.type().buildQuery(queryInfo.storeName(), queryInfo.operation());
-        final QueryResult<Object, Object> result = service.query(
-            applicationId,
-            query,
-            queryInfo.parameters(),
-            deserialized.right()
-        );
+        final QueryResult<Object, Object> result = service.execute(applicationId, query.left(), query.right());
         ExchangeHelper.sendJsonResponse(exchange, onlySuccessKVRecords ? onlySuccessKVRecords(result): result);
     }
 

@@ -20,25 +20,26 @@
 package io.streamthoughts.azkarra.api.query;
 
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
-import io.streamthoughts.azkarra.api.query.internal.Query;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 
+/**
+ * A {@code InteractiveQueryService} can be used to query a {@link org.apache.kafka.streams.KafkaStreams} state store.
+ */
 public interface InteractiveQueryService {
 
     /**
      * Executes an interactive query for the specified streams application.
      *
-     * @param applicationId the streams application id.
-     * @param query         the {@link Query} instance.
-     * @param parameters    the query parameters.
-     * @param options       the query execution options.
+     * @param applicationId the {@code application.id} of the Kafka Streams to query.
+     *
+     * @param queryObject   the query object to be executed.
+     * @param queryOptions  the options of the query.
      *
      * @return              the {@link QueryResult} instance.
      *
      * @throws InvalidStreamsStateException if the streams is not running for the given applicationId.
      */
-    <K, V> QueryResult<K, V>  query(final String applicationId,
-                                    final Query<K, V> query,
-                                    final QueryParams parameters,
-                                    final Queried options);
+    <K, V> QueryResult<K, V> execute(final String applicationId,
+                                     final QueryRequest queryObject,
+                                     final QueryOptions queryOptions);
 }

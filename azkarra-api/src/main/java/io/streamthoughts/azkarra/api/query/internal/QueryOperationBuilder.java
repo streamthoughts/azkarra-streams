@@ -18,9 +18,10 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 
 public interface QueryOperationBuilder {
 
-    Query operation(final StoreOperation operation);
+    <K, V> LocalPreparedQuery<K, V> prepare(final StoreOperation operation);
 }

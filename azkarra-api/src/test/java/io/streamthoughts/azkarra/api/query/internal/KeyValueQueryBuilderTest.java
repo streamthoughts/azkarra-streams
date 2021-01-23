@@ -18,12 +18,18 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
-import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_FROM;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_TO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class KeyValueQueryBuilderTest {
 
@@ -31,45 +37,45 @@ public class KeyValueQueryBuilderTest {
 
     @Test
     public void shouldThrowInvalidQueryWhenBuildingKeyValueGetGivenNoKeyParam() {
-        final Query query = new KeyValueQueryBuilder(STORE_NAME).get();
-        InvalidQueryException exception = assertThrows(InvalidQueryException.class, query::prepare);
+        final LocalPreparedQuery query = new KeyValueQueryBuilder(STORE_NAME).get();
+        InvalidQueryException exception = assertThrows(InvalidQueryException.class, () -> query.compile(new GenericQueryParams()));
         assertEquals(
                 exception.getMessage(),
-                "Missing requires parameters : [" + KeyValueQueryBuilder.QUERY_PARAM_KEY + "]");
+                "Missing requires parameters : [" + QUERY_PARAM_KEY + "]");
     }
 
     @Test
     public void shouldThrowInvalidQueryWhenBuildingKeyValueRangeGivenNoKeyParam() {
-        final Query query = new KeyValueQueryBuilder(STORE_NAME).range();
-        InvalidQueryException exception = assertThrows(InvalidQueryException.class, query::prepare);
+        final LocalPreparedQuery query = new KeyValueQueryBuilder(STORE_NAME).range();
+        InvalidQueryException exception = assertThrows(InvalidQueryException.class, () -> query.compile(new GenericQueryParams()));
         assertEquals(
                 exception.getMessage(),
-                "Missing requires parameters : [" + KeyValueQueryBuilder.QUERY_PARAM_KEY_FROM+ ", " + KeyValueQueryBuilder.QUERY_PARAM_KEY_TO + "]");
+                "Missing requires parameters : [" + QUERY_PARAM_KEY_FROM + ", " + QUERY_PARAM_KEY_TO + "]");
     }
 
     @Test
     public void shouldSuccessWhenBuildingKeyValueAllGivenNoParam() {
-        final Query<Object, Object> query = new KeyValueQueryBuilder(STORE_NAME).all();
-        PreparedQuery<Object, Object> prepared = query.prepare();
+        final LocalPreparedQuery<Object, Object> query = new KeyValueQueryBuilder(STORE_NAME).all();
+        LocalExecutableQuery<Object, Object> prepared = query.compile(new GenericQueryParams());
         assertNotNull(prepared);
     }
 
     @Test
     public void shouldSuccessWhenBuildingKeyValueGetGivenKeyParam() {
-        final Query<Object, Object> query = new KeyValueQueryBuilder(STORE_NAME).get();
-        PreparedQuery<Object, Object> prepared = query.prepare(new QueryParams(new HashMap<>() {{
-            put(KeyValueQueryBuilder.QUERY_PARAM_KEY, "key");
-        }}));
+        final LocalPreparedQuery<Object, Object> query = new KeyValueQueryBuilder(STORE_NAME).get();
+        LocalExecutableQuery<Object, Object> prepared = query.compile(new GenericQueryParams()
+            .put(QUERY_PARAM_KEY, "key")
+        );
         assertNotNull(prepared);
     }
 
     @Test
     public void shouldSuccessWhenBuildingKeyValueRangeGivenKeyParam() {
-        final Query<Object, Object> query = new KeyValueQueryBuilder(STORE_NAME).range();
-        PreparedQuery<Object, Object> prepared = query.prepare(new QueryParams(new HashMap<>() {{
-            put(KeyValueQueryBuilder.QUERY_PARAM_KEY_FROM, "keyFrom");
-            put(KeyValueQueryBuilder.QUERY_PARAM_KEY_TO, "keyTo");
-        }}));
+        final LocalPreparedQuery<Object, Object> query = new KeyValueQueryBuilder(STORE_NAME).range();
+        LocalExecutableQuery<Object, Object> prepared = query.compile(new GenericQueryParams()
+            .put(QUERY_PARAM_KEY_FROM, "keyFrom")
+            .put(QUERY_PARAM_KEY_TO, "keyTo")
+        );
         assertNotNull(prepared);
     }
 

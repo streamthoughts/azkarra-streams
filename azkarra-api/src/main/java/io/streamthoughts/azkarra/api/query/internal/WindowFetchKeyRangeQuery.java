@@ -21,11 +21,15 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.Query;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
@@ -33,9 +37,12 @@ import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import java.time.Instant;
 import java.util.List;
 
-public class WindowFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed<K>, V> {
+import static io.streamthoughts.azkarra.api.util.Utils.capped;
 
-    private final String store;
+public class WindowFetchKeyRangeQuery<K, V>
+        extends DecorateQuery<Query>
+        implements LocalExecutableQuery<Windowed<K>, V> {
+
     private final K keyFrom;
     private final K keyTo;
     private final Instant timeFrom;
@@ -44,51 +51,52 @@ public class WindowFetchKeyRangeQuery<K, V> implements LocalStoreQuery<Windowed<
     /**
      * Creates a new {@link WindowFetchKeyRangeQuery} instance.
      *
-     * @param storeName     the name of the store.
+     * @param store         the name of the store.
      * @param fromKey       the query param key from.
      * @param toKey         the query param key to.
-     * @param fromTime      the query param time from.
-     * @param toTime        the query param time to.
+     * @param timeFrom      the query param time from.
+     * @param timeTo        the query param time to.
      */
-    WindowFetchKeyRangeQuery(final String storeName,
+    WindowFetchKeyRangeQuery(final String store,
                              final K fromKey,
                              final K toKey,
-                             final Instant fromTime,
-                             final Instant toTime) {
-        this.store = storeName;
+                             final Instant timeFrom,
+                             final Instant timeTo) {
+        super(createQuery(store, fromKey,toKey, timeFrom, timeTo));
         this.keyFrom = fromKey;
         this.keyTo = toKey;
-        this.timeFrom = fromTime;
-        this.timeTo = toTime;
+        this.timeFrom = timeFrom;
+        this.timeTo = timeTo;
+    }
+
+    private static QueryRequest createQuery(final String store,
+                                            final Object fromKey,
+                                            final Object toKey,
+                                            final Instant timeFrom,
+                                            final Instant timeTo) {
+        return new QueryRequest()
+                .storeName(store)
+                .storeType(StoreType.WINDOW)
+                .storeOperation(StoreOperation.FETCH_KEY_RANGE)
+                .params(new GenericQueryParams()
+                        .put(QueryConstants.QUERY_PARAM_KEY_FROM, fromKey)
+                        .put(QueryConstants.QUERY_PARAM_KEY_TO, toKey)
+                        .put(QueryConstants.QUERY_PARAM_TIME_FROM, capped(timeFrom).toEpochMilli())
+                        .put(QueryConstants.QUERY_PARAM_TIME_TO, capped(timeTo).toEpochMilli())
+                );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StoreType storeType() {
-        return StoreType.WINDOW;
-    }
+    public Try<List<KV<Windowed<K>, V>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreOperation operationType() {
-        return StoreOperation.FETCH_KEY_RANGE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<Windowed<K>, V>>> execute(final KafkaStreamsContainer container, final long limit) {
-
-        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = container.localWindowStore(store);
+        final LocalStoreAccessor<ReadOnlyWindowStore<K, V>> accessor = provider.localWindowStore(getStoreName());
 
         final Reader<ReadOnlyWindowStore<K, V>, List<KV<Windowed<K>, V>>> reader =
             reader(keyFrom, keyTo, timeFrom, timeTo)
-            .map(iterator -> LocalStoreQuery.toKeyValueListAndClose(iterator, limit));
+            .map(iterator -> LocalExecutableQuery.toKeyValueListAndClose(iterator, limit));
 
         return new LocalStoreQueryExecutor<>(accessor).execute(reader);
     }

@@ -18,55 +18,83 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.time.Instant;
+
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_FROM;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_TO;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME_FROM;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME_TO;
 
 public class TimestampedWindowQueryBuilder extends WindowQueryBuilder {
 
     /**
      * Creates a new {@link TimestampedWindowQueryBuilder} instance.
-     * @param storeName         the name of the store.
+     *
+     * @param store     the name of the store.
      */
-    TimestampedWindowQueryBuilder(final String storeName) {
-        super(storeName);
+    TimestampedWindowQueryBuilder(final String store) {
+       super(store);
     }
 
-    public <K, V> Query<K, V> fetch() {
-        return new Query<>(storeName, new TimestampedFetchWindowQueryBuilder<>());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalPreparedQuery<K, V> fetch() {
+        return new TimestampedFetchWindowQueryBuilder<>(store);
     }
 
-    public <K, V> Query<Windowed<K>, V> fetchKeyRange() {
-        return new Query<>(storeName, new TimestampedWindowFetKeyRangeQueryBuilder<>());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> fetchKeyRange() {
+        return new TimestampedWindowFetKeyRangeQueryBuilder<>(store);
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalPreparedQuery<Long, V> fetchTimeRange() {
+        return new TimestampedWindowFetchTimeRangeQueryBuilder<>(store);
     }
 
-    public <V> Query<Long, V> fetchTimeRange() {
-        return new Query<>(storeName, new TimestampedWindowFetchTimeRangeQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> fetchAll() {
+        return new TimestampedWindowFetchAllQueryBuilder<>(store);
     }
 
-    public <K, V> Query<Windowed<K>, V> fetchAll() {
-        return new Query<>(storeName, new TimestampedWindowFetchAllQueryBuilder<>());
-    }
-
-    public <K, V> Query<Windowed<K>, V> all() {
-        return new Query<>(storeName, (store, parameters) -> new TimestampedWindowGetAllQuery<>(store));
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalPreparedQuery<Windowed<K>, V> all() {
+        return params -> new TimestampedWindowGetAllQuery<>(store);
     }
 
     static class TimestampedFetchWindowQueryBuilder<K, V> extends WindowQueryBuilder.FetchWindowQueryBuilder<K, V> {
+
+        public TimestampedFetchWindowQueryBuilder(final String store) {
+            super(store);
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<K, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<K, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new TimestampedWindowFetchQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY),
                 null,
-                p.getLong(QUERY_PARAM_TIME)
+                p.getLong(QueryConstants.QUERY_PARAM_TIME)
             );
         }
     }
@@ -74,12 +102,16 @@ public class TimestampedWindowQueryBuilder extends WindowQueryBuilder {
     static class TimestampedWindowFetKeyRangeQueryBuilder<K, V> extends
             WindowFetchKeyRangeQueryBuilder<K, V> {
 
+        public TimestampedWindowFetKeyRangeQueryBuilder(final String store) {
+            super(store);
+        }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Windowed<K>, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<Windowed<K>, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new TimestampedWindowFetchKeyRangeQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY_FROM),
@@ -90,15 +122,19 @@ public class TimestampedWindowQueryBuilder extends WindowQueryBuilder {
         }
     }
 
-    static class TimestampedWindowFetchTimeRangeQueryBuilder<V>
-            extends WindowQueryBuilder.WindowFetchTimeRangeQueryBuilder<V> {
+    static class TimestampedWindowFetchTimeRangeQueryBuilder<K, V>
+            extends WindowQueryBuilder.WindowFetchTimeRangeQueryBuilder<K, V> {
+
+        public TimestampedWindowFetchTimeRangeQueryBuilder(final String store) {
+            super(store);
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Long, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<Long, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new TimestampedWindowFetchTimeRangeQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY),
@@ -111,12 +147,16 @@ public class TimestampedWindowQueryBuilder extends WindowQueryBuilder {
     static class TimestampedWindowFetchAllQueryBuilder<K, V>
             extends WindowQueryBuilder.WindowFetchAllQueryBuilder<K, V> {
 
+        public TimestampedWindowFetchAllQueryBuilder(final String store) {
+            super(store);
+        }
+
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<Windowed<K>, V> build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<Windowed<K>, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new TimestampedWindowFetchAllQuery<>(
                 store,
                 Instant.ofEpochMilli(p.getLong(QUERY_PARAM_TIME_FROM)),

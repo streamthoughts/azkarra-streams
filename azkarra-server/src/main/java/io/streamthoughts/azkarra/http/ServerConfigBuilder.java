@@ -56,7 +56,7 @@ public class ServerConfigBuilder {
      * Creates a new {@link ServerConfigBuilder}.
      */
     ServerConfigBuilder(final Map<String, Object> configs) {
-        this.configs = configs;
+        this.configs = new HashMap<>(configs);
     }
 
     /**

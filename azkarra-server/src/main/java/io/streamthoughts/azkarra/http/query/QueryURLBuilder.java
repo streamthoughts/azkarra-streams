@@ -32,4 +32,31 @@ public interface QueryURLBuilder {
     String buildURL(final String server,
                     final String applicationId,
                     final String store);
+
+
+    class DefaultQueryURLBuilder implements QueryURLBuilder {
+
+        private final String schema;
+
+        private final String basePath;
+
+        /**
+         * Creates a new {@link DefaultQueryURLBuilder} instance.
+         *
+         * @param schema     the http schema.
+         * @param basePath   the url base relative path.
+         */
+        public DefaultQueryURLBuilder(final String schema, final String basePath) {
+            this.schema = schema;
+            this.basePath = basePath;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String buildURL(final String server, final String applicationId, final String store) {
+            return schema + "://" + server + basePath + "applications/" + applicationId + "/stores/" + store;
+        }
+    }
 }

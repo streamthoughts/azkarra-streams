@@ -24,14 +24,17 @@ public class QueryBuilder {
 
     private final String storeName;
 
+    public static QueryBuilder store(final String storeName) {
+        return new QueryBuilder(storeName);
+    }
+
     /**
      * Creates a new {@link QueryBuilder} instance.
      *
      * @param storeName the store name to query.
      */
     public QueryBuilder(final String storeName) {
-        Objects.requireNonNull(storeName, "storeName cannot be null");
-        this.storeName = storeName;
+        this.storeName = Objects.requireNonNull(storeName, "storeName cannot be null");
     }
 
     /**

@@ -19,15 +19,15 @@
 package io.streamthoughts.azkarra.http.query;
 
 import io.streamthoughts.azkarra.api.errors.AzkarraRetriableException;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.QueryInfo;
-import io.streamthoughts.azkarra.api.query.RemoteQueryClient;
+import io.streamthoughts.azkarra.api.query.QueryOptions;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.result.ErrorResultSet;
 import io.streamthoughts.azkarra.api.query.result.QueryError;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.runtime.query.RemoteStateStoreClient;
 import io.streamthoughts.azkarra.serialization.Serdes;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,7 +45,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-public class HttpRemoteQueryClient implements RemoteQueryClient {
+public class HttpRemoteQueryClient implements RemoteStateStoreClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpRemoteQueryClient.class);
 
@@ -77,11 +77,11 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
      */
     @Override
     public <K, V> CompletableFuture<QueryResult<K, V>> query(final ServerHostInfo serverInfo,
-                                                             final QueryInfo query,
-                                                             final Queried options) {
+                                                             final QueryRequest query,
+                                                             final QueryOptions options) {
         final String server = serverInfo.hostAndPort();
 
-        final String path = queryURLBuilder.buildURL(server, serverInfo.id(), query.storeName());
+        final String path = queryURLBuilder.buildURL(server, serverInfo.id(), query.getStoreName());
 
         final String json = JsonQuerySerde.serialize(query, options);
 
@@ -94,8 +94,8 @@ public class HttpRemoteQueryClient implements RemoteQueryClient {
 
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.<K, V>newBuilder()
                 .setServer(server)
-                .setStoreName(query.storeName())
-                .setStoreType(query.type().prettyName());
+                .setStoreName(query.getStoreName())
+                .setStoreType(query.getStoreType().prettyName());
 
         final CompletableFuture<QueryResult<K, V>> future = new CompletableFuture<>();
 

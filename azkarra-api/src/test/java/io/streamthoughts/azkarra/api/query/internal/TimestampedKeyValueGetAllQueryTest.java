@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.InMemoryKeyValueIterator;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -42,7 +43,7 @@ public class TimestampedKeyValueGetAllQueryTest {
     @Test
     public void shouldGetAll() {
         TimestampedKeyValueGetAllQuery<String, String> query = new TimestampedKeyValueGetAllQuery<>(STORE_NAME);
-        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(LocalStoreAccessProvider.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.all()).thenReturn(new InMemoryKeyValueIterator<>("key", ValueAndTimestamp.make("value", 1L)));

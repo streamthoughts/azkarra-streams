@@ -19,10 +19,10 @@
 package io.streamthoughts.azkarra.http.query;
 
 import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.GenericQueryParams;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
-import io.streamthoughts.azkarra.api.query.Queried;
-import io.streamthoughts.azkarra.api.query.QueryInfo;
+import io.streamthoughts.azkarra.api.query.QueryOptions;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.http.error.InvalidStateStoreQueryException;
 import org.junit.jupiter.api.Test;
@@ -55,22 +55,22 @@ public class JsonQuerySerdeTest {
     public void shouldDeserializeGivenValidJsonQueryWithNoOption() {
 
         String dataString = " { \"type\" : \"key_value\", \"query\" : {  \"get\" : {\"key\" : \"foo\"} } }";
-        Tuple<QueryInfo, Queried> tuple = JsonQuerySerde.deserialize("store", dataString.getBytes());
+        Tuple<QueryRequest, QueryOptions> tuple = JsonQuerySerde.deserialize("store", dataString.getBytes());
         assertNotNull(tuple);
-        assertEquals(StoreType.KEY_VALUE, tuple.left().type());
-        assertEquals(StoreOperation.GET, tuple.left().operation());
-        assertTrue(tuple.left().parameters().contains("key"));
+        assertEquals(StoreType.KEY_VALUE, tuple.left().getStoreType());
+        assertEquals(StoreOperation.GET, tuple.left().getStoreOperation());
+        assertTrue(tuple.left().getParams().contains("key"));
     }
 
     @Test
     public void shouldDeserializeGivenValidJsonQueryWithOptions() {
 
         String dataString = " { \"type\" : \"key_value\", \"query\" : {  \"get\" : {\"key\" : \"foo\"} }, \"set_options\" : {\"retries\": 42, \"retry_backoff_ms\": 42} }";
-        Tuple<QueryInfo, Queried> tuple = JsonQuerySerde.deserialize("store", dataString.getBytes());
+        Tuple<QueryRequest, QueryOptions> tuple = JsonQuerySerde.deserialize("store", dataString.getBytes());
         assertNotNull(tuple);
-        assertEquals(StoreType.KEY_VALUE, tuple.left().type());
-        assertEquals(StoreOperation.GET, tuple.left().operation());
-        assertTrue(tuple.left().parameters().contains("key"));
+        assertEquals(StoreType.KEY_VALUE, tuple.left().getStoreType());
+        assertEquals(StoreOperation.GET, tuple.left().getStoreOperation());
+        assertTrue(tuple.left().getParams().contains("key"));
         assertEquals(42, tuple.right().retries());
         assertEquals(42, tuple.right().retryBackoff().toMillis());
     }
@@ -97,8 +97,8 @@ public class JsonQuerySerdeTest {
 
     @Test
     public void shouldDeserializeJsonGivenQueryWhenNoParamsIsRequired() {
-        QueryInfo qInfo = new QueryInfo("store", StoreType.KEY_VALUE, StoreOperation.GET, QueryParams.empty());
-        String json = JsonQuerySerde.serialize(qInfo, Queried.locally());
+        QueryRequest qInfo = new QueryRequest("store", StoreType.KEY_VALUE, StoreOperation.GET, GenericQueryParams.empty());
+        String json = JsonQuerySerde.serialize(qInfo, QueryOptions.locally());
 
         assertEquals(
         "{" +

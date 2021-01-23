@@ -34,45 +34,31 @@ import java.util.stream.StreamSupport;
 /**
  * Default interface to execute a local state storeName.
  */
-public interface LocalStoreQuery<K, V> {
+public interface LocalExecutableQuery<K, V> extends Query {
 
     int NO_LIMIT = -1;
 
     /**
-     * The storeName type on which this query can be executed.
-     *
-     * @return  a new {@link StoreOperation} instance.
-     */
-    StoreType storeType();
-
-    /**
-     * The operation type supported by this query.
-     *
-     * @return  a new {@link StoreOperation} instance.
-     */
-    StoreOperation operationType();
-
-    /**
      * Executes this query to the specified KafkaStreams application.
      *
-     * @param container the {@link KafkaStreamsContainer} instance.
+     * @param provider the {@link LocalStoreAccessProvider} instance.
      */
-    default Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container) {
-        return execute(container, NO_LIMIT);
+    default Try<List<KV<K, V>>> execute(final LocalStoreAccessProvider provider) {
+        return execute(provider, NO_LIMIT);
     }
 
     /**
      * Executes this query to the specified KafkaStreams application.
      *
-     * @param container the {@link KafkaStreamsContainer} instance.
+     * @param provider the {@link KafkaStreamsContainer} instance.
      * @param limit     the maximum number of records the result should be limited to (-1 means no limit).
      */
-    Try<List<KV<K, V>>> execute(final KafkaStreamsContainer container, long limit);
+    Try<List<KV<K, V>>> execute(final LocalStoreAccessProvider provider, long limit);
 
     static <K, V> List<KV<K, V>> toKeyValueListAndClose(final KeyValueIterator<K, V> it, final long limit) {
         Stream<KV<K, V>> kvStream = StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
-                .map(kv -> KV.of(kv.key, kv.value));
+            .stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
+            .map(kv -> KV.of(kv.key, kv.value));
 
         if (limit > 0)
             kvStream = kvStream.limit(limit);

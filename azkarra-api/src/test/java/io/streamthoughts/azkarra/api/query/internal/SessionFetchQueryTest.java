@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.InMemoryKeyValueIterator;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serdes;
@@ -46,7 +47,7 @@ public class SessionFetchQueryTest {
         SessionFetchQuery<String, String> query = new SessionFetchQuery<>(
                 STORE_NAME, KEY,
                 Serdes.String().serializer());
-        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        final var mkContainer = Mockito.mock(LocalStoreAccessProvider.class);
 
         ReadOnlySessionStore store = mock(ReadOnlySessionStore.class);
         when(store.fetch(KEY)).thenReturn(new InMemoryKeyValueIterator<>(new Windowed<>("key", null), "value"));

@@ -18,42 +18,48 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQueryWithKey;
+import io.streamthoughts.azkarra.api.query.Query;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Objects;
 
-public abstract class KeyedLocalStoreQuery<T, K, V> implements LocalStoreQuery<K, V> {
+public abstract class BaseKeyedLocalStoreQuery<K1, K2, V>
+        extends DecorateQuery<Query>
+        implements LocalExecutableQueryWithKey<K1, K2, V> {
 
-    private final String storeName;
-    private final T key;
-    private final Serializer<T> keySerializer;
-
+    private final K1 key;
+    private final Serializer<K1> keySerializer;
 
     /**
-     * Creates a new {@link KeyedLocalStoreQuery} instance.
+     * Creates a new {@link BaseKeyedLocalStoreQuery} instance.
      *
-     * @param storeName     the storeName name.
+     * @param query         the {@link Query}.
      * @param key           the record key.
      * @param keySerializer the key serializer.
      */
-    KeyedLocalStoreQuery(final String storeName,
-                         final T key,
-                         final Serializer<T> keySerializer) {
+    BaseKeyedLocalStoreQuery(final Query query,
+                             final K1 key,
+                             final Serializer<K1> keySerializer) {
+        super(query);
         this.key = key;
-        this.storeName = storeName;
         this.keySerializer = keySerializer;
     }
 
-    public T key() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public K1 getKey() {
         return key;
     }
 
-    public String storeName() {
-        return storeName;
-    }
-
-    public Serializer<T> keySerializer() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Serializer<K1> getKeySerializer() {
         return keySerializer;
     }
 
@@ -63,10 +69,11 @@ public abstract class KeyedLocalStoreQuery<T, K, V> implements LocalStoreQuery<K
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof KeyedLocalStoreQuery)) return false;
-        KeyedLocalStoreQuery<?, ?, ?> that = (KeyedLocalStoreQuery<?, ?, ?>) o;
-        return Objects.equals(storeName, that.storeName) &&
-               Objects.equals(key, that.key);
+        if (!(o instanceof BaseKeyedLocalStoreQuery)) return false;
+        if (!super.equals(o)) return false;
+        BaseKeyedLocalStoreQuery<?, ?, ?> that = (BaseKeyedLocalStoreQuery<?, ?, ?>) o;
+        return Objects.equals(key, that.key) &&
+                Objects.equals(keySerializer, that.keySerializer);
     }
 
     /**
@@ -74,6 +81,7 @@ public abstract class KeyedLocalStoreQuery<T, K, V> implements LocalStoreQuery<K
      */
     @Override
     public int hashCode() {
-        return Objects.hash(storeName, key);
+        return Objects.hash(super.hashCode(), key, keySerializer);
     }
+
 }

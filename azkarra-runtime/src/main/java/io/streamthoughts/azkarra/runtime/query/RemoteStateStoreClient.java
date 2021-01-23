@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,29 +16,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.query;
+package io.streamthoughts.azkarra.runtime.query;
 
+import io.streamthoughts.azkarra.api.query.QueryOptions;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Default interface to query a remote streams state store.
+ * A {@code RemoteStateStoreClient} is used to execute a query on a remote state store.
  */
-public interface RemoteQueryClient {
-
+public interface RemoteStateStoreClient {
 
     /**
-     * Executes a query to the specified server.
+     * Query a remote Kafka Streams state store using the specified server.
      *
-     * @param server     the {@link ServerHostInfo} to query.
-     * @param query      the {@link QueryInfo} to send.
-     * @param options    the {@link Queried} options.
+     * @param server        the {@link ServerHostInfo}.
+     * @param queryObject   the {@link QueryRequest}.
+     * @param queryOptions  the {@link QueryOptions}.
      *
      * @return  a {@link CompletableFuture} of {@link QueryResult}.
      */
     <K, V> CompletableFuture<QueryResult<K, V>> query(final ServerHostInfo server,
-                                                      final QueryInfo query,
-                                                      final Queried options);
+                                                      final QueryRequest queryObject,
+                                                      final QueryOptions queryOptions);
 }

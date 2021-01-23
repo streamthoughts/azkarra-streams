@@ -21,57 +21,46 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Reader;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.DecorateQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.Query;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.StoreType;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class KeyValueCountQuery implements LocalStoreQuery<String, Long> {
+public class KeyValueCountQuery extends DecorateQuery<Query> implements LocalExecutableQuery<String, Long> {
 
     private static final String STATIC_KEY = "count";
     
-    private final String storeName;
-
     /**
      * Creates a new {@link KeyValueCountQuery} instance.
      *
-     * @param storeName     the name of the store.
+     * @param store         the name of the store.
      */
-    KeyValueCountQuery(final String storeName) {
-        this.storeName = storeName;
+    KeyValueCountQuery(final String store) {
+       super(
+           new QueryRequest()
+           .storeName(store)
+           .storeOperation(StoreOperation.COUNT)
+           .storeType(StoreType.KEY_VALUE)
+       );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StoreType storeType() {
-        return StoreType.KEY_VALUE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StoreOperation operationType() {
-        return StoreOperation.COUNT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Try<List<KV<String, Long>>> execute(final KafkaStreamsContainer container,
-                                               final long limit) {
+    public Try<List<KV<String, Long>>> execute(final LocalStoreAccessProvider provider, final long limit) {
 
         final LocalStoreAccessor<ReadOnlyKeyValueStore<Object, Object>> accessor =
-                container.localKeyValueStore(storeName);
+                provider.localKeyValueStore(getStoreName());
 
         Reader<ReadOnlyKeyValueStore<Object, Object>, List<KV<String, Long>>> reader = reader()
                 .map(value -> Optional.ofNullable(value)

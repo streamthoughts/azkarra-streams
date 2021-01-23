@@ -18,57 +18,76 @@
  */
 package io.streamthoughts.azkarra.api.query.internal;
 
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 
 public class TimestampedKeyValueQueryBuilder extends KeyValueQueryBuilder {
 
     /**
      * Creates a new {@link TimestampedKeyValueQueryBuilder} instance.
-     *
-     * @param storeName     the name of the store.
      */
-    TimestampedKeyValueQueryBuilder(final String storeName) {
-        super(storeName);
+    TimestampedKeyValueQueryBuilder(final String store) {
+        super(store);
     }
 
-    public <K, V> Query<K, V> all() {
-        return new Query<>(storeName, (store, parameters) -> new TimestampedKeyValueGetAllQuery<>(store));
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalPreparedQuery<K, V> all() {
+        return params -> new TimestampedKeyValueGetAllQuery<>(store);
     }
 
-    public <K, V> Query<K, V> get() {
-        return new Query<>(storeName, new TimestampedGetKeyValueQueryBuilder<>());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalPreparedQuery<K, V> get() {
+        return new TimestampedGetKeyValueQueryBuilder<>(store);
     }
 
-    public <K, V> Query<K, V> range() {
-        return new Query<>(storeName, new TimestampedGetKeyValueRangeQueryBuilder<>());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> LocalPreparedQuery<K, V> range() {
+        return new TimestampedGetKeyValueRangeQueryBuilder<>(store);
     }
 
-    static class TimestampedGetKeyValueQueryBuilder<K, V> extends KeyValueQueryBuilder.GetKeyValueQueryBuilder<K, V> {
+    static class TimestampedGetKeyValueQueryBuilder<K, V> extends GetKeyValuePreparedQuery<K, V> {
+
+        public TimestampedGetKeyValueQueryBuilder(final String store) {
+            super(store);
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<K, V> build(final String store, final QueryParams parameters) {
-
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
-            return new TimestampedKeyValueGetQuery<>(store, p.getValue(QUERY_PARAM_KEY), null);
+        public LocalExecutableQuery<K, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
+            return new TimestampedKeyValueGetQuery<>(store, p.getValue(QueryConstants.QUERY_PARAM_KEY), null);
         }
     }
 
-    static class TimestampedGetKeyValueRangeQueryBuilder<K, V> extends GetKeyValueRangeQueryBuilder<K, V>  {
+    static class TimestampedGetKeyValueRangeQueryBuilder<K, V> extends GetKeyValueRangePreparedQuery<K, V>  {
+
+        public TimestampedGetKeyValueRangeQueryBuilder(final String store) {
+            super(store);
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<K, V>  build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        public LocalExecutableQuery<K, V> compile(final QueryParams params) {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new TimestampedKeyValueGetRangeQuery<>(
-                    store,
-                    p.getValue(QUERY_PARAM_KEY_FROM),
-                    p.getValue(QUERY_PARAM_KEY_TO)
+                store,
+                p.getValue(QueryConstants.QUERY_PARAM_KEY_FROM),
+                p.getValue(QueryConstants.QUERY_PARAM_KEY_TO)
             );
         }
     }

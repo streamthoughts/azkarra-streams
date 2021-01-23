@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,17 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.query.internal;
+package io.streamthoughts.azkarra.api.query;
 
-import io.streamthoughts.azkarra.api.errors.AzkarraException;
+import org.apache.kafka.common.serialization.Serializer;
 
-class InvalidQueryException extends AzkarraException {
+public interface LocalExecutableQueryWithKey<K1, K2, V> extends LocalExecutableQuery<K2, V> {
 
-    /**
-     * Creates a new {@link InvalidQueryException} instance.
-     * @param message   the error message.
-     */
-    InvalidQueryException(final String message) {
-        super(message);
+    default boolean hasKey() {
+        return getKey() == null;
     }
+
+    K1 getKey();
+
+    Serializer<K1> getKeySerializer();
 }

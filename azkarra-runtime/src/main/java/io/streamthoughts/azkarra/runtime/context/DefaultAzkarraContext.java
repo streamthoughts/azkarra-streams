@@ -42,6 +42,7 @@ import io.streamthoughts.azkarra.api.errors.AzkarraContextException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
+import io.streamthoughts.azkarra.api.query.InteractiveQueryService;
 import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
@@ -55,6 +56,8 @@ import io.streamthoughts.azkarra.runtime.interceptors.AutoCreateTopicsIntercepto
 import io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptor;
 import io.streamthoughts.azkarra.runtime.interceptors.WaitForSourceTopicsInterceptor;
+import io.streamthoughts.azkarra.runtime.modules.InteractiveQueryServiceModule;
+import io.streamthoughts.azkarra.runtime.query.DefaultInteractiveQueryService;
 import io.streamthoughts.azkarra.runtime.service.LocalAzkarraStreamsService;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.runtime.util.ShutdownHook;
@@ -205,6 +208,13 @@ public class DefaultAzkarraContext implements AzkarraContext {
             StreamsExecutionEnvironmentAbstractFactory.class,
             () -> new StreamsExecutionEnvironmentAbstractFactory(getAllComponents(StreamsExecutionEnvironmentFactory.class))
         );
+
+        registerSingleton(
+            DefaultInteractiveQueryService.class,
+            new InteractiveQueryServiceModule(),
+            withConditions(onMissingComponent(List.of(InteractiveQueryService.class)))
+        );
+
     }
 
     /**

@@ -18,82 +18,46 @@
  */
 package io.streamthoughts.azkarra.api.query;
 
-import io.streamthoughts.azkarra.api.config.MapConf;
-
-import java.util.Collections;
 import java.util.Map;
 
-public class QueryParams {
-
-    public static QueryParams empty() {
-        return new QueryParams(Collections.emptyMap());
-    }
-
-    private final InnerMapConf parameters;
-
-    /**
-     * Creates a new {@link QueryParams} instance.
-     *
-     * @param params the key-value parameters.
-     */
-    public QueryParams(final Map<String, Object> params) {
-        this.parameters = new InnerMapConf(params);
-    }
-
+public interface QueryParams {
+    
     /**
      * Gets the parameter for the given key.
      *
-     * @param key   the parameter key.
-     * @return      the object value.
+     * @param key the parameter key.
+     * @return the object value.
      */
-    @SuppressWarnings("unchecked")
-    public <V> V getValue(final String key) {
-        return (V) originals().get(key);
-    }
+    <V> V getValue(final String key);
 
     /**
      * Gets the parameter as string for the given key.
      *
-     * @param key   the parameter key.
-     * @return      the string value.
+     * @param key the parameter key.
+     * @return the string value.
      */
-    public String getString(final String key) {
-        return parameters.getString(key);
-    }
+    String getString(final String key);
 
     /**
      * Gets the parameter as long for the given key.
      *
-     * @param key   the parameter key.
-     * @return      the long value.
+     * @param key the parameter key.
+     * @return the long value.
      */
-    public Long getLong(final String key) {
-        return parameters.getLong(key);
-    }
+    Long getLong(final String key);
 
-    public boolean contains(final String key) {
-        return parameters.hasPath(key);
-    }
+    /**
+     * Checks whether this {@link QueryParams} contains the given key param.
+     *
+     * @param key   the key params.
+     * @return      {@code true} if this {@link QueryParams} contains the given key.
+     */
+    boolean contains(String key);
 
-    public Map<String, Object> originals() {
-        return Collections.unmodifiableMap(parameters.originals());
-    }
-
-    @Override
-    public String toString() {
-        return "Parameters{" +
-                "params=" + parameters.originals() +
-                '}';
-    }
-
-    private static class InnerMapConf extends MapConf {
-
-        InnerMapConf(final Map<String, ?> props) {
-            super(props, null, false); // we don't need to explode the Map.
-        }
-
-        Map<String, ?> originals() {
-            return parameters;
-        }
-    }
+    /**
+     * Gets all query params as {@code Map}.
+     *
+     * @return  a new {@link Map}.
+     */
+    Map<String, Object> getAsMap();
 }

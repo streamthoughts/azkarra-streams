@@ -18,13 +18,8 @@
  */
 package io.streamthoughts.azkarra.api.query;
 
-import io.streamthoughts.azkarra.api.query.internal.KeyValueQueryBuilder;
-import io.streamthoughts.azkarra.api.query.internal.Query;
 import io.streamthoughts.azkarra.api.query.internal.QueryBuilder;
-import io.streamthoughts.azkarra.api.query.internal.SessionQueryBuilder;
-import io.streamthoughts.azkarra.api.query.internal.TimestampedKeyValueQueryBuilder;
-import io.streamthoughts.azkarra.api.query.internal.TimestampedWindowQueryBuilder;
-import io.streamthoughts.azkarra.api.query.internal.WindowQueryBuilder;
+import io.streamthoughts.azkarra.api.query.internal.QueryOperationBuilder;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,10 +36,8 @@ public enum StoreType {
      */
     KEY_VALUE {
         @Override
-        @SuppressWarnings("unchecked")
-        public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            KeyValueQueryBuilder builder = new QueryBuilder(storeName).keyValue();
-            return builder.operation(operation);
+        public QueryOperationBuilder getQueryBuilder(final String storeName) {
+            return new QueryBuilder(storeName).keyValue();
         }
     },
     /**
@@ -52,10 +45,8 @@ public enum StoreType {
      */
     WINDOW {
         @Override
-        @SuppressWarnings("unchecked")
-        public <K, V> Query<K, V>  buildQuery(final String storeName, final StoreOperation operation) {
-            WindowQueryBuilder builder = new QueryBuilder(storeName).window();
-            return builder.operation(operation);
+        public QueryOperationBuilder getQueryBuilder(final String storeName) {
+            return new QueryBuilder(storeName).window();
         }
     },
     /**
@@ -63,10 +54,8 @@ public enum StoreType {
      */
     SESSION {
         @Override
-        @SuppressWarnings("unchecked")
-        public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            SessionQueryBuilder builder = new QueryBuilder(storeName).session();
-            return builder.operation(operation);
+        public QueryOperationBuilder getQueryBuilder(final String storeName) {
+            return new QueryBuilder(storeName).session();
         }
     },
     /**
@@ -74,10 +63,8 @@ public enum StoreType {
      */
     TIMESTAMPED_KEY_VALUE {
         @Override
-        @SuppressWarnings("unchecked")
-        public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            TimestampedKeyValueQueryBuilder builder = new QueryBuilder(storeName).timestampedKeyValue();
-            return builder.operation(operation);
+        public QueryOperationBuilder getQueryBuilder(final String storeName) {
+            return new QueryBuilder(storeName).timestampedKeyValue();
         }
     },
     /**
@@ -85,10 +72,8 @@ public enum StoreType {
      */
     TIMESTAMPED_WINDOW {
         @Override
-        @SuppressWarnings("unchecked")
-        public <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation) {
-            TimestampedWindowQueryBuilder builder = new QueryBuilder(storeName).timestampedWindow();
-            return builder.operation(operation);
+        public QueryOperationBuilder getQueryBuilder(final String storeName) {
+            return new QueryBuilder(storeName).timestampedWindow();
         }
     };
 
@@ -105,7 +90,7 @@ public enum StoreType {
         return Optional.ofNullable(CACHE.get(uppercased));
     }
 
-    public abstract <K, V> Query<K, V> buildQuery(final String storeName, final StoreOperation operation);
+    public abstract QueryOperationBuilder getQueryBuilder(final String storeName);
 
     public String prettyName() {
         return name().toLowerCase();

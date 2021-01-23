@@ -125,7 +125,7 @@ public class QueryResult<K, V> implements Serializable {
      * @param timeout   is the query timeout.
      * @return          a new {@link QueryResult} instance.
      */
-    public  QueryResult<K, V> timeout(final boolean timeout) {
+    public QueryResult<K, V> timeout(final boolean timeout) {
         return new QueryResult<>(
                 took,
                 timeout,

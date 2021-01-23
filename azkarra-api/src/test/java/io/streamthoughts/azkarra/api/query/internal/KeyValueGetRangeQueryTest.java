@@ -21,6 +21,7 @@ package io.streamthoughts.azkarra.api.query.internal;
 import io.streamthoughts.azkarra.api.InMemoryKeyValueIterator;
 import io.streamthoughts.azkarra.api.model.KV;
 import io.streamthoughts.azkarra.api.monad.Try;
+import io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider;
 import io.streamthoughts.azkarra.api.query.LocalStoreAccessor;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -40,10 +41,12 @@ public class KeyValueGetRangeQueryTest {
 
     @Test
     public void shouldGetGivenRange() {
-        KeyValueGetRangeQuery<String, String> query = new KeyValueGetRangeQuery<>(STORE_NAME,
-                "keyFrom",
-                "keyTo");
-        final var mkContainer = Mockito.mock(KafkaStreamsContainer.class);
+        KeyValueGetRangeQuery<String, String> query = new KeyValueGetRangeQuery<>(
+            STORE_NAME,
+           "keyFrom",
+            "keyTo"
+        );
+        final var mkContainer = Mockito.mock(LocalStoreAccessProvider.class);
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.range("keyFrom", "keyTo")).thenReturn(new InMemoryKeyValueIterator<>("keyFrom", "value"));

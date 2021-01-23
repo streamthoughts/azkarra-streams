@@ -19,34 +19,36 @@
 package io.streamthoughts.azkarra.api.query.internal;
 
 import io.streamthoughts.azkarra.api.monad.Validator;
-import io.streamthoughts.azkarra.api.query.LocalStoreQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
+import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 
 import java.util.Objects;
 
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_FROM;
+import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_TO;
+
 public class KeyValueQueryBuilder implements QueryOperationBuilder {
 
-    public static final String QUERY_PARAM_KEY = "key";
-    public static final String QUERY_PARAM_KEY_FROM = "keyFrom";
-    public static final String QUERY_PARAM_KEY_TO = "keyTo";
-
-    protected final String storeName;
+    protected final String store;
 
     /**
      * Creates a new {@link KeyValueQueryBuilder} instance.
-     * @param storeName     the name of the store.
+     *
+     * @param store     the name of the store.
      */
-    KeyValueQueryBuilder(final String storeName) {
-        Objects.requireNonNull(storeName, "storeName cannot be null");
-        this.storeName = storeName;
+    KeyValueQueryBuilder(final String store) {
+        this.store = store;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Query operation(final StoreOperation operation) {
+    public LocalPreparedQuery prepare(final StoreOperation operation) {
 
         if (operation == StoreOperation.GET)
             return get();
@@ -60,51 +62,63 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
         throw new InvalidQueryException("Operation not supported '" + operation.name() + "'");
     }
 
-    public <K, V> Query<K, V> all() {
-        return new Query<>(storeName, (store, parameters) -> new KeyValueGetAllQuery<>(store));
+    public <K, V> LocalPreparedQuery<K, V> all() {
+        return params -> new KeyValueGetAllQuery<>(store);
     }
 
-    public <K, V> Query<K, V> get() {
-        return new Query<>(storeName, new GetKeyValueQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<K, V> get() {
+        return new GetKeyValuePreparedQuery<>(store);
     }
 
-    public <K, V> Query<K, V> range() {
-        return new Query<>(storeName, new GetKeyValueRangeQueryBuilder<>());
+    public <K, V> LocalPreparedQuery<K, V> range() {
+        return new GetKeyValueRangePreparedQuery<>(store);
     }
 
-    public Query<String, Long> count() {
-        return new Query<>(storeName, (store, parameters) -> new KeyValueCountQuery(store));
+    public LocalPreparedQuery<String, Long> count() {
+        return params -> new KeyValueCountQuery(store);
     }
 
-    static class GetKeyValueQueryBuilder<K, V> implements LocalStoreQueryBuilder<K, V>  {
+    static class GetKeyValuePreparedQuery<K, V> implements LocalPreparedQuery<K, V> {
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
-            return Validator.of(parameters)
-                    .validates(p -> p.contains(QUERY_PARAM_KEY), MissingRequiredKeyError.of(QUERY_PARAM_KEY));
+        protected final String store;
+
+        public GetKeyValuePreparedQuery(final String store) {
+            this.store = Objects.requireNonNull(store, "store should not be null");
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<K, V> build(final String store, final QueryParams parameters) {
+        public Validator<QueryParams> validator(final QueryParams params) {
+            return Validator
+                .of(params)
+                .validates(p -> p.contains(QUERY_PARAM_KEY), MissingRequiredKeyError.of(QUERY_PARAM_KEY));
+        }
 
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public LocalExecutableQuery<K, V> compile(final QueryParams params) throws InvalidQueryException {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
             return new KeyValueGetQuery<>(store, p.getValue(QUERY_PARAM_KEY), null);
         }
     }
 
-    static class GetKeyValueRangeQueryBuilder<K, V> implements LocalStoreQueryBuilder<K, V>  {
+    static class GetKeyValueRangePreparedQuery<K, V> implements LocalPreparedQuery<K, V> {
+
+        protected final String store;
+
+        public GetKeyValueRangePreparedQuery(String store) {
+            this.store = Objects.requireNonNull(store, "store should not be null");
+        }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public Validator<QueryParams> validates(final QueryParams parameters) {
+        public Validator<QueryParams> validator(final QueryParams parameters) {
             return Validator.of(parameters)
                     .validates(p -> p.contains(QUERY_PARAM_KEY_FROM), MissingRequiredKeyError.of(QUERY_PARAM_KEY_FROM))
                     .validates(p -> p.contains(QUERY_PARAM_KEY_TO), MissingRequiredKeyError.of(QUERY_PARAM_KEY_TO));
@@ -114,13 +128,9 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
          * {@inheritDoc}
          */
         @Override
-        public LocalStoreQuery<K, V>  build(final String store, final QueryParams parameters) {
-            final QueryParams p = validates(parameters).getOrThrow(LocalStoreQueryBuilder::toInvalidQueryException);
-            return new KeyValueGetRangeQuery<>(
-                    store,
-                    p.getValue(QUERY_PARAM_KEY_FROM),
-                    p.getValue(QUERY_PARAM_KEY_TO)
-            );
+        public LocalExecutableQuery<K, V>  compile(final QueryParams params) throws InvalidQueryException {
+            final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
+            return new KeyValueGetRangeQuery<>(store, p.getValue(QUERY_PARAM_KEY_FROM), p.getValue(QUERY_PARAM_KEY_TO));
         }
     }
 }
