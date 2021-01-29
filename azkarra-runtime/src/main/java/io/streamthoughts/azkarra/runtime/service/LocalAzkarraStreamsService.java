@@ -18,23 +18,19 @@
  */
 package io.streamthoughts.azkarra.runtime.service;
 
+import io.streamthoughts.azkarra.api.ApplicationId;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
+import io.streamthoughts.azkarra.api.ContainerId;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentFactory;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
-import io.streamthoughts.azkarra.api.model.Environment;
-import io.streamthoughts.azkarra.api.model.Metric;
-import io.streamthoughts.azkarra.api.model.MetricGroup;
-import io.streamthoughts.azkarra.api.model.StreamsStatus;
-import io.streamthoughts.azkarra.api.model.StreamsTopologyGraph;
-import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
+import io.streamthoughts.azkarra.api.model.HasId;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsApplication;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
-import io.streamthoughts.azkarra.api.streams.ServerMetadata;
-import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
+import io.streamthoughts.azkarra.runtime.env.internal.BasicContainerId;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -42,7 +38,6 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -54,57 +49,49 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      * {@inheritDoc}
      */
     @Override
-    public Collection<String> getAllStreams() {
+    public Set<String> listAllKafkaStreamsContainerIds() {
         return context.getAllEnvironments()
             .stream()
-            .flatMap(environment -> environment.applicationIds().stream())
-            .collect(Collectors.toList());
+            .flatMap(environment -> HasId.getIds(environment.getContainerIds()).stream())
+            .collect(Collectors.toSet());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Conf getStreamsConfigById(final String applicationId) {
-        return getStreamsById(applicationId).streamsConfig();
+    public Set<String> listAllKafkaStreamsApplicationIds() {
+        return context.getAllEnvironments()
+            .stream()
+            .flatMap(environment -> HasId.getIds(environment.getApplicationIds()).stream())
+            .collect(Collectors.toSet());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public KafkaStreamsContainer getStreamsById(final String applicationId) {
+    public KafkaStreamsContainer getStreamsContainerById(final String containerId) {
         final Optional<KafkaStreamsContainer> container = context
             .getAllEnvironments()
             .stream()
-            .flatMap(environment -> environment.applications().stream())
-            .filter(o -> o.applicationId().equals(applicationId))
+            .flatMap(environment -> environment.getContainers().stream())
+            .filter(o -> o.containerId().equals(containerId))
             .findFirst();
 
         if (container.isPresent()) {
             return container.get();
         }
-        throw new NotFoundException("no Kafka Streams instance for application.id '" + applicationId + "'");
+        throw new NotFoundException("Failed to find Kafka Streams instance for container id '" + containerId + "'");
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public StreamsStatus getStreamsStatusById(final String applicationId) {
-        KafkaStreamsContainer streams = getStreamsById(applicationId);
-        return new StreamsStatus(
-            streams.applicationId(),
-            streams.state().value().name(),
-            streams.threadMetadata());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StreamsTopologyGraph getStreamsTopologyById(final String applicationId) {
-        return getStreamsById(applicationId).topologyGraph();
+    public Collection<KafkaStreamsContainer> getAllStreamsContainersById(final String applicationId) {
+        var environment = getStreamsApplicationById(applicationId).environment();
+        return context.getEnvironmentForName(environment).getContainers();
     }
 
     /**
@@ -112,36 +99,10 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public ApplicationId startStreamsTopology(final String topologyType,
-                                              final String topologyVersion,
-                                              final String env,
-                                              final Executed executed) {
-        return context.addTopology(topologyType, topologyVersion, env, executed);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<MetricGroup> getStreamsMetricsById(final String applicationId) {
-        return getStreamsById(applicationId).metrics();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<MetricGroup> getStreamsMetricsById(final String applicationId,
-                                                  final Predicate<Tuple<String, Metric>> filter) {
-        return getStreamsById(applicationId).metrics(KafkaStreamsContainer.KafkaMetricFilter.of(filter));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ConsumerGroupOffsets getStreamsConsumerOffsetsById(final String applicationId) {
-        final KafkaStreamsContainer container = getStreamsById(applicationId);
-        return container.offsets();
+                                            final String topologyVersion,
+                                            final String env,
+                                            final Executed executed) {
+        return context.addTopology(topologyType, topologyVersion, env, executed).orElse(null);
     }
 
     /**
@@ -150,24 +111,6 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     @Override
     public Conf getContextConfig() {
         return context.getConfiguration();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<Environment> getAllEnvironments() {
-        return context.getAllEnvironments()
-            .stream()
-            .map( env -> new Environment(
-                env.name(),
-                env.type(),
-                env.state(),
-                env.getConfiguration().getConfAsMap(),
-                env.applicationIds(),
-                env.isDefault()
-            )
-          ).collect(Collectors.toSet());
     }
 
     /**
@@ -190,55 +133,79 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      * {@inheritDoc}
      */
     @Override
-    public Set<ServerMetadata> getStreamsInstancesById(final String applicationId) {
-        final KafkaStreamsContainer container = getStreamsById(applicationId);
-        return container.allMetadata();
+    public KafkaStreamsApplication getStreamsApplicationById(final String id) {
+        return context.getAllEnvironments()
+           .stream()
+           .flatMap(env -> env.getApplicationById(new ApplicationId(id)).stream())
+           .findFirst()
+           .orElseThrow(() -> new NotFoundException("Failed to found KafkaStreams application for id " + id));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void stopStreams(final String applicationId, final boolean cleanUp) {
-        Objects.requireNonNull(applicationId, "cannot stop streams for an empty application.id");
-        final KafkaStreamsContainer container = getStreamsById(applicationId);
-        container.close(cleanUp, Duration.ZERO); // non-blocking
+    public void stopStreamsContainer(final String containerId, final boolean cleanUp) {
+        Objects.requireNonNull(containerId, "Cannot stop streams for an empty container id");
+        getStreamsContainerById(containerId).close(cleanUp, Duration.ZERO); // non-blocking
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void restartStreams(final String applicationId) {
-        Objects.requireNonNull(applicationId, "cannot restart streams for an empty application.id");
-        final KafkaStreamsContainer container = getStreamsById(applicationId);
-        container.restart();
+    public void restartStreamsContainer(final String containerId) {
+        Objects.requireNonNull(containerId, "Cannot restart streams for an empty container id");
+        getStreamsContainerById(containerId).restart();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void deleteStreams(final String applicationId) {
+    public void terminateStreamsContainer(final String containerId) {
+        Objects.requireNonNull(containerId, "Cannot stop streams for an empty container id");
+
+        final ContainerId id = new BasicContainerId(containerId);
+        StreamsExecutionEnvironment<?> env = null;
+        Iterator<StreamsExecutionEnvironment<?>> it = context.getAllEnvironments().iterator();
+        while (it.hasNext() && env == null) {
+            StreamsExecutionEnvironment<?> e = it.next();
+            if (e.getContainerIds().contains(id)) {
+                env = e;
+            }
+        }
+        if (env != null) {
+            env.terminate(id);
+        } else {
+            throw new NotFoundException(
+                "Failed to find an environment running KafkaStreams containers for container id '" + id + "'."
+            );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void terminateStreamsApplication(final String applicationId) {
+        final ApplicationId id = new ApplicationId(applicationId);
 
         StreamsExecutionEnvironment<?> env = null;
         Iterator<StreamsExecutionEnvironment<?>> it = context.getAllEnvironments().iterator();
         while (it.hasNext() && env == null) {
             StreamsExecutionEnvironment<?> e = it.next();
-            boolean exists = e.applications()
-                .stream()
-                .map(KafkaStreamsContainer::applicationId)
-                .collect(Collectors.toList())
-                .contains(applicationId);
-            if (exists) {
+            if (e.getApplicationIds().contains(id)) {
                 env = e;
             }
         }
         if (env != null) {
-            env.remove(new ApplicationId(applicationId));
+            env.terminate(id);
         } else {
             throw new NotFoundException(
-                "Can't find streams environment running an application with id'" + applicationId+ "'.");
+                "Failed to find an environment running KafkaStreams containers for application.id '"
+                + applicationId + "'."
+            );
         }
     }
 }

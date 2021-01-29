@@ -29,6 +29,7 @@
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.http.UndertowEmbeddedServer"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer"/>
+    <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.env.LocalStreamsExecutionEnvironment"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig" />
@@ -39,8 +40,10 @@
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.http.query.HttpRemoteStateStoreClient" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.query.LocalStoreAccessProvider" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.query.internal.QueryResultUtils" />
+    <suppress checks="LineLength" files="io.streamthoughts.azkarra.http.routes.*" />
     <suppress checks="NPathComplexity" files="io.streamthoughts.azkarra.commons.error.SafeDeserializerConfig"/>
     <suppress checks="ParameterNumber" files="SimpleComponentDescriptor" />
+    <suppress checks="ParameterNumber" files="StreamsInstanceInfo" />
     <suppress checks="ParameterNumber" files="Conf" />
     <suppress checks="BooleanExpressionComplexity" files="io.streamthoughts.azkarra.runtime.streams.topology.TopologyUtils" />
 

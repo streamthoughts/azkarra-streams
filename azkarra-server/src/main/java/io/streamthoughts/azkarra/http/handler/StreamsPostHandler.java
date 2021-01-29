@@ -21,12 +21,9 @@ package io.streamthoughts.azkarra.http.handler;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.data.StreamsTopologyRequest;
 import io.undertow.server.HttpServerExchange;
-
-import java.util.Collections;
 
 public class StreamsPostHandler extends AbstractStreamHttpHandler {
 
@@ -51,13 +48,13 @@ public class StreamsPostHandler extends AbstractStreamHttpHandler {
             .withDescription(streams.getDescription())
             .withConfig(Conf.of(streams.getConfig()));
 
-        final ApplicationId id = service.startStreamsTopology(
+        var id = service.startStreamsTopology(
             streams.getType(),
             streams.getVersion(),
             streams.getEnv(),
             executed
         );
-        ExchangeHelper.sendJsonResponse(exchange, Collections.singletonMap("id", id.toString()));
+        ExchangeHelper.sendJsonResponse(exchange, id);
     }
 
 }

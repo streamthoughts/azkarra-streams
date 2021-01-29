@@ -20,13 +20,14 @@ package io.streamthoughts.azkarra.http.sse;
 
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
-import io.streamthoughts.azkarra.api.events.reactive.EventStreamPublisher;
-import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.serialization.json.Json;
 import io.undertow.server.handlers.sse.ServerSentEventConnection;
 import io.undertow.server.handlers.sse.ServerSentEventConnectionCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_EVENT;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_ID;
 
 /**
  * @since 0.8.0
@@ -54,25 +55,24 @@ public class EventStreamConnectionCallback implements ServerSentEventConnectionC
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void connected(final ServerSentEventConnection connection,
                           final String lastEventId) {
-        var applicationId = connection.getParameter("id");
-        var eventChannel = connection.getParameter("event");
+        var containerId = connection.getParameter(HTTP_QUERY_PARAM_ID);
+        var eventChannel = connection.getParameter(HTTP_QUERY_PARAM_EVENT);
         LOG.info(
-            "ServerSentEventConnection established. Subscribe to event-stream for application='{}', type='{}'",
-            applicationId,
+            "ServerSentEventConnection established. Subscribe to event-stream for Container ID='{}', Type='{}'",
+            containerId,
             eventChannel
         );
 
         try {
-            final KafkaStreamsContainer container = service.getStreamsById(applicationId);
-            final EventStreamPublisher publisher = container.eventStreamPublisherForType(eventChannel);
+            var container = service.getStreamsContainerById(containerId);
+            var publisher = container.getEventStreamPublisherForType(eventChannel);
             if (publisher == null) {
                 connection.shutdown();
                 return;
             }
-            publisher.subscribe(new ServerSentEventSubscriber<>(connection, publisher.type(), applicationId, json));
+            publisher.subscribe(new ServerSentEventSubscriber<>(connection, publisher.type(), containerId, json));
 
         } catch (NotFoundException e) {
             LOG.error(e.getMessage());

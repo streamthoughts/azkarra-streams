@@ -39,8 +39,8 @@ import io.streamthoughts.azkarra.api.query.QueryableKafkaStreams;
 import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
-import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
-import io.streamthoughts.azkarra.api.streams.ServerMetadata;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsInstance;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsMetadata;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
 import io.streamthoughts.azkarra.api.streams.TopicPartitions;
@@ -55,6 +55,7 @@ import io.streamthoughts.azkarra.api.streams.store.PartitionLogOffsetsAndLag;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import io.streamthoughts.azkarra.runtime.query.LocalQueryCall;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -77,7 +78,6 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.processor.ThreadMetadata;
-import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -102,7 +102,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -137,7 +136,7 @@ public class LocalKafkaStreamsContainer implements
 
     private volatile Set<ThreadMetadata> threadMetadata = Collections.emptySet();
 
-    private final String applicationServer;
+    private final Endpoint endpoint;
 
     private final LinkedBlockingQueue<StateChangeWatcher> stateChangeWatchers = new LinkedBlockingQueue<>();
 
@@ -150,15 +149,16 @@ public class LocalKafkaStreamsContainer implements
     private volatile ContainerState containerState;
     private final Object containerStateLock = new Object();
 
-    private final List<EventStream> eventStreams = new LinkedList<>();
+    private final List<EventStream<?, ?>> eventStreams = new LinkedList<>();
 
-    private final Map<String, EventStreamPublisher> publishers = new LinkedHashMap<>();
+    private final Map<String, EventStreamPublisher<?, ?>> publishers = new LinkedHashMap<>();
 
     /**
      * The {@link Executor} which is used top start/stop the internal streams in a non-blocking way.
      */
     private Executor executor;
-    private final UUID containerId;
+
+    private final String containerId;
 
     // The internal states used to manage container Lifecycle
     private enum ContainerState {
@@ -191,7 +191,8 @@ public class LocalKafkaStreamsContainer implements
      * @param topologyDefinition the {@link TopologyDefinition} instance.
      * @param streamsFactory     the {@link KafkaStreamsFactory} instance.
      */
-    LocalKafkaStreamsContainer(final Conf streamsConfig,
+    LocalKafkaStreamsContainer(final String containerId,
+                               final Conf streamsConfig,
                                final TopologyDefinition topologyDefinition,
                                final KafkaStreamsFactory streamsFactory,
                                final List<StreamsLifecycleInterceptor> interceptors) {
@@ -203,9 +204,10 @@ public class LocalKafkaStreamsContainer implements
         this.interceptors = interceptors;
         this.streamsFactory = streamsFactory;
         this.topologyDefinition = topologyDefinition;
-        this.containerId = UUID.randomUUID();
-        this.applicationServer = streamsConfig()
+        this.containerId = containerId;
+        this.endpoint = streamsConfig()
             .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
+            .map(Endpoint::of)
             .orElse(null);
         topologyDefinition.getEventStreams().forEach(this::registerEventStream);
     }
@@ -288,13 +290,14 @@ public class LocalKafkaStreamsContainer implements
      * {@inheritDoc}
      */
     @Override
-    public EventStreamPublisher eventStreamPublisherForType(final String eventType) {
+    @SuppressWarnings("unchecked")
+    public <K, V> EventStreamPublisher<K, V> getEventStreamPublisherForType(final String eventType) {
         Objects.requireNonNull(eventType, "eventType cannot be null");
         validateInitialized();
         if (!publishers.containsKey(eventType)) {
-            throw new IllegalArgumentException("Cannot found Event-Stream for type: " + eventType);
+            throw new IllegalArgumentException("Failed to found Event-Stream for type: " + eventType);
         }
-        return publishers.get(eventType);
+        return (EventStreamPublisher<K, V>) publishers.get(eventType);
     }
 
     /**
@@ -303,6 +306,14 @@ public class LocalKafkaStreamsContainer implements
     @Override
     public <K, V> void registerEventStream(final EventStream<K, V> eventStream) {
         eventStreams.add(Objects.requireNonNull(eventStream, "eventStream cannot be null"));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<String> listRegisteredEventStreamTypes() {
+        return eventStreams.stream().map(EventStream::type).collect(Collectors.toSet());
     }
 
     private void reset() {
@@ -368,6 +379,14 @@ public class LocalKafkaStreamsContainer implements
      * {@inheritDoc}
      */
     @Override
+    public String containerId() {
+        return containerId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String applicationId() {
         return streamsConfig().getString(StreamsConfig.APPLICATION_ID_CONFIG);
     }
@@ -376,8 +395,8 @@ public class LocalKafkaStreamsContainer implements
      * {@inheritDoc}
      */
     @Override
-    public String applicationServer() {
-        return applicationServer;
+    public Optional<Endpoint> endpoint() {
+        return Optional.ofNullable(endpoint);
     }
 
     /**
@@ -735,44 +754,41 @@ public class LocalKafkaStreamsContainer implements
             .collect(Collectors.toList());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<ServerMetadata> localServerMetadata() {
-        return allMetadata()
-           .stream()
-           .filter(ServerMetadata::isLocal)
-           .findFirst();
+    public List<KafkaStreamsInstance> allInstances() {
+        if (!isRunning()) return Collections.emptyList();
+        final Collection<StreamsMetadata> allMetadata = kafkaStreams.allMetadata();
+        return allMetadata.stream()
+            .map(metadata -> {
+                final Endpoint endpoint = new Endpoint(metadata.hostInfo().host(), metadata.hostInfo().port());
+                return new KafkaStreamsInstance(
+                    checkEndpoint(endpoint) ? containerId : null,
+                    endpoint,
+                    checkEndpoint(endpoint),
+                    toKafkaStreamsMetadata(metadata)
+                );
+            }).collect(Collectors.toList());
+
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Set<ServerMetadata> allMetadata() {
-        if (!isRunning()) return Collections.emptySet();
-
-        // allMetadata throw an IllegalAccessException if instance is not running
-        return kafkaStreams.allMetadata()
-           .stream()
-           .map(this::newServerInfoFor)
-           .collect(Collectors.toSet());
+    public KafkaStreamsInstance describe() {
+        var metadata = allInstances()
+            .stream()
+            .filter(KafkaStreamsInstance::isLocal)
+            .findFirst()
+            .map(KafkaStreamsInstance::metadata)
+            .orElse(KafkaStreamsMetadata.EMPTY);
+        return new KafkaStreamsInstance(
+            containerId,
+            endpoint,
+            true,
+            metadata
+        );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<ServerMetadata> allMetadataForStore(final String storeName) {
-        Objects.requireNonNull(storeName, "storeName cannot be null");
-        if (!isRunning()) return Collections.emptySet();
-
-        Collection<StreamsMetadata> metadata = kafkaStreams.allMetadataForStore(storeName);
-        return metadata.stream()
-            .map(this::newServerInfoFor)
-            .collect(Collectors.toList());
-    }
 
     /**
      * {@inheritDoc}
@@ -834,6 +850,17 @@ public class LocalKafkaStreamsContainer implements
         return getLocalStoreAccess(storeName, QueryableStoreTypes.sessionStore());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<Endpoint> findAllEndpointsForStore(final String storeName) {
+        return kafkaStreams.allMetadataForStore(storeName)
+            .stream()
+            .map(metadata -> new Endpoint(metadata.hostInfo().host(), metadata.hostInfo().port()))
+            .collect(Collectors.toSet());
+    }
+
     private <T> LocalStoreAccessor<T> getLocalStoreAccess(final String storeName,
                                                           final QueryableStoreType<T> storeType) {
 
@@ -890,19 +917,13 @@ public class LocalKafkaStreamsContainer implements
         lastObservedException = throwable;
     }
 
-    private ServerMetadata newServerInfoFor(final StreamsMetadata metadata) {
-        var hostInfo = new ServerHostInfo(applicationId(), metadata.host(), metadata.port(), isLocal(metadata));
-        return new ServerMetadata(
-            hostInfo,
+    private static KafkaStreamsMetadata toKafkaStreamsMetadata(final StreamsMetadata metadata) {
+        return new KafkaStreamsMetadata(
             metadata.stateStoreNames(),
             groupByTopicThenGet(metadata.topicPartitions()),
             metadata.standbyStateStoreNames(),
             groupByTopicThenGet(metadata.standbyTopicPartitions())
         );
-    }
-
-    private boolean isLocal(final StreamsMetadata metadata) {
-        return isSameHost(new HostInfo(metadata.host(), metadata.port()));
     }
 
     private static Set<TopicPartitions> groupByTopicThenGet(final Set<TopicPartition> topicPartitions) {
@@ -961,9 +982,8 @@ public class LocalKafkaStreamsContainer implements
     /**
      * {@inheritDoc}
      */
-    @Override
-    public boolean isSameHost(final HostInfo info) {
-        return applicationServer.equals(info.host() + ":" + info.port());
+    public boolean checkEndpoint(final Endpoint endpoint) {
+        return this.endpoint.equals(endpoint);
     }
 
     private void validateInitialized() {

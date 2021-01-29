@@ -23,20 +23,22 @@ import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.query.InteractiveQueryService;
 import io.streamthoughts.azkarra.http.APIVersions;
-import io.streamthoughts.azkarra.http.handler.ApplicationGetInstancesHandler;
-import io.streamthoughts.azkarra.http.handler.ApplicationGetTopologyHandler;
 import io.streamthoughts.azkarra.http.handler.ApplicationQueryStoreHandler;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
 import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
 
+import static io.streamthoughts.azkarra.http.ExchangeHelper.getQueryParam;
+import static io.streamthoughts.azkarra.http.ExchangeHelper.sendJsonResponse;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_ID;
+
 /**
  * This class defines all routes for API '/applications'.
  */
 public class ApiApplicationsRoutes implements RoutingHandlerProvider, AzkarraContextAware {
 
-    private static final String APPLICATIONS_PREFIX_PATH = APIVersions.PATH_V1 + "/applications/";
+    private static final String APPLICATIONS_PREFIX_PATH = APIVersions.PATH_V1 + "/applications";
 
     private AzkarraContext context;
 
@@ -52,21 +54,24 @@ public class ApiApplicationsRoutes implements RoutingHandlerProvider, AzkarraCon
     public RoutingHandler handler(final AzkarraStreamsService service) {
         final InteractiveQueryService queryService = context.getComponent(InteractiveQueryService.class);
         return Handlers.routing()
-                .get(templatePath("{id}"),
-                        new ApplicationGetInstancesHandler(service))
+            .get(template(""), exchange ->
+                sendJsonResponse(exchange, service.listAllKafkaStreamsApplicationIds()))
 
-                .get(templatePath("{id}/topology"),
-                        new ApplicationGetTopologyHandler(service))
+            .get(template("/{id}"), exchange ->
+                sendJsonResponse(exchange, service.getStreamsApplicationById(getQueryParam(exchange, HTTP_QUERY_PARAM_ID))))
 
-                .post(templatePath("{id}/stores/{storeName}"),
-                        new BlockingHandler(new ApplicationQueryStoreHandler(queryService, false)))
+            .delete(template("/{id}"), exchange ->
+                service.terminateStreamsApplication(getQueryParam(exchange, HTTP_QUERY_PARAM_ID)))
 
-                .post(templatePath("{id}/stores/{storeName}/records"),
-                        new BlockingHandler(new ApplicationQueryStoreHandler(queryService, true)));
+            .post(template("/{id}/stores/{storeName}"),
+                    new BlockingHandler(new ApplicationQueryStoreHandler(queryService, false)))
+
+            .post(template("/{id}/stores/{storeName}/records"),
+                    new BlockingHandler(new ApplicationQueryStoreHandler(queryService, true)));
     }
 
-    private String templatePath(final String assignments) {
-        return APPLICATIONS_PREFIX_PATH + assignments;
+    private static String template(final String path) {
+        return APPLICATIONS_PREFIX_PATH + path;
     }
 
     /**

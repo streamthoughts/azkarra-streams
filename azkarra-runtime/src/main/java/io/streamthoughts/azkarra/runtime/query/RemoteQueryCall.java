@@ -23,7 +23,7 @@ import io.streamthoughts.azkarra.api.query.QueryCall;
 import io.streamthoughts.azkarra.api.query.QueryOptions;
 import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
-import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,8 @@ public class RemoteQueryCall<K, V> extends BaseAsyncQueryCall<K, V, QueryRequest
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteQueryCall.class);
 
-    private final ServerHostInfo remote;
+    private final String application;
+    private final Endpoint endpoint;
     private final RemoteStateStoreClient client;
 
     private final String localServerName;
@@ -46,25 +47,26 @@ public class RemoteQueryCall<K, V> extends BaseAsyncQueryCall<K, V, QueryRequest
      *
      * @param query the query.
      */
-    public RemoteQueryCall(final String localServerName,
+    public RemoteQueryCall(final String application,
+                           final String localServerName,
+                           final Endpoint endpoint,
                            final QueryRequest query,
-                           final ServerHostInfo remote,
                            final RemoteStateStoreClient client) {
         super(query);
-        this.remote = remote;
+        this.application = application;
+        this.endpoint = endpoint;
         this.client = client;
         this.localServerName = localServerName;
     }
 
     @Override
     public QueryResult<K, V> execute(final QueryOptions options) {
-        final String remoteServerName = remote.hostAndPort();
         QueryResult<K, V> result;
         try {
             result = executeAsync(options).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            result = buildInternalErrorResult(localServerName, remoteServerName, e);
+            result = buildInternalErrorResult(localServerName, endpoint.toString(), e);
         } catch (ExecutionException e) {
             // cast should be OK.
             LOG.error("Cannot query remote state store. {}", e.getCause().getMessage());
@@ -78,9 +80,9 @@ public class RemoteQueryCall<K, V> extends BaseAsyncQueryCall<K, V, QueryRequest
      */
     @Override
     public CompletableFuture<QueryResult<K, V>> executeAsync(final QueryOptions options) {
-        CompletableFuture<QueryResult<K, V>> future = client.query(remote, query, options);
+        CompletableFuture<QueryResult<K, V>> future = client.query(application, endpoint, query, options);
         if (options.retries() == 0) {
-            future = future.exceptionally(t -> buildInternalErrorResult(localServerName, remote.hostAndPort(), t));
+            future = future.exceptionally(t -> buildInternalErrorResult(localServerName, endpoint.toString(), t));
         }
         return future.thenApply(rs -> rs.server(localServerName));
     }

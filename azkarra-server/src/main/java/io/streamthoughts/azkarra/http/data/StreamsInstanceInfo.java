@@ -20,10 +20,11 @@ package io.streamthoughts.azkarra.http.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import io.streamthoughts.azkarra.serialization.json.TimestampSerializer;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class StreamsInstanceResponse {
+public class StreamsInstanceInfo {
 
     private final String id;
 
@@ -35,22 +36,26 @@ public class StreamsInstanceResponse {
 
     private final String description;
 
+    private final Endpoint endpoint;
+
     private final State state;
 
-    private String exception;
+    private final String exception;
 
-    public StreamsInstanceResponse(final String id,
-                                   final long since,
-                                   final String name,
-                                   final String version,
-                                   final String description,
-                                   final State state,
-                                   final String exception) {
+    public StreamsInstanceInfo(final String id,
+                               final long since,
+                               final String name,
+                               final String version,
+                               final String description,
+                               final Endpoint endpoint,
+                               final State state,
+                               final String exception) {
         this.id = id;
         this.since = since;
         this.name = name;
         this.version = version;
         this.description = description;
+        this.endpoint = endpoint;
         this.state = state;
         this.exception = exception;
     }
@@ -82,6 +87,10 @@ public class StreamsInstanceResponse {
 
     public String getDescription() {
         return description;
+    }
+
+    public Endpoint getEndpoint() {
+        return endpoint;
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -117,8 +126,14 @@ public class StreamsInstanceResponse {
         private String name;
         private String version;
         private String description;
+        private Endpoint endpoint;
         private String exception;
-        private StreamsInstanceResponse.State state;
+        private StreamsInstanceInfo.State state;
+
+        public Builder setEndpoint(final Endpoint endpoint) {
+            this.endpoint = endpoint;
+            return this;
+        }
 
         public Builder setId(final String id) {
             this.id = id;
@@ -155,13 +170,14 @@ public class StreamsInstanceResponse {
             return this;
         }
 
-        public StreamsInstanceResponse build() {
-            return new StreamsInstanceResponse(
+        public StreamsInstanceInfo build() {
+            return new StreamsInstanceInfo(
                 id,
                 since,
                 name,
                 version,
                 description,
+                endpoint,
                 state,
                 exception);
         }

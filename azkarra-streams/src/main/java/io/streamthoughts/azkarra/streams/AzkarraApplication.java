@@ -20,21 +20,18 @@ package io.streamthoughts.azkarra.streams;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextListener;
-import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.banner.Banner;
 import io.streamthoughts.azkarra.api.banner.BannerPrinter;
 import io.streamthoughts.azkarra.api.components.Ordered;
 import io.streamthoughts.azkarra.api.config.ArgsConf;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
-import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.server.EmbeddedHttpServer;
 import io.streamthoughts.azkarra.api.server.ServerInfo;
 import io.streamthoughts.azkarra.api.spi.EmbeddedHttpServerProvider;
 import io.streamthoughts.azkarra.api.util.Network;
 import io.streamthoughts.azkarra.http.ServerConfig;
 import io.streamthoughts.azkarra.http.ServerConfigBuilder;
-import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import io.streamthoughts.azkarra.streams.autoconfigure.AutoConfigure;
 import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
 import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
@@ -53,7 +50,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -355,17 +351,14 @@ public class AzkarraApplication {
         // Initializing context from the application configuration.
         new ApplicationConfigLoader(configLoaders).load(this);
 
-        // Automatically start all streams topology for the specified environment.
-        if (autoStart.isEnable())
-            context.addListener(new AutoStartContextListener());
-
         if (isHttpServerEnable()) {
             final EmbeddedHttpServer embeddedHttpServer = loadEmbeddedHttpServerImplementation();
             context.addListener(new EmbeddedServerLifecycle(embeddedHttpServer, buildHttpServerConfig()));
         }
 
         context.start();
-        LOG.info("Azkarra application started");
+        LOG.info("Azkarra application started.");
+        autoStart.runIfEnable(context);
         return context;
     }
 
@@ -480,74 +473,6 @@ public class AzkarraApplication {
                 "Cannot find implementation for service provider : " + EmbeddedHttpServerProvider.class.getName());
         }
         return result.get(0);
-    }
-
-    private class AutoStartContextListener implements AzkarraContextListener {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public int order() {
-            return Ordered.LOWEST_ORDER - 1;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onContextStart(final AzkarraContext context) {
-            final String environment = selectExecutionEnvironmentForAutoStart(context);
-            final Set<TopologyDescriptor> topologies = context.getTopologyDescriptors(environment);
-            for (TopologyDescriptor desc : topologies) {
-                context.addTopology(
-                    desc.className(),
-                    desc.version().toString(),
-                    environment,
-                    new InternalExecuted()
-                );
-            }
-        }
-
-        private String selectExecutionEnvironmentForAutoStart(final AzkarraContext context) {
-            return autoStart
-                .environment()
-                .or(() -> context.getAllEnvironments()
-                    .stream().filter(StreamsExecutionEnvironment::isDefault)
-                    .findFirst()
-                    .map(StreamsExecutionEnvironment::name))
-                .orElseThrow(() ->
-                    new AzkarraException("Cannot auto-start topology, no default environment can be found")
-                );
-        }
-    }
-
-    /**
-     * Wrapper class.
-     */
-    private static class AutoStart {
-
-        private final boolean enable;
-        private final String environment;
-
-        /**
-         * Creates a new {@link AutoStart} instance.
-         *
-         * @param enable        is all topologies should be started automatically.
-         * @param environment   the environment that should be used to topologies.
-         */
-        AutoStart(final boolean enable, final String environment) {
-            this.enable = enable;
-            this.environment = environment;
-        }
-
-        boolean isEnable(){
-            return enable;
-        }
-
-        Optional<String> environment() {
-            return Optional.ofNullable(environment);
-        }
     }
 
     private static final class EmbeddedServerLifecycle implements AzkarraContextListener {

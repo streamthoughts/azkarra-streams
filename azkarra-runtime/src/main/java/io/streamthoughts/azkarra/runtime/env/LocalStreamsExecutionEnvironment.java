@@ -18,8 +18,10 @@
  */
 package io.streamthoughts.azkarra.runtime.env;
 
+import io.streamthoughts.azkarra.api.ApplicationId;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
+import io.streamthoughts.azkarra.api.ContainerId;
 import io.streamthoughts.azkarra.api.Executed;
 import io.streamthoughts.azkarra.api.State;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
@@ -33,17 +35,18 @@ import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.events.EventStream;
 import io.streamthoughts.azkarra.api.events.EventStreamProvider;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
-import io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsApplication;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
+import io.streamthoughts.azkarra.runtime.env.internal.BasicContainerId;
 import io.streamthoughts.azkarra.runtime.env.internal.EnvironmentAwareComponentSupplier;
 import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
+import io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer;
 import io.streamthoughts.azkarra.runtime.streams.errors.CloseKafkaStreamsOnThreadException;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
 import org.apache.kafka.streams.KafkaStreams;
@@ -57,10 +60,12 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -71,8 +76,9 @@ import java.util.stream.Stream;
 /**
  * The default {@link StreamsExecutionEnvironment} implementation.
  */
-public class LocalStreamsExecutionEnvironment
-        implements StreamsExecutionEnvironment<LocalStreamsExecutionEnvironment>, AzkarraContextAware {
+public class LocalStreamsExecutionEnvironment implements
+        StreamsExecutionEnvironment<LocalStreamsExecutionEnvironment>,
+        AzkarraContextAware {
 
     public final static String TYPE = "local";
 
@@ -151,7 +157,7 @@ public class LocalStreamsExecutionEnvironment
     /**
      * The list of streams instances currently started.
      */
-    private final Map<ApplicationId, KafkaStreamsContainer> activeStreams;
+    private final Map<ContainerId, KafkaStreamsContainer> activeStreams;
 
     private AzkarraContext context;
 
@@ -170,7 +176,7 @@ public class LocalStreamsExecutionEnvironment
      *
      * @param configuration  the default {@link Conf} instance.
      */
-    public LocalStreamsExecutionEnvironment(final Conf configuration) {
+    private LocalStreamsExecutionEnvironment(final Conf configuration) {
         this(configuration, EnvironmentNameGenerator.generate());
     }
 
@@ -225,8 +231,9 @@ public class LocalStreamsExecutionEnvironment
         return isDefault;
     }
 
-    public boolean isDefault(final boolean isDefault) {
-        return this.isDefault = isDefault;
+    public LocalStreamsExecutionEnvironment isDefault(final boolean isDefault) {
+        this.isDefault = isDefault;
+        return this;
     }
 
     /**
@@ -315,19 +322,44 @@ public class LocalStreamsExecutionEnvironment
      * {@inheritDoc}
      */
     @Override
-    public Collection<KafkaStreamsContainer> applications() {
+    public Collection<KafkaStreamsContainer> getContainers() {
         return activeStreams.values();
     }
 
     /**
      * {@inheritDoc}
-     * @return
      */
     @Override
-    public Set<String> applicationIds() {
-        return activeStreams.keySet().stream().map(ApplicationId::toString).collect(Collectors.toSet());
+    public Set<ContainerId> getContainerIds() {
+        return new HashSet<>(activeStreams.keySet());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<ApplicationId> getApplicationIds() {
+        return activeStreams.values()
+            .stream()
+            .map(KafkaStreamsContainer::applicationId)
+            .map(ApplicationId::new)
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<KafkaStreamsApplication> getApplicationById(final ApplicationId id) {
+        final List<KafkaStreamsContainer> containers = getActiveContainersForApplication(id);
+        if (containers.isEmpty()) return Optional.empty();
+        var container = (LocalKafkaStreamsContainer)containers.get(0);
+        return Optional.of(new KafkaStreamsApplication(
+            name,
+            container.applicationId(),
+            container.allInstances()
+        ));
+    }
 
     /**
      * {@inheritDoc}
@@ -424,7 +456,9 @@ public class LocalStreamsExecutionEnvironment
         var applicationId = generateApplicationId(definition, topologyHolder.getTopologyConfig());
         checkStreamsIsAlreadyRunningFor(applicationId);
 
-        topologyHolder.setApplicationId(applicationId);
+        var containerId = BasicContainerId.create(applicationId).randomize(4);
+
+        topologyHolder.setContainerId(containerId);
 
         var streamsConfig = topologyConfig.hasPath("streams") ? topologyConfig.getSubConf("streams") : Conf.empty();
         var applicationIdConfig = Conf.of(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString());
@@ -435,6 +469,7 @@ public class LocalStreamsExecutionEnvironment
         var threadExceptionHandler = supply(streamThreadExceptionHandler, topologyConfig);
 
         var kafkaStreamsContainer = LocalKafkaStreamsContainer.newBuilder()
+            .withContainerId(containerId.id())
             .withStateListeners(stateListeners)
             .withRestoreListeners(restoreListeners)
             .withStreamThreadExceptionHandlers(List.of(threadExceptionHandler))
@@ -444,9 +479,8 @@ public class LocalStreamsExecutionEnvironment
             .withInterceptors(topologyHolder.getAllInterceptors())
             .build();
 
-        activeStreams.put(applicationId, kafkaStreamsContainer);
+        activeStreams.put(containerId, kafkaStreamsContainer);
         kafkaStreamsContainer.start(STREAMS_EXECUTOR);
-
         return applicationId;
     }
 
@@ -458,7 +492,7 @@ public class LocalStreamsExecutionEnvironment
         LOG.info("Stopping streams environment '{}'", name);
         checkIsStarted();
         try {
-            for (final ApplicationId id : activeStreams.keySet()) {
+            for (final ContainerId id : activeStreams.keySet()) {
                 try {
                     stop(id, cleanUp);
                 } catch (IllegalStateException e) {
@@ -477,6 +511,17 @@ public class LocalStreamsExecutionEnvironment
      */
     @Override
     public void stop(final ApplicationId id, final boolean cleanUp, final Duration timeout) {
+        final List<KafkaStreamsContainer> containers = getActiveContainersForApplication(id);
+        for (KafkaStreamsContainer container : containers) {
+            stop(new BasicContainerId(container.containerId()), cleanUp, timeout);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void stop(final ContainerId id, final boolean cleanUp, final Duration timeout) {
         checkIsStarted();
         closeStreamsContainer(id, cleanUp, timeout, false);
     }
@@ -485,9 +530,21 @@ public class LocalStreamsExecutionEnvironment
      * {@inheritDoc}
      */
     @Override
-    public void remove(final ApplicationId id, final Duration timeout) {
+    public void terminate(final ContainerId id, final Duration timeout) {
         checkIsStarted();
         closeStreamsContainer(id, true, timeout, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void terminate(final ApplicationId id, final Duration timeout) {
+        checkIsStarted();
+        final List<KafkaStreamsContainer> containers = getActiveContainersForApplication(id);
+        for (KafkaStreamsContainer container : containers) {
+            closeStreamsContainer(new BasicContainerId(container.containerId()), true, timeout, true);
+        }
     }
 
     /**
@@ -501,7 +558,7 @@ public class LocalStreamsExecutionEnvironment
      *
      * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
      */
-    private void closeStreamsContainer(final ApplicationId id,
+    private void closeStreamsContainer(final ContainerId id,
                                        final boolean cleanUp,
                                        final Duration timeout,
                                        final boolean remove) {
@@ -522,10 +579,18 @@ public class LocalStreamsExecutionEnvironment
     }
 
     private void checkStreamsIsAlreadyRunningFor(final ApplicationId id) {
-        if (activeStreams.containsKey(id)) {
+        if (!getActiveContainersForApplication(id).isEmpty()) {
             throw new AlreadyExistsException(
-                "A streams instance is already registered for application.id '" + id + "'");
+                "A local KafkaStream instance is already registered with an application.id '" + id + "'");
         }
+    }
+
+    private List<KafkaStreamsContainer> getActiveContainersForApplication(final ApplicationId id) {
+        return activeStreams.entrySet()
+            .stream()
+            .filter(it -> it.getKey().startWith(id))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
     }
 
     private void checkIsStarted() {
@@ -563,7 +628,6 @@ public class LocalStreamsExecutionEnvironment
             TopologyConfig
         );
     }
-
 
     /**
      * {@inheritDoc}
@@ -611,7 +675,7 @@ public class LocalStreamsExecutionEnvironment
 
         private final Supplier<TopologyProvider> supplier;
         private final InternalExecuted executed;
-        private ApplicationId applicationId;
+        private ContainerId containerId;
 
         /**
          * Creates a new {@link TopologyDefinitionHolder} instance.
@@ -625,8 +689,8 @@ public class LocalStreamsExecutionEnvironment
             this.executed = new InternalExecuted(executed);
         }
 
-        public void setApplicationId(final ApplicationId applicationId) {
-            this.applicationId = applicationId;
+        public void setContainerId(final ContainerId containerId) {
+            this.containerId = containerId;
         }
 
         List<StreamsLifecycleInterceptor> getAllInterceptors() {
@@ -656,15 +720,14 @@ public class LocalStreamsExecutionEnvironment
             );
         }
 
-        boolean matches(final ApplicationId applicationId) {
-            return this.applicationId.equals(applicationId);
+        boolean matches(final ContainerId containerId) {
+            return this.containerId.equals(containerId);
         }
     }
 
     private <T> T supply(final Supplier<T> supplier, final Conf componentConfig) {
         return new EnvironmentAwareComponentSupplier<>(supplier).get(this, componentConfig);
     }
-
 
     private static class InternalTopologyDefinition implements TopologyDefinition {
 

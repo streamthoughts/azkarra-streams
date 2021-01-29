@@ -20,10 +20,12 @@ package io.streamthoughts.azkarra.http.routes;
 
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.http.APIVersions;
-import io.streamthoughts.azkarra.http.handler.ContextGetHandler;
+import io.streamthoughts.azkarra.http.data.GetContextResponse;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
 import io.undertow.server.RoutingHandler;
+
+import static io.streamthoughts.azkarra.http.ExchangeHelper.sendJsonResponse;
 
 public class ApiContextRoutes implements RoutingHandlerProvider {
 
@@ -35,6 +37,6 @@ public class ApiContextRoutes implements RoutingHandlerProvider {
     @Override
     public RoutingHandler handler(final AzkarraStreamsService service) {
         return Handlers.routing()
-            .get(PATH, new ContextGetHandler(service));
+            .get(PATH, exchange -> sendJsonResponse(exchange, new GetContextResponse(service.getContextConfig())));
     }
 }

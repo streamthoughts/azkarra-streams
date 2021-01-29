@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,26 +16,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.handler;
+import httpClient from './httpClient';
 
-import io.streamthoughts.azkarra.api.AzkarraStreamsService;
-import io.undertow.server.HttpServerExchange;
+const API_V1 = '/api/v1';
 
-public class StreamsRestartHandler extends AbstractStreamHttpHandler implements WithApplication {
+class AzkarraApi {
 
-    /**
-     * Creates a new {@link StreamsRestartHandler} instance.
-     *
-     * @param service   the {@link AzkarraStreamsService} instance.
-     */
-    public StreamsRestartHandler(final AzkarraStreamsService service) {
-        super(service);
+    getApiV1() {
+        return httpClient.get(API_V1);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void handleRequest(final HttpServerExchange exchange, final String applicationId) {
-        service.restartStreams(applicationId);
+    getVersion() {
+        return httpClient.get("/version");
+    }
+
+    getHealth() {
+        return httpClient.get("/health", {errorInterceptorEnabled: false});
+    }
+
+    getInfo() {
+        return httpClient.get("/info");
     }
 }
+
+const azkarraApi = new AzkarraApi();
+export default azkarraApi;

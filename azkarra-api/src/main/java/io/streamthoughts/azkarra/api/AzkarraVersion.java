@@ -23,6 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+/**
+ * A {@link AzkarraVersion} is used to get version information about the running azkarra library.
+ */
 public class AzkarraVersion {
 
     private static final Logger LOG = LoggerFactory.getLogger(AzkarraVersion.class);

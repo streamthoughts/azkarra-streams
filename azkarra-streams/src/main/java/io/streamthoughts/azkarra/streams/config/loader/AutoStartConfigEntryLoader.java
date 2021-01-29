@@ -26,7 +26,7 @@ import io.streamthoughts.azkarra.streams.AzkarraApplication;
 
 public class AutoStartConfigEntryLoader extends AbstractConfigEntryLoader {
 
-    public static final String CONFIG_ENTRY_KEY = "autoStart";
+    public static final String CONFIG_ENTRY_KEY = "autostart";
 
     public AutoStartConfigEntryLoader() {
         super(CONFIG_ENTRY_KEY);

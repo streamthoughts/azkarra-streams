@@ -30,6 +30,7 @@ import io.streamthoughts.azkarra.api.query.QueryableKafkaStreams;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
 import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.Serde;
@@ -38,7 +39,6 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyDescription;
 import org.apache.kafka.streams.processor.ThreadMetadata;
-import org.apache.kafka.streams.state.HostInfo;
 
 import java.time.Duration;
 import java.util.List;
@@ -47,6 +47,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+/**
+ * A {@code KafkaStreamsContainer} is used to encapsulate and to manipulate a {@link KafkaStreams} instance
+ * that can be running either locally or remotely.
+ */
 public interface KafkaStreamsContainer extends QueryableKafkaStreams {
 
     /**
@@ -101,18 +105,27 @@ public interface KafkaStreamsContainer extends QueryableKafkaStreams {
     Conf streamsConfig();
 
     /**
+     * Gets the id for this container.
+     *
+     * @return  a string container id.
+     */
+    String containerId();
+
+    /**
      * Gets configured {@link StreamsConfig#APPLICATION_ID_CONFIG} for this {@link KafkaStreams} instance.
      *
-     * @return  a string application.id.
+     * @return  a string {@code application.id}
      */
     String applicationId();
 
     /**
-     * Gets configured {@link StreamsConfig#APPLICATION_SERVER_CONFIG} for this {@link KafkaStreams} instance.
+     * Gets the endpoint configured for this {@link KafkaStreams} instance.
      *
-     * @return  a string application.server.
+     * @see StreamsConfig#APPLICATION_SERVER_CONFIG
+     *
+     * @return  an optional {@link Endpoint}
      */
-    String applicationServer();
+    Optional<Endpoint> endpoint();
 
     /**
      * Gets the last observed exception thrown the {@link KafkaStreams} instance.
@@ -202,12 +215,12 @@ public interface KafkaStreamsContainer extends QueryableKafkaStreams {
     }
 
     /**
-     * Checks whether the given {@link HostInfo} is the same as this container.
+     * Checks whether the given {@link Endpoint} is the same as this container.
      *
-     * @param info  the {@link HostInfo} to verify.
-     * @return      {@code true} if the given host
+     * @param endpoint  the {@link Endpoint} to verify.
+     * @return          {@code true} if the given host
      */
-    boolean isSameHost(final HostInfo info);
+    boolean checkEndpoint(final Endpoint endpoint);
 
     /**
      * Gets the partition lag for all local state store.
@@ -217,13 +230,12 @@ public interface KafkaStreamsContainer extends QueryableKafkaStreams {
      */
     List<LocalStorePartitionLags> allLocalStorePartitionLags();
 
-    Optional<ServerMetadata> localServerMetadata();
-
     /**
-     * @see KafkaStreams#allMetadata().
+     * Describes the local {@code KafkaStreams} instance.
+     *
+     * @return  the {@link KafkaStreamsInstance} instance.
      */
-    Set<ServerMetadata> allMetadata();
-
+    KafkaStreamsInstance describe();
 
     /**
      * Creates a new {@link Producer} instance using the same configs that the Kafka Streams instance.
@@ -239,9 +251,29 @@ public interface KafkaStreamsContainer extends QueryableKafkaStreams {
      */
     AdminClient getAdminClient();
 
-    EventStreamPublisher eventStreamPublisherForType(final String eventType);
+    /**
+     * Gets a new {@link EventStreamPublisher} for the given event-tye.
+     *
+     * @param eventType the {@link EventStream} type.
+     * @return          a new {@link EventStreamPublisher} instance.
+     */
+    <K, V> EventStreamPublisher<K, V> getEventStreamPublisherForType(final String eventType);
 
+    /**
+     * Registers a new {@link EventStream} to this container.
+     *
+     * @param eventStream   the {@link EventStream} to register.
+     * @param <K>   the record key-type.
+     * @param <V>   the record value-type.
+     */
     <K, V> void registerEventStream(final EventStream<K, V> eventStream);
+
+    /**
+     * Gets the set of registered event streams.
+     *
+     * @return  the {@link Set} of event-streams.
+     */
+    Set<String> listRegisteredEventStreamTypes();
 
     /**
      * Register a watcher to be notified of {@link KafkaStreams.State} change event.

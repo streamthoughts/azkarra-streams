@@ -21,7 +21,7 @@ package io.streamthoughts.azkarra.runtime.query;
 import io.streamthoughts.azkarra.api.query.QueryOptions;
 import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
-import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -33,13 +33,15 @@ public interface RemoteStateStoreClient {
     /**
      * Query a remote Kafka Streams state store using the specified server.
      *
-     * @param server        the {@link ServerHostInfo}.
+     * @param application   the Kafka Streams {@code application.id}.
+     * @param endpoint      the {@link Endpoint}.
      * @param queryObject   the {@link QueryRequest}.
      * @param queryOptions  the {@link QueryOptions}.
      *
      * @return  a {@link CompletableFuture} of {@link QueryResult}.
      */
-    <K, V> CompletableFuture<QueryResult<K, V>> query(final ServerHostInfo server,
+    <K, V> CompletableFuture<QueryResult<K, V>> query(final String application,
+                                                      final Endpoint endpoint,
                                                       final QueryRequest queryObject,
                                                       final QueryOptions queryOptions);
 }

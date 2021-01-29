@@ -65,6 +65,10 @@ public class Metric {
         return value;
     }
 
+    public String group() {
+        return group;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

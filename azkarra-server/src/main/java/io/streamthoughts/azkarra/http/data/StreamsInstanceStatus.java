@@ -16,31 +16,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.handler;
+package io.streamthoughts.azkarra.http.data;
 
-import io.streamthoughts.azkarra.api.AzkarraStreamsService;
-import io.streamthoughts.azkarra.http.ExchangeHelper;
-import io.undertow.server.HttpServerExchange;
+import org.apache.kafka.streams.processor.ThreadMetadata;
 
 import java.util.Set;
 
-public class EnvironmentTypesGetListHandler extends AbstractStreamHttpHandler {
+public class StreamsInstanceStatus {
+
+    private final String applicationId;
+    private final String state;
+    private final Set<ThreadMetadata> threads;
 
     /**
-     * Creates a new {@link EnvironmentTypesGetListHandler} instance.
+     * Creates a new {@link StreamsInstanceStatus} instance.
      *
-     * @param service   the {@link AzkarraStreamsService} instance.
+     * @param threads   the set of {@link ThreadMetadata} instance.
      */
-    public EnvironmentTypesGetListHandler(final AzkarraStreamsService service) {
-        super(service);
+    public StreamsInstanceStatus(final String applicationId,
+                                 final String state,
+                                 final Set<ThreadMetadata> threads) {
+        this.applicationId = applicationId;
+        this.state = state;
+        this.threads = threads;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void handleRequest(final HttpServerExchange exchange) {
-        final Set<String> environments = service.getSupportedEnvironmentTypes();
-        ExchangeHelper.sendJsonResponse(exchange, environments);
+    public String getId() {
+        return applicationId;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public Set<ThreadMetadata> getThreads() {
+        return threads;
     }
 }

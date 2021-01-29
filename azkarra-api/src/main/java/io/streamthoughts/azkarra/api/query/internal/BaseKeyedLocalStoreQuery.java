@@ -43,8 +43,8 @@ public abstract class BaseKeyedLocalStoreQuery<K1, K2, V>
                              final K1 key,
                              final Serializer<K1> keySerializer) {
         super(query);
-        this.key = key;
-        this.keySerializer = keySerializer;
+        this.key = Objects.requireNonNull(key, "key should not be null");
+        this.keySerializer = Objects.requireNonNull(keySerializer, "keySerializer should not be null");
     }
 
     /**

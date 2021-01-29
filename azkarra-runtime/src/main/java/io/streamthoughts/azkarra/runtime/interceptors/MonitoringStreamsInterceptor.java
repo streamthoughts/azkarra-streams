@@ -82,7 +82,7 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
         final Map<String, Object> producerConfigs = config.getProducerConfigs(clientId);
         producer = container.createNewProducer(producerConfigs);
 
-        final var advertisedServer = config.getAdvertisedServer().orElse(container.applicationServer());
+        final var advertisedServer = config.getAdvertisedServer().orElse(container.endpoint().get().listener());
         final var eventsContext = new CloudEventsContext(container.applicationId(), advertisedServer, queryClusterId());
         taskSupplier = () -> new MonitoringStreamsTask(
             eventsContext,

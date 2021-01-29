@@ -76,18 +76,25 @@ public class DefaultInteractiveQueryService implements InteractiveQueryService {
     public <K, V> QueryResult<K, V> execute(final String applicationId,
                                             final QueryRequest queryRequest,
                                             final QueryOptions queryOptions) {
+        Objects.requireNonNull(applicationId, "applicationId should not be null");
+        Objects.requireNonNull(queryRequest, "queryRequest should not be null");
+        Objects.requireNonNull(queryOptions, "queryOptions should not be null");
         final long now = Time.SYSTEM.milliseconds();
 
-        final KafkaStreamsContainer container = service.getStreamsById(applicationId);
-
-        checkIsRunning(container);
+        var container =  service.getAllStreamsContainersById(applicationId)
+            .stream()
+            .filter(KafkaStreamsContainer::isRunning)
+            .findFirst()
+            .orElseThrow(() -> new InvalidStreamsStateException(
+                "Failed to find running Kafka Streams instance for application id '" + applicationId + "'"
+            ));
 
         // Validate the query so that we can build a custom result.
         final Optional<List<Error>> errors = queryRequest.validate();
 
         if (errors.isPresent()) {
             QueryResultBuilder<K, V> queryBuilder = QueryResultBuilder.newBuilder();
-            final String server = container.applicationServer();
+            final String server = container.endpoint().get().listener();
             return queryBuilder
                 .setServer(server)
                 .setTook(Time.SYSTEM.milliseconds() - now)
@@ -118,14 +125,5 @@ public class DefaultInteractiveQueryService implements InteractiveQueryService {
      */
     public void registerQueryExecutionDelegatee(final QueryExecutionDelegatee delegatee) {
         this.executors.add(Objects.requireNonNull(delegatee, "delegatee cannot be null"));
-    }
-
-    private void checkIsRunning(final KafkaStreamsContainer streams) {
-        if (!streams.isRunning()) {
-            throw new InvalidStreamsStateException(
-                    "streams instance for id '" + streams.applicationId() +
-                            "' is not running (" + streams.state().value() + ")"
-            );
-        }
     }
 }

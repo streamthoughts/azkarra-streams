@@ -21,7 +21,6 @@ package io.streamthoughts.azkarra.http.routes;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.util.Version;
 import io.streamthoughts.azkarra.http.APIVersions;
-import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.handler.AbstractStreamHttpHandler;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
@@ -32,10 +31,17 @@ import io.undertow.server.RoutingHandler;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static io.streamthoughts.azkarra.http.ExchangeHelper.getQueryParam;
+import static io.streamthoughts.azkarra.http.ExchangeHelper.sendJsonResponse;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_TYPE;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_VERSION;
+
 /**
  * This class defines all routes for API '/topologies'.
  */
 public class ApiTopologyRoutes implements RoutingHandlerProvider {
+
+    private static final String TOPOLOGIES_PREFIX_PATH = APIVersions.PATH_V1 + "/topologies";
 
     /**
      * Creates a new {@link ApiTopologyRoutes} instance.
@@ -50,30 +56,33 @@ public class ApiTopologyRoutes implements RoutingHandlerProvider {
     public RoutingHandler handler(final AzkarraStreamsService service) {
 
         return Handlers.routing()
-            .get(APIVersions.PATH_V1 + "/topologies",
+            .get(template(""),
                 handlerFor(service, exchange -> {
-                    ExchangeHelper.sendJsonResponse(exchange, service.getAllTopologies());
+                    sendJsonResponse(exchange, service.getAllTopologies());
                 })
             )
-            .get(APIVersions.PATH_V1 + "/topologies/{type}/versions",
-                handlerFor(service, exchange -> {
-                    var type = ExchangeHelper.getQueryParam(exchange, "type");
-                    var versions = service.getTopologyVersionsByAlias(type)
-                        .stream()
-                        .map(Version::toString)
-                        .collect(Collectors.toSet());
-                    ExchangeHelper.sendJsonResponse(exchange, versions);
-                })
+            .get(template("/{type}/versions"),
+                    handlerFor(service, exchange -> {
+                        var type = getQueryParam(exchange, HTTP_QUERY_PARAM_TYPE);
+                        var versions = service.getTopologyVersionsByAlias(type)
+                                .stream()
+                                .map(Version::toString)
+                                .collect(Collectors.toSet());
+                        sendJsonResponse(exchange, versions);
+                    })
             )
-            .get(APIVersions.PATH_V1 + "/topologies/{type}/versions/{version}",
+            .get(template("/{type}/versions/{version}"),
                 handlerFor(service, exchange -> {
-                    var type = ExchangeHelper.getQueryParam(exchange, "type");
-                    var version = ExchangeHelper.getQueryParam(exchange, "version");
-                    ExchangeHelper.sendJsonResponse(exchange,
-                        service.getTopologyByAliasAndVersion(type, version)
-                    );
+                    var type = getQueryParam(exchange, HTTP_QUERY_PARAM_TYPE);
+                    var version = getQueryParam(exchange, HTTP_QUERY_PARAM_VERSION);
+                    sendJsonResponse(exchange, service.getTopologyByAliasAndVersion(type, version));
                 })
             );
+
+    }
+
+    private static String template(final String path) {
+        return TOPOLOGIES_PREFIX_PATH + path;
     }
 
     private HttpHandler handlerFor(final AzkarraStreamsService service,

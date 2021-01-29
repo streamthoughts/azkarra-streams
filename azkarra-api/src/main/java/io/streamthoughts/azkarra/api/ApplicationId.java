@@ -16,14 +16,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.api;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.streamthoughts.azkarra.api.model.HasId;
 
 import java.util.Objects;
 
 /**
- * Simple class to wrap the value of {@link org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG}.
+ * An interface representing an ID to uniquely identify a KafkaStreams application running either locally or remotely.
+ *
+ * @see org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG
  */
-public class ApplicationId {
+public class ApplicationId implements HasId {
 
     private final String id;
 
@@ -33,9 +39,18 @@ public class ApplicationId {
      *
      * @throws NullPointerException if the specified id is {@code null}.
      */
-    public ApplicationId(final String id) {
-        Objects.requireNonNull(id, "id cannot be null");
-        this.id = id;
+    @JsonCreator
+    public ApplicationId(@JsonProperty("id") final String id) {
+        this.id = Objects.requireNonNull(id, "id should not be null");;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @JsonProperty("id")
+    public String id() {
+        return id;
     }
 
     /**
@@ -64,4 +79,5 @@ public class ApplicationId {
     public String toString() {
         return id;
     }
+
 }

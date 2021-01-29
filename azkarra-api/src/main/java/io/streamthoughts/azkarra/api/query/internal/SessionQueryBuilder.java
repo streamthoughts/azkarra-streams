@@ -24,6 +24,8 @@ import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.util.Objects;
@@ -33,6 +35,8 @@ import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_
 import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_TO;
 
 public class SessionQueryBuilder implements QueryOperationBuilder {
+
+    private static Serializer DEFAULT_SERIALIZER = new StringSerializer();
 
     private final String store;
 
@@ -87,7 +91,7 @@ public class SessionQueryBuilder implements QueryOperationBuilder {
         @Override
         public LocalExecutableQuery<Windowed<K>, V> compile(final QueryParams params) {
             final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
-            return new SessionFetchQuery<>(store, p.getValue(QUERY_PARAM_KEY), null);
+            return new SessionFetchQuery<>(store, p.getValue(QUERY_PARAM_KEY), DEFAULT_SERIALIZER);
         }
     }
 

@@ -18,17 +18,16 @@
  */
 package io.streamthoughts.azkarra.api.query;
 
-import io.streamthoughts.azkarra.api.streams.ServerMetadata;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import org.apache.kafka.common.serialization.Serializer;
-import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyQueryMetadata;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlySessionStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.apache.kafka.streams.state.ValueAndTimestamp;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 public interface LocalStoreAccessProvider {
 
@@ -83,10 +82,7 @@ public interface LocalStoreAccessProvider {
     <K, V> LocalStoreAccessor<ReadOnlySessionStore<K, V>> localSessionStore(final String store);
 
 
-    /**
-     * @see KafkaStreams#allMetadataForStore(String).
-     */
-    Collection<ServerMetadata> allMetadataForStore(final String storeName);
+    Set<Endpoint> findAllEndpointsForStore(final String storeName);
 
     <K> Optional<KeyQueryMetadata> findMetadataForStoreAndKey(final String storeName,
                                                               final K key,

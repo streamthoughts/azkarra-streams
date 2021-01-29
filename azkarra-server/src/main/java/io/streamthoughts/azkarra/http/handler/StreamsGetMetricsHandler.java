@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.http.handler;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
+import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.model.Metric;
 import io.streamthoughts.azkarra.api.model.MetricGroup;
@@ -27,8 +28,7 @@ import io.streamthoughts.azkarra.api.model.predicate.GroupMetricFilter;
 import io.streamthoughts.azkarra.api.model.predicate.NameMetricFilter;
 import io.streamthoughts.azkarra.api.model.predicate.NonNullMetricFilter;
 import io.streamthoughts.azkarra.api.monad.Tuple;
-import io.streamthoughts.azkarra.http.ExchangeHelper;
-import io.streamthoughts.azkarra.api.AzkarraStreamsService;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.http.error.MetricNotFoundException;
 import io.streamthoughts.azkarra.http.prometheus.KafkaStreamsMetricsCollector;
 import io.undertow.server.HttpServerExchange;
@@ -42,7 +42,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class StreamsGetMetricsHandler extends AbstractStreamHttpHandler implements WithApplication {
+import static io.streamthoughts.azkarra.http.ExchangeHelper.getOptionalQueryParam;
+import static io.streamthoughts.azkarra.http.ExchangeHelper.getQueryParam;
+import static io.streamthoughts.azkarra.http.ExchangeHelper.sendJsonResponse;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_FILTER_EMPTY;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_FORMAT;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_FORMAT_VALUE_PROMETHEUS;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_GROUP;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_ID;
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_METRIC;
+
+public class StreamsGetMetricsHandler extends AbstractStreamHttpHandler {
 
     /**
      * Creates a new {@link StreamsGetMetricsHandler} instance.
@@ -57,11 +67,12 @@ public class StreamsGetMetricsHandler extends AbstractStreamHttpHandler implemen
      * {@inheritDoc}
      */
     @Override
-    public void handleRequest(final HttpServerExchange exchange, final String applicationId) {
-        final Optional<String> empty = ExchangeHelper.getOptionalQueryParam(exchange, "filter_empty");
-        final Optional<String> group = ExchangeHelper.getOptionalQueryParam(exchange, "group");
-        final Optional<String> name  = ExchangeHelper.getOptionalQueryParam(exchange, "metric");
-        final Optional<String> format  = ExchangeHelper.getOptionalQueryParam(exchange, "format");
+    public void handleRequest(final HttpServerExchange exchange) {
+        final Optional<String> empty = getOptionalQueryParam(exchange, HTTP_QUERY_PARAM_FILTER_EMPTY);
+        final Optional<String> group = getOptionalQueryParam(exchange, HTTP_QUERY_PARAM_GROUP);
+        final Optional<String> name  = getOptionalQueryParam(exchange, HTTP_QUERY_PARAM_METRIC);
+        final Optional<String> format  = getOptionalQueryParam(exchange, HTTP_QUERY_PARAM_FORMAT);
+        final String containerId = getQueryParam(exchange, HTTP_QUERY_PARAM_ID);
 
         Optional<Predicate<Tuple<String, Metric>>> all = Optional.of(t -> true);
 
@@ -71,10 +82,10 @@ public class StreamsGetMetricsHandler extends AbstractStreamHttpHandler implemen
             .map(predicate -> name.map(NameMetricFilter::new).map(predicate::and).orElse(predicate))
             .get();
 
-        if (format.isPresent() && format.get().equals("prometheus")) {
+        if (format.isPresent() && format.get().equals(HTTP_QUERY_PARAM_FORMAT_VALUE_PROMETHEUS)) {
 
             CollectorRegistry registry = new CollectorRegistry();
-            new KafkaStreamsMetricsCollector(service, filter, applicationId).register(registry);
+            new KafkaStreamsMetricsCollector(service, filter, containerId).register(registry);
 
             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, TextFormat.CONTENT_TYPE_004);
 
@@ -85,7 +96,8 @@ public class StreamsGetMetricsHandler extends AbstractStreamHttpHandler implemen
                 throw new AzkarraException("Unexpected error happens while writing metrics", e);
             }
         } else {
-            Set<MetricGroup> groupSet = service.getStreamsMetricsById(applicationId, filter);
+            final KafkaStreamsContainer container = service.getStreamsContainerById(containerId);
+            final Set<MetricGroup> groupSet = container.metrics(KafkaStreamsContainer.KafkaMetricFilter.of(filter));
 
             final Optional<Metric> metric = groupSet.stream()
                     .flatMap(g -> g.metrics().stream())
@@ -101,9 +113,9 @@ public class StreamsGetMetricsHandler extends AbstractStreamHttpHandler implemen
 
             boolean extractValue = exchange.getRelativePath().endsWith("/value");
             if (name.isPresent() && extractValue) {
-                ExchangeHelper.sendJsonResponse(exchange, metric.get().value());
+                sendJsonResponse(exchange, metric.get().value());
             } else {
-                ExchangeHelper.sendJsonResponse(exchange, groupSet);
+                sendJsonResponse(exchange, groupSet);
             }
         }
     }

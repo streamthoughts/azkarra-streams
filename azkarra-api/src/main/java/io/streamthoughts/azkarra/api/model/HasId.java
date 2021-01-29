@@ -18,38 +18,29 @@
  */
 package io.streamthoughts.azkarra.api.model;
 
-import org.apache.kafka.streams.processor.ThreadMetadata;
-
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class StreamsStatus {
+/**
+ * An interface representing a model that has an identifier.
+ */
+public interface HasId {
 
-    private final String applicationId;
-    private final String state;
-    private final Set<ThreadMetadata> threads;
+    String id();
+
+    default boolean startWith(final HasId hasId) {
+        return id().startsWith(hasId.id());
+    }
 
     /**
-     * Creates a new {@link StreamsStatus} instance.
+     * Helper method to get string ids from a collection of {@link HasId} objects.
      *
-     * @param threads   the set of {@link ThreadMetadata} instance.
+     * @param collections   the collection of {@link HasId}.
+     *
+     * @return              a set containing only the string ids.
      */
-    public StreamsStatus(final String applicationId,
-                         final String state,
-                         final Set<ThreadMetadata> threads) {
-        this.applicationId = applicationId;
-        this.state = state;
-        this.threads = threads;
-    }
-
-    public String getId() {
-        return applicationId;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public Set<ThreadMetadata> getThreads() {
-        return threads;
+    static Set<String> getIds(final Collection<? extends HasId> collections) {
+        return collections.stream().map(HasId::id).collect(Collectors.toSet());
     }
 }

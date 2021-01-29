@@ -1,21 +1,21 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2019-2021 StreamThoughts.
+*
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements. See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License. You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 <template>
   <div>
     <div class="vue-json-editor"></div>
@@ -79,7 +79,7 @@ export default {
             self.$emit("json-change", json);
             self.internalChange = true;
             self.$emit("input", json);
-            self.$nextTick(function() {
+            self.$nextTick(function () {
               self.internalChange = false;
             });
           } catch (e) {
@@ -89,9 +89,9 @@ export default {
       };
 
       this.editor = new JsonEditor(
-        this.$el.querySelector(".vue-json-editor"),
-        options,
-        this.json
+          this.$el.querySelector(".vue-json-editor"),
+          options,
+          this.json
       );
     }
   }
@@ -99,9 +99,9 @@ export default {
 </script>
 
 <style lang="css">
- .vue-json-editor .jsoneditor {
-   border: 1px solid #ced4da;
-   border-radius: .25rem;
-   padding: .375rem .75rem;
- }
+.vue-json-editor .jsoneditor {
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  padding: .375rem .75rem;
+}
 </style>

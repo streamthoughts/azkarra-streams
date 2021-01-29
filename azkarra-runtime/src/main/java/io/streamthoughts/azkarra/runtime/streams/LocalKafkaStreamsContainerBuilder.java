@@ -55,6 +55,7 @@ public class LocalKafkaStreamsContainerBuilder {
         new MonitorConsumerInterceptorConfigDecorator()
     );
 
+    private String containerId;
     private TopologyDefinition topologyDefinition;
     private KafkaStreamsFactory kafkaStreamsFactory;
     private Conf streamsConfig;
@@ -62,6 +63,11 @@ public class LocalKafkaStreamsContainerBuilder {
     private List<KafkaStreams.StateListener> stateListeners = Collections.emptyList();
     private List<StreamThreadExceptionHandler> exceptionHandlers = Collections.emptyList();
     private List<StreamsLifecycleInterceptor> interceptors = Collections.emptyList();
+
+    public LocalKafkaStreamsContainerBuilder withContainerId(final String containerId) {
+        this.containerId = containerId;
+        return this;
+    }
 
     public LocalKafkaStreamsContainerBuilder withStreamsConfig(final Conf streamsConfig) {
         this.streamsConfig = streamsConfig;
@@ -112,6 +118,7 @@ public class LocalKafkaStreamsContainerBuilder {
 
         final var delegatingKafkaStreamsFactory = new DelegatingKafkaStreamsFactory(kafkaStreamsFactory);
         final var container = new LocalKafkaStreamsContainer(
+            containerId,
             enrichedStreamsConfig,
             topologyDefinition,
             delegatingKafkaStreamsFactory,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,27 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.handler;
+package io.streamthoughts.azkarra.api;
 
-import io.streamthoughts.azkarra.api.AzkarraStreamsService;
-import io.undertow.server.HttpServerExchange;
+import io.streamthoughts.azkarra.api.model.HasId;
 
-public class StreamsDeleteHandler extends AbstractStreamHttpHandler implements WithApplication {
+/**
+ * An interface representing an ID to uniquely identify a KafkaStreams instance running either locally or remotely.
+ */
+public interface ContainerId extends HasId {
 
-    /**
-     * Creates a new {@link StreamsDeleteHandler} instance.
-     *
-     * @param service   the {@link AzkarraStreamsService} instance.
-     */
-    public StreamsDeleteHandler(final AzkarraStreamsService service) {
-        super(service);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void handleRequest(final HttpServerExchange exchange, final String applicationId) {
-        service.deleteStreams(applicationId);
-    }
 }

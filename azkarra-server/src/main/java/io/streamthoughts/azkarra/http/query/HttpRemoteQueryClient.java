@@ -26,7 +26,8 @@ import io.streamthoughts.azkarra.api.query.result.QueryError;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
-import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.api.util.Endpoint;
+import io.streamthoughts.azkarra.http.serialization.json.JsonQuerySerde;
 import io.streamthoughts.azkarra.runtime.query.RemoteStateStoreClient;
 import io.streamthoughts.azkarra.serialization.Serdes;
 import okhttp3.Call;
@@ -76,13 +77,12 @@ public class HttpRemoteQueryClient implements RemoteStateStoreClient {
      * {@inheritDoc}
      */
     @Override
-    public <K, V> CompletableFuture<QueryResult<K, V>> query(final ServerHostInfo serverInfo,
+    public <K, V> CompletableFuture<QueryResult<K, V>> query(final String application,
+                                                             final Endpoint endpoint,
                                                              final QueryRequest query,
                                                              final QueryOptions options) {
-        final String server = serverInfo.hostAndPort();
-
-        final String path = queryURLBuilder.buildURL(server, serverInfo.id(), query.getStoreName());
-
+        final String server = endpoint.listener();
+        final String path = queryURLBuilder.buildURL(server, application, query.getStoreName());
         final String json = JsonQuerySerde.serialize(query, options);
 
         Request request = new Request.Builder()

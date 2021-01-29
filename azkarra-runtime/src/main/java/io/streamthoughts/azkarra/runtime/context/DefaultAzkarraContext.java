@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.runtime.context;
 
+import io.streamthoughts.azkarra.api.ApplicationId;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraContextListener;
@@ -43,7 +44,6 @@ import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsEnvironmentException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.query.InteractiveQueryService;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
 import io.streamthoughts.azkarra.runtime.StreamsExecutionEnvironmentAbstractFactory;
@@ -97,7 +97,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultAzkarraContext.class);
 
-    public static final String DEFAULT_ENV_NAME = "__default";
+    public static final String DEFAULT_ENV_NAME = "default";
 
     /**
      * Static helper that can be used to creates a new {@link AzkarraContext} instance
@@ -133,8 +133,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
     }
 
     private boolean registerShutdownHook;
-
-    private StreamsExecutionEnvironment<?> defaultEnvironment;
 
     private final Map<String, StreamsExecutionEnvironment<?>> environments;
 
@@ -306,35 +304,35 @@ public class DefaultAzkarraContext implements AzkarraContext {
      * {@inheritDoc}
      */
     @Override
-    public ApplicationId addTopology(final String type, final Executed executed) {
-        return addTopology(type, DEFAULT_ENV_NAME, executed);
+    public Optional<ApplicationId> addTopology(final String type, final Executed executed) {
+        return addTopology(type, null, executed);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ApplicationId addTopology(final Class<? extends TopologyProvider> type, final Executed executed) {
-        return addTopology(type, DEFAULT_ENV_NAME, executed);
+    public Optional<ApplicationId> addTopology(final Class<? extends TopologyProvider> type, final Executed executed) {
+        return addTopology(type, null, executed);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ApplicationId addTopology(final Class<? extends TopologyProvider> type,
-                                     final String envName,
-                                     final Executed executed) {
-        return addTopology(type.getName(), envName, executed);
+    public Optional<ApplicationId> addTopology(final Class<? extends TopologyProvider> type,
+                                              final String environment,
+                                              final Executed executed) {
+        return addTopology(type.getName(), environment, executed);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ApplicationId addTopology(final String type,
-                                     final String environment,
-                                     final Executed executed) {
+    public Optional<ApplicationId> addTopology(final String type,
+                                               final String environment,
+                                               final Executed executed) {
         return addTopology(type, null, environment, executed);
     }
 
@@ -342,10 +340,10 @@ public class DefaultAzkarraContext implements AzkarraContext {
      * {@inheritDoc}
      */
     @Override
-    public ApplicationId addTopology(final String type,
-                                     final String version,
-                                     final String environment,
-                                     final Executed executed) {
+    public Optional<ApplicationId> addTopology(final String type,
+                                               final String version,
+                                               final String environment,
+                                               final Executed executed) {
 
         final TopologyRegistration registration = new TopologyRegistration(type, version, environment, executed);
 
@@ -354,7 +352,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
            res = mayAddTopologyToEnvironment(registration);
         else
             topologyRegistrations.add(registration);
-        return res;
+        return Optional.ofNullable(res);
     }
 
     public void setState(final State state) {
@@ -373,15 +371,20 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     private ApplicationId mayAddTopologyToEnvironment(final TopologyRegistration registration) {
         Objects.requireNonNull(registration, "registration cannot be null");
-        checkIfEnvironmentExists(
-            registration.environment,
-            String.format(
-                "Error while adding topology '%s', environment '%s' not found",
-                registration.type,
-                registration.environment
-        ));
 
-        final var environment = environments.get(registration.environment);
+        final StreamsExecutionEnvironment <?> environment;
+        if (registration.environment != null) {
+            checkIfEnvironmentExists(
+                registration.environment,
+                String.format(
+                    "Error while adding topology '%s', environment '%s' not found",
+                    registration.type,
+                    registration.environment
+                ));
+            environment = environments.get(registration.environment);
+        } else {
+            environment = getDefaultEnvironment();
+        }
 
         // Attempt to register the topology as a component if it is missing.
         if (!componentFactory.containsComponent(registration.type)) {
@@ -418,7 +421,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
         } else {
             final String loggedVersion = registration.version != null ? registration.version : "latest";
             throw new AzkarraContextException(
-               "Failed to register topology to environment '" + registration.environment + "'."
+               "Failed to register topology to environment '" + environment.name() + "'."
                + " Cannot find any topology provider for type='" + registration.type
                + "', version='" + loggedVersion +" '."
             );
@@ -476,7 +479,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public StreamsExecutionEnvironment<?> getEnvironmentForName(final String name) {
         Objects.requireNonNull(name, "name cannot be null");
-        checkIfEnvironmentExists(name, "No environment can be found for name " + name);
+        checkIfEnvironmentExists(name, "Failed to find environment for name '" + name + "'");
         return environments.get(name);
     }
 
@@ -485,7 +488,12 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public StreamsExecutionEnvironment<?> getDefaultEnvironment() {
-        return defaultEnvironment;
+        return getAllEnvironments()
+            .stream()
+            .filter(env -> env.isDefault() || env.name().equals(DEFAULT_ENV_NAME))
+            .findFirst()
+            .orElse(null);
+
     }
 
     /**
@@ -581,12 +589,13 @@ public class DefaultAzkarraContext implements AzkarraContext {
             throw new AzkarraContextException("Too many default environments " + strDefault);
         }
 
-        if (defaults.size() == 1) {
-            defaultEnvironment = defaults.get(0);
-        } else {
+        if (defaults.isEmpty()) {
             LOG.warn("No default environment can be found, initializing a new one with name {}", DEFAULT_ENV_NAME);
-            defaultEnvironment = getComponent(StreamsExecutionEnvironmentFactory.class).create(DEFAULT_ENV_NAME);
-            addExecutionEnvironment(defaultEnvironment);
+            addExecutionEnvironment(
+                getComponent(StreamsExecutionEnvironmentFactory.class)
+                    .create(DEFAULT_ENV_NAME)
+                    .isDefault(true)
+            );
         }
     }
 
@@ -661,9 +670,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
                              final String version,
                              final String environment,
                              final Executed executed) {
-            this.type = type;
-            this.version = version;
+            this.type = Objects.requireNonNull(type, "type should not be null");
             this.environment = environment;
+            this.version = version;
             this.executed = new InternalExecuted(executed);
         }
 

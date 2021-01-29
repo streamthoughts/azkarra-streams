@@ -30,8 +30,9 @@ import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
-import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
-import io.streamthoughts.azkarra.api.streams.ServerMetadata;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsInstance;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsMetadata;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer;
 import org.apache.kafka.streams.KeyQueryMetadata;
 import org.apache.kafka.streams.KeyValue;
@@ -41,8 +42,8 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -58,9 +59,9 @@ import static org.mockito.Mockito.when;
 
 public class DistributedQueryCallTest {
 
-    public static final String STORE_NAME = "STORE_NAME";
-
-    public static final String REMOTE_SERVER = "remote:1234";
+    private static final String STORE_NAME = "STORE_NAME";
+    private static final Endpoint LOCAL_ENDPOINT = new Endpoint("local", 1234);
+    private static final Endpoint REMOTE_ENDPOINT = new Endpoint("remote", 1234);
 
     private RemoteStateStoreClient client;
 
@@ -73,16 +74,17 @@ public class DistributedQueryCallTest {
         client = mock(RemoteStateStoreClient.class);
         container = mock(LocalKafkaStreamsContainer.class);
         when(container.isRunning()).thenReturn(true);
+        when(container.endpoint()).thenReturn(Optional.of(LOCAL_ENDPOINT));
         when(container.defaultKeySerde())
             .thenReturn(Optional.empty());
 
-        when(client.query(any(), any(), any()))
+        when(client.query(any(), any(), any(), any()))
             .thenReturn(CompletableFuture.completedFuture(
                 new QueryResultBuilder<>()
-                    .setServer(REMOTE_SERVER)
+                    .setServer(REMOTE_ENDPOINT.toString())
                     .setStatus(QueryStatus.SUCCESS)
                     .setSuccessResultSet(Collections.singletonList(
-                            new SuccessResultSet<>(REMOTE_SERVER, true, Collections.singletonList(KV.of("key", 42L)) )))
+                            new SuccessResultSet<>(REMOTE_ENDPOINT.toString(), true, Collections.singletonList(KV.of("key", 42L)) )))
                     .build()
             ));
     }
@@ -90,10 +92,7 @@ public class DistributedQueryCallTest {
     @Test
     public void shouldQueryLocalKVStateStoreGivenKeyQuery() {
         call = new DistributedQueryCall<>(newLocalExecutableQuery(), container, client);
-        when(container.applicationServer()).thenReturn("local:1234");
-        ServerMetadata localServer = newServerMetadata("local", true);
-        when(container.localServerMetadata())
-                .thenReturn(Optional.of(localServer));
+        when(container.describe()).thenReturn(newKafkaStreamsInstance(LOCAL_ENDPOINT, true));
 
         when(container.findMetadataForStoreAndKey(any(), any(), any()))
                 .thenReturn(Optional.of(newKeyQueryMetadata("local")));
@@ -101,12 +100,12 @@ public class DistributedQueryCallTest {
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.get("key")).thenReturn(42L);
         when(container.localKeyValueStore(matches(STORE_NAME))).thenReturn(new LocalStoreAccessor<>(() -> store));
-        when(container.isSameHost(new HostInfo("local", 1234))).thenReturn(true);
+        when(container.checkEndpoint(new Endpoint("local", 1234))).thenReturn(true);
 
         QueryResult<String, Long> result = call.execute(QueryOptions.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
-        assertEquals(localServer.hostAndPort(), result.getServer());
+        assertEquals(LOCAL_ENDPOINT.toString(), result.getServer());
 
         GlobalResultSet<String, Long> rs = result.getResult();
         List<SuccessResultSet<String, Long>> success = rs.getSuccess();
@@ -118,24 +117,20 @@ public class DistributedQueryCallTest {
     @Test
     public void shouldQueryRemoteKVStateStoreGivenKeyQuery() {
         call = new DistributedQueryCall<>(newLocalExecutableQuery(), container, client);
-        when(container.applicationServer()).thenReturn("local:1234");
-        when(container.localServerMetadata())
-                .thenReturn(Optional.of(newServerMetadata("local", true)));
-
         when(container.findMetadataForStoreAndKey(any(), any(), any()))
                 .thenReturn(Optional.of(newKeyQueryMetadata("remote")));
-        when(container.isSameHost(new HostInfo("remote", 1234))).thenReturn(false);
+        when(container.checkEndpoint(new Endpoint("remote", 1234))).thenReturn(false);
 
         QueryResult<String, Long> result = call.execute(QueryOptions.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
-        assertEquals(newServerMetadata("local", true).hostAndPort(), result.getServer());
+        assertEquals(LOCAL_ENDPOINT.toString(), result.getServer());
 
         GlobalResultSet<String, Long> rs = result.getResult();
         List<SuccessResultSet<String, Long>> success = rs.getSuccess();
         assertEquals(1, success.size());
         assertEquals(1, success.get(0).getTotal());
-        assertEquals("remote:1234", success.get(0).getServer());
+        assertEquals(REMOTE_ENDPOINT.toString(), success.get(0).getServer());
         assertEquals(42L, success.get(0).getRecords().get(0).value());
     }
 
@@ -144,15 +139,12 @@ public class DistributedQueryCallTest {
         LocalPreparedQuery<String, Long> all = new QueryBuilder(STORE_NAME).keyValue().all();
         LocalExecutableQuery<String, Long> query = all.compile(new GenericQueryParams());
         call = new DistributedQueryCall<>(query, container, client);
-        when(container.applicationServer()).thenReturn("local:1234");
-        when(container.localServerMetadata())
-                .thenReturn(Optional.of(newServerMetadata("local", true)));
-
-        when(container.allMetadataForStore(any()))
-                .thenReturn(Arrays.asList(
-                        newServerMetadata("local", true),
-                        newServerMetadata("remote", false))
-                );
+        when(container.describe()).thenReturn(newKafkaStreamsInstance(LOCAL_ENDPOINT, true));
+        when(container.findAllEndpointsForStore(any()))
+            .thenReturn(new HashSet<>() {{
+                add(LOCAL_ENDPOINT);
+                add(REMOTE_ENDPOINT);
+            }});
 
         ReadOnlyKeyValueStore store = mock(ReadOnlyKeyValueStore.class);
         when(store.all()).thenReturn(new InMemoryKeyValueIterator<>("key", 42L));
@@ -161,7 +153,7 @@ public class DistributedQueryCallTest {
         QueryResult<String, Long> result = call.execute(QueryOptions.immediately());
         assertNotNull(result);
         assertEquals(QueryStatus.SUCCESS, result.getStatus());
-        assertEquals(newServerMetadata("local", true).hostAndPort(), result.getServer());
+        assertEquals(LOCAL_ENDPOINT.toString(), result.getServer());
 
         GlobalResultSet<String, Long> rs = result.getResult();
         List<SuccessResultSet<String, Long>> success = rs.getSuccess();
@@ -170,6 +162,15 @@ public class DistributedQueryCallTest {
         assertEquals(1, success.get(0).getTotal());
         assertEquals(42L, success.get(0).getRecords().get(0).value());
         assertEquals(42L, success.get(1).getRecords().get(0).value());
+    }
+
+    private KafkaStreamsInstance newKafkaStreamsInstance(final Endpoint endpoint, final boolean isLocal) {
+        return new KafkaStreamsInstance(
+                "test",
+                endpoint,
+                isLocal,
+                KafkaStreamsMetadata.EMPTY
+        );
     }
 
     private LocalExecutableQuery<String, Long> newLocalExecutableQuery() {
@@ -188,16 +189,6 @@ public class DistributedQueryCallTest {
                 0
         );
     }
-
-    private ServerMetadata newServerMetadata(final String host, final boolean isLocal) {
-        return new ServerMetadata(
-                new ServerHostInfo("app", host, 1234, isLocal),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                Collections.emptySet(),
-                Collections.emptySet());
-    }
-
 
     /**
      * In-memory {@link KeyValueIterator} which can be used for testing purpose.

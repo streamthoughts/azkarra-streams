@@ -24,11 +24,11 @@ import io.streamthoughts.azkarra.api.components.ConfigurableComponentFactory;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import org.apache.kafka.streams.KafkaStreams;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -108,7 +108,7 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      * @return              the {@link ApplicationId} instance if the environment is already started,
      *                      otherwise {@code null}.
      */
-    ApplicationId addTopology(final String type, final Executed executed);
+    Optional<ApplicationId> addTopology(final String type, final Executed executed);
 
     /**
      * Adds a topology to the default environment of this context.
@@ -119,7 +119,7 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      * @return              the {@link ApplicationId} instance if the environment is already started,
      *                      otherwise {@code null}.
      */
-    ApplicationId addTopology(final Class<? extends TopologyProvider> type, final Executed executed);
+    Optional<ApplicationId> addTopology(final Class<? extends TopologyProvider> type, final Executed executed);
 
     /**
      * Adds a topology to a specified environment.
@@ -131,9 +131,9 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      * @return              the {@link ApplicationId} instance if the environment is already started,
      *                      otherwise {@code null}..
      */
-    ApplicationId addTopology(final Class<? extends TopologyProvider> type,
-                              final String environment,
-                              final Executed executed);
+    Optional<ApplicationId> addTopology(final Class<? extends TopologyProvider> type,
+                                        final String environment,
+                                        final Executed executed);
 
     /**
      * Adds a topology to a specified environment.
@@ -142,10 +142,10 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      * @param environment   the environment name.
      * @param executed      the {@link Executed} instance.
      *
-     * @return              the {@link ApplicationId} instance if the environment is already started,
+     * @return              the {@link ContainerId} instance if the environment is already started,
      *                      otherwise {@code null}.
      */
-    ApplicationId addTopology(final String type, final String environment, final Executed executed);
+    Optional<ApplicationId> addTopology(final String type, final String environment, final Executed executed);
 
     /**
      * Adds a topology to a specified environment.
@@ -155,13 +155,13 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
      * @param environment   the environment name.
      * @param executed      the {@link Executed} instance.
      *
-     * @return              the {@link ApplicationId} instance if the environment is already started,
+     * @return              the {@link ContainerId} instance if the environment is already started,
      *                      otherwise {@code null}.
      */
-    ApplicationId addTopology(final String type,
-                              final String version,
-                              final String environment,
-                              final Executed executed);
+    Optional<ApplicationId> addTopology(final String type,
+                                        final String version,
+                                        final String environment,
+                                        final Executed executed);
 
     /**
      * Gets all topologies registered into this {@link AzkarraContext} even those ones which are not enable.

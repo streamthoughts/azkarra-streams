@@ -20,7 +20,7 @@ package io.streamthoughts.azkarra.runtime.streams;
 
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
+import io.streamthoughts.azkarra.api.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import org.apache.kafka.streams.StreamsConfig;

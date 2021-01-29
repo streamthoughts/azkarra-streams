@@ -22,8 +22,12 @@ import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
 import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 public class TimestampedKeyValueQueryBuilder extends KeyValueQueryBuilder {
+
+    private static Serializer DEFAULT_SERIALIZER = new StringSerializer();
 
     /**
      * Creates a new {@link TimestampedKeyValueQueryBuilder} instance.
@@ -68,7 +72,11 @@ public class TimestampedKeyValueQueryBuilder extends KeyValueQueryBuilder {
         @Override
         public LocalExecutableQuery<K, V> compile(final QueryParams params) {
             final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
-            return new TimestampedKeyValueGetQuery<>(store, p.getValue(QueryConstants.QUERY_PARAM_KEY), null);
+            return new TimestampedKeyValueGetQuery<>(
+                store,
+                p.getValue(QueryConstants.QUERY_PARAM_KEY),
+                DEFAULT_SERIALIZER
+            );
         }
     }
 

@@ -18,6 +18,8 @@
  */
 package io.streamthoughts.azkarra.api.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.util.Arrays;
 
@@ -71,5 +73,11 @@ public class Utils {
         Instant[] instants = {Instant.ofEpochMilli(Long.MIN_VALUE), instant, Instant.ofEpochMilli(Long.MAX_VALUE)};
         Arrays.sort(instants);
         return instants[1];
+    }
+
+    public static String formatStackTrace(final Throwable t) {
+        StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }

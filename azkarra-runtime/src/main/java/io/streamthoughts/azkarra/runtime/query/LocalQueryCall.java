@@ -66,9 +66,13 @@ public class LocalQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalExecutab
             .recover(t -> {
                 String cause = t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
                 String error = "Retries exhausted for querying state store " + query.getStoreName() + ". " + cause;
-                final QueryResult<K, V> result = buildNotAvailableResult(container.applicationServer(), error);
+                final QueryResult<K, V> result = buildNotAvailableResult(getLocalEndpoint(), error);
                 return Try.success(result.timeout(true));
             }).get();
+    }
+
+    public String getLocalEndpoint() {
+        return container.endpoint().get().listener();
     }
 
     private Retry toRetry(final QueryOptions options) {
@@ -97,11 +101,11 @@ public class LocalQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalExecutab
 
         final Either<SuccessResultSet<K, V>, ErrorResultSet> rs = attempt.get()
             .left()
-            .map(records -> new SuccessResultSet<>(container.applicationServer(), false, records))
+            .map(records -> new SuccessResultSet<>(getLocalEndpoint(), false, records))
             .right()
-            .map(errors -> new ErrorResultSet(container.applicationServer(), false, QueryError.allOf(errors)));
+            .map(errors -> new ErrorResultSet(getLocalEndpoint(), false, QueryError.allOf(errors)));
 
-        return buildQueryResult(container.applicationServer(), Collections.singletonList(rs));
+        return buildQueryResult(getLocalEndpoint(), Collections.singletonList(rs));
     }
 
     /**

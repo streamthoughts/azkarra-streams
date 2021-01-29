@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,28 +16,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.handler;
+package io.streamthoughts.azkarra.http.data;
 
-import io.streamthoughts.azkarra.http.ExchangeHelper;
-import io.streamthoughts.azkarra.api.AzkarraStreamsService;
-import io.undertow.server.HttpServerExchange;
+import io.streamthoughts.azkarra.api.config.Conf;
 
-public class StreamsGetStatusHandler extends AbstractStreamHttpHandler implements WithApplication {
+public class GetContextResponse {
+
+    private final Conf config;
 
     /**
-     * Creates a new {@link StreamsGetStatusHandler} instance.
-     *
-     * @param service   the {@link AzkarraStreamsService} instance.
+     * Creates a new {@link GetContextResponse} instance.
+     * @param config    the context configuration.
      */
-    public StreamsGetStatusHandler(final AzkarraStreamsService service) {
-        super(service);
+    public GetContextResponse(final Conf config) {
+        this.config = config;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void handleRequest(final HttpServerExchange exchange, final String applicationId) {
-        ExchangeHelper.sendJsonResponse(exchange, service.getStreamsStatusById(applicationId));
+    public Conf getConfig() {
+        return config;
     }
 }

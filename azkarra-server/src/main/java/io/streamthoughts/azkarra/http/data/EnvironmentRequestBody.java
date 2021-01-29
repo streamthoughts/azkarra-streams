@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,27 +16,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.http.handler;
+package io.streamthoughts.azkarra.http.data;
 
-import io.streamthoughts.azkarra.http.ExchangeHelper;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * An helper {@link HttpHandler} which can be used for routes requiring query param 'id'.
- */
-public interface WithApplication extends HttpHandler {
+import javax.validation.constraints.NotEmpty;
+import java.util.Map;
 
-    String QUERY_PARAM_ID = "id";
+public class EnvironmentRequestBody {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    default void handleRequest(final HttpServerExchange exchange) throws Exception {
-        final String applicationId = ExchangeHelper.getQueryParam(exchange, QUERY_PARAM_ID);
-        handleRequest(exchange, applicationId);
+    public final String name;
+    public final String type;
+    public final Map<String, Object> config;
+
+    @JsonCreator
+    public EnvironmentRequestBody(@JsonProperty("name") @NotEmpty final String name,
+                                  @JsonProperty("type") final String type,
+                                  @JsonProperty("config") final Map<String, Object> config) {
+        this.name = name;
+        this.type = type;
+        this.config = config;
     }
-
-    void handleRequest(final HttpServerExchange exchange, final String applicationId) throws Exception;
 }

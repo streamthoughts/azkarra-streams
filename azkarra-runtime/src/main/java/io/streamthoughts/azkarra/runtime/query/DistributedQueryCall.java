@@ -22,17 +22,16 @@ import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.errors.InvalidStreamsStateException;
 import io.streamthoughts.azkarra.api.monad.Either;
 import io.streamthoughts.azkarra.api.query.DecorateQuery;
-import io.streamthoughts.azkarra.api.query.LocalExecutableQueryWithKey;
 import io.streamthoughts.azkarra.api.query.LocalExecutableQuery;
+import io.streamthoughts.azkarra.api.query.LocalExecutableQueryWithKey;
 import io.streamthoughts.azkarra.api.query.QueryCall;
 import io.streamthoughts.azkarra.api.query.QueryOptions;
 import io.streamthoughts.azkarra.api.query.QueryRequest;
 import io.streamthoughts.azkarra.api.query.result.ErrorResultSet;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
-import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
-import io.streamthoughts.azkarra.api.streams.ServerMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import io.streamthoughts.azkarra.api.util.FutureCollectors;
 import io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer;
 import org.apache.kafka.common.serialization.Serializer;
@@ -83,7 +82,7 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
         // Quickly check if streams instance is still running
         if (!container.isRunning()) {
             throw new InvalidStreamsStateException(
-                    "streams instance for id '" + container.applicationId() +
+                    "streams instance for id '" + applicationId() +
                             "' is not running (" + container.state().value() + ")"
             );
         }
@@ -130,23 +129,18 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
      *             A remote query can fail if the remote instance is down and re-balancing has not occurred yet.
      */
     private QueryResult<K, V> querySingleHostStateStore(final QueryOptions options) throws AzkarraException {
-        final String serverName = localApplicationServer();
+        final String serverName = localEndpoint();
 
         return container
             .findMetadataForStoreAndKey(query.getStoreName(), getKey(), getKeySerializer())
             .map(keyQueryMetadata -> {
                 var activeHost = keyQueryMetadata.getActiveHost();
-                var target = new ServerHostInfo(
-                    container.applicationId(),
-                    activeHost.host(),
-                    activeHost.port(),
-                    container.isSameHost(activeHost)
-                );
+                final Endpoint endpoint = new Endpoint(activeHost.host(), activeHost.port());
                 final QueryCall<K, V> call;
-                if (target.isLocal()) {
+                if (container.checkEndpoint(endpoint)) {
                     call = new LocalQueryCall<>(container, query);
                 } else if (options.remoteAccessAllowed()) {
-                    call = new RemoteQueryCall<>(serverName, new QueryRequest(query), target, client);
+                    call = new RemoteQueryCall<>(applicationId(), serverName, endpoint, newQueryRequest(), client);
                 } else {
                     call = new EmptyQueryCall<>(serverName, query);
                 }
@@ -157,36 +151,41 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
             });
     }
 
-    private String localApplicationServer() {
-        return container.applicationServer();
+    private QueryRequest newQueryRequest() {
+        return new QueryRequest(query);
+    }
+
+    private String applicationId() {
+        return container.applicationId();
+    }
+
+    private String localEndpoint() {
+        return container.endpoint().get().listener() ;
     }
 
     private QueryResult<K, V> queryMultiHostStateStore(final QueryOptions options) {
 
         final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results = new LinkedList<>();
 
-        var servers = container
-                .allMetadataForStore(query.getStoreName())
-                .stream()
-                .map(ServerMetadata::hostInfo)
-                .collect(Collectors.toList());
+        var endpoints = container.findAllEndpointsForStore(query.getStoreName());
 
-        if (servers.isEmpty()) {
+        if (endpoints.isEmpty()) {
             String error = "no metadata available for store '" + query.getStoreName() + "'";
             LOG.warn(error);
-            return buildNotAvailableResult(localApplicationServer(), error);
+            return buildNotAvailableResult(localEndpoint(), error);
         }
 
         List<CompletableFuture<QueryResult<K, V>>> remotes = null;
         if (options.remoteAccessAllowed()) {
             // Forward query to all remote instances
-            remotes = servers.stream()
-                .filter(Predicate.not(ServerHostInfo::isLocal))
-                .map(remote -> {
+            remotes = endpoints.stream()
+                .filter(Predicate.not(container::checkEndpoint))
+                .map(endpoint -> {
                     final RemoteQueryCall<K, V> call = new RemoteQueryCall<>(
-                        localApplicationServer(),
-                        new QueryRequest(query),
-                        remote,
+                        applicationId(),
+                        localEndpoint(),
+                        endpoint,
+                        newQueryRequest(),
                         client
                     );
                     // disable retries and remote
@@ -196,8 +195,8 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
                 .collect(Collectors.toList());
         }
         //Execute the query locally only if the local instance own the queried store.
-       servers.stream()
-            .filter(ServerHostInfo::isLocal)
+       endpoints.stream()
+            .filter(container::checkEndpoint)
             .findFirst()
             .map( local -> {
                 final LocalQueryCall<K, V> call = new LocalQueryCall<>(container, query);
@@ -212,7 +211,7 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
             results.addAll(waitRemoteThenGet(remotes));
         }
 
-        return buildQueryResult(localApplicationServer(), results);
+        return buildQueryResult(localEndpoint(), results);
     }
 
     private static <K, V> List<Either<SuccessResultSet<K, V>, ErrorResultSet>> waitRemoteThenGet(

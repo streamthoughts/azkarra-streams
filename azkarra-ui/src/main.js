@@ -18,6 +18,7 @@
  */
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Notifications from 'vue-notification'
 
 import App from './App.vue'
 import StatesQuery from './components/StatesQuery.vue'
@@ -25,7 +26,13 @@ import TopologyListPage from './components/TopologyList.vue'
 import StreamsListPage from './components/StreamsList.vue'
 import StreamsDetailsPage from './components/StreamsDetails.vue'
 import OverviewPage from './components/Overview.vue'
-import EnvironmentsListPage from './components/EnvironmentsList.vue'
+import EnvironmentListPage from './components/EnvironmentList.vue'
+import EnvironmentDetailsPage from './components/EnvironmentDetails.vue'
+import ApplicationListPage from './components/ApplicationList.vue'
+import ApplicationDetailsPage from './components/ApplicationDetails.vue'
+import Configuration from './components/Configuration.vue'
+import About from './components/About.vue'
+
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
@@ -34,6 +41,9 @@ import '@fortawesome/fontawesome-free/js/all.js'
 
 import "./assets/main.css"
 
+Vue.use(VueRouter)
+//Vue.use(VueNotification)
+Vue.use(Notifications)
 Vue.config.productionTip = false
 
 const routes = [
@@ -41,11 +51,14 @@ const routes = [
   { path: '/topologies', component: TopologyListPage },
   { path: '/streams', component: StreamsListPage },
   { path: '/streams/:id', component: StreamsDetailsPage },
-  { path: '/environments', component: EnvironmentsListPage },
-  { path: '/query', component: StatesQuery }
+  { path: '/environments', component: EnvironmentListPage },
+  { path: '/environments/:name', component: EnvironmentDetailsPage },
+  { path: '/applications', component: ApplicationListPage },
+  { path: '/applications/:id', component: ApplicationDetailsPage },
+  { path: '/query', component: StatesQuery },
+  { path: '/configuration', component: Configuration },
+  { path: '/about', component: About }
 ]
-
-Vue.use(VueRouter)
 const router = new VueRouter({ routes })
 
 new Vue({

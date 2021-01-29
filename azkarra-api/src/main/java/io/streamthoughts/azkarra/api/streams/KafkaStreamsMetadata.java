@@ -18,18 +18,22 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Objects;
+import java.util.Collections;
 import java.util.Set;
 
 /**
- * Class which is used to describe a stream application instance.
+ * A {@code KafkaStreamsMetadata} regroups information about resources assigned to a stream application instance,
+ * i.e., a set of Topic/Partitions and state stores.
  */
-public class ServerMetadata {
+public class KafkaStreamsMetadata {
 
-    private final ServerHostInfo hostInfo;
+    public static final KafkaStreamsMetadata EMPTY = new KafkaStreamsMetadata(
+            Collections.emptySet(),
+            Collections.emptySet(),
+            Collections.emptySet(),
+            Collections.emptySet());
 
     private final Set<String> stateStores;
     private final Set<TopicPartitions> assignments;
@@ -38,61 +42,16 @@ public class ServerMetadata {
 
 
     /**
-     * Creates a new {@link ServerMetadata} instance.
+     * Creates a new {@link KafkaStreamsMetadata} instance.
      */
-    public ServerMetadata(final ServerHostInfo hostInfo,
-                          final Set<String> stateStores,
-                          final Set<TopicPartitions> assignments,
-                          final Set<String> standbyStateStores,
-                          final Set<TopicPartitions> standbyAssignments) {
-        this.hostInfo = Objects.requireNonNull(hostInfo, "hostInfo cannot be null");
+    public KafkaStreamsMetadata(final Set<String> stateStores,
+                                final Set<TopicPartitions> assignments,
+                                final Set<String> standbyStateStores,
+                                final Set<TopicPartitions> standbyAssignments) {
         this.stateStores = stateStores;
         this.assignments = assignments;
         this.standbyStateStores = standbyStateStores;
         this.standbyAssignments = standbyAssignments;
-    }
-
-    /**
-     * Gets the stream application id.
-     *
-     * @return the string id.
-     */
-    @JsonProperty("id")
-    public String id() {
-        return hostInfo.id();
-    }
-
-    /**
-     * Gets the stream application host.
-     *
-     * @return the string host.
-     */
-    public String host() {
-        return hostInfo.host();
-    }
-
-    /**
-     * Gets the stream application port.
-     *
-     * @return the string port.
-     */
-    public int port() {
-        return hostInfo.port();
-    }
-
-    /**
-     * Checks whether this instance is local.
-     *
-     * @return the {@code true} if local.
-     */
-    @JsonIgnore
-    public boolean isLocal() {
-        return hostInfo.isLocal();
-    }
-
-    @JsonProperty("server")
-    public String hostAndPort() {
-        return hostInfo.hostAndPort();
     }
 
     /**
@@ -134,10 +93,5 @@ public class ServerMetadata {
     public Set<TopicPartitions> standbyAssignments() {
         return standbyAssignments;
     }
-
-    @JsonIgnore
-    public ServerHostInfo hostInfo() {
-        return hostInfo;
-    }
-
 }
+

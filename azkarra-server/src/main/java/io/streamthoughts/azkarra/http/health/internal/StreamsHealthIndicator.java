@@ -95,9 +95,9 @@ public class StreamsHealthIndicator implements HealthIndicator, AzkarraContextAw
     }
 
     private List<KafkaStreamsContainer> getAllStreams() {
-        return this.service.getAllStreams()
+        return this.service.listAllKafkaStreamsContainerIds()
                     .stream()
-                    .map(service::getStreamsById)
+                    .map(service::getStreamsContainerById)
                     .collect(Collectors.toList());
     }
 

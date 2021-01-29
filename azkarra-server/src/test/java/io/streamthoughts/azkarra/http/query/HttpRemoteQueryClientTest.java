@@ -28,7 +28,7 @@ import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.QueryResultBuilder;
 import io.streamthoughts.azkarra.api.query.result.QueryStatus;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
-import io.streamthoughts.azkarra.api.streams.ServerHostInfo;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import io.streamthoughts.azkarra.http.APIVersions;
 import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.streamthoughts.azkarra.http.client.HttpClientBuilder;
@@ -57,12 +57,7 @@ public class HttpRemoteQueryClientTest {
         QueryResult.class
     );
 
-    private static final ServerHostInfo SERVER_INFO = new ServerHostInfo(
-        "test",
-        "localhost",
-        8089,
-        false
-    );
+    private static final Endpoint SERVER_INFO = new Endpoint("localhost", 8089);
 
     private static final String TEST_STORE_NAME = "store";
 
@@ -102,7 +97,7 @@ public class HttpRemoteQueryClientTest {
             .setBody(new String(SERDES.serialize(queryResult)))
         );
 
-        CompletableFuture<QueryResult<Object, Object>> future = client.query(SERVER_INFO, query, QueryOptions.immediately());
+        CompletableFuture<QueryResult<Object, Object>> future = client.query("test", SERVER_INFO, query, QueryOptions.immediately());
         QueryResult<Object, Object> response = future.get();
         Assertions.assertEquals(queryResult, response);
     }
@@ -110,12 +105,12 @@ public class HttpRemoteQueryClientTest {
     private QueryResult<String, String> newQueryResult() {
         List<KV<String, String>> kv = singletonList(KV.of("k1", "v1"));
         return QueryResultBuilder.<String, String>newBuilder()
-            .setServer(SERVER_INFO.hostAndPort())
+            .setServer(SERVER_INFO.listener())
             .setStatus(QueryStatus.SUCCESS)
             .setStoreName(TEST_STORE_NAME)
             .setSuccessResultSet(
                 singletonList(
-                    new SuccessResultSet<>(SERVER_INFO.hostAndPort(), true, kv)
+                    new SuccessResultSet<>(SERVER_INFO.listener(), true, kv)
                 )
             )
             .setTook(0)

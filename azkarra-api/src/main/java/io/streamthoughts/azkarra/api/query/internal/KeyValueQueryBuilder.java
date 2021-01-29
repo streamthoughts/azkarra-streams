@@ -24,6 +24,8 @@ import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Objects;
 
@@ -32,6 +34,8 @@ import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_
 import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_KEY_TO;
 
 public class KeyValueQueryBuilder implements QueryOperationBuilder {
+
+    private static Serializer DEFAULT_SERIALIZER = new StringSerializer();
 
     protected final String store;
 
@@ -102,7 +106,7 @@ public class KeyValueQueryBuilder implements QueryOperationBuilder {
         @Override
         public LocalExecutableQuery<K, V> compile(final QueryParams params) throws InvalidQueryException {
             final QueryParams p = validator(params).getOrThrow(InvalidQueryException::new);
-            return new KeyValueGetQuery<>(store, p.getValue(QUERY_PARAM_KEY), null);
+            return new KeyValueGetQuery<>(store, p.getValue(QUERY_PARAM_KEY), DEFAULT_SERIALIZER);
         }
     }
 

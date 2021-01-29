@@ -25,6 +25,7 @@ import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.QueryOptions;
 import io.streamthoughts.azkarra.api.query.StoreType;
 import io.streamthoughts.azkarra.http.error.InvalidStateStoreQueryException;
+import io.streamthoughts.azkarra.http.serialization.json.JsonQuerySerde;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

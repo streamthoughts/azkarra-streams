@@ -21,10 +21,11 @@ package io.streamthoughts.azkarra.runtime.streams;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
+import io.streamthoughts.azkarra.api.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.util.Utils;
+import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import org.apache.kafka.streams.StreamsConfig;
 
 import static java.lang.Character.isUpperCase;
@@ -57,13 +58,18 @@ public class DefaultApplicationIdBuilder implements ApplicationIdBuilder, Stream
         return id.map(ApplicationId::new).orElseGet(() -> new ApplicationId(normalize(build(metadata, environment))));
     }
 
-    private String build(final TopologyMetadata metadata, final StreamsExecutionEnvironment environment) {
+    private String build(final TopologyMetadata metadata,
+                         final StreamsExecutionEnvironment<?> environment) {
         StringBuilder sb = new StringBuilder();
-        String name = environment.name();
-        if (!name.startsWith(INTERNAL_ENV_NAME_PREFIX)) {
+        final String name = environment.name();
+        if (isNotDefaultOrInternalEnvironmentName(name)) {
             sb.append(name).append(CHAR_SEPARATOR);
         }
         return normalize(sb.append(metadata.name()).append(CHAR_SEPARATOR).append(metadata.version()).toString());
+    }
+
+    private boolean isNotDefaultOrInternalEnvironmentName(String name) {
+        return !(name.startsWith(INTERNAL_ENV_NAME_PREFIX) || name.equals(DefaultAzkarraContext.DEFAULT_ENV_NAME));
     }
 
     private static String normalize(final String name) {

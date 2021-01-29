@@ -20,7 +20,7 @@ package io.streamthoughts.azkarra.runtime.streams.errors;
 
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
 import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentAware;
-import io.streamthoughts.azkarra.api.streams.ApplicationId;
+import io.streamthoughts.azkarra.api.ApplicationId;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
 import org.slf4j.Logger;

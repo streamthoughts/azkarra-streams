@@ -1,98 +1,115 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2019-2021 StreamThoughts.
+*
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements. See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License. You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 <template>
-    <div id="app">
-      <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">
-          <a class="navbar-brand" href="#">
-             <img height="62px" alt="azkarra-streams-logo" src="static/azkarra-streams-logo-light.svg"/>
-             <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
-           </a>
+  <div id="app">
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">
+        <a class="navbar-brand" href="#">
+          <img height="62px" alt="azkarra-streams-logo" src="static/azkarra-streams-logo-light.svg"/>
+          <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
         </a>
-        <ul class="navbar-nav text-light px-3">
-            <li class="nav-item text-nowrap">
-              {{ version.azkarraVersion }} ({{ version.branch }} / {{ version.commitId }})
+      </a>
+      <ul class="navbar-nav text-light px-3">
+        <li class="nav-item text-nowrap">
+        </li>
+      </ul>
+    </nav>
+    <div class="main-container">
+      <nav class="bg-dark main-sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <router-link to="/" exact class="nav-link">
+                <span class="icon"><i class="fas fa-tachometer-alt"></i></span>
+                <div class="nav-label">Overview</div>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/applications" class="nav-link">
+                <span class="icon"><i class="fas fa-rocket"></i></span>
+                <div class="nav-label">Applications</div>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/streams" class="nav-link">
+                <span class="icon"><i class="fas fa-server"></i></span>
+                <div class="nav-label">Instances</div>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/topologies" class="nav-link">
+                <span class="icon"><i class="fas fa-project-diagram"></i></span>
+                <div class="nav-label">Topologies</div>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/query" class="nav-link">
+                <span class="icon"><i class="fas fa-search"></i></span>
+                <div class="nav-label">Interactive Queries</div>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/configuration" class="nav-link">
+                <span class="icon"><i class="fas fa-cog"></i></span>
+                <div class="nav-label">Configuration</div>
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/environments" class="nav-link">
+                <span class="icon"><i class="far fa-plus-square"></i></span>
+                <div class="nav-label">Environments</div>
+              </router-link>
+            </li>
+            <li class="nav-item position-absolute fixed-bottom border-top">
+              <router-link to="/about" class="nav-link">
+                <span class="icon"><i class="fas fa-info-circle"></i></span>
+                <div class="nav-label">About</div>
+              </router-link>
             </li>
           </ul>
+        </div>
       </nav>
-      <div class="main-container">
-        <nav class="bg-dark main-sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <router-link to="/" exact class="nav-link">
-                  <span class="icon"><i class="fas fa-tachometer-alt"></i></span>
-                  <div class="nav-label">Overview</div>
-                </router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/streams" class="nav-link">
-                  <span class="icon"><i class="fas fa-server"></i></span>
-                  <div class="nav-label">Active Streams</div>
-                </router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/topologies" class="nav-link">
-                  <span class="icon"><i class="fas fa-project-diagram"></i></span>
-                  <div class="nav-label">Topologies</div>
-                </router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/query" class="nav-link">
-                  <span class="icon"><i class="fas fa-search"></i></span>
-                  <div class="nav-label">Interactive Queries</div>
-                </router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/environments" class="nav-link">
-                  <span class="icon"><i class="far fa-plus-square"></i></span>
-                  <div class="nav-label">Environments</div>
-                  </router-link>
-              </li>
-            </ul>
-          </div>
-        </nav>
-        <main role="main" class="main-content">
-          <div class="container-fluid">
-            <template v-for="error in errors" :key="error.id">
-              <transition name="smooth-slide" mode="out-in">
-                  <div class="row">
-                    <div class="col alert alert-warning">
-                      <a v-on:click="removeError(error)" href="#"
-                          class="close"
-                          data-dismiss="alert"
-                          aria-label="close">&times;</a>
-                      <strong>Warning!</strong> {{ error.message }}
-                    </div>
-                  </div>
-               </transition>
-            </template>
-          </div>
-          <transition name="smooth-slide" mode="out-in">
-             <router-view></router-view>
-          </transition>
-        </main>
-      </div>
-      <div class="login-modal">
+      <main role="main" class="main-content">
+        <div class="container-fluid">
+          <template v-for="error in errors" :key="error.id">
+            <transition name="smooth-slide" mode="out-in">
+              <div class="row">
+                <div class="col alert alert-warning">
+                  <a v-on:click="removeError(error)" href="#"
+                     class="close"
+                     data-dismiss="alert"
+                     aria-label="close">&times;</a>
+                  <strong>Warning!</strong> {{ error.message }}
+                </div>
+              </div>
+            </transition>
+          </template>
+        </div>
+        <transition name="smooth-slide" mode="out-in">
+          <router-view></router-view>
+        </transition>
+      </main>
+    </div>
+    <div class="login-modal">
       <vue-modal v-if="openAuthModal">
         <template v-slot:header>
-           <h3>Authentication</h3>
+          <h3>Authentication</h3>
         </template>
         <template v-slot:body>
           <form>
@@ -125,16 +142,23 @@
           <button class="btn btn-dark" v-on:click="authenticate">Login</button>
         </template>
       </vue-modal>
-      </div>
     </div>
+    <notifications group="default"
+                   position="bottom right"
+                   speed="500"
+                   max="6"
+                   reverse="true"
+                   width="36%"/>
+  </div>
 </template>
 
 <script>
 
-import azkarra from './services/azkarra-api.js'
+import httpClient from './services/httpClient.js'
+import azkarraApi from './services/azkarra.api.js'
 import VueModal from './components/VueModal.vue'
 
-var errorsCount = 0;
+let errorsCount = 0;
 
 export default {
   components: {
@@ -143,48 +167,71 @@ export default {
   name: 'app',
   data() {
     return {
-      version: {},
-      errors: [],
-      timers: [],
       openAuthModal: false,
       auth: {},
       isAuthAttempted: false,
-      api: { },
+      api: {},
     }
   },
-  created () {
+  created: function () {
     let that = this;
-    azkarra.axios().interceptors.response.use(
-      function (response) {
-        return response;
-      },
-      function (error) {
-        let config = error.config;
-        let isHandlerEnable = !(config.hasOwnProperty('errorInterceptorEnabled') && !config.handlerEnabled);
-        if (isHandlerEnable) {
-          let status = error.response.status
-          // auth modal should not be opened if server is in headless mode.
-          if ((status == 403 || status == 401) && !that.isHeadless()) {
-            that.openAuthModal = true
-          } else {
-            let errorMessage = (error.response.data == '')
-              ? { error_code: error.response.status, message : error.message }
-              : error.response.data
-            that.pushError(errorMessage);
-          }
-        }
-        return Promise.reject(error.response);
+    let notificationId = 0;
+    let errorInterceptor = error => {
+      if (!error.response) {
+        that.$notify({
+          group: 'default',
+          title: `Network Error (#${notificationId++})`,
+          text: `Connection refused (request: ${error.config.method.toUpperCase()}/ ${error.config.url}')`,
+          type: 'error'
+        });
+        return Promise.reject(error);
       }
-    );
-    that.load();
+      let response = error.response;
+      if (!(error.config.hasOwnProperty('errorInterceptorEnabled') && !error.config.handlerEnabled)) {
+        let status = response.status;
+        let error = response.data === '' ? {error_code: status, message: error.message} : response.data;
+        switch (status) {
+          case 401:
+          case 403:
+            // auth modal should not be opened if server is in headless mode.
+            that.openAuthModal = true;
+            that.$notify({
+              group: 'default',
+              title: `${response.statusText} (#${notificationId++})`,
+              text: 'Authentication is required',
+              type: 'warn'
+            });
+            break;
+          case 404:
+            that.$notify({
+              group: 'default',
+              title: `${response.statusText} (#${notificationId++})`,
+              text: error.message,
+              type: 'warn'
+            });
+            break;
+          default:
+            this.$notify({
+              group: 'default',
+              title: `${response.statusText} (#${notificationId++})`,
+              text: error.message,
+              type: 'error'
+            });
+        }
+      }
+      return Promise.reject(response);
+    }
+    let successInterceptor = response => {
+      return response;
+    }
+    httpClient.interceptors.response.use(successInterceptor, errorInterceptor);
+    this.load();
   },
   watch: {
-    '$route': 'removeErrors'
+    '$route': 'clear'
   },
-  beforeDestroy () {
-    this.timers.forEach((timer) => {
-      clearInterval(timer);
-    });
+  beforeDestroy() {
+    this.clear();
   },
   methods: {
 
@@ -194,61 +241,39 @@ export default {
 
     authenticate() {
       let that = this;
-      azkarra.setClientAuth(this.auth);
+      httpClient.defaults.auth = this.auth;
 
       // trigger request to check authentication
-      azkarra.getApi().then(function(d) {
+      azkarraApi.getApiV1().then(response => {
         that.openAuthModal = false
         that.load();
         if (that.$route.path !== "/") {
-          that.$router.push({ path: '/' });
+          that.$router.push({path: '/'});
         }
-      }, function(error) {
+      }, function (error) {
         that.isAuthAttempted = true;
       });
     },
 
     load() {
       let that = this;
-      azkarra.getVersion().then(function(data){ that.version = data });
-      azkarra.getApi().then(function(data) { that.api = data });
+      azkarraApi.getApiV1().then(response => that.api = response.data);
     },
-
-    pushError(error) {
-      let that = this;
-      let timer = setInterval(that.removeError, 8000, error);
-      error.timer = timer;
-      error.id = errorsCount++;
-      error.index = that.errors.length;
-      that.errors.push(error);
-      that.timers.push(timer);
-      if (that.errors.length > 3) {
-        that.removeError(that.errors[0]);
-      }
-    },
-
-    removeError(error) {
-     this.errors.splice(error.index, 1);
-     this.errors.forEach(function(err, index) { err.index = index });
-     clearInterval(error.timer);
-    },
-
-    removeErrors() {
-      this.timers.forEach(timer => { clearInterval(timer) });
-      this.errors = [];
+    clear() {
+      this.$notify({group: 'default', clean: true});
     }
   }
 }
 </script>
 
 <style scoped>
-  .alert {
-    z-index: 1000;
-    opacity: 0.95;
-    transition: opacity .4s ease;
-  }
+.alert {
+  z-index: 1000;
+  opacity: 0.95;
+  transition: opacity .4s ease;
+}
 
-  span.navbar-api-info {
-    font-size : 0.8em;
-  }
+span.navbar-api-info {
+  font-size: 0.8em;
+}
 </style>

@@ -23,7 +23,9 @@ import io.streamthoughts.azkarra.api.AzkarraStreamsService;
 import io.streamthoughts.azkarra.http.ExchangeHelper;
 import io.undertow.server.HttpServerExchange;
 
-public class StreamsStopHandler extends AbstractStreamHttpHandler implements WithApplication {
+import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_ID;
+
+public class StreamsStopHandler extends AbstractStreamHttpHandler {
 
     private static final String CLEANUP_QUERY_PARAM = "cleanup";
 
@@ -40,13 +42,13 @@ public class StreamsStopHandler extends AbstractStreamHttpHandler implements Wit
      * {@inheritDoc}
      */
     @Override
-    public void handleRequest(final HttpServerExchange exchange, final String applicationId) {
+    public void handleRequest(HttpServerExchange exchange) {
         final JsonNode payload = ExchangeHelper.readJsonRequest(exchange);
         boolean cleanup = false;
         if (!payload.isMissingNode() && payload.hasNonNull(CLEANUP_QUERY_PARAM)) {
             JsonNode node = payload.get(CLEANUP_QUERY_PARAM);
             cleanup = node.asBoolean();
         }
-        service.stopStreams(applicationId, cleanup);
+        service.stopStreamsContainer(ExchangeHelper.getQueryParam(exchange, HTTP_QUERY_PARAM_ID), cleanup);
     }
 }

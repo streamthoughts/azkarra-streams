@@ -25,6 +25,8 @@ import io.streamthoughts.azkarra.api.query.LocalPreparedQuery;
 import io.streamthoughts.azkarra.api.query.QueryParams;
 import io.streamthoughts.azkarra.api.query.StoreOperation;
 import io.streamthoughts.azkarra.api.query.error.InvalidQueryException;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import java.time.Instant;
@@ -39,6 +41,8 @@ import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_
 import static io.streamthoughts.azkarra.api.query.internal.QueryConstants.QUERY_PARAM_TIME_TO;
 
 public class WindowQueryBuilder implements QueryOperationBuilder {
+
+    private static Serializer DEFAULT_SERIALIZER = new StringSerializer();
 
     public static final Error INVALID_TIME_ERROR = new Error(
         "invalid parameters: 'timeFrom' must be inferior to 'timeTo'");
@@ -125,7 +129,7 @@ public class WindowQueryBuilder implements QueryOperationBuilder {
             return new WindowFetchQuery<>(
                 store,
                 p.getValue(QUERY_PARAM_KEY),
-                null,
+                DEFAULT_SERIALIZER,
                 p.getLong(QUERY_PARAM_TIME)
             );
         }

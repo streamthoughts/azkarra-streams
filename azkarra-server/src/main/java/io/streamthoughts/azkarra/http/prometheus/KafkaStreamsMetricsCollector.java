@@ -25,6 +25,7 @@ import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.Metric;
 import io.streamthoughts.azkarra.api.model.MetricGroup;
 import io.streamthoughts.azkarra.api.monad.Tuple;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +37,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Simple {@link Collector} implementation for collecting
- * metrics from {@link org.apache.kafka.streams.KafkaStreams} instance.
+ * Simple {@link Collector} implementation for collecting metrics from a {@code KafkaStreams} instance.
  */
 public class KafkaStreamsMetricsCollector extends Collector {
 
@@ -50,7 +50,7 @@ public class KafkaStreamsMetricsCollector extends Collector {
 
     private final AzkarraStreamsService service;
 
-    private final String[] applications;
+    private final String[] containerIds;
 
     private final Predicate<Tuple<String, Metric>> filter;
 
@@ -61,9 +61,9 @@ public class KafkaStreamsMetricsCollector extends Collector {
      */
     public KafkaStreamsMetricsCollector(final AzkarraStreamsService service,
                                         final Predicate<Tuple<String, Metric>> filter,
-                                        final String... applications) {
+                                        final String... containerIds) {
         this.service = service;
-        this.applications = applications;
+        this.containerIds = containerIds;
         this.filter = filter;
     }
 
@@ -74,12 +74,14 @@ public class KafkaStreamsMetricsCollector extends Collector {
     public List<MetricFamilySamples> collect() {
 
         List<MetricFamilySamples> samples = new LinkedList<>();
-        for (String application : applications) {
+        for (String containerId : containerIds) {
             try {
-                Set<MetricGroup> groupSet = service.getStreamsMetricsById(application, filter);
+                Set<MetricGroup> groupSet = service
+                    .getStreamsContainerById(containerId)
+                    .metrics(KafkaStreamsContainer.KafkaMetricFilter.of(filter));
 
                 samples.addAll(groupSet.stream()
-                    .flatMap(group -> group.metrics().stream().map(m -> buildMetric(application, group.name(), m)))
+                    .flatMap(group -> group.metrics().stream().map(m -> buildMetric(containerId, group.name(), m)))
                     .collect(Collectors.toList())
                 );
 

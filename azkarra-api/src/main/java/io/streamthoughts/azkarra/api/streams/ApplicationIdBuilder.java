@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.api.streams;
 
+import io.streamthoughts.azkarra.api.ApplicationId;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 

@@ -22,16 +22,19 @@ package io.streamthoughts.azkarra.runtime.service;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
 import io.streamthoughts.azkarra.api.AzkarraStreamsService;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironment;
+import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentFactory;
 import io.streamthoughts.azkarra.api.components.ComponentDescriptor;
 import io.streamthoughts.azkarra.api.components.ComponentFactory;
 import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.errors.NoSuchComponentException;
+import io.streamthoughts.azkarra.api.errors.NotFoundException;
+import io.streamthoughts.azkarra.api.model.HasName;
 import io.streamthoughts.azkarra.api.model.TopologyAndAliases;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.Version;
-import io.streamthoughts.azkarra.api.StreamsExecutionEnvironmentFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,9 +50,9 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
 
     /**
      * Creates a new {@link AbstractAzkarraStreamsService} instance.
-     * 
      */
-    protected AbstractAzkarraStreamsService() { }
+    protected AbstractAzkarraStreamsService() {
+    }
 
     /**
      * {@inheritDoc}
@@ -76,9 +79,9 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
         }
 
         return topologies.entrySet()
-            .stream()
-            .map(entry -> new TopologyAndAliases(entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList());
+                .stream()
+                .map(entry -> new TopologyAndAliases(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -109,9 +112,9 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
         }
 
         var descriptor = optional.get();
-        if (! TopologyProvider.class.isAssignableFrom(descriptor.type())) {
+        if (!TopologyProvider.class.isAssignableFrom(descriptor.type())) {
             throw new NoSuchComponentException(
-                "Component for alias '"+ alias + "' and '" + qualifier + "' is not a sub-type of TopologyProvider");
+                "Component for alias '" + alias + "' and '" + qualifier + "' is not a sub-type of TopologyProvider");
         }
         return new TopologyDescriptor(descriptor);
     }
@@ -130,10 +133,10 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
         }
 
         return descriptors
-            .stream()
-            .map(ComponentDescriptor::version)
-            .sorted()
-            .collect(Collectors.toList());
+                .stream()
+                .map(ComponentDescriptor::version)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     /**
@@ -142,9 +145,31 @@ public abstract class AbstractAzkarraStreamsService implements AzkarraStreamsSer
     @Override
     public Set<String> getSupportedEnvironmentTypes() {
         return context.getAllComponents(StreamsExecutionEnvironmentFactory.class)
-            .stream()
-            .map(StreamsExecutionEnvironmentFactory::type)
-            .collect(Collectors.toSet());
+                .stream()
+                .map(StreamsExecutionEnvironmentFactory::type)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<StreamsExecutionEnvironment.View> describeAllEnvironments() {
+        return context.getAllEnvironments()
+                .stream()
+                .map(StreamsExecutionEnvironment::describe)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StreamsExecutionEnvironment.View describeEnvironmentByName(final String name) {
+        Objects.requireNonNull(name, "name should not be null");
+        return HasName.filterByName(context.getAllEnvironments(), name)
+                .map(StreamsExecutionEnvironment::describe)
+                .orElseThrow(() -> new NotFoundException("Failed to find environment for name '" + name + "'"));
     }
 
     /**
