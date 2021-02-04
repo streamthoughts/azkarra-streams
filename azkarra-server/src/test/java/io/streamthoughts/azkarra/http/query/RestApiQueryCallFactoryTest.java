@@ -35,9 +35,9 @@ import io.streamthoughts.azkarra.serialization.Serdes;
 import io.streamthoughts.azkarra.serialization.json.Json;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -48,31 +48,34 @@ import java.util.concurrent.ExecutionException;
 
 import static java.util.Collections.singletonList;
 
-public class HttpRemoteStateStoreClientTest {
+public class RestApiQueryCallFactoryTest {
 
     private static final Serdes<QueryResult> SERDES = new SpecificJsonSerdes<>(
         Json.getDefault(),
         QueryResult.class
     );
 
-    private static final Endpoint SERVER_INFO = new Endpoint("localhost", 8089);
-
     private static final String TEST_STORE_NAME = "store";
 
-    private HttpRemoteStateStoreClient client;
+    private final RestApiQueryCallFactory callFactory = new RestApiQueryCallFactory(
+            HttpClientBuilder.newBuilder().build()
+    );
 
-    private MockWebServer server;
+    private static MockWebServer SERVER;
 
-    @BeforeEach
-    public void beforeEach() throws IOException {
-        client = new HttpRemoteStateStoreClient(HttpClientBuilder.newBuilder().build());
-        server = new MockWebServer();
-        server.start(SERVER_INFO.port());
+    private static Endpoint ENDPOINT;
+
+
+    @BeforeAll
+    public static void beforeAll() throws IOException {
+        SERVER = new MockWebServer();
+        SERVER.start();
+        ENDPOINT = new Endpoint("localhost", SERVER.getPort());
     }
 
-    @AfterEach
-    public void afterEach() throws IOException {
-        server.shutdown();
+    @AfterAll
+    public static void afterAll() throws IOException {
+        SERVER.shutdown();
     }
 
     @Test
@@ -86,12 +89,14 @@ public class HttpRemoteStateStoreClientTest {
 
         QueryResult<String, String> queryResult = newQueryResult();
 
-        server.enqueue(new MockResponse()
+        SERVER.enqueue(new MockResponse()
             .setResponseCode(HttpURLConnection.HTTP_OK)
             .setBody(new String(SERDES.serialize(queryResult)))
         );
 
-        CompletableFuture<QueryResult<Object, Object>> future = client.query("test", SERVER_INFO, query, QueryOptions.immediately());
+        CompletableFuture<QueryResult<Object, Object>> future = callFactory
+            .create("test", Endpoint.of("localhost:8080"), ENDPOINT, query)
+            .executeAsync(QueryOptions.immediately());
         QueryResult<Object, Object> response = future.get();
         Assertions.assertEquals(queryResult, response);
     }
@@ -99,12 +104,12 @@ public class HttpRemoteStateStoreClientTest {
     private QueryResult<String, String> newQueryResult() {
         List<KV<String, String>> kv = singletonList(KV.of("k1", "v1"));
         return QueryResultBuilder.<String, String>newBuilder()
-            .setServer(SERVER_INFO.listener())
+            .setServer(ENDPOINT.listener())
             .setStatus(QueryStatus.SUCCESS)
             .setStoreName(TEST_STORE_NAME)
             .setSuccessResultSet(
                 singletonList(
-                    new SuccessResultSet<>(SERVER_INFO.listener(), true, kv)
+                    new SuccessResultSet<>(ENDPOINT.listener(), true, kv)
                 )
             )
             .setTook(0)

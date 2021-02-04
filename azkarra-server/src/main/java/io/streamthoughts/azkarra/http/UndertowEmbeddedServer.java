@@ -39,7 +39,7 @@ import io.streamthoughts.azkarra.http.error.AzkarraExceptionMapper;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultHandler;
 import io.streamthoughts.azkarra.http.error.ExceptionDefaultResponseListener;
 import io.streamthoughts.azkarra.http.handler.HeadlessHttpHandler;
-import io.streamthoughts.azkarra.http.query.HttpRemoteStateStoreClient;
+import io.streamthoughts.azkarra.http.query.RestApiQueryCallFactory;
 import io.streamthoughts.azkarra.http.routes.WebUIHttpRoutes;
 import io.streamthoughts.azkarra.http.security.SecurityConfig;
 import io.streamthoughts.azkarra.http.security.SecurityMechanism;
@@ -206,7 +206,7 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         }
         final OkHttpClient httpClient = httpClientBuilder.build();
         final String protocol = serverConfig.isSslEnable() ? "https" : "http";
-        context.registerSingleton(new HttpRemoteStateStoreClient(httpClient, protocol));
+        context.registerSingleton(new RestApiQueryCallFactory(httpClient, protocol));
     }
 
     private Undertow buildUndertowServer() {

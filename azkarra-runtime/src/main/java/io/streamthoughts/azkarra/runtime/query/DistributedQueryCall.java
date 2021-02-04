@@ -54,9 +54,9 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedQueryCall.class);
 
-    private final RemoteStateStoreClient client;
-
     private final LocalKafkaStreamsContainer container;
+
+    private final RemoteQueryCallFactory callFactory;
 
     /**
      * Creates a new {@link DecorateQuery} instance.
@@ -65,10 +65,10 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
      */
     public DistributedQueryCall(final LocalExecutableQuery<K, V> query,
                                 final LocalKafkaStreamsContainer container,
-                                final RemoteStateStoreClient client) {
+                                final RemoteQueryCallFactory callFactory) {
         super(query);
         this.container = Objects.requireNonNull(container, "container should not be null");
-        this.client = Objects.requireNonNull(client, "client should not be null");
+        this.callFactory = Objects.requireNonNull(callFactory, "callFactory should not be null");
     }
 
     /**
@@ -93,7 +93,9 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
         } else {
             result = queryMultiHostStateStore(options);
         }
-        return result.took(Time.SYSTEM.milliseconds() - now);
+        return result
+                .server(localEndpointListener())
+                .took(Time.SYSTEM.milliseconds() - now);
     }
 
     private boolean isKeyedQuery() {
@@ -101,11 +103,11 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
     }
 
     private Object getKey() {
-        return ((LocalExecutableQueryWithKey)query).getKey();
+        return ((LocalExecutableQueryWithKey) query).getKey();
     }
 
     private Serializer<Object> getKeySerializer() {
-        return ((LocalExecutableQueryWithKey)query).getKeySerializer();
+        return ((LocalExecutableQueryWithKey) query).getKeySerializer();
     }
 
     /**
@@ -113,42 +115,38 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
      */
     @Override
     public QueryCall<K, V> renew() {
-        return new DistributedQueryCall<>(query, container, client);
+        return new DistributedQueryCall<>(query, container, callFactory);
     }
 
     /**
      * Execute this key-query either locally or remotely.
      *
-     * @param options       the {@link QueryOptions} option.
-     *
-     * @return              the {@link QueryResult}
-     * @throws AzkarraException
-     *             A local query can fail if the container is re-initializing (task migration)
-     *             or the store is not initialized (or closed).
-     *
-     *             A remote query can fail if the remote instance is down and re-balancing has not occurred yet.
+     * @param options the {@link QueryOptions} option.
+     * @return the {@link QueryResult}
+     * @throws AzkarraException A local query can fail if the container is re-initializing (task migration)
+     *                          or the store is not initialized (or closed).
+     *                          <p>
+     *                          A remote query can fail if the remote instance is down and re-balancing has not occurred yet.
      */
     private QueryResult<K, V> querySingleHostStateStore(final QueryOptions options) throws AzkarraException {
-        final String serverName = localEndpoint();
-
         return container
-            .findMetadataForStoreAndKey(query.getStoreName(), getKey(), getKeySerializer())
-            .map(keyQueryMetadata -> {
-                var activeHost = keyQueryMetadata.getActiveHost();
-                final Endpoint endpoint = new Endpoint(activeHost.host(), activeHost.port());
-                final QueryCall<K, V> call;
-                if (container.checkEndpoint(endpoint)) {
-                    call = new LocalQueryCall<>(container, query);
-                } else if (options.remoteAccessAllowed()) {
-                    call = new RemoteQueryCall<>(applicationId(), serverName, endpoint, newQueryRequest(), client);
-                } else {
-                    call = new EmptyQueryCall<>(serverName, query);
-                }
-                return call.execute(options);
-            }).orElseGet(() -> {
-                var error = "no metadata available for store '" + query.getStoreName() + "', key '" + getKey() + "'";
-                return buildNotAvailableResult(serverName, error);
-            });
+                .findMetadataForStoreAndKey(query.getStoreName(), getKey(), getKeySerializer())
+                .map(keyQueryMetadata -> {
+                    var activeHost = keyQueryMetadata.getActiveHost();
+                    final Endpoint endpoint = new Endpoint(activeHost.host(), activeHost.port());
+                    final QueryCall<K, V> call;
+                    if (container.checkEndpoint(endpoint)) {
+                        call = new LocalQueryCall<>(container, query);
+                    } else if (options.remoteAccessAllowed()) {
+                        call = createRemoteQueryCall(endpoint);
+                    } else {
+                        call = new EmptyQueryCall<>(query);
+                    }
+                    return call.execute(options);
+                }).orElseGet(() -> {
+                    var error = "no metadata available for store '" + query.getStoreName() + "', key '" + getKey() + "'";
+                    return buildNotAvailableResult(error);
+                });
     }
 
     private QueryRequest newQueryRequest() {
@@ -159,8 +157,12 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
         return container.applicationId();
     }
 
-    private String localEndpoint() {
-        return container.endpoint().get().listener() ;
+    private Endpoint localEndpoint() {
+        return container.endpoint().get();
+    }
+
+    private String localEndpointListener() {
+        return container.endpoint().get().listener();
     }
 
     private QueryResult<K, V> queryMultiHostStateStore(final QueryOptions options) {
@@ -172,51 +174,48 @@ public class DistributedQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalEx
         if (endpoints.isEmpty()) {
             String error = "no metadata available for store '" + query.getStoreName() + "'";
             LOG.warn(error);
-            return buildNotAvailableResult(localEndpoint(), error);
+            return buildNotAvailableResult(error);
         }
 
         List<CompletableFuture<QueryResult<K, V>>> remotes = null;
         if (options.remoteAccessAllowed()) {
             // Forward query to all remote instances
             remotes = endpoints.stream()
-                .filter(Predicate.not(container::checkEndpoint))
-                .map(endpoint -> {
-                    final RemoteQueryCall<K, V> call = new RemoteQueryCall<>(
-                        applicationId(),
-                        localEndpoint(),
-                        endpoint,
-                        newQueryRequest(),
-                        client
-                    );
-                    // disable retries and remote
-                    final QueryOptions newOptions = options.withRemoteAccessAllowed(false).withRetries(0);
-                    return call.executeAsync(newOptions);
-                })
-                .collect(Collectors.toList());
+                    .filter(Predicate.not(container::checkEndpoint))
+                    .map(endpoint -> {
+                        final QueryCall<K, V> call = createRemoteQueryCall(endpoint);
+                        // disable retries and remote
+                        final QueryOptions newOptions = options.withRemoteAccessAllowed(false).withRetries(0);
+                        return call.executeAsync(newOptions);
+                    })
+                    .collect(Collectors.toList());
         }
         //Execute the query locally only if the local instance own the queried store.
-       endpoints.stream()
-            .filter(container::checkEndpoint)
-            .findFirst()
-            .map( local -> {
-                final LocalQueryCall<K, V> call = new LocalQueryCall<>(container, query);
-                // disable retries
-                final QueryOptions newOptions = options.withRetries(0);
-                return call.execute(newOptions).getResult().unwrap().get(0);
-            })
-            .ifPresent(results::add);
+        endpoints.stream()
+                .filter(container::checkEndpoint)
+                .findFirst()
+                .map(local -> {
+                    final LocalQueryCall<K, V> call = new LocalQueryCall<>(container, query);
+                    // disable retries
+                    final QueryOptions newOptions = options.withRetries(0);
+                    return call.execute(newOptions).getResult().unwrap().get(0);
+                })
+                .ifPresent(results::add);
 
         if (remotes != null) {
             // Blocking
             results.addAll(waitRemoteThenGet(remotes));
         }
+        return buildQueryResult(results);
+    }
 
-        return buildQueryResult(localEndpoint(), results);
+    private QueryCall<K, V> createRemoteQueryCall(final Endpoint endpoint) {
+        return callFactory.create(applicationId(), localEndpoint(), endpoint, newQueryRequest());
     }
 
     private static <K, V> List<Either<SuccessResultSet<K, V>, ErrorResultSet>> waitRemoteThenGet(
             final List<CompletableFuture<QueryResult<K, V>>> futures
-    )  {
+    ) {
 
         final CompletableFuture<List<QueryResult<K, V>>> future = futures
                 .stream()

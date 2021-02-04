@@ -32,6 +32,7 @@ import io.streamthoughts.azkarra.api.query.result.ErrorResultSet;
 import io.streamthoughts.azkarra.api.query.result.QueryError;
 import io.streamthoughts.azkarra.api.query.result.QueryResult;
 import io.streamthoughts.azkarra.api.query.result.SuccessResultSet;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 import io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 
@@ -66,13 +67,13 @@ public class LocalQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalExecutab
             .recover(t -> {
                 String cause = t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
                 String error = "Retries exhausted for querying state store " + query.getStoreName() + ". " + cause;
-                final QueryResult<K, V> result = buildNotAvailableResult(getLocalEndpoint(), error);
-                return Try.success(result.timeout(true));
+                final QueryResult<K, V> result = buildNotAvailableResult(error);
+                return Try.success(result.server(getLocalEndpoint().listener()).timeout(true));
             }).get();
     }
 
-    public String getLocalEndpoint() {
-        return container.endpoint().get().listener();
+    public Endpoint getLocalEndpoint() {
+        return container.endpoint().get();
     }
 
     private Retry toRetry(final QueryOptions options) {
@@ -99,13 +100,15 @@ public class LocalQueryCall<K, V> extends BaseAsyncQueryCall<K, V, LocalExecutab
                 t -> Try.success(Either.right(Collections.singletonList(new Error(t))))
             );
 
+        final String localEndpoint = getLocalEndpoint().listener();
+
         final Either<SuccessResultSet<K, V>, ErrorResultSet> rs = attempt.get()
             .left()
-            .map(records -> new SuccessResultSet<>(getLocalEndpoint(), false, records))
+            .map(records -> new SuccessResultSet<>(localEndpoint, false, records))
             .right()
-            .map(errors -> new ErrorResultSet(getLocalEndpoint(), false, QueryError.allOf(errors)));
+            .map(errors -> new ErrorResultSet(localEndpoint, false, QueryError.allOf(errors)));
 
-        return buildQueryResult(getLocalEndpoint(), Collections.singletonList(rs));
+        return buildQueryResult(Collections.singletonList(rs)).server(localEndpoint);
     }
 
     /**

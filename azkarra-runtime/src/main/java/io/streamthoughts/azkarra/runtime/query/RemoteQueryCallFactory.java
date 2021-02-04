@@ -18,40 +18,14 @@
  */
 package io.streamthoughts.azkarra.runtime.query;
 
-import io.streamthoughts.azkarra.api.query.DecorateQuery;
-import io.streamthoughts.azkarra.api.query.Query;
 import io.streamthoughts.azkarra.api.query.QueryCall;
-import io.streamthoughts.azkarra.api.query.QueryOptions;
-import io.streamthoughts.azkarra.api.query.result.QueryResult;
+import io.streamthoughts.azkarra.api.query.QueryRequest;
+import io.streamthoughts.azkarra.api.util.Endpoint;
 
-import java.util.Collections;
+public interface RemoteQueryCallFactory {
 
-import static io.streamthoughts.azkarra.runtime.query.internal.QueryResultUtils.buildQueryResult;
-
-public class EmptyQueryCall<K, V> extends BaseAsyncQueryCall<K, V, Query> {
-
-    /**
-     * Creates a new {@link DecorateQuery} instance.
-     *
-     * @param query the query.
-     */
-    public EmptyQueryCall(final Query query) {
-        super(query);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public QueryResult<K, V> execute(final QueryOptions options) {
-        return buildQueryResult(Collections.emptyList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public QueryCall<K, V> renew() {
-        return new EmptyQueryCall<>(query);
-    }
+    <K, V> QueryCall<K, V> create(final String applicationServer,
+                                  final Endpoint localEndpoint,
+                                  final Endpoint remoteEndpoint,
+                                  final QueryRequest query);
 }

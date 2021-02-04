@@ -29,15 +29,15 @@ import java.util.Objects;
 
 public class DistributedQueryExecutionDelegatee implements QueryExecutionDelegatee {
 
-    private final RemoteStateStoreClient client;
+    private final RemoteQueryCallFactory callFactory;
 
     /**
      * Creates a new {@link DistributedQueryExecutionDelegatee} instance.
      *
-     * @param client    the {@link RemoteStateStoreClient}.
+     * @param callFactory    the {@link RemoteQueryCallFactory}.
      */
-    public DistributedQueryExecutionDelegatee(final RemoteStateStoreClient client) {
-        this.client = Objects.requireNonNull(client, "client should not be null");
+    public DistributedQueryExecutionDelegatee(final RemoteQueryCallFactory callFactory) {
+        this.callFactory = Objects.requireNonNull(callFactory, "callFactory should not be null");
     }
 
     /**
@@ -58,6 +58,6 @@ public class DistributedQueryExecutionDelegatee implements QueryExecutionDelegat
         final LocalExecutableQuery<K, V> compiled = queryRequest.compile();
         final LocalKafkaStreamsContainer localContainer = (LocalKafkaStreamsContainer) container;
 
-        return new DistributedQueryCall<>(compiled, localContainer, client).execute(queryOptions);
+        return new DistributedQueryCall<>(compiled, localContainer, callFactory).execute(queryOptions);
     }
 }

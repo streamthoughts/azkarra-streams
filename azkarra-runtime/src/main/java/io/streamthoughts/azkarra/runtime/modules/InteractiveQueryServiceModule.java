@@ -23,7 +23,7 @@ import io.streamthoughts.azkarra.api.components.ComponentModule;
 import io.streamthoughts.azkarra.runtime.query.DefaultInteractiveQueryService;
 import io.streamthoughts.azkarra.runtime.query.DistributedQueryExecutionDelegatee;
 import io.streamthoughts.azkarra.runtime.query.QueryExecutionDelegatee;
-import io.streamthoughts.azkarra.runtime.query.RemoteStateStoreClient;
+import io.streamthoughts.azkarra.runtime.query.RemoteQueryCallFactory;
 
 public class InteractiveQueryServiceModule extends ComponentModule<DefaultInteractiveQueryService> {
 
@@ -34,9 +34,9 @@ public class InteractiveQueryServiceModule extends ComponentModule<DefaultIntera
     public DefaultInteractiveQueryService get() {
         var streamsService = getComponent(AzkarraStreamsService.class);
         var queryService = new DefaultInteractiveQueryService(streamsService);
-        var client = getComponent(RemoteStateStoreClient.class);
+        var callFactory = getComponent(RemoteQueryCallFactory.class);
 
-        queryService.registerQueryExecutionDelegatee(new DistributedQueryExecutionDelegatee(client));
+        queryService.registerQueryExecutionDelegatee(new DistributedQueryExecutionDelegatee(callFactory));
         getAllComponents(QueryExecutionDelegatee.class).forEach(queryService::registerQueryExecutionDelegatee);
 
         return queryService;

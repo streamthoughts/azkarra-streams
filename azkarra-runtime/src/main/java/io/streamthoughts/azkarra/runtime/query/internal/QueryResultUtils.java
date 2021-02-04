@@ -31,18 +31,15 @@ import java.util.stream.Collectors;
 
 public class QueryResultUtils {
 
-    public static <K, V> QueryResult<K, V> buildNotAvailableResult(final String server,
-                                                                   final String error) {
+    public static <K, V> QueryResult<K, V> buildNotAvailableResult(final String error) {
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
         return builder
-                .setServer(server)
-                .setStatus(QueryStatus.NOT_AVAILABLE)
-                .setError(error)
-                .build();
+            .setStatus(QueryStatus.NOT_AVAILABLE)
+            .setError(error)
+            .build();
     }
 
-    public static <K, V> QueryResult<K, V> buildQueryResult(final String localServerName,
-                                                            final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results) {
+    public static <K, V> QueryResult<K, V> buildQueryResult(final List<Either<SuccessResultSet<K, V>, ErrorResultSet>> results) {
         final List<ErrorResultSet> errors = results.stream()
                 .filter(Either::isRight)
                 .map(e -> e.right().get()).collect(Collectors.toList());
@@ -55,35 +52,34 @@ public class QueryResultUtils {
 
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
         return builder
-                .setServer(localServerName)
-                .setStatus(status)
-                .setFailedResultSet(errors)
-                .setSuccessResultSet(success)
-                .build();
+            .setStatus(status)
+            .setFailedResultSet(errors)
+            .setSuccessResultSet(success)
+            .build();
     }
 
-    public static <K,V> QueryResult<K, V> buildInternalErrorResult(final String localServerName,
-                                                       final String remoteServerName,
-                                                       final Throwable t) {
+    public static <K, V> QueryResult<K, V> buildInternalErrorResult(final String localServerName,
+                                                                    final String remoteServerName,
+                                                                    final Throwable t) {
         final QueryError error = QueryError.of(t);
         final ErrorResultSet errorResultSet = new ErrorResultSet(
-                remoteServerName,
-                true,
-                error);
+            remoteServerName,
+            true,
+            error);
 
         final QueryResultBuilder<K, V> builder = QueryResultBuilder.newBuilder();
         return builder
-                .setServer(localServerName)
-                .setStatus(QueryStatus.ERROR)
-                .setFailedResultSet(errorResultSet)
-                .build();
+            .setServer(localServerName)
+            .setStatus(QueryStatus.ERROR)
+            .setFailedResultSet(errorResultSet)
+            .build();
     }
 
 
     private static <K, V> QueryStatus computeStatus(final List<ErrorResultSet> errors,
                                                     final List<SuccessResultSet<K, V>> success) {
         QueryStatus status;
-        if ( !errors.isEmpty() && !success.isEmpty()) {
+        if (!errors.isEmpty() && !success.isEmpty()) {
             status = QueryStatus.PARTIAL;
         } else if (!errors.isEmpty()) {
             status = QueryStatus.ERROR;
