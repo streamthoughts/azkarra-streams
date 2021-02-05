@@ -25,5 +25,5 @@ public interface StreamsExecutionEnvironmentAware {
      *
      * @param environment   the {@link StreamsExecutionEnvironment} instance
      */
-    void setExecutionEnvironment(final StreamsExecutionEnvironment environment);
+    void setExecutionEnvironment(final StreamsExecutionEnvironment<?> environment);
 }

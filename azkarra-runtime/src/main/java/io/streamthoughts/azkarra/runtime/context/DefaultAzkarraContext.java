@@ -150,7 +150,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     /**
      * Creates a new {@link DefaultAzkarraContext} instance.
      *
-     * @param configuration   the context {@link Conf} instance.
+     * @param configuration the context {@link Conf} instance.
      */
     private DefaultAzkarraContext(final Conf configuration, final ComponentFactory componentFactory) {
         Objects.requireNonNull(configuration, "configuration cannot be null");
@@ -167,50 +167,50 @@ public class DefaultAzkarraContext implements AzkarraContext {
     private void initialize() {
         // Register all built-in StreamsLifeCycleInterceptor implementations.
         registerComponent(
-            AutoCreateTopicsInterceptor.class,
-            withConditions(onPropertyTrue(AUTO_CREATE_TOPICS_ENABLE_CONFIG))
+                AutoCreateTopicsInterceptor.class,
+                withConditions(onPropertyTrue(AUTO_CREATE_TOPICS_ENABLE_CONFIG))
         );
         registerComponent(
-            MonitoringStreamsInterceptor.class,
-            withConditions(onPropertyTrue(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG))
+                MonitoringStreamsInterceptor.class,
+                withConditions(onPropertyTrue(MONITORING_STREAMS_INTERCEPTOR_ENABLE_CONFIG))
         );
         registerComponent(
-            KafkaBrokerReadyInterceptor.class,
-            withConditions(onPropertyTrue(KAFKA_READY_INTERCEPTOR_ENABLE_CONFIG)),
-            withOrder(Ordered.HIGHEST_ORDER)
+                KafkaBrokerReadyInterceptor.class,
+                withConditions(onPropertyTrue(KAFKA_READY_INTERCEPTOR_ENABLE_CONFIG)),
+                withOrder(Ordered.HIGHEST_ORDER)
         );
         registerComponent(
-            WaitForSourceTopicsInterceptor.class,
-            withConditions(any(
-                onPropertyTrue(WAIT_FOR_TOPICS_ENABLE_CONFIG),
-                onPropertyTrue(ENABLE_WAIT_FOR_TOPICS__CONFIG))
-            ),
-            withOrder(Ordered.LOWEST_ORDER)
+                WaitForSourceTopicsInterceptor.class,
+                withConditions(any(
+                        onPropertyTrue(WAIT_FOR_TOPICS_ENABLE_CONFIG),
+                        onPropertyTrue(ENABLE_WAIT_FOR_TOPICS__CONFIG))
+                ),
+                withOrder(Ordered.LOWEST_ORDER)
         );
         registerComponent(
-            StreamThreadExceptionHandler.class,
-            new DefaultStreamThreadExceptionHandlerFactory(),
-            withConditions(onMissingComponent(List.of(StreamThreadExceptionHandler.class)))
+                StreamThreadExceptionHandler.class,
+                new DefaultStreamThreadExceptionHandlerFactory(),
+                withConditions(onMissingComponent(List.of(StreamThreadExceptionHandler.class)))
         );
         registerSingleton(
-            AzkarraStreamsService.class,
-            LocalAzkarraStreamsService::new,
-            withConditions(onMissingComponent(List.of(AzkarraStreamsService.class)))
+                AzkarraStreamsService.class,
+                LocalAzkarraStreamsService::new,
+                withConditions(onMissingComponent(List.of(AzkarraStreamsService.class)))
         );
         registerSingleton(
-            StreamsExecutionEnvironmentFactory.class,
-            LocalStreamsExecutionEnvironmentFactory::new,
-            withConditions(onMissingComponent(List.of(StreamsExecutionEnvironmentFactory.class)))
+                StreamsExecutionEnvironmentFactory.class,
+                LocalStreamsExecutionEnvironmentFactory::new,
+                withConditions(onMissingComponent(List.of(StreamsExecutionEnvironmentFactory.class)))
         );
         registerComponent(
-            StreamsExecutionEnvironmentAbstractFactory.class,
-            () -> new StreamsExecutionEnvironmentAbstractFactory(getAllComponents(StreamsExecutionEnvironmentFactory.class))
+                StreamsExecutionEnvironmentAbstractFactory.class,
+                () -> new StreamsExecutionEnvironmentAbstractFactory(getAllComponents(StreamsExecutionEnvironmentFactory.class))
         );
 
         registerSingleton(
-            DefaultInteractiveQueryService.class,
-            new InteractiveQueryServiceModule(),
-            withConditions(onMissingComponent(List.of(InteractiveQueryService.class)))
+                DefaultInteractiveQueryService.class,
+                new InteractiveQueryServiceModule(),
+                withConditions(onMissingComponent(List.of(InteractiveQueryService.class)))
         );
 
     }
@@ -281,15 +281,15 @@ public class DefaultAzkarraContext implements AzkarraContext {
             environments.put(env.name(), env);
             Map<String, Object> confAsMap = new TreeMap<>(env.getConfiguration().getConfAsMap());
             final String configLogs = confAsMap.entrySet()
-                .stream()
-                .map(e -> e.getKey() + " = " + e.getValue())
-                .collect(Collectors.joining("\n\t"));
+                    .stream()
+                    .map(e -> e.getKey() + " = " + e.getValue())
+                    .collect(Collectors.joining("\n\t"));
             LOG.info("Registered new streams environment for name '{}' and default config :\n\t{}",
-                env.name(),
-                configLogs
+                    env.name(),
+                    configLogs
             );
             if (env instanceof AzkarraContextAware)
-                ((AzkarraContextAware)env).setAzkarraContext(this);
+                ((AzkarraContextAware) env).setAzkarraContext(this);
 
             if (state == State.STARTED) {
                 env.start();
@@ -321,8 +321,8 @@ public class DefaultAzkarraContext implements AzkarraContext {
      */
     @Override
     public Optional<ApplicationId> addTopology(final Class<? extends TopologyProvider> type,
-                                              final String environment,
-                                              final Executed executed) {
+                                               final String environment,
+                                               final Executed executed) {
         return addTopology(type.getName(), environment, executed);
     }
 
@@ -344,15 +344,14 @@ public class DefaultAzkarraContext implements AzkarraContext {
                                                final String version,
                                                final String environment,
                                                final Executed executed) {
-
         final TopologyRegistration registration = new TopologyRegistration(type, version, environment, executed);
-
-        ApplicationId res = null;
         if (state == State.STARTED)
-           res = mayAddTopologyToEnvironment(registration);
-        else
+            return addTopologyToEnvironment(registration);
+        else {
             topologyRegistrations.add(registration);
-        return Optional.ofNullable(res);
+            return Optional.empty();
+        }
+
     }
 
     public void setState(final State state) {
@@ -362,25 +361,24 @@ public class DefaultAzkarraContext implements AzkarraContext {
     /**
      * Build and add a {@link TopologyProvider} to a target {@link StreamsExecutionEnvironment}.
      *
-     * @param registration  the {@link TopologyRegistration}
-     * @return              the {@link ApplicationId} instance if the environment is already started,
-     *                      otherwise {@code null}.
+     * @param registration the {@link TopologyRegistration}
      *
+     * @return the {@link ApplicationId} instance if the environment is already started, otherwise {@code null}.
      * @throws AzkarraContextException if no component is registered for the topology to register.
      *                                 if target environment doesn't exists.
      */
-    private ApplicationId mayAddTopologyToEnvironment(final TopologyRegistration registration) {
+    private Optional<ApplicationId> addTopologyToEnvironment(final TopologyRegistration registration) {
         Objects.requireNonNull(registration, "registration cannot be null");
 
-        final StreamsExecutionEnvironment <?> environment;
+        final StreamsExecutionEnvironment<?> environment;
         if (registration.environment != null) {
             checkIfEnvironmentExists(
-                registration.environment,
-                String.format(
-                    "Error while adding topology '%s', environment '%s' not found",
-                    registration.type,
-                    registration.environment
-                ));
+                    registration.environment,
+                    String.format(
+                            "Error while adding topology '%s', environment '%s' not found",
+                            registration.type,
+                            registration.environment
+                    ));
             environment = environments.get(registration.environment);
         } else {
             environment = getDefaultEnvironment();
@@ -397,33 +395,26 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
         final var streamConfig = registration.executed.config();
         final var conditionalContext = new ConfigConditionalContext<>(
-            streamConfig
-                .withFallback(environment.getConfiguration())
-                .withFallback(getConfiguration())
+                streamConfig
+                        .withFallback(environment.getConfiguration())
+                        .withFallback(getConfiguration())
         );
 
         final Optional<ComponentDescriptor<TopologyProvider>> opt = registration.version == null ?
-            componentFactory.findDescriptorByAlias(registration.type, conditionalContext, Qualifiers.byLatestVersion()) :
-            componentFactory.findDescriptorByAlias(registration.type, conditionalContext, Qualifiers.byVersion(registration.version));
+                componentFactory.findDescriptorByAlias(registration.type, conditionalContext, Qualifiers.byLatestVersion()) :
+                componentFactory.findDescriptorByAlias(registration.type, conditionalContext, Qualifiers.byVersion(registration.version));
 
         if (opt.isPresent()) {
             final TopologyDescriptor<TopologyProvider> descriptor = new TopologyDescriptor<>(opt.get());
-            final StreamsTopologyMeta meta = new StreamsTopologyMeta(
-                descriptor.name(),
-                descriptor.version(),
-                descriptor.description(),
-                descriptor.type(),
-                descriptor.classLoader(),
-                descriptor.configuration()
-            );
+            final StreamsTopologyMeta meta = StreamsTopologyMeta.create().from(descriptor).build();
             return environment.newTopologyExecution(meta, registration.executed).start();
 
         } else {
             final String loggedVersion = registration.version != null ? registration.version : "latest";
             throw new AzkarraContextException(
-               "Failed to register topology to environment '" + environment.name() + "'."
-               + " Cannot find any topology provider for type='" + registration.type
-               + "', version='" + loggedVersion +" '."
+                    "Failed to register topology to environment '" + environment.name() + "'."
+                            + " Cannot find any topology provider for type='" + registration.type
+                            + "', version='" + loggedVersion + " '."
             );
         }
     }
@@ -434,7 +425,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public Set<TopologyDescriptor> getTopologyDescriptors() {
         Collection<ComponentDescriptor<TopologyProvider>> descriptors =
-            componentFactory.findAllDescriptorsByClass(TopologyProvider.class);
+                componentFactory.findAllDescriptorsByClass(TopologyProvider.class);
         return descriptors.stream().map(TopologyDescriptor::new).collect(Collectors.toSet());
     }
 
@@ -455,13 +446,13 @@ public class DefaultAzkarraContext implements AzkarraContext {
                 .withFallback(getConfiguration());
         var conditionalContext = new ConfigConditionalContext<>(componentConfig);
         Collection<ComponentDescriptor<TopologyProvider>> descriptors =
-            componentFactory.findAllDescriptorsByClass(
-                TopologyProvider.class,
-                conditionalContext, Qualifiers.byAnyRestrictions(
-                    Restriction.application(),
-                    Restriction.env(env.name())
-                )
-            );
+                componentFactory.findAllDescriptorsByClass(
+                        TopologyProvider.class,
+                        conditionalContext, Qualifiers.byAnyRestrictions(
+                                Restriction.application(),
+                                Restriction.env(env.name())
+                        )
+                );
         return descriptors.stream().map(TopologyDescriptor::new).collect(Collectors.toSet());
     }
 
@@ -489,10 +480,10 @@ public class DefaultAzkarraContext implements AzkarraContext {
     @Override
     public StreamsExecutionEnvironment<?> getDefaultEnvironment() {
         return getAllEnvironments()
-            .stream()
-            .filter(env -> env.isDefault() || env.name().equals(DEFAULT_ENV_NAME))
-            .findFirst()
-            .orElse(null);
+                .stream()
+                .filter(env -> env.isDefault() || env.name().equals(DEFAULT_ENV_NAME))
+                .findFirst()
+                .orElse(null);
 
     }
 
@@ -503,7 +494,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
     public void start() {
         if (state != State.CREATED) {
             throw new IllegalStateException(
-                "The context is either already started or already stopped, cannot re-start");
+                    "The context is either already started or already stopped, cannot re-start");
         }
         LOG.info("Starting AzkarraContext");
         componentFactory.init(getConfiguration());
@@ -542,9 +533,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
                 listener.onContextStop(this);
             } catch (Exception e) {
                 LOG.error(
-                    "Unexpected error happens while invoking listener '{}#onContextStop' : ",
-                    listener.getClass().getName(),
-                    e
+                        "Unexpected error happens while invoking listener '{}#onContextStop' : ",
+                        listener.getClass().getName(),
+                        e
                 );
             }
         });
@@ -564,7 +555,7 @@ public class DefaultAzkarraContext implements AzkarraContext {
         initDefaultStreamsExecutionEnvironment();
         if (!topologyRegistrations.isEmpty()) {
             LOG.info("Adding all registered topologies to declared streams environments");
-            topologyRegistrations.forEach(this::mayAddTopologyToEnvironment);
+            topologyRegistrations.forEach(this::addTopologyToEnvironment);
         }
     }
 
@@ -576,25 +567,30 @@ public class DefaultAzkarraContext implements AzkarraContext {
 
     private void initDefaultStreamsExecutionEnvironment() {
         final List<StreamsExecutionEnvironment<?>> defaults = environments
-            .values()
-            .stream()
-            .filter(env -> env.isDefault() || env.name().equals(DEFAULT_ENV_NAME))
-            .collect(Collectors.toList());
+                .values()
+                .stream()
+                .filter(env -> env.isDefault() || env.name().equals(DEFAULT_ENV_NAME))
+                .collect(Collectors.toList());
 
         if (defaults.size() > 1) {
             final String strDefault = defaults
-                .stream()
-                .map(StreamsExecutionEnvironment::name)
-                .collect(Collectors.joining(",", "[", "]"));
+                    .stream()
+                    .map(StreamsExecutionEnvironment::name)
+                    .collect(Collectors.joining(",", "[", "]"));
             throw new AzkarraContextException("Too many default environments " + strDefault);
+        }
+
+        if (defaults.size() == 1) {
+            // Ensure the environment named 'default' is flagged as default.
+            defaults.get(0).isDefault(true);
         }
 
         if (defaults.isEmpty()) {
             LOG.warn("No default environment can be found, initializing a new one with name {}", DEFAULT_ENV_NAME);
             addExecutionEnvironment(
-                getComponent(StreamsExecutionEnvironmentFactory.class)
-                    .create(DEFAULT_ENV_NAME)
-                    .isDefault(true)
+                    getComponent(StreamsExecutionEnvironmentFactory.class)
+                            .create(DEFAULT_ENV_NAME)
+                            .isDefault(true)
             );
         }
     }
@@ -685,9 +681,9 @@ public class DefaultAzkarraContext implements AzkarraContext {
             if (!(o instanceof TopologyRegistration)) return false;
             TopologyRegistration that = (TopologyRegistration) o;
             return Objects.equals(type, that.type) &&
-                Objects.equals(version, that.version) &&
-                Objects.equals(environment, that.environment) &&
-                Objects.equals(executed, that.executed);
+                    Objects.equals(version, that.version) &&
+                    Objects.equals(environment, that.environment) &&
+                    Objects.equals(executed, that.executed);
         }
 
         /**

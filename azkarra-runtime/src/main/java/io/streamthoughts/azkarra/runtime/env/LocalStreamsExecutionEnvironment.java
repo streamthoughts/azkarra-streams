@@ -30,7 +30,6 @@ import io.streamthoughts.azkarra.api.StreamsTopologyExecution;
 import io.streamthoughts.azkarra.api.StreamsTopologyMeta;
 import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.RocksDBConfig;
 import io.streamthoughts.azkarra.api.errors.AlreadyExistsException;
 import io.streamthoughts.azkarra.api.errors.AzkarraException;
 import io.streamthoughts.azkarra.api.events.EventStream;
@@ -43,6 +42,7 @@ import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
+import io.streamthoughts.azkarra.api.util.Version;
 import io.streamthoughts.azkarra.runtime.env.internal.BasicContainerId;
 import io.streamthoughts.azkarra.runtime.env.internal.EnvironmentAwareComponentSupplier;
 import io.streamthoughts.azkarra.runtime.streams.DefaultApplicationIdBuilder;
@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -84,6 +85,8 @@ public class LocalStreamsExecutionEnvironment implements
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalStreamsExecutionEnvironment.class);
 
+    public static final String STREAMS_CONFIG_PREFIX = "streams";
+
     /**
      * Static helper that can be used to creates a new {@link StreamsExecutionEnvironment} instance
      * using the empty configuration and a generated unique name.
@@ -98,20 +101,18 @@ public class LocalStreamsExecutionEnvironment implements
      * Static helper that can be used to creates a new {@link StreamsExecutionEnvironment} instance from
      * the specified env name and using the configuration.
      *
-     * @param envName  the name to be used for identifying this environment.
-     *
+     * @param name   the name to be used for identifying this environment.
      * @return a new {@link LocalStreamsExecutionEnvironment} instance.
      */
-    public static LocalStreamsExecutionEnvironment create(final String envName) {
-        return create(Conf.empty(), envName);
+    public static LocalStreamsExecutionEnvironment create(final String name) {
+        return create(Conf.empty(), name);
     }
 
     /**
      * Static helper that can be used to creates a new {@link StreamsExecutionEnvironment} instance from
      * the specified {@link Conf} and using a generated env name.
      *
-     * @param settings  the {@link Conf} instance.
-     *
+     * @param settings the {@link Conf} instance.
      * @return a new {@link LocalStreamsExecutionEnvironment} instance.
      */
     public static LocalStreamsExecutionEnvironment create(final Conf settings) {
@@ -123,12 +124,11 @@ public class LocalStreamsExecutionEnvironment implements
      * the specified {@link Conf} and env name.
      *
      * @param settings  the {@link Conf} instance.
-     * @param envName   the name to be used for identifying this environment.
-     *
+     * @param name      the name to be used for identifying this environment.
      * @return a new {@link LocalStreamsExecutionEnvironment} instance.
      */
-    public static LocalStreamsExecutionEnvironment create(final Conf settings, final String envName) {
-        return new LocalStreamsExecutionEnvironment(settings, envName);
+    public static LocalStreamsExecutionEnvironment create(final Conf settings, final String name) {
+        return new LocalStreamsExecutionEnvironment(settings, name);
     }
 
     private static final ThreadPerStreamsExecutor STREAMS_EXECUTOR = new ThreadPerStreamsExecutor();
@@ -143,6 +143,11 @@ public class LocalStreamsExecutionEnvironment implements
      */
     private State state;
 
+    private final List<Supplier<Conf>> confSuppliers = new LinkedList<>();
+
+    /**
+     * The environment's configuration.
+     */
     private Conf configuration;
 
     private final List<KafkaStreams.StateListener> stateListeners = new LinkedList<>();
@@ -174,28 +179,17 @@ public class LocalStreamsExecutionEnvironment implements
     /**
      * Creates a new {@link LocalStreamsExecutionEnvironment} instance.
      *
-     * @param configuration  the default {@link Conf} instance.
+     * @param config the configuration of the environment.
+     * @param name   the name  of the environment.
      */
-    private LocalStreamsExecutionEnvironment(final Conf configuration) {
-        this(configuration, EnvironmentNameGenerator.generate());
-    }
-
-    /**
-     * Creates a new {@link LocalStreamsExecutionEnvironment} instance.
-     *
-     * @param envName the environment name to be used.
-     */
-    private LocalStreamsExecutionEnvironment(final Conf config,
-                                             final String envName) {
-        Objects.requireNonNull(config, "config cannot be null");
-        Objects.requireNonNull(envName, "envName cannot be null");
-        this.configuration = config;
+    private LocalStreamsExecutionEnvironment(final Conf config, final String name) {
+        this.name = Objects.requireNonNull(name, "name cannot be null");
+        this.configuration = Objects.requireNonNull(config, "config cannot be null");
         this.activeStreams = new HashMap<>();
         this.interceptors = new LinkedList<>();
         this.kafkaStreamsFactory = () -> KafkaStreamsFactory.DEFAULT;
         this.applicationIdBuilderSupplier = DefaultApplicationIdBuilder::new;
         this.topologies = new LinkedList<>();
-        this.name = envName;
         setState(State.CREATED);
     }
 
@@ -231,6 +225,10 @@ public class LocalStreamsExecutionEnvironment implements
         return isDefault;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public LocalStreamsExecutionEnvironment isDefault(final boolean isDefault) {
         this.isDefault = isDefault;
         return this;
@@ -248,13 +246,10 @@ public class LocalStreamsExecutionEnvironment implements
      * Adds a {@link KafkaStreams.StateListener} instance that will set to all {@link KafkaStreams} instance created
      * in this {@link StreamsExecutionEnvironment}.
      *
-     * @see KafkaStreams#setStateListener(KafkaStreams.StateListener).
-     *
-     * @param listener  the {@link KafkaStreams.StateListener} instance.
-     *
-     * @throws IllegalStateException if this {@link StreamsExecutionEnvironment} instance is started.
-     *
+     * @param listener the {@link KafkaStreams.StateListener} instance.
      * @return this {@link StreamsExecutionEnvironment} instance.
+     * @throws IllegalStateException if this {@link StreamsExecutionEnvironment} instance is started.
+     * @see KafkaStreams#setStateListener(KafkaStreams.StateListener).
      */
     public LocalStreamsExecutionEnvironment addStateListener(final KafkaStreams.StateListener listener) {
         Objects.requireNonNull(listener, "Cannot add empty listener");
@@ -266,13 +261,10 @@ public class LocalStreamsExecutionEnvironment implements
      * Adds a {@link StateRestoreListener} instance that will set to all {@link KafkaStreams} instance created
      * in this {@link StreamsExecutionEnvironment}.
      *
-     * @see KafkaStreams#setGlobalStateRestoreListener(StateRestoreListener) .
-     *
-     * @param listener  the {@link StateRestoreListener} instance.
-     *
-     * @throws IllegalStateException if this {@link StreamsExecutionEnvironment} instance is started.
-     *
+     * @param listener the {@link StateRestoreListener} instance.
      * @return this {@link StreamsExecutionEnvironment} instance.
+     * @throws IllegalStateException if this {@link StreamsExecutionEnvironment} instance is started.
+     * @see KafkaStreams#setGlobalStateRestoreListener(StateRestoreListener) .
      */
     public LocalStreamsExecutionEnvironment addGlobalStateListener(final StateRestoreListener listener) {
         Objects.requireNonNull(listener, "Cannot add empty listener");
@@ -285,7 +277,7 @@ public class LocalStreamsExecutionEnvironment implements
      * in this {@link StreamsExecutionEnvironment}.
      * The interceptors will be executed in the order in which they were added.
      *
-     * @param interceptor   the {@link {@link StreamsLifecycleInterceptor}}.
+     * @param interceptor the {@link {@link StreamsLifecycleInterceptor}}.
      * @return this {@link StreamsExecutionEnvironment} instance.
      */
     public LocalStreamsExecutionEnvironment addStreamsLifecycleInterceptor(
@@ -298,9 +290,8 @@ public class LocalStreamsExecutionEnvironment implements
      * Sets the {@link StreamThreadExceptionHandler} invoked when a StreamThread abruptly terminates
      * due to an uncaught exception.
      *
-     * @param handler   the {@link StreamThreadExceptionHandler}.
-     * @return          this {@link StreamsExecutionEnvironment} instance.
-     *
+     * @param handler the {@link StreamThreadExceptionHandler}.
+     * @return this {@link StreamsExecutionEnvironment} instance.
      * @see KafkaStreams#setUncaughtExceptionHandler(Thread.UncaughtExceptionHandler)
      */
     public LocalStreamsExecutionEnvironment setStreamThreadExceptionHandler(
@@ -312,7 +303,7 @@ public class LocalStreamsExecutionEnvironment implements
     /**
      * Gets the {@link StreamThreadExceptionHandler}.
      *
-     * @return          the {@link Supplier<StreamThreadExceptionHandler>}, otherwise {@code null} if no handler is set.
+     * @return the {@link Supplier<StreamThreadExceptionHandler>}, otherwise {@code null} if no handler is set.
      */
     public Supplier<StreamThreadExceptionHandler> getStreamThreadExceptionHandler() {
         return streamThreadExceptionHandler;
@@ -340,10 +331,10 @@ public class LocalStreamsExecutionEnvironment implements
     @Override
     public Set<ApplicationId> getApplicationIds() {
         return activeStreams.values()
-            .stream()
-            .map(KafkaStreamsContainer::applicationId)
-            .map(ApplicationId::new)
-            .collect(Collectors.toSet());
+                .stream()
+                .map(KafkaStreamsContainer::applicationId)
+                .map(ApplicationId::new)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -353,11 +344,11 @@ public class LocalStreamsExecutionEnvironment implements
     public Optional<KafkaStreamsApplication> getApplicationById(final ApplicationId id) {
         final List<KafkaStreamsContainer> containers = getActiveContainersForApplication(id);
         if (containers.isEmpty()) return Optional.empty();
-        var container = (LocalKafkaStreamsContainer)containers.get(0);
+        var container = (LocalKafkaStreamsContainer) containers.get(0);
         return Optional.of(new KafkaStreamsApplication(
-            name,
-            container.applicationId(),
-            container.allInstances()
+                name,
+                container.applicationId(),
+                container.allInstances()
         ));
     }
 
@@ -365,10 +356,11 @@ public class LocalStreamsExecutionEnvironment implements
      * {@inheritDoc}
      */
     @Override
-    public LocalStreamsExecutionEnvironment setConfiguration(final Conf configuration) {
-        this.configuration = configuration;
+    public LocalStreamsExecutionEnvironment addConfiguration(final Supplier<Conf> configuration) {
+        confSuppliers.add(Objects.requireNonNull(configuration, "configuration should not be null"));
         return this;
     }
+
 
     /**
      * {@inheritDoc}
@@ -378,14 +370,15 @@ public class LocalStreamsExecutionEnvironment implements
         return configuration;
     }
 
+
     /**
-     * {@inheritDoc}
+     * Helper method to add a configuration prefixed with 'streams.'.
+     *
+     * @param configuration the {@link Conf} to supply.
+     * @return  {@code this}.
      */
-    @Override
-    public LocalStreamsExecutionEnvironment setRocksDBConfig(final RocksDBConfig rocksDBConfig) {
-        Objects.requireNonNull(rocksDBConfig, "rocksDBConfig cannot be null");
-        configuration = configuration.withFallback(Conf.of("streams", rocksDBConfig.conf()));
-        return this;
+    public LocalStreamsExecutionEnvironment addStreamsConfiguration(final Supplier<Conf> configuration) {
+        return addConfiguration(() -> Conf.of(STREAMS_CONFIG_PREFIX, configuration.get()));
     }
 
     /**
@@ -407,30 +400,101 @@ public class LocalStreamsExecutionEnvironment implements
     }
 
     /**
-     * Add a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment} to be started.
+     * Registers a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment}.
+     * A new {@link KafkaStreams} instance will be created and started for this topology
+     * when the environment will start.
      *
-     * @param provider     the {@link TopologyProvider} supplier.
+     * If the {@link LocalStreamsExecutionEnvironment} is already started, then a new {@link KafkaStreams} instance
+     * is immediately created.
      *
-     * @return             this {@link ApplicationId} instance if the environment is already started,
-     *                     otherwise {@code null}.
+     * @see #addTopology(Supplier)
+     *
+     * @param supplier the {@link TopologyProvider} supplier.
+     * @return         {@code this}.
      */
-    public ApplicationId addTopology(final Supplier<TopologyProvider> provider) {
-        return addTopology(provider, new InternalExecuted());
+    public LocalStreamsExecutionEnvironment registerTopology(final Supplier<TopologyProvider> supplier) {
+        return registerTopology(supplier, new InternalExecuted());
+
     }
 
     /**
-     * Add a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment} to be started.
+     * Registers a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment}.
+     * A new {@link KafkaStreams} instance will be created and started for this topology
+     * when the environment will start.
      *
-     * @param provider     the {@link TopologyProvider} supplier.
-     * @param executed     the {@link Executed} instance.
+     * If the {@link LocalStreamsExecutionEnvironment} is already started, then a new {@link KafkaStreams} instance
+     * is immediately created.
      *
-     * @return             this {@link ApplicationId} instance if the environment is already started,
-     *                     otherwise {@code null}.
+     * @see #addTopology(Supplier, Executed)
+     *
+     * @param topology the {@link Topology}.
+     * @param version  the topology's {@link Version}.
+     * @param executed the topology's execution options.
+     *
+     * @return         {@code this}.
      */
-    public ApplicationId addTopology(final Supplier<TopologyProvider> provider, final Executed executed) {
-        final TopologyDefinitionHolder internalProvider = new TopologyDefinitionHolder(provider, executed);
+    public LocalStreamsExecutionEnvironment registerTopology(final Topology topology,
+                                                             final Version version,
+                                                             final Executed executed) {
+        addTopology(() -> TopologyProvider.of(topology, version), executed);
+        return this;
+    }
+
+    /**
+     * Registers a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment}.
+     * A new {@link KafkaStreams} instance will be created and started for this topology
+     * when the environment will start.
+     *
+     * If the {@link LocalStreamsExecutionEnvironment} is already started, then a new {@link KafkaStreams} instance
+     * is immediately created.
+     *
+     * @see #addTopology(Supplier, Executed)
+     *
+     * @param supplier the {@link TopologyProvider} supplier.
+     * @param executed the {@link Executed} instance.
+     *
+     * @return         {@code this}.
+     */
+    public LocalStreamsExecutionEnvironment registerTopology(final Supplier<TopologyProvider> supplier,
+                                                             final Executed executed) {
+        addTopology(supplier, executed);
+        return this;
+    }
+
+    /**
+     * Adds a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment}.
+     * A new {@link KafkaStreams} instance will be created and started for this topology
+     * when the environment will start.
+     *
+     * If the {@link LocalStreamsExecutionEnvironment} is already started, then a new {@link KafkaStreams} instance
+     * is immediately created.
+     *
+     * @param supplier the {@link TopologyProvider} supplier.
+     * @return         the {@link ApplicationId} instance if the environment is already started,
+     * otherwise {@link Optional#empty()}.
+     */
+    public Optional<ApplicationId> addTopology(final Supplier<TopologyProvider> supplier) {
+        return addTopology(supplier, new InternalExecuted());
+    }
+
+    /**
+     * Adds a new {@link TopologyProvider} instance to this {@link StreamsExecutionEnvironment}.
+     * A new {@link KafkaStreams} instance will be created and started for this topology
+     * when the environment will start.
+     *
+     * If the {@link LocalStreamsExecutionEnvironment} is already started, then a new {@link KafkaStreams} instance
+     * is immediately created.
+     *
+     * @param supplier the {@link TopologyProvider} supplier.
+     * @param executed the {@link Executed} instance.
+     * @return         the {@link ApplicationId} instance if the environment is already started,
+     * otherwise {@link Optional#empty()}.
+     */
+    public Optional<ApplicationId> addTopology(final Supplier<TopologyProvider> supplier,
+                                               final Executed executed) {
+        final TopologyDefinitionHolder internalProvider = new TopologyDefinitionHolder(supplier, executed);
         topologies.add(internalProvider);
-        return state == State.STARTED ? start(internalProvider) : null;
+        return state == State.STARTED ? Optional.of(start(internalProvider)) : Optional.empty();
     }
 
     /**
@@ -440,16 +504,37 @@ public class LocalStreamsExecutionEnvironment implements
     public void start() throws IllegalStateException, AzkarraException {
         if (state != State.CREATED) {
             throw new IllegalStateException(
-                "The environment is either already started or already stopped, cannot re-start");
+                    "The environment is either already started or already stopped, cannot re-start");
         }
+        initConfiguration();
         topologies.forEach(this::start);
         setState(State.STARTED);
+    }
+
+    @VisibleForTesting
+    void initConfiguration() {
+        if (!confSuppliers.isEmpty()) {
+            Conf newConfig = null;
+            final ListIterator<Supplier<Conf>> it = confSuppliers.listIterator(confSuppliers.size());
+            while (it.hasPrevious()) {
+                Conf conf = supply(it.previous(), configuration);
+                if (newConfig == null)
+                    newConfig = conf;
+                else
+                    newConfig = newConfig.withFallback(conf);
+            }
+            configuration = newConfig;
+        }
     }
 
     private ApplicationId start(final TopologyDefinitionHolder topologyHolder) {
         final TopologyDefinition definition = topologyHolder.createTopologyDefinition();
 
-        LOG.info("Building new Topology for name='{}', version='{}'", definition.getName(), definition.getVersion());
+        LOG.info(
+            "Creating new container for topology with: name='{}', version='{}'",
+            definition.getName(),
+            definition.getVersion()
+        );
 
         var topologyConfig = topologyHolder.getTopologyConfig();
 
@@ -460,7 +545,10 @@ public class LocalStreamsExecutionEnvironment implements
 
         topologyHolder.setContainerId(containerId);
 
-        var streamsConfig = topologyConfig.hasPath("streams") ? topologyConfig.getSubConf("streams") : Conf.empty();
+        var streamsConfig = topologyConfig.hasPath(STREAMS_CONFIG_PREFIX) ?
+                topologyConfig.getSubConf(STREAMS_CONFIG_PREFIX) :
+                Conf.empty();
+
         var applicationIdConfig = Conf.of(StreamsConfig.APPLICATION_ID_CONFIG, applicationId.toString());
 
         if (streamThreadExceptionHandler == null)
@@ -551,11 +639,10 @@ public class LocalStreamsExecutionEnvironment implements
      * Close the {@link KafkaStreams} instance for the given identifier and wait up to the {@code timeout}
      * for the instance to be closed.
      *
-     * @param id        the streams application identifier.
-     * @param cleanUp   flag to indicate if local states must be cleanup.
-     * @param timeout   the duration to wait for the streams to shutdown.
-     * @param remove    if the instance should be removed from active streams.
-     *
+     * @param id      the streams application identifier.
+     * @param cleanUp flag to indicate if local states must be cleanup.
+     * @param timeout the duration to wait for the streams to shutdown.
+     * @param remove  if the instance should be removed from active streams.
      * @throws IllegalArgumentException if no streams instance exist for the given {@code id}.
      */
     private void closeStreamsContainer(final ContainerId id,
@@ -581,16 +668,16 @@ public class LocalStreamsExecutionEnvironment implements
     private void checkStreamsIsAlreadyRunningFor(final ApplicationId id) {
         if (!getActiveContainersForApplication(id).isEmpty()) {
             throw new AlreadyExistsException(
-                "A local KafkaStream instance is already registered with an application.id '" + id + "'");
+                    "A local KafkaStream instance is already registered with an application.id '" + id + "'");
         }
     }
 
     private List<KafkaStreamsContainer> getActiveContainersForApplication(final ApplicationId id) {
         return activeStreams.entrySet()
-            .stream()
-            .filter(it -> it.getKey().startWith(id))
-            .map(Map.Entry::getValue)
-            .collect(Collectors.toList());
+                .stream()
+                .filter(it -> it.getKey().startWith(id))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
     }
 
     private void checkIsStarted() {
@@ -612,7 +699,7 @@ public class LocalStreamsExecutionEnvironment implements
      * Sets the {@link KafkaStreamsFactory} that will be used to provide
      * the {@link KafkaStreams} to configure and start.
      *
-     * @param factory   the {@link KafkaStreamsFactory} instance.
+     * @param factory the {@link KafkaStreamsFactory} instance.
      * @return this {@link StreamsExecutionEnvironment} instance.
      */
     public LocalStreamsExecutionEnvironment setKafkaStreamsFactory(final Supplier<KafkaStreamsFactory> factory) {
@@ -624,8 +711,8 @@ public class LocalStreamsExecutionEnvironment implements
                                                 final Conf TopologyConfig) {
         var applicationIdBuilder = supply(applicationIdBuilderSupplier, TopologyConfig);
         return applicationIdBuilder.buildApplicationId(
-            new TopologyMetadata(definition.getName(), definition.getVersion(), definition.getDescription()),
-            TopologyConfig
+                new TopologyMetadata(definition.getName(), definition.getVersion(), definition.getDescription()),
+                TopologyConfig
         );
     }
 
@@ -680,8 +767,8 @@ public class LocalStreamsExecutionEnvironment implements
         /**
          * Creates a new {@link TopologyDefinitionHolder} instance.
          *
-         * @param supplier  the supplier to supplier.
-         * @param executed  the {@link Executed} instance.
+         * @param supplier the supplier to supplier.
+         * @param executed the {@link Executed} instance.
          */
         TopologyDefinitionHolder(final Supplier<TopologyProvider> supplier,
                                  final Executed executed) {
@@ -695,9 +782,9 @@ public class LocalStreamsExecutionEnvironment implements
 
         List<StreamsLifecycleInterceptor> getAllInterceptors() {
             return Stream
-                .concat(interceptors.stream(), executed.interceptors().stream())
-                .map(i -> supply(i, getTopologyConfig()))
-                .collect(Collectors.toList());
+                    .concat(interceptors.stream(), executed.interceptors().stream())
+                    .map(i -> supply(i, getTopologyConfig()))
+                    .collect(Collectors.toList());
         }
 
         KafkaStreamsFactory getKafkaStreamsFactory() {
@@ -709,14 +796,14 @@ public class LocalStreamsExecutionEnvironment implements
             var ctxConfig = context != null ? context.getConfiguration() : Conf.empty();
             var envConfig = LocalStreamsExecutionEnvironment.this.getConfiguration();
             // Merged all configurations
-            return Conf.of(executed.config(), envConfig, envConfig, ctxConfig);
+            return Conf.of(executed.config(), envConfig, ctxConfig);
         }
 
         TopologyDefinition createTopologyDefinition() {
             return new InternalTopologyDefinition(
-                executed.name(),
-                executed.description(),
-                supply(supplier, getTopologyConfig())
+                    executed.name(),
+                    executed.description(),
+                    supply(supplier, getTopologyConfig())
             );
         }
 
@@ -784,8 +871,8 @@ public class LocalStreamsExecutionEnvironment implements
         @Override
         public List<EventStream> getEventStreams() {
             return (provider instanceof EventStreamProvider) ?
-                ((EventStreamProvider)provider).eventStreams() :
-                Collections.emptyList();
+                    ((EventStreamProvider) provider).eventStreams() :
+                    Collections.emptyList();
         }
     }
 }

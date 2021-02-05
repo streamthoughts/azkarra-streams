@@ -82,7 +82,7 @@ public class CompositeStreamsInterceptor implements StreamsLifecycleInterceptor,
      * {@inheritDoc}
      */
     @Override
-    public void setExecutionEnvironment(final StreamsExecutionEnvironment environment) {
+    public void setExecutionEnvironment(final StreamsExecutionEnvironment<?> environment) {
         for (StreamsLifecycleInterceptor interceptor : interceptors) {
             if (interceptor instanceof StreamsExecutionEnvironmentAware) {
                 ((StreamsExecutionEnvironmentAware)interceptor).setExecutionEnvironment(environment);

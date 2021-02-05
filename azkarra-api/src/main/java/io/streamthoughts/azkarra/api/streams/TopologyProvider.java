@@ -19,7 +19,10 @@
 package io.streamthoughts.azkarra.api.streams;
 
 import io.streamthoughts.azkarra.api.providers.Provider;
+import io.streamthoughts.azkarra.api.util.Version;
 import org.apache.kafka.streams.Topology;
+
+import java.util.Objects;
 
 /**
  * The default interface to supply a Kafka Streams {@link Topology} instance.
@@ -40,4 +43,27 @@ public interface TopologyProvider extends Provider<Topology> {
      * @return  the {@link Topology} instance.
      */
     Topology topology();
+
+    /**
+     * An helper method to create a static {@link TopologyProvider} returning the provided {@link Topology}.
+     *
+     * @param topology  the {@link Topology} instance.
+     * @param version   the topology's version.
+     * @return          a new {@link TopologyProvider} instance.
+     */
+    static TopologyProvider of(final Topology topology, final Version version) {
+        Objects.requireNonNull(topology, "topology should not be null");
+        Objects.requireNonNull(version, "version should not be null");
+        return new TopologyProvider() {
+            @Override
+            public String version() {
+                return version.toString();
+            }
+
+            @Override
+            public Topology topology() {
+                return topology;
+            }
+        };
+    }
 }

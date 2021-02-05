@@ -21,11 +21,12 @@ package io.streamthoughts.azkarra.api.config;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Configuration class for setting internal RocksDB options.
  */
-public class RocksDBConfig {
+public class RocksDBConfig implements Supplier<Conf> {
 
     public static String ROCKS_DB_MAX_WRITE_BUFFER_NUMBER_CONFIG = "rocksdb.max.write.buffer.number";
     public static String ROCKS_DB_WRITE_BUFFER_SIZE_CONFIG       = "rocksdb.write.buffer.size";
@@ -35,12 +36,22 @@ public class RocksDBConfig {
     public static String ROCKS_DB_LOG_LEVEL_CONFIG               = "rocksdb.log.level";
     public static String ROCKS_DB_LOG_MAX_FILE_SIZE_CONFIG       = "rocksdb.log.max.file.size";
 
-    private Map<String, String> configs = new HashMap<>();
+    private final Map<String, Object> configs = new HashMap<>();
 
+    /**
+     * Helper method to create a new {@link RocksDBConfig} object with statistics enable.
+     *
+     * @return  a new {@link RocksDBConfig}.
+     */
     public static RocksDBConfig withStatsEnable() {
         return new RocksDBConfig(true);
     }
 
+    /**
+     * Helper method to create a new {@link RocksDBConfig} object with statistics disable.
+     *
+     * @return  a new {@link RocksDBConfig}.
+     */
     public static RocksDBConfig withStatsDisable() {
         return new RocksDBConfig(false);
     }
@@ -82,12 +93,19 @@ public class RocksDBConfig {
         return this;
     }
 
-    public Conf conf() {
-        return new MapConf(configs);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return configs.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Conf get() {
+        return Conf.of(configs);
     }
 }

@@ -20,7 +20,6 @@ package io.streamthoughts.azkarra.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.streamthoughts.azkarra.api.config.Conf;
-import io.streamthoughts.azkarra.api.config.RocksDBConfig;
 import io.streamthoughts.azkarra.api.errors.NotFoundException;
 import io.streamthoughts.azkarra.api.model.HasId;
 import io.streamthoughts.azkarra.api.model.HasName;
@@ -29,6 +28,7 @@ import io.streamthoughts.azkarra.api.streams.KafkaStreamsApplication;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import org.apache.kafka.streams.KafkaStreams;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
@@ -37,7 +37,10 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * A StreamsExecutionEnvironment manages the lifecycle of {@link org.apache.kafka.streams.Topology} instances.
+ * A {@code StreamsExecutionEnvironment} manages the execution and the lifecycle of one or many {@link KafkaStreams}
+ * instances that run either locally or remotely.
+ *
+ * @see KafkaStreamsContainer
  */
 public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironment<T>> extends HasName {
 
@@ -107,7 +110,7 @@ public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironme
                 .findFirst()
                 .orElseThrow(() ->
                         new NotFoundException(
-                                "Fail to find running KafkaStreams instance for container id '"
+                                "Failed to find running KafkaStreams instance for container id '"
                                         + id
                                         + "' in environment '" + name() + "'")
                 );
@@ -136,11 +139,25 @@ public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironme
     Optional<KafkaStreamsApplication> getApplicationById(final ApplicationId id);
 
     /**
-     * Sets this environment configuration.
+     * Adds a new configuration to this environment.
+     * This method can be invoked multiple time. The supplied configuration will override all prior configurations.
+     *
+     * @see #addConfiguration(Supplier)
      *
      * @return this {@link StreamsExecutionEnvironment} instance.
      */
-    T setConfiguration(final Conf configuration);
+    default T addConfiguration(final Conf configuration) {
+        return addConfiguration(() -> configuration);
+    }
+
+    /**
+     * Adds a new configuration to this environment.
+     * This method can be invoked multiple time. The supplied configuration will override all prior configurations.
+     *
+     *
+     * @return this {@link StreamsExecutionEnvironment} instance.
+     */
+    T addConfiguration(final Supplier<Conf> configuration);
 
     /**
      * Gets this environment configuration.
@@ -148,14 +165,6 @@ public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironme
      * @return the {@link Conf} instance.
      */
     Conf getConfiguration();
-
-    /**
-     * Sets the {@link RocksDBConfig} streamsConfig used by topology persistent stores.
-     *
-     * @param settings the {@link RocksDBConfig} instance.
-     * @return this {@link StreamsExecutionEnvironment} instance.
-     */
-    T setRocksDBConfig(final RocksDBConfig settings);
 
     /**
      * Sets the {@link ApplicationIdBuilder} that should be used for building streams {@code application.id}.
@@ -173,7 +182,8 @@ public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironme
     Supplier<ApplicationIdBuilder> getApplicationIdBuilder();
 
     /**
-     * Adds streamsConfig that will be used in fallback if not present in defined environment streamsConfig.
+     * Adds settings to this environment that will be used in fallback if not present
+     * in the defined environment configuration.
      *
      * @param settings the {@link Conf} instance.
      * @return this {@link StreamsExecutionEnvironment} instance.
@@ -321,7 +331,7 @@ public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironme
      * A {@code Environment} is used to describe the current state of a
      * {@link io.streamthoughts.azkarra.api.StreamsExecutionEnvironment} instance.
      */
-    class View implements HasName {
+    class View implements HasName, Serializable {
 
         private final StreamsExecutionEnvironment<?> environment;
 

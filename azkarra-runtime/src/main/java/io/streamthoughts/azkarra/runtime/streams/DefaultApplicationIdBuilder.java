@@ -39,13 +39,13 @@ public class DefaultApplicationIdBuilder implements ApplicationIdBuilder, Stream
     private static final char[] AUTHORIZED_CHAR_SEPARATOR = {' ', '-', '_', '.'};
     private static final String INTERNAL_ENV_NAME_PREFIX = "__";
 
-    private StreamsExecutionEnvironment environment;
+    private StreamsExecutionEnvironment<?> environment;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setExecutionEnvironment(final StreamsExecutionEnvironment environment) {
+    public void setExecutionEnvironment(final StreamsExecutionEnvironment<?> environment) {
         this.environment = environment;
     }
 

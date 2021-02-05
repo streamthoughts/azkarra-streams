@@ -28,8 +28,9 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Class which can be used for configuring components.
+ * A {@code Conf} represents an immutable object which can be used for configuring components.
  *
+ * @see Configurable
  * @see io.streamthoughts.azkarra.api.AzkarraContext
  * @see io.streamthoughts.azkarra.api.StreamsExecutionEnvironment
  * @see io.streamthoughts.azkarra.api.streams.TopologyProvider

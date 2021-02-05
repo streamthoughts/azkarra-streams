@@ -19,6 +19,7 @@
 
 package io.streamthoughts.azkarra.api;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 /**
@@ -26,20 +27,20 @@ import java.util.concurrent.Callable;
  *
  * @see StreamsExecutionEnvironment
  */
-public interface StreamsTopologyExecution extends Callable<ApplicationId> {
+public interface StreamsTopologyExecution extends Callable<Optional<ApplicationId>> {
 
     /**
      * Starts the streams-topology encapsulated by this object.
      *
      * @return  the {@link ApplicationId}.
      */
-    ApplicationId start();
+    Optional<ApplicationId> start();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    default ApplicationId call() {
+    default Optional<ApplicationId> call() {
         return start();
     }
 }

@@ -24,6 +24,7 @@ import io.streamthoughts.azkarra.api.StreamsTopologyMeta;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
+import io.streamthoughts.azkarra.api.util.Version;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import io.streamthoughts.azkarra.runtime.context.internal.ContextAwareTopologySupplier;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
@@ -56,20 +57,14 @@ public class LocalStreamsExecutionTest {
 
         var mkDescriptor = mock(TopologyDescriptor.class);
         when(mkDescriptor.name()).thenReturn("test");
+        when(mkDescriptor.version()).thenReturn(Version.parse("1.0"));
         when(mkDescriptor.configuration()).thenReturn(Conf.of("prop.descriptor", "desc.value"));
         when(mkDescriptor.type()).thenReturn(TopologyDescriptor.class);
         Executed executed = Executed.as("test-app").withConfig(Conf.of("prop.executed", "exec.value"));
         context.setConfiguration(Conf.of("prop.context", "value"));
 
         final LocalStreamsExecution execution = new LocalStreamsExecution(
-            new StreamsTopologyMeta(
-                mkDescriptor.name(),
-                mkDescriptor.version(),
-                mkDescriptor.description(),
-                mkDescriptor.type(),
-                mkDescriptor.classLoader(),
-                mkDescriptor.configuration()
-            ),
+            StreamsTopologyMeta.create().from(mkDescriptor).build(),
             executed,
             context,
             mkEnv
@@ -98,6 +93,7 @@ public class LocalStreamsExecutionTest {
 
         var mkDescriptor = mock(TopologyDescriptor.class);
         when(mkDescriptor.name()).thenReturn("test");
+        when(mkDescriptor.version()).thenReturn(Version.parse("1.0"));
         when(mkDescriptor.configuration()).thenReturn(Conf.empty());
         when(mkDescriptor.type()).thenReturn(TopologyDescriptor.class);
         when(mkDescriptor.classLoader()).thenReturn(this.getClass().getClassLoader());
@@ -110,14 +106,7 @@ public class LocalStreamsExecutionTest {
 
         //Execute
         final LocalStreamsExecution execution = new LocalStreamsExecution(
-            new StreamsTopologyMeta(
-                mkDescriptor.name(),
-                mkDescriptor.version(),
-                mkDescriptor.description(),
-                mkDescriptor.type(),
-                mkDescriptor.classLoader(),
-                mkDescriptor.configuration()
-            ),
+            StreamsTopologyMeta.create().from(mkDescriptor).build(),
             Executed.as("test"),
             context,
             mkEnv

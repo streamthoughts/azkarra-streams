@@ -49,7 +49,8 @@ public class LocalStreamsExecutionEnvironmentTest {
             "default.prop", "value"
         );
 
-        environment.setConfiguration(envConf);
+        environment.addConfiguration(envConf);
+        environment.initConfiguration();
 
         Executed executed = Executed.as("dummy-topology", "a test topology")
             .withConfig(Conf.of(

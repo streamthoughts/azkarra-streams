@@ -42,7 +42,7 @@ import java.util.stream.Stream;
  */
 public class MapConf extends AbstractConf {
 
-    protected final Map<String, ?> parameters;
+    private final Map<String, ?> parameters;
 
     private final Conf fallback;
 
@@ -52,7 +52,7 @@ public class MapConf extends AbstractConf {
      * @return a new {@link MapConf} instance.
      */
     static MapConf empty() {
-        return new MapConf(Collections.emptyMap(), null, true);
+        return new MapConf(Collections.emptyMap());
     }
 
     /**
@@ -61,7 +61,7 @@ public class MapConf extends AbstractConf {
      * @return a new {@link MapConf} instance.
      */
     static MapConf singletonConf(final String key, final Object value) {
-        return new MapConf(Collections.singletonMap(key, value), null, true);
+        return new MapConf(Collections.singletonMap(key, value));
     }
 
     /**
@@ -83,7 +83,7 @@ public class MapConf extends AbstractConf {
         this(parameters, null, explode);
     }
 
-    protected MapConf(final Map<String, ?> parameters,
+    private MapConf(final Map<String, ?> parameters,
                       final Conf fallback,
                       final boolean explode) {
         Objects.requireNonNull(parameters, "parameters cannot be null");

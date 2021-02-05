@@ -53,10 +53,10 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
     /**
      * Creates a new {@link LocalStreamsExecution} instance.
      *
-     * @param meta          the {@link StreamsTopologyMeta} object.
-     * @param executed      the {@link Executed} object.
-     * @param context       the {@link AzkarraContext} object.
-     * @param environment   the {@link LocalStreamsExecutionEnvironment} object.
+     * @param meta        the {@link StreamsTopologyMeta} object.
+     * @param executed    the {@link Executed} object.
+     * @param context     the {@link AzkarraContext} object.
+     * @param environment the {@link LocalStreamsExecutionEnvironment} object.
      */
     LocalStreamsExecution(final StreamsTopologyMeta meta,
                           final Executed executed,
@@ -70,7 +70,7 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
      * {@inheritDoc}
      */
     @Override
-    public ApplicationId start() {
+    public Optional<ApplicationId> start() {
         // Gets user-defined streams name or fallback on descriptor cannot be null).
         final var streamName = executed.nameOrElseGet(meta.name());
 
@@ -79,10 +79,10 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
 
         // Gets user-defined configuration and fallback on inherited configurations.
         final var streamsConfig = Conf.of(
-            executed.config(),              // (1) Executed
-            environment.getConfiguration(), // (2) Environment
-            context.getConfiguration(),     // (3) Context
-            meta.configuration()            // (4) Streams (i.e: default)
+                executed.config(),              // (1) Executed
+                environment.getConfiguration(), // (2) Environment
+                context.getConfiguration(),     // (3) Context
+                meta.configuration()            // (4) Streams (i.e: default)
         );
 
         final var interceptors = executed.interceptors();
@@ -91,34 +91,34 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
 
         // Get and register all StreamsLifeCycleInterceptors component for any scopes: Application, Env, Streams
         interceptors.addAll(findLifecycleInterceptors(
-            streamsConfig,
-            Restriction.application(),
-            Restriction.env(environment.name()),
-            Restriction.streams(streamName))
+                streamsConfig,
+                Restriction.application(),
+                Restriction.env(environment.name()),
+                Restriction.streams(streamName))
         );
 
         // Get and register KafkaStreamsFactory for one the scopes: Application, Env, Streams
-        final var factory =  executed.factory()
-            .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.streams(streamName)))
-            .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.env(environment.name())))
-            .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.application()))
-            .orElse(() -> KafkaStreamsFactory.DEFAULT);
+        final var factory = executed.factory()
+                .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.streams(streamName)))
+                .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.env(environment.name())))
+                .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.application()))
+                .orElse(() -> KafkaStreamsFactory.DEFAULT);
 
         LOG.info(
-            "Registered new topology to environment '{}' for type='{}', version='{}', name='{}'.",
-            environment.name(),
-            meta.type().getName(),
-            meta.version(),
-            streamName
+                "Registered new topology to environment '{}' for type='{}', version='{}', name='{}'.",
+                environment.name(),
+                meta.type().getName(),
+                meta.version(),
+                streamName
         );
 
         final var completedExecuted = Executed.as(streamName)
-            .withConfig(streamsConfig)
-            .withDescription(Optional.ofNullable(description).orElse(""))
-            .withInterceptors(interceptors)
-            .withKafkaStreamsFactory(
-                () -> new ClassLoaderAwareKafkaStreamsFactory(factory.get(), meta.classLoader())
-            );
+                .withConfig(streamsConfig)
+                .withDescription(Optional.ofNullable(description).orElse(""))
+                .withInterceptors(interceptors)
+                .withKafkaStreamsFactory(
+                    () -> new ClassLoaderAwareKafkaStreamsFactory(factory.get(), meta.classLoader())
+                );
 
         return environment.addTopology(new ContextAwareTopologySupplier(context, meta), completedExecuted);
     }
@@ -127,17 +127,17 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
                                                                                   final Restriction... restrictions) {
         final Qualifier<StreamsLifecycleInterceptor> qualifier = Qualifiers.byAnyRestrictions(restrictions);
         return context.getComponentFactory()
-            .getAllComponentProviders(StreamsLifecycleInterceptor.class, qualifier)
-            .stream()
-            .filter(ConfigConditionalContext.of(componentConfig))
-            .map(provider -> new ContextAwareLifecycleInterceptorSupplier(context, provider))
-            .collect(Collectors.toList());
+                .getAllComponentProviders(StreamsLifecycleInterceptor.class, qualifier)
+                .stream()
+                .filter(ConfigConditionalContext.of(componentConfig))
+                .map(provider -> new ContextAwareLifecycleInterceptorSupplier(context, provider))
+                .collect(Collectors.toList());
     }
 
     private Optional<Supplier<KafkaStreamsFactory>> findKafkaStreamsFactory(final Conf componentConfig,
                                                                             final Restriction restriction) {
         return new RestrictedComponentFactory(context.getComponentFactory())
-            .findComponentByRestriction(KafkaStreamsFactory.class, componentConfig, restriction)
-            .map(gettable -> new ContextAwareKafkaStreamsFactorySupplier(context, gettable));
+                .findComponentByRestriction(KafkaStreamsFactory.class, componentConfig, restriction)
+                .map(gettable -> new ContextAwareKafkaStreamsFactorySupplier(context, gettable));
     }
 }

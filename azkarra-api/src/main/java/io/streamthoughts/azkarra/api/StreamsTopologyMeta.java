@@ -20,10 +20,12 @@
 package io.streamthoughts.azkarra.api;
 
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.providers.TopologyDescriptor;
 import io.streamthoughts.azkarra.api.streams.TopologyProvider;
 import io.streamthoughts.azkarra.api.util.Version;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class StreamsTopologyMeta {
 
@@ -34,29 +36,28 @@ public class StreamsTopologyMeta {
     private final ClassLoader classLoader;
     private final Conf conf;
 
-
     /**
      * Creates a new {@link StreamsTopologyMeta} instance.
      *
-     * @param name          the name of the topology.
-     * @param version       the version of the topology
-     * @param description   the description of the topology.
-     * @param type          the topology {@link Class}.
-     * @param classLoader   the topology {@link ClassLoader}.
-     * @param conf          the default {@link Conf} for the topology.
+     * @param name        the name of the topology.
+     * @param version     the version of the topology
+     * @param description the description of the topology.
+     * @param type        the topology {@link Class}.
+     * @param classLoader the topology {@link ClassLoader}.
+     * @param conf        the default {@link Conf} for the topology.
      */
-    public StreamsTopologyMeta(final String name,
-                               final Version version,
-                               final String description,
-                               final Class<TopologyProvider> type,
-                               final ClassLoader classLoader,
-                               final Conf conf) {
-        this.name = name;
-        this.version = version;
+    private StreamsTopologyMeta(final String name,
+                                final Version version,
+                                final String description,
+                                final Class<TopologyProvider> type,
+                                final ClassLoader classLoader,
+                                final Conf conf) {
+        this.name = Objects.requireNonNull(name, "name should not be null");
+        this.version = Objects.requireNonNull(version, "version should not be null");
+        this.type = Objects.requireNonNull(type, "version should not be null");
+        this.classLoader = Objects.requireNonNull(classLoader, "classLoader should not be null");
+        this.conf = Objects.requireNonNull(conf, "conf should not be null");
         this.description = description;
-        this.type = type;
-        this.classLoader = classLoader;
-        this.conf = conf;
     }
 
     public String name() {
@@ -120,5 +121,77 @@ public class StreamsTopologyMeta {
                 ", classLoader=" + classLoader +
                 ", conf=" + conf +
                 '}';
+    }
+
+    /**
+     * Helper method to create a new {@link Builder} instance.
+     *
+     * @return a new {@link Builder} instance
+     */
+    public static Builder create() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private String name;
+        private Version version;
+        private String description;
+        private Class<TopologyProvider> type;
+        private ClassLoader classLoader;
+        private Conf conf;
+
+        public Builder from(final TopologyDescriptor<TopologyProvider> descriptor) {
+            return this
+                    .setName(descriptor.name())
+                    .setVersion(descriptor.version())
+                    .setDescription(descriptor.description())
+                    .setType(descriptor.type())
+                    .setClassLoader(descriptor.classLoader())
+                    .setConf(descriptor.configuration());
+        }
+
+        public Builder setName(final String name) {
+            this.name = Objects.requireNonNull(name, "name should not be null");
+            return this;
+        }
+
+        public Builder setVersion(final Version version) {
+            this.version = Objects.requireNonNull(version, "version should not be null");
+            ;
+            return this;
+        }
+
+        public Builder setDescription(final String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder setType(final Class<TopologyProvider> type) {
+            this.type = Objects.requireNonNull(type, "type should not be null");
+            ;
+            return this;
+        }
+
+        public Builder setClassLoader(final ClassLoader classLoader) {
+            this.classLoader = classLoader;
+            return this;
+        }
+
+        public Builder setConf(final Conf conf) {
+            this.conf = conf;
+            return this;
+        }
+
+        public StreamsTopologyMeta build() {
+            return new StreamsTopologyMeta(
+                    name,
+                    version,
+                    description,
+                    type,
+                    Optional.ofNullable(classLoader).orElse(type.getClassLoader()),
+                    Optional.ofNullable(conf).orElse(Conf.empty())
+            );
+        }
     }
 }

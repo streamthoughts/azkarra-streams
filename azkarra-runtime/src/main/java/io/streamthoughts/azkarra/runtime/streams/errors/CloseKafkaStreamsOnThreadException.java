@@ -38,7 +38,7 @@ public class CloseKafkaStreamsOnThreadException implements
 
     private static final Logger LOG = LoggerFactory.getLogger(CloseKafkaStreamsOnThreadException.class);
 
-    private StreamsExecutionEnvironment environment;
+    private StreamsExecutionEnvironment<?> environment;
 
     /**
      * {@inheritDoc}
@@ -62,7 +62,7 @@ public class CloseKafkaStreamsOnThreadException implements
      * {@inheritDoc}
      */
     @Override
-    public void setExecutionEnvironment(final StreamsExecutionEnvironment environment) {
+    public void setExecutionEnvironment(final StreamsExecutionEnvironment<?> environment) {
         this.environment = environment;
     }
 }
