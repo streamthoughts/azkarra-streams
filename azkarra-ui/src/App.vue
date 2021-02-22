@@ -17,90 +17,111 @@
 * limitations under the License.
 */
 <template>
-  <div id="app">
-    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">
-        <a class="navbar-brand" href="#">
-          <img height="62px" alt="azkarra-streams-logo" src="static/azkarra-streams-logo-light.svg"/>
-          <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
-        </a>
-      </a>
-      <ul class="navbar-nav text-light px-3">
-        <li class="nav-item text-nowrap">
-        </li>
-      </ul>
-    </nav>
-    <div class="main-container">
-      <nav class="bg-dark main-sidebar">
-        <div class="sidebar-sticky">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <router-link to="/" exact class="nav-link">
-                <span class="icon"><i class="fas fa-tachometer-alt"></i></span>
-                <div class="nav-label">Overview</div>
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/applications" class="nav-link">
-                <span class="icon"><i class="fas fa-rocket"></i></span>
-                <div class="nav-label">Applications</div>
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/streams" class="nav-link">
-                <span class="icon"><i class="fas fa-server"></i></span>
-                <div class="nav-label">Instances</div>
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/topologies" class="nav-link">
-                <span class="icon"><i class="fas fa-project-diagram"></i></span>
-                <div class="nav-label">Topologies</div>
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/query" class="nav-link">
-                <span class="icon"><i class="fas fa-search"></i></span>
-                <div class="nav-label">Interactive Queries</div>
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/configuration" class="nav-link">
-                <span class="icon"><i class="fas fa-cog"></i></span>
-                <div class="nav-label">Configuration</div>
-              </router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/environments" class="nav-link">
-                <span class="icon"><i class="far fa-plus-square"></i></span>
-                <div class="nav-label">Environments</div>
-              </router-link>
-            </li>
-            <li class="nav-item position-absolute fixed-bottom border-top">
-              <router-link to="/about" class="nav-link">
-                <span class="icon"><i class="fas fa-info-circle"></i></span>
-                <div class="nav-label">About</div>
-              </router-link>
-            </li>
-          </ul>
-        </div>
+  <div id="app" class="app">
+    <div class="main-navbar" :class="{ 'active': menuVisible }">
+      <div class="navbar-header">
+        <img
+             alt="azkarra-streams-logo"
+             src="static/azkarra-streams-logo-light.svg"
+             v-if="menuVisible"
+        />
+      </div>
+      <nav class="navbar-content">
+        <ul class="nav-list">
+          <li class="nav-list-item">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/" exact class="nav-link"><i class="fas fa-tachometer-alt"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/" exact class="nav-link">Overview</router-link>
+              </span>
+            </div>
+          </li>
+          <li class="nav-list-item">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/applications" class="nav-link"><i class="fas fa-rocket"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/applications" class="nav-link">Applications</router-link>
+              </span>
+            </div>
+          </li>
+          <li class="nav-list-item">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/streams" class="nav-link"><i class="fas fa-server"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/streams" class="nav-link">Instances</router-link>
+              </span>
+            </div>
+          </li>
+          <li class="nav-list-item">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/topologies" class="nav-link"><i class="fas fa-project-diagram"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/topologies" class="nav-link">Topologies</router-link>
+              </span>
+            </div>
+          </li>
+          <li class="nav-list-item">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/query" class="nav-link"><i class="fas fa-search"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/query" class="nav-link">Interactive Queries</router-link>
+              </span>
+            </div>
+          </li>
+          <li class="nav-list-item">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/configuration" class="nav-link"><i class="fas fa-cog"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/configuration" class="nav-link">Configuration</router-link>
+              </span>
+            </div>
+          </li>
+          <li class="nav-list-item">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/environments" class="nav-link"><i class="far fa-plus-square"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/environments" class="nav-link">Environments</router-link>
+              </span>
+            </div>
+          </li>
+          <li class="nav-list-item border-top" style="margin-top: auto;">
+            <div class="nav-list-item-content">
+              <span class="icon">
+                <router-link to="/about" class="nav-link"><i class="fas fa-info-circle"></i></router-link>
+              </span>
+              <span class="list-item-text">
+                <router-link to="/about" class="nav-link">About</router-link>
+              </span>
+            </div>
+          </li>
+        </ul>
       </nav>
-      <main role="main" class="main-content">
-        <div class="container-fluid">
-          <template v-for="error in errors" :key="error.id">
-            <transition name="smooth-slide" mode="out-in">
-              <div class="row">
-                <div class="col alert alert-warning">
-                  <a v-on:click="removeError(error)" href="#"
-                     class="close"
-                     data-dismiss="alert"
-                     aria-label="close">&times;</a>
-                  <strong>Warning!</strong> {{ error.message }}
-                </div>
-              </div>
-            </transition>
-          </template>
+    </div>
+    <div class="main-container">
+      <header class="main-header box-shadow">
+        <div class="button toggle-menu" @click="toggleMenu()" v-if="menuVisible">
+          <format-indent-decrease class="icon"></format-indent-decrease>
         </div>
+        <div class="button toggle-menu" @click="toggleMenu()" v-if="!menuVisible">
+          <format-indent-increase class="icon"></format-indent-increase>
+        </div>
+        <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
+      </header>
+      <main role="main" class="main-content">
         <transition name="smooth-slide" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -158,11 +179,16 @@ import httpClient from './services/httpClient.js'
 import azkarraApi from './services/azkarra.api.js'
 import VueModal from './components/VueModal.vue'
 
+import FormatIndentDecrease from 'vue-material-design-icons/FormatIndentDecrease.vue';
+import FormatIndentIncrease from 'vue-material-design-icons/FormatIndentIncrease.vue';
+
 let errorsCount = 0;
 
 export default {
   components: {
     'vue-modal': VueModal,
+    FormatIndentDecrease,
+    FormatIndentIncrease
   },
   name: 'app',
   data() {
@@ -170,7 +196,8 @@ export default {
       openAuthModal: false,
       auth: {},
       isAuthAttempted: false,
-      api: {},
+      api: { headless: false },
+      menuVisible: false
     }
   },
   created: function () {
@@ -234,6 +261,9 @@ export default {
     this.clear();
   },
   methods: {
+    toggleMenu () {
+      this.menuVisible = !this.menuVisible
+    },
 
     isHeadless() {
       return this.api.headless || false;
@@ -266,14 +296,6 @@ export default {
 }
 </script>
 
-<style scoped>
-.alert {
-  z-index: 1000;
-  opacity: 0.95;
-  transition: opacity .4s ease;
-}
-
-span.navbar-api-info {
-  font-size: 0.8em;
-}
+<style lang="scss">
+@import  "./assets/main.scss";
 </style>

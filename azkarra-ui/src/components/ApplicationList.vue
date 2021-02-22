@@ -73,13 +73,6 @@ export default {
         });
       });
     },
-    onJsonChange(json) {
-      this.disableCreateBtn = false;
-    },
-
-    onJsonError() {
-      this.disableCreateBtn = true;
-    },
   },
   computed: {
     orderedApplications: function () {

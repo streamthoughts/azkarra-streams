@@ -755,7 +755,9 @@ public class LocalKafkaStreamsContainer implements
     }
 
     public List<KafkaStreamsInstance> allInstances() {
-        if (!isRunning()) return Collections.emptyList();
+        if (!isRunning()) {
+            return Collections.singletonList(getLocalInstance(KafkaStreamsMetadata.EMPTY));
+        }
         final Collection<StreamsMetadata> allMetadata = kafkaStreams.allMetadata();
         return allMetadata.stream()
             .map(metadata -> {
@@ -781,6 +783,10 @@ public class LocalKafkaStreamsContainer implements
             .findFirst()
             .map(KafkaStreamsInstance::metadata)
             .orElse(KafkaStreamsMetadata.EMPTY);
+        return getLocalInstance(metadata);
+    }
+
+    public KafkaStreamsInstance getLocalInstance(final KafkaStreamsMetadata metadata) {
         return new KafkaStreamsInstance(
             containerId,
             endpoint,

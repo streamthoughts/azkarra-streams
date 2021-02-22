@@ -39,8 +39,6 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
 
-import "./assets/main.css"
-
 Vue.use(VueRouter)
 //Vue.use(VueNotification)
 Vue.use(Notifications)

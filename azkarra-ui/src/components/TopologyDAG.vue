@@ -255,7 +255,7 @@ export default {
       let div = d3.select("body").append("div")
           .classed("tooltip", true)
           .classed("tooltip-topology-dag", true)
-          .style("opacity", 0);
+          .style("display", "none");
 
       let gSubTopologies = g
           .selectAll().data(objectTopology.subTopologies)
@@ -338,7 +338,7 @@ export default {
             .on("mouseover", function (d) {
               div.transition()
                   .duration(200)
-                  .style("opacity", 1);
+                  .style("display", "block");
               div.html("<span>" + d.name + "</span")
                   .style("left", (d3.event.pageX + 30) + "px")
                   .style("top", (d3.event.pageY - 30) + "px");
@@ -346,7 +346,7 @@ export default {
             .on("mouseout", function (d) {
               div.transition()
                   .duration(500)
-                  .style("opacity", 0);
+                  .style("display", "none");
             });
 
         let gSubTopologyLevels = d3.select(this).selectAll(".g-sub-topology-level")
@@ -420,7 +420,7 @@ export default {
                 .on("mouseover", function (d) {
                   div.transition()
                       .duration(200)
-                      .style("opacity", 1);
+                      .style("display", "block");
                   div.html("<span>" + d.name + "</span")
                       .style("left", (d3.event.pageX + 30) + "px")
                       .style("top", (d3.event.pageY - 30) + "px");
@@ -428,7 +428,7 @@ export default {
                 .on("mouseout", function (d) {
                   div.transition()
                       .duration(500)
-                      .style("opacity", 0);
+                      .style("display", "none");
                 });
           });
         });
@@ -583,7 +583,9 @@ class TopicNode extends TopologyNode {
 </script>
 
 
-<style>
+<style lang="scss">
+
+@import "../assets/colors.scss";
 
 #svg-container {
   display: inline-block;
@@ -610,13 +612,13 @@ text.topology-node {
 .g-sub-topology-node.g-sub-topology-node-processor rect,
 .g-sub-topology-node.g-sub-topology-node-sink rect,
 .g-sub-topology-node.g-sub-topology-node-source rect {
-  fill: #2762c2;
-  stroke: #2762c2;
+  fill: $primary;
+  stroke: $primary;
 }
 
 .g-sub-topology-node.g-sub-topology-node-topic rect {
-  fill: #26b793;
-  stroke: #26b793;
+  fill: $color-green-light;
+  stroke:  $color-green-light;
 }
 
 .topology-node-link-v, .topology-node-link-h {
@@ -632,8 +634,9 @@ div.tooltip-topology-dag {
   font: 14px sans-serif;
   font-weight: bold;
   background: #ffffff;
-  border: 3px solid #2762c2;
+  border: 3px solid $primary;
   border-radius: 8px;
   pointer-events: none;
+  opacity: 1;
 }
 </style>
