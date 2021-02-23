@@ -18,11 +18,13 @@
  */
 package io.streamthoughts.azkarra.metrics;
 
+import io.streamthoughts.azkarra.api.annotations.Component;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.ConfEntry;
 import io.streamthoughts.azkarra.streams.AbstractConfigEntryLoader;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 
+@Component
 public class AzkarraMetricsConfigEntryLoader extends AbstractConfigEntryLoader {
 
     public static final String CONFIG_ENTRY_KEY = "metrics";
