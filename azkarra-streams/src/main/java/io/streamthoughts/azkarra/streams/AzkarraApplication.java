@@ -40,6 +40,7 @@ import io.streamthoughts.azkarra.streams.config.loader.AutoStartConfigEntryLoade
 import io.streamthoughts.azkarra.streams.config.loader.ComponentConfigEntryLoader;
 import io.streamthoughts.azkarra.streams.config.loader.EnvironmentsConfigEntryLoader;
 import io.streamthoughts.azkarra.streams.config.loader.ServerConfigEntryLoader;
+import io.streamthoughts.azkarra.streams.config.loader.StreamsConfigEntryLoader;
 import org.apache.kafka.streams.StreamsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -342,6 +343,7 @@ public class AzkarraApplication {
         final List<ApplicationConfigEntryLoader> configLoaders = new ArrayList<>();
         configLoaders.add(new NoopConfigEntryLoader(Set.of(CONTEXT_CONFIG_KEY, COMPONENT_PATHS_CONFIG_KEY)));
         configLoaders.add(new ComponentConfigEntryLoader());
+        configLoaders.add(new StreamsConfigEntryLoader());
         configLoaders.add(new ServerConfigEntryLoader());
         configLoaders.add(new AutoStartConfigEntryLoader());
         configLoaders.add(new EnvironmentsConfigEntryLoader());
