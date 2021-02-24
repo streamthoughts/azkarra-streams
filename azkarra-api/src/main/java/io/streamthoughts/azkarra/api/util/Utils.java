@@ -25,6 +25,13 @@ import java.util.Arrays;
 
 public class Utils {
 
+    public static void closeQuietly(final AutoCloseable closeable) {
+        try {
+            closeable.close();
+        } catch (Throwable ignored) {
+        }
+    }
+
     public static boolean isNullOrEmpty(final String str) {
         return str == null || str.isEmpty();
     }
@@ -47,9 +54,8 @@ public class Utils {
     }
 
     public static boolean isNumber(final String s) {
-        if (s.isEmpty()) {
-            return false;
-        }
+        if (s.isEmpty()) return false;
+
         for (int i = 0; i < s.length(); i++) {
             if (i == 0 && s.charAt(i) == '-') {
                 if (s.length() == 1) {

@@ -30,12 +30,12 @@
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.streams.LocalKafkaStreamsContainer"/>
     <suppress checks="ClassFanOutComplexity" files="io.streamthoughts.azkarra.runtime.env.LocalStreamsExecutionEnvironment"/>
+    <suppress checks="MethodLength" files=".*Config.java"/>
+    <suppress checks="LineLength" files=".*Config.java"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.components.DefaultComponentFactory"/>
-    <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.query.internal.QueryResultUtils" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.query.DistributedQueryCall" />
-    <suppress checks="LineLength" files="io.streamthoughts.azkarra.runtime.interceptors.KafkaBrokerReadyInterceptorConfig" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.streams.components.ComponentResolver"/>
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher" />
     <suppress checks="LineLength" files="io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer" />

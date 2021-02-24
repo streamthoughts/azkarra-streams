@@ -30,7 +30,7 @@ import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateRestoreListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeUncaughtExceptionHandler;
-import io.streamthoughts.azkarra.api.streams.rocksdb.DefaultRocksDBConfigSetter;
+import io.streamthoughts.azkarra.api.streams.rocksdb.AzkarraRocksDBConfigSetter;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.streams.KafkaStreams;
@@ -129,11 +129,19 @@ public class LocalKafkaStreamsContainerBuilder {
     }
 
     /**
-     * Default interface that be used to provide additional properties to the streams configuration.
+     * The {@code StreamsConfigDecorator} can be used to provide additional properties to the streams configuration.
      */
     @FunctionalInterface
-    private interface StreamsConfigDecorator{
+    private interface StreamsConfigDecorator {
+
+        /**
+         * Decorates the given {@link Conf}.
+         *
+         * @param streamsConfig the streams config.
+         * @return              the decorated config.
+         */
         Conf apply(final Conf streamsConfig);
+
     }
 
     public static class RocksDBConfigDecorator implements StreamsConfigDecorator {
@@ -143,9 +151,16 @@ public class LocalKafkaStreamsContainerBuilder {
          */
         @Override
         public Conf apply(final Conf streamsConfig) {
-            if (streamsConfig.hasPath(ROCKSDB_CONFIG_SETTER_CLASS_CONFIG))
+
+            if (streamsConfig.hasPath(ROCKSDB_CONFIG_SETTER_CLASS_CONFIG)) {
                 return streamsConfig;
-            Conf rocksDBConf = Conf.of(ROCKSDB_CONFIG_SETTER_CLASS_CONFIG, DefaultRocksDBConfigSetter.class.getName());
+            }
+
+            Conf rocksDBConf = Conf.of(
+                    ROCKSDB_CONFIG_SETTER_CLASS_CONFIG,
+                    AzkarraRocksDBConfigSetter.class.getName()
+            );
+
             return Conf.of(rocksDBConf, streamsConfig);
         }
     }
