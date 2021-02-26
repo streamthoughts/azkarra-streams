@@ -17,153 +17,163 @@
 * limitations under the License.
 */
 <template>
-  <div id="application-details" class="container-fluid">
-    <div class="row justify-content-end my-3">
-      <div class="col text-right">
-        <div class="dropdown action-btn-right">
-          <button class="btn btn-dark dropdown-toggle"
-                  type="button"
-                  id="dropdownMenuButton" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false">
-            Available Actions
-          </button>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="#" v-on:click="toggleConfirmTerminate()">
-              <i class="fas fa-trash-alt"></i>Terminate
-            </a>
+  <div id="applications-details">
+    <div class="main-content-header">
+      <ul class="list-inline">
+        <li class="list-inline-item">
+          <h1 class="main-title">Kafka Streams Application</h1>
+        </li>
+        <li class="list-inline-item">
+          <div class="dropdown fl-right">
+            <button class="btn dropdown-toggle"
+                    type="button"
+                    id="dropdownMenuButton" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+              Available Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#" v-on:click="toggleConfirmTerminate()">
+                <i class="fas fa-trash-alt"></i>Terminate
+              </a>
+            </div>
           </div>
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Information</div>
-          <div class="panel-body">
-            <div class="property-card-container">
-              <div class="property-card">
-                <div class="property-card-name">Application ID</div>
-                <div class="property-card-value">{{ application.id }}</div>
-              </div>
-              <div class="property-card">
-                <div class="property-card-name">Environment</div>
-                <div class="property-card-value">
-                  <router-link :to="{path: '/environments/' + application.environment}">{{ application.environment }}</router-link>
+    <div class="main-content-body container-fluid">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-heading">Information</div>
+            <div class="panel-body">
+              <div class="property-card-container">
+                <div class="property-card">
+                  <div class="property-card-name">Application ID</div>
+                  <div class="property-card-value">{{ application.id }}</div>
+                </div>
+                <div class="property-card">
+                  <div class="property-card-name">Environment</div>
+                  <div class="property-card-value">
+                    <router-link :to="{path: '/environments/' + application.environment}">{{
+                        application.environment
+                      }}
+                    </router-link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Instances</div>
-          <div class="panel-body border-0">
-            <table class="table">
-              <thead>
-              <tr>
-                <th class="width-40"></th>
-                <th>Container ID</th>
-                <th>Version</th>
-                <th>Stores</th>
-                <th>Endpoint</th>
-                <th>Status</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="instance in instances">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-heading">Instances</div>
+            <div class="panel-body">
+              <table class="table">
+                <thead>
                 <tr>
-                  <td class="width-40">
-                    <span v-bind:class="instance.stateClass"><i aria-hidden="true" class="fa fa-circle"></i></span>
-                  </td>
-                  <td>
-                    <router-link :to="{path: '/streams/' + instance.id}">{{ instance.id }}</router-link>
-                  </td>
-                  <td>{{ instance.version }}</td>
-                  <td>{{ instance.metadata.stores }}</td>
-                  <td>
-                    <a target="_blank"
-                       :href="protocol + '//' +  instance.endpoint.address  + ':' + instance.endpoint.port + '/ui' ">
-                      {{ instance.endpoint.address }}:{{ instance.endpoint.port }}
-                    </a>
-                  </td>
-                  <td>{{ instance.state }}</td>
-                <tr>
-              </template>
-              <tbody>
-            </table>
+                  <th class="width-40"></th>
+                  <th>Container ID</th>
+                  <th>Version</th>
+                  <th>Stores</th>
+                  <th>Endpoint</th>
+                  <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template v-for="instance in instances">
+                  <tr>
+                    <td class="width-40">
+                      <span v-bind:class="instance.stateClass"><i aria-hidden="true" class="fa fa-circle"></i></span>
+                    </td>
+                    <td>
+                      <router-link :to="{path: '/streams/' + instance.id}">{{ instance.id }}</router-link>
+                    </td>
+                    <td>{{ instance.version }}</td>
+                    <td>{{ instance.metadata.stores }}</td>
+                    <td>
+                      <a target="_blank"
+                         :href="protocol + '//' +  instance.endpoint.address  + ':' + instance.endpoint.port + '/ui' ">
+                        {{ instance.endpoint.address }}:{{ instance.endpoint.port }}
+                      </a>
+                    </td>
+                    <td>{{ instance.state }}</td>
+                  <tr>
+                </template>
+                <tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Topics</div>
-          <div class="panel-body border-0">
-            <table class="table">
-              <thead>
-              <tr>
-                <th class="width-40"></th>
-                <th>Name</th>
-                <th>Partition</th>
-                <th>Assigned</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="assignment in orderedTopicAssignments">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-heading">Topics</div>
+            <div class="panel-body">
+              <table class="table">
+                <thead>
                 <tr>
-                  <td class="width-40"></td>
-                  <td>{{ assignment.topic }}</td>
-                  <td>{{ assignment.partition }}</td>
-                  <td>
-                    <a target="_blank"
-                       :href="protocol + '//' +  assignment.endpoint.address  + ':' + assignment.endpoint.port + '/ui' ">
-                      {{ assignment.endpoint.address }}:{{ assignment.endpoint.port }}
-                    </a>
-                  </td>
-                <tr>
-              </template>
-              <tbody>
-            </table>
+                  <th class="width-40"></th>
+                  <th>Name</th>
+                  <th>Partition</th>
+                  <th>Assigned</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template v-for="assignment in orderedTopicAssignments">
+                  <tr>
+                    <td class="width-40"></td>
+                    <td>{{ assignment.topic }}</td>
+                    <td>{{ assignment.partition }}</td>
+                    <td>
+                      <a target="_blank"
+                         :href="protocol + '//' +  assignment.endpoint.address  + ':' + assignment.endpoint.port + '/ui' ">
+                        {{ assignment.endpoint.address }}:{{ assignment.endpoint.port }}
+                      </a>
+                    </td>
+                  <tr>
+                </template>
+                <tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
+      <vue-modal v-if="openConfirmModal">
+        <template v-slot:header>
+          <h3>Are you absolutely sure?</h3>
+        </template>
+        <template v-slot:body>
+          <form>
+            <div class="alert alert-danger" role="alert">
+              This action cannot be undone! The streams instances will be stopped and removed from its environment.
+              Please also keep in mind that: Terminating an application will delete all local data with regard
+              to the application.
+            </div>
+            <div class="form-group">
+              <label for="confirmStreamsApplication">Please type in the id of the application to confirm.</label>
+              <input type="text"
+                     class="form-control" id="confirmStreamsApplication"
+                     aria-describedby="confirmStreamsApplicationHelp"
+                     v-model="formConfirmTerminate.id">
+              <small id="confirmStreamsApplicationHelp" class="form-text text-muted">
+                The application to stop is '{{ id }}'.
+              </small>
+            </div>
+          </form>
+        </template>
+        <template v-slot:footer>
+          <button class="btn btn-dark" v-on:click="toggleConfirmTerminate()">Close</button>
+          <button class="btn btn-danger"
+                  v-bind:disabled="!isTerminateConfirmed()"
+                  v-on:click="terminate()"
+                  id="stop-btn">Terminate
+          </button>
+        </template>
+      </vue-modal>
     </div>
-    <vue-modal v-if="openConfirmModal">
-      <template v-slot:header>
-        <h3>Are you absolutely sure?</h3>
-      </template>
-      <template v-slot:body>
-        <form>
-          <div class="alert alert-danger" role="alert">
-            This action cannot be undone! The streams instances will be stopped and removed from its environment.
-            Please also keep in mind that: Terminating an application will delete all local data with regard
-            to the application.
-          </div>
-          <div class="form-group">
-            <label for="confirmStreamsApplication">Please type in the id of the application to confirm.</label>
-            <input type="text"
-                   class="form-control" id="confirmStreamsApplication"
-                   aria-describedby="confirmStreamsApplicationHelp"
-                   v-model="formConfirmTerminate.id">
-            <small id="confirmStreamsApplicationHelp" class="form-text text-muted">
-              The application to stop is '{{ id }}'.
-            </small>
-          </div>
-        </form>
-      </template>
-      <template v-slot:footer>
-        <button class="btn btn-dark" v-on:click="toggleConfirmTerminate()">Close</button>
-        <button class="btn btn-danger"
-                v-bind:disabled="!isTerminateConfirmed()"
-                v-on:click="terminate()"
-                id="stop-btn">Terminate
-        </button>
-      </template>
-    </vue-modal>
   </div>
 </template>
 
@@ -185,7 +195,7 @@ export default {
       instances: [],
       protocol: window.location.protocol,
       openConfirmModal: false,
-      formConfirmTerminate: { id: "" },
+      formConfirmTerminate: {id: ""},
     }
   },
   created() {

@@ -17,97 +17,99 @@
 * limitations under the License.
 */
 <template>
-  <div id="component-environment-list-container" class="container-fluid">
-    <div class="row justify-content-end my-3">
-      <div class="col text-right">
-        <div class="dropdown action-btn-right">
-          <button class="btn btn-dark dropdown-toggle"
-                  type="button"
-                  id="dropdownMenuButton" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="false">
-            Available Actions
-          </button>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="#" v-on:click="toggleModal()">
-              <i class="fas fa-plus"></i>Create Environment
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Execution Environments</div>
-          <table class="table">
-            <thead>
-            <tr>
-              <th></th>
-              <th>Name
-              </td>
-              <th>Type
-              </td>
-              <th>Default
-              </td>
-              <th>Applications
-              </td>
-            </tr>
-            </thead>
-            <tbody>
-            <template v-for="env in orderedEnvironments" :key="env.name">
-              <tr>
-                <td></td>
-                <td>
-                  <router-link :to="{path: '/environments/' + env.name}">{{ env.name }}</router-link>
-                </td>
-                <td>{{ env.type }}</td>
-                <td>{{ env.is_default }}</td>
-                <td>{{ env.applications.length }}</td>
-              </tr>
-            </template>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <vue-modal v-if="openCreateModal">
-      <template v-slot:header>
-        <h3>Create new environments</h3>
-      </template>
-      <template v-slot:body>
-        <form>
-          <div class="form-group mb-3">
-            <label for="envName">Name</label>
-            <input v-model="form.name" type="text" class="form-control" id="envName" aria-describedby="envNameHelp">
-            <small id="envNameHelp" class="form-text text-muted">The name to identify this environment</small>
-          </div>
-          <div class="form-group mb-3">
-            <label for="env-type">Type</label>
-            <select v-model="form.type" class="custom-select" id="env-type" aria-describedby="envTypeHelp">>
-              <template v-for="type in environmentTypes">
-                <option v-bind:value="type">{{ type }}</option>
-              </template>
-            </select>
-            <small id="envTypeHelp" class="form-text text-muted">The type of this environment</small>
-          </div>
-          <div class="form-group mb-3">
-            <label for="envConfig">Configuration</label>
-            <div aria-describedby="envConfigHelp">
-              <vue-json-editor
-                  v-model="form.config"
-                  @json-change="onJsonChange"
-                  @has-error="onJsonError">
-              </vue-json-editor>
+  <div id="component-environment-list-container">
+    <div class="main-content-header">
+      <ul class="list-inline">
+        <li class="list-inline-item">
+          <h1 class="main-title">Execution Environments</h1>
+        </li>
+        <li class="list-inline-item">
+          <div class="dropdown action-btn-right">
+            <button class="btn btn-dark dropdown-toggle"
+                    type="button"
+                    id="dropdownMenuButton" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+              Available Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#" v-on:click="toggleModal()">
+                <i class="fas fa-plus"></i> Create Environment
+              </a>
             </div>
-            <small id="envConfigHelp" class="form-text text-muted">The JSON configuration for this environment</small>
           </div>
-        </form>
-      </template>
-      <template v-slot:footer>
-        <button class="btn btn-primary" v-bind:disabled="disableCreateBtn" v-on:click="create">Create</button>
-        <button class="btn btn-dark" v-on:click="toggleModal()">Close</button>
-      </template>
-    </vue-modal>
+        </li>
+      </ul>
+    </div>
+    <div class="main-content-body container-fluid">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <table class="table">
+              <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Applications</th>
+              </tr>
+              </thead>
+              <tbody>
+              <template v-for="env in orderedEnvironments" :key="env.name">
+                <tr>
+                  <td></td>
+                  <td>
+                    <router-link :to="{path: '/environments/' + env.name}">{{ env.name }}</router-link>
+                  </td>
+                  <td>{{ env.type }}</td>
+                  <td>{{ env.is_default }}</td>
+                  <td>{{ env.applications.length }}</td>
+                </tr>
+              </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <vue-modal v-if="openCreateModal">
+        <template v-slot:header>
+          <h3>Create new environments</h3>
+        </template>
+        <template v-slot:body>
+          <form>
+            <div class="form-group mb-3">
+              <label for="envName">Name</label>
+              <input v-model="form.name" type="text" class="form-control" id="envName" aria-describedby="envNameHelp">
+              <small id="envNameHelp" class="form-text text-muted">The name to identify this environment</small>
+            </div>
+            <div class="form-group mb-3">
+              <label for="env-type">Type</label>
+              <select v-model="form.type" class="custom-select" id="env-type" aria-describedby="envTypeHelp">>
+                <template v-for="type in environmentTypes">
+                  <option v-bind:value="type">{{ type }}</option>
+                </template>
+              </select>
+              <small id="envTypeHelp" class="form-text text-muted">The type of this environment</small>
+            </div>
+            <div class="form-group mb-3">
+              <label for="envConfigHelp">Configuration</label>
+              <div aria-describedby="envConfigHelp">
+                <vue-json-editor
+                    v-model="form.config"
+                    @json-change="onJsonChange"
+                    @has-error="onJsonError">
+                </vue-json-editor>
+              </div>
+              <small id="envConfigHelp" class="form-text text-muted">The JSON configuration for this environment</small>
+            </div>
+          </form>
+        </template>
+        <template v-slot:footer>
+          <button class="btn btn-primary" v-bind:disabled="disableCreateBtn" v-on:click="create">Create</button>
+          <button class="btn btn-dark" v-on:click="toggleModal()">Close</button>
+        </template>
+      </vue-modal>
+    </div>
   </div>
 </template>
 

@@ -17,8 +17,11 @@
 * limitations under the License.
 */
 <template>
-  <div>
-    <div class="container-fluid" id="overview">
+  <div id="overview">
+    <div class="main-content-header">
+      <h1 class="main-title">Overview</h1>
+    </div>
+    <div class="main-content-body container-fluid">
       <div class="row">
         <div class="col-6">
           <div class="my-3 p-3 panel border bg-white rounded box-shadow">
@@ -55,7 +58,7 @@
 <script>
 import azkarraApi from '../services/azkarra.api.js';
 import VueJsonPretty from 'vue-json-pretty';
-import { getClassForHealthState } from '@/utils';
+import {getClassForHealthState} from '@/utils';
 import HealthIndicatorsList from './HealthIndicatorsList.vue';
 
 export default {

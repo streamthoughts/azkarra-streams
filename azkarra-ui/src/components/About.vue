@@ -17,35 +17,40 @@
 * limitations under the License.
 */
 <template>
-  <div id="component-configuration-container" class="container-fluid">
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">About</div>
-          <div class="panel-body">
-            <div class="property-card-container">
-              <div class="property-card">
-                <div class="property-card-name">Version</div>
-                <div class="property-card-value">Azkarra Dashboard {{ version.azkarraVersion }}</div>
-              </div>
-              <div class="property-card">
-                <div class="property-card-name">Git Branch</div>
-                <div class="property-card-value">{{ version.branch }} </div>
-              </div>
-              <div class="property-card">
-                <div class="property-card-name">Git Commit ID</div>
-                <div class="property-card-value">{{ version.commitId }}</div>
-              </div>
-              <div class="property-card">
+  <div id="component-configuration-container">
+    <div class="main-content-header">
+      <h1 class="main-title">About</h1>
+    </div>
+    <div class="main-content-body container-fluid">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-body">
+              <div class="property-card-container">
+                <div class="property-card">
+                  <div class="property-card-name">Version</div>
+                  <div class="property-card-value">Azkarra Dashboard {{ version.azkarraVersion }}</div>
+                </div>
+                <div class="property-card">
+                  <div class="property-card-name">Git Branch</div>
+                  <div class="property-card-value">{{ version.branch }}</div>
+                </div>
+                <div class="property-card">
+                  <div class="property-card-name">Git Commit ID</div>
+                  <div class="property-card-value">{{ version.commitId }}</div>
+                </div>
+                <div class="property-card">
                   <div class="property-card-name">License</div>
                   <div class="property-card-value">Apache License 2.0</div>
+                </div>
               </div>
-            </div>
-            <div class="about">
-              <p>
-                Copyright 2019-2021 StreamThoughts</br>
-                Azkarra Dashboard is an <a href="https://github.com/streamthoughts/azkarra-streams" target="_blank">open source project</a>
-              </p>
+              <div class="about">
+                <p>
+                  Copyright 2019-2021 StreamThoughts</br>
+                  Azkarra Dashboard is an <a href="https://github.com/streamthoughts/azkarra-streams" target="_blank">open
+                  source project</a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -58,8 +63,7 @@
 import azkarraApi from '../services/azkarra.api.js';
 
 export default {
-  components: {
-  },
+  components: {},
   data: function () {
     return {
       version: {},

@@ -41,7 +41,7 @@
           <li class="nav-list-item">
             <div class="nav-list-item-content">
               <span class="icon">
-                <router-link to="/applications" class="nav-link"><i class="fas fa-rocket"></i></router-link>
+                <router-link to="/applications" class="nav-link"><i class="fas fa-th"></i></router-link>
               </span>
               <span class="list-item-text">
                 <router-link to="/applications" class="nav-link">Applications</router-link>
@@ -51,7 +51,7 @@
           <li class="nav-list-item">
             <div class="nav-list-item-content">
               <span class="icon">
-                <router-link to="/streams" class="nav-link"><i class="fas fa-server"></i></router-link>
+                <router-link to="/streams" class="nav-link"><i class="fas fa-stream"></i></router-link>
               </span>
               <span class="list-item-text">
                 <router-link to="/streams" class="nav-link">Instances</router-link>
@@ -61,7 +61,7 @@
           <li class="nav-list-item">
             <div class="nav-list-item-content">
               <span class="icon">
-                <router-link to="/topologies" class="nav-link"><i class="fas fa-project-diagram"></i></router-link>
+                <router-link to="/topologies" class="nav-link"><i class="fas fa-cubes"></i></router-link>
               </span>
               <span class="list-item-text">
                 <router-link to="/topologies" class="nav-link">Topologies</router-link>
@@ -91,7 +91,7 @@
           <li class="nav-list-item">
             <div class="nav-list-item-content">
               <span class="icon">
-                <router-link to="/environments" class="nav-link"><i class="far fa-plus-square"></i></router-link>
+                <router-link to="/environments" class="nav-link"><i class="far fa-clone"></i></router-link>
               </span>
               <span class="list-item-text">
                 <router-link to="/environments" class="nav-link">Environments</router-link>
@@ -119,10 +119,14 @@
         <div class="button toggle-menu" @click="toggleMenu()" v-if="!menuVisible">
           <format-indent-increase class="icon"></format-indent-increase>
         </div>
-        <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
+        <div>
+          <span class="header-link"><a href="https://www.azkarrastreams.io/" target="_blank">documentation</a></span>
+          <span class="header-link"><a href="/apidoc" target="_blank">API</a></span>
+          <span class="navbar-api-info" v-if="api.headless">(mode : headless)</span>
+        </div>
       </header>
       <main role="main" class="main-content">
-        <transition name="smooth-slide" mode="out-in">
+        <transition name="component-fade" mode="out-in">
           <router-view></router-view>
         </transition>
       </main>
@@ -188,7 +192,7 @@ export default {
   components: {
     'vue-modal': VueModal,
     FormatIndentDecrease,
-    FormatIndentIncrease
+    FormatIndentIncrease,
   },
   name: 'app',
   data() {
@@ -197,7 +201,7 @@ export default {
       auth: {},
       isAuthAttempted: false,
       api: { headless: false },
-      menuVisible: false
+      menuVisible: true
     }
   },
   created: function () {

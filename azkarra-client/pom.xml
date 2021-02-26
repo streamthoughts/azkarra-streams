@@ -92,7 +92,10 @@
     <build>
         <resources>
             <resource>
-                <directory>api</directory>
+                <directory>${project.build.directory}/generated-sources/openapi/api</directory>
+                <includes>
+                    <include>openapi.yaml</include>
+                </includes>
                 <filtering>true</filtering>
             </resource>
         </resources>

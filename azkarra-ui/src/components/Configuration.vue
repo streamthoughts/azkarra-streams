@@ -17,30 +17,34 @@
 * limitations under the License.
 */
 <template>
-  <div id="component-configuration-container" class="container-fluid">
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Configuration</div>
-          <div class="panel-body">
-            <table class="table">
-              <thead>
-              <tr>
-                <th class="width-40"></th>
-                <th>Property</th>
-                <th>Value</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="(value, key) in context.config" :key="key">
+  <div id="component-configuration-container">
+    <div class="main-content-header">
+      <h1 class="main-title">Configuration</h1>
+    </div>
+    <div class="main-content-body container-fluid">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-body">
+              <table class="table">
+                <thead>
                 <tr>
-                  <td class="width-40"></td>
-                  <td>{{ key }}</td>
-                  <td>{{ value }}</td>
-                <tr>
-              </template>
-              <tbody>
-            </table>
+                  <th class="width-40"></th>
+                  <th>Property</th>
+                  <th>Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template v-for="(value, key) in context.config" :key="key">
+                  <tr>
+                    <td class="width-40"></td>
+                    <td>{{ key }}</td>
+                    <td>{{ value }}</td>
+                  <tr>
+                </template>
+                <tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

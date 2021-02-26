@@ -17,107 +17,112 @@
 * limitations under the License.
 */
 <template>
-  <div id="component-topology-list-container" class="container-fluid">
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Registered Topologies</div>
-          <table class="table">
-            <thead>
-            <tr>
-              <th>Type</th>
-              <th>Aliases</th>
-              <th>Versions</th>
-              <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <template v-for="topology in topologies" :key="topology.type">
+  <div id="component-topology-list-container">
+    <div class="main-content-header">
+      <h1 class="main-title">Registered Topologies</h1>
+    </div>
+    <div class="main-content-body container-fluid">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <table class="table">
+              <thead>
               <tr>
-                <td>{{ topology.type }}</td>
-                <td>{{ topology.aliases }}</td>
-                <td>
-                  <select class="custom-select"
-                          v-on:change="loadTopologyVersion($event, topology)">
-                    <option selected disabled>Select a version</option>
-                    <template v-for="version in topology.versions">
-                      <option v-bind:value="version">{{ version }}</option>
-                    </template>
-                  </select>
-                </td>
-                <td>
-                  <div class="btn-group" role="group" aria-label="operations">
-                    <button type="button"
-                            class="btn btn-primary"
-                            v-bind:disabled="topology.disabled"
-                            v-on:click="configure(topology)">Deploy
-                    </button>
-                  </div>
-                </td>
+                <th>Type</th>
+                <th>Aliases</th>
+                <th>Versions</th>
+                <th></th>
               </tr>
-            </template>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+              <template v-for="topology in topologies" :key="topology.type">
+                <tr>
+                  <td>{{ topology.type }}</td>
+                  <td>{{ topology.aliases }}</td>
+                  <td>
+                    <select class="custom-select"
+                            v-on:change="loadTopologyVersion($event, topology)">
+                      <option selected disabled>Select a version</option>
+                      <template v-for="version in topology.versions">
+                        <option v-bind:value="version">{{ version }}</option>
+                      </template>
+                    </select>
+                  </td>
+                  <td>
+                    <div class="btn-group" role="group" aria-label="operations">
+                      <button type="button"
+                              class="btn btn-primary"
+                              v-bind:disabled="topology.disabled"
+                              v-on:click="configure(topology)">Deploy
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
-    <vue-modal v-if="openCreateModal">
-      <template v-slot:header>
-        <h3>Deploy new streams application</h3>
-      </template>
-      <template v-slot:body>
-        <form>
-          <div class="form-group mb-3">
-            <label for="type">Type</label>
-            <input v-model="form.type" readonly type="text" class="form-control" id="type" aria-describedby="typeHelp">
-          </div>
-          <div class="form-group mb-3">
-            <label for="version">Version</label>
-            <input v-model="form.version" readonly type="text" class="form-control" id="version"
-                   aria-describedby="versionHelp">
-          </div>
-          <div class="form-group mb-3">
-            <label for="name">Name</label>
-            <input v-model="form.name" type="text" class="form-control" id="name" aria-describedby="nameHelp">
-            <small id="nameHelp" class="form-text text-muted">The name to identify this streams
-              application(required).</small>
-          </div>
-          <div class="form-group mb-3">
-            <label for="description">Description</label>
-            <input v-model="form.description" type="text" class="form-control" id="description"
-                   aria-describedby="descriptionHelp">
-            <small id="descriptionHelp" class="form-text text-muted">The description for this streams
-              application</small>
-          </div>
-          <div class="form-group mb-3">
-            <label for="description">Environment</label>
-            <select v-model="form.env" class="custom-select" id="environment" aria-describedby="envHelp">>
-              <template v-for="env in environments">
-                <option v-bind:value="env.name">{{ env.name }} (type: {{ env.type }})</option>
-              </template>
-            </select>
-            <small id="envHelp" class="form-text text-muted">The environment to deploy this streams
-              application(required).</small>
-          </div>
-          <div class="form-group mb-3">
-            <label for="streamConfig">Configuration</label>
-            <div aria-describedby="streamConfigHelp">
-              <vue-json-editor
-                  v-model="form.config"
-                  @json-change="onJsonChange"
-                  @has-error="onJsonError">
-              </vue-json-editor>
+      <vue-modal v-if="openCreateModal">
+        <template v-slot:header>
+          <h3>Deploy new streams application</h3>
+        </template>
+        <template v-slot:body>
+          <form>
+            <div class="form-group mb-3">
+              <label for="type">Type</label>
+              <input v-model="form.type" readonly type="text" class="form-control" id="type"
+                     aria-describedby="typeHelp">
             </div>
-            <small id="streamConfigHelp" class="form-text text-muted">The JSON configuration for this streams
-              application</small>
-          </div>
-        </form>
-      </template>
-      <template v-slot:footer>
-        <button class="btn btn-primary" v-bind:disabled="disableModalDeployBtn()" v-on:click="deploy">Deploy</button>
-        <button class="btn btn-dark" v-on:click="toggleModal()">Close</button>
-      </template>
-    </vue-modal>
+            <div class="form-group mb-3">
+              <label for="version">Version</label>
+              <input v-model="form.version" readonly type="text" class="form-control" id="version"
+                     aria-describedby="versionHelp">
+            </div>
+            <div class="form-group mb-3">
+              <label for="name">Name</label>
+              <input v-model="form.name" type="text" class="form-control" id="name" aria-describedby="nameHelp">
+              <small id="nameHelp" class="form-text text-muted">The name to identify this streams
+                application(required).</small>
+            </div>
+            <div class="form-group mb-3">
+              <label for="description">Description</label>
+              <input v-model="form.description" type="text" class="form-control" id="description"
+                     aria-describedby="descriptionHelp">
+              <small id="descriptionHelp" class="form-text text-muted">The description for this streams
+                application</small>
+            </div>
+            <div class="form-group mb-3">
+              <label for="description">Environment</label>
+              <select v-model="form.env" class="custom-select" id="environment" aria-describedby="envHelp">>
+                <template v-for="env in environments">
+                  <option v-bind:value="env.name">{{ env.name }} (type: {{ env.type }})</option>
+                </template>
+              </select>
+              <small id="envHelp" class="form-text text-muted">The environment to deploy this streams
+                application(required).</small>
+            </div>
+            <div class="form-group mb-3">
+              <label for="streamConfigHelp">Configuration</label>
+              <div aria-describedby="streamConfigHelp">
+                <vue-json-editor
+                    v-model="form.config"
+                    @json-change="onJsonChange"
+                    @has-error="onJsonError">
+                </vue-json-editor>
+              </div>
+              <small id="streamConfigHelp" class="form-text text-muted">The JSON configuration for this streams
+                application</small>
+            </div>
+          </form>
+        </template>
+        <template v-slot:footer>
+          <button class="btn btn-primary" v-bind:disabled="disableModalDeployBtn()" v-on:click="deploy">Deploy</button>
+          <button class="btn btn-dark" v-on:click="toggleModal()">Close</button>
+        </template>
+      </vue-modal>
+    </div>
   </div>
 </template>
 <script>

@@ -17,31 +17,50 @@
 * limitations under the License.
 */
 <template>
-  <div id="applications-list" class="container-fluid">
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Kafka Streams Applications</div>
-          <table class="table">
-            <thead>
-            <tr>
-              <th></th>
-              <th>Application ID</th>
-              <th>Environment</th>
-              <th>Instances</th>
-            </tr>
-            </thead>
-            <tbody>
-            <template v-for="app in orderedApplications" :key="app.id">
+  <div id="applications-list">
+    <div class="main-content-header">
+      <h1 class="main-title">Kafka Streams Applications</h1>
+    </div>
+    <div class="main-content-body container-fluid">
+      <div class="row">
+        <div class="col">
+          <div class="fl-right">
+            <button v-on:click.prevent="load()"
+                    type="button"
+                    class="btn btn-primary">
+              <i class="fas fa-sync"></i> Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <table class="table">
+              <thead>
               <tr>
-                <td></td>
-                <td><router-link :to="{path: '/applications/' + app.id}">{{ app.id }}</router-link></td>
-                <td><router-link :to="{path: '/environments/' + app.environment}">{{ app.environment }}</router-link></td>
-                <td>{{ app.instances.length }}</td>
+                <th></th>
+                <th>Application ID</th>
+                <th>Environment</th>
+                <th>Instances</th>
               </tr>
-            </template>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+              <template v-for="app in orderedApplications" :key="app.id">
+                <tr>
+                  <td></td>
+                  <td>
+                    <router-link :to="{path: '/applications/' + app.id}">{{ app.id }}</router-link>
+                  </td>
+                  <td>
+                    <router-link :to="{path: '/environments/' + app.environment}">{{ app.environment }}</router-link>
+                  </td>
+                  <td>{{ app.instances.length }}</td>
+                </tr>
+              </template>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -68,6 +87,7 @@ export default {
     load() {
       let that = this;
       applicationApiV1.getAllApplications().then(resp1 => {
+        that.applications = [];
         resp1.data.forEach(id => {
           applicationApiV1.getApplicationById(id).then(resp2 => that.applications.push(resp2.data));
         });

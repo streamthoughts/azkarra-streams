@@ -17,80 +17,84 @@
 * limitations under the License.
 */
 <template>
-  <div id="environment-details" class="container-fluid">
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Environment Information</div>
-          <div class="panel-body">
-            <div class="property-card-container">
-              <div class="property-card">
-                <div class="property-card-name">Name</div>
-                <div class="property-card-value">{{ environment.name }}</div>
-              </div>
-              <div class="property-card">
-                <div class="property-card-name">Type</div>
-                <div class="property-card-value">{{ environment.type }}</div>
-              </div>
-              <div class="property-card">
-                <div class="property-card-name">Default</div>
-                <div class="property-card-value">{{ environment.is_default }}</div>
+  <div id="environment-details">
+    <div class="main-content-header">
+      <h1 class="main-title">Environment Information</h1>
+    </div>
+    <div class="main-content-body container-fluid">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-body">
+              <div class="property-card-container">
+                <div class="property-card">
+                  <div class="property-card-name">Name</div>
+                  <div class="property-card-value">{{ environment.name }}</div>
+                </div>
+                <div class="property-card">
+                  <div class="property-card-name">Type</div>
+                  <div class="property-card-value">{{ environment.type }}</div>
+                </div>
+                <div class="property-card">
+                  <div class="property-card-name">Default</div>
+                  <div class="property-card-value">{{ environment.is_default }}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Applications</div>
-          <div class="panel-body border-0">
-            <table class="table">
-              <thead>
-              <tr>
-                <th class="width-40"></th>
-                <th>Name</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="app in environment.applications">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-heading">Applications</div>
+            <div class="panel-body border-0">
+              <table class="table">
+                <thead>
                 <tr>
-                  <td class="width-40"></td>
-                  <td>
-                    <router-link :to="{path: '/applications/' + app}">{{ app }}</router-link>
-                  </td>
-                <tr>
-              </template>
-              <tbody>
-            </table>
+                  <th class="width-40"></th>
+                  <th>Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template v-for="app in environment.applications">
+                  <tr>
+                    <td class="width-40"></td>
+                    <td>
+                      <router-link :to="{path: '/applications/' + app}">{{ app }}</router-link>
+                    </td>
+                  <tr>
+                </template>
+                <tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <div class="panel border bg-white rounded box-shadow">
-          <div class="panel-heading">Configuration</div>
-          <div class="panel-body border-0">
-            <table class="table">
-              <thead>
-              <tr>
-                <th class="width-40"></th>
-                <th>Property</th>
-                <th>Value</th>
-              </tr>
-              </thead>
-              <tbody>
-              <template v-for="(value, key) in environment.config" :key="key">
+      <div class="row">
+        <div class="col">
+          <div class="panel border bg-white rounded box-shadow">
+            <div class="panel-heading">Configuration</div>
+            <div class="panel-body border-0">
+              <table class="table">
+                <thead>
                 <tr>
-                  <td class="width-40"></td>
-                  <td>{{ key }}</td>
-                  <td>{{ value }}</td>
-                <tr>
-              </template>
-              <tbody>
-            </table>
+                  <th class="width-40"></th>
+                  <th>Property</th>
+                  <th>Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template v-for="(value, key) in environment.config" :key="key">
+                  <tr>
+                    <td class="width-40"></td>
+                    <td>{{ key }}</td>
+                    <td>{{ value }}</td>
+                  <tr>
+                </template>
+                <tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
