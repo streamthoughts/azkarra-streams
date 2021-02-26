@@ -27,14 +27,13 @@ public interface Configurable {
      */
     void configure(final Conf configuration);
 
-
     static void mayConfigure(final Object instance, final Conf conf) {
         if (isConfigurable(instance.getClass())) {
             ((Configurable)instance).configure(conf);
         }
     }
 
-    static boolean isConfigurable(final Class type) {
+    static boolean isConfigurable(final Class<?> type) {
         return Configurable.class.isAssignableFrom(type);
     }
 }

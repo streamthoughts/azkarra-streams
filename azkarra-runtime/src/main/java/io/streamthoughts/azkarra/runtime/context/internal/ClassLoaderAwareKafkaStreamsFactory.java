@@ -35,7 +35,7 @@ public class ClassLoaderAwareKafkaStreamsFactory
     /**
      * Creates a new {@link ClassLoaderAwareKafkaStreamsFactory} instance.
      *
-     * @param delegate      the {@link KafkaStreamsFactory} to delagate.
+     * @param delegate      the {@link KafkaStreamsFactory} to delegate.
      * @param classLoader   the {@link ClassLoader} to be used.
      */
     public ClassLoaderAwareKafkaStreamsFactory(final KafkaStreamsFactory delegate,

@@ -28,6 +28,8 @@ import io.streamthoughts.azkarra.api.components.Qualifier;
 import io.streamthoughts.azkarra.api.components.Restriction;
 import io.streamthoughts.azkarra.api.components.qualifier.Qualifiers;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.config.Configurable;
+import io.streamthoughts.azkarra.api.config.ConfigurableSupplier;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
 import io.streamthoughts.azkarra.runtime.AbstractTopologyStreamsExecution;
 import io.streamthoughts.azkarra.runtime.components.RestrictedComponentFactory;
@@ -82,7 +84,7 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
                 executed.config(),              // (1) Executed
                 environment.getConfiguration(), // (2) Environment
                 context.getConfiguration(),     // (3) Context
-                meta.configuration()            // (4) Streams (i.e: default)
+                meta.configuration()            // (4) Provider (i.e: default)
         );
 
         final var interceptors = executed.interceptors();
@@ -97,13 +99,6 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
                 Restriction.streams(streamName))
         );
 
-        // Get and register KafkaStreamsFactory for one the scopes: Application, Env, Streams
-        final var factory = executed.factory()
-                .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.streams(streamName)))
-                .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.env(environment.name())))
-                .or(() -> findKafkaStreamsFactory(streamsConfig, Restriction.application()))
-                .orElse(() -> KafkaStreamsFactory.DEFAULT);
-
         LOG.info(
                 "Registered new topology to environment '{}' for type='{}', version='{}', name='{}'.",
                 environment.name(),
@@ -112,15 +107,33 @@ public class LocalStreamsExecution extends AbstractTopologyStreamsExecution<Loca
                 streamName
         );
 
+        // Get and register KafkaStreamsFactory for one the scopes: Application, Env, Streams
+        final var factory = findStreamsFactorySupplierFor(streamName);
+
         final var completedExecuted = Executed.as(streamName)
                 .withConfig(streamsConfig)
                 .withDescription(Optional.ofNullable(description).orElse(""))
                 .withInterceptors(interceptors)
-                .withKafkaStreamsFactory(
-                    () -> new ClassLoaderAwareKafkaStreamsFactory(factory.get(), meta.classLoader())
-                );
+                .withKafkaStreamsFactory(factory);
 
         return environment.addTopology(new ContextAwareTopologySupplier(context, meta), completedExecuted);
+    }
+
+    private ConfigurableSupplier<KafkaStreamsFactory> findStreamsFactorySupplierFor(final String streamName) {
+        return new ConfigurableSupplier<>() {
+            @Override
+            public KafkaStreamsFactory get(final Conf configs) {
+                Supplier<KafkaStreamsFactory> factory = executed.factory()
+                    .or(() -> findKafkaStreamsFactory(configs, Restriction.streams(streamName)))
+                    .or(() -> findKafkaStreamsFactory(configs, Restriction.env(environment.name())))
+                    .or(() -> findKafkaStreamsFactory(configs, Restriction.application()))
+                    .orElse(() -> KafkaStreamsFactory.DEFAULT);
+
+                Configurable.mayConfigure(factory, configs);
+
+                return new ClassLoaderAwareKafkaStreamsFactory(factory.get(), meta.classLoader());
+            }
+        };
     }
 
     private List<Supplier<StreamsLifecycleInterceptor>> findLifecycleInterceptors(final Conf componentConfig,

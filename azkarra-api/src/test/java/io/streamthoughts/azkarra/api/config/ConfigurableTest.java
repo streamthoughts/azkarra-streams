@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2019-2020 StreamThoughts.
  *
@@ -18,40 +19,28 @@
  */
 package io.streamthoughts.azkarra.api.config;
 
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-/**
- * A configurable supplier.
- *
- * @param <T>   the type of the supply object.
- */
-public abstract class ConfigurableSupplier<T> implements Supplier<T>, Configurable {
+import java.util.concurrent.atomic.AtomicBoolean;
 
-    private Conf config;
+import static io.streamthoughts.azkarra.api.config.Configurable.isConfigurable;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void configure(final Conf configuration) {
-        this.config = Objects.requireNonNull(configuration, "configuration cannot be null");
+
+public class ConfigurableTest {
+
+    @Test
+    public void should_verify_when_object_is_configurable() {
+        Assertions.assertFalse(isConfigurable(Object.class));
+        Assertions.assertTrue(isConfigurable(((Configurable) configuration -> { }).getClass()));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public T get() {
-        verifyState();
-        return get(config);
-    }
+    @Test
+    public void should_configure_given_configurable_object() {
+        final AtomicBoolean isConfigured = new AtomicBoolean(false);
+        Configurable configurable = configuration -> isConfigured.set(true);
 
-    private void verifyState() {
-        if (config == null) {
-            throw new IllegalStateException(this.getClass().getSimpleName() + " is not configured");
-        }
+        Configurable.mayConfigure(configurable, Conf.EMPTY);
+        Assertions.assertTrue(isConfigured.get());
     }
-
-    public abstract T get(final Conf configs);
 }

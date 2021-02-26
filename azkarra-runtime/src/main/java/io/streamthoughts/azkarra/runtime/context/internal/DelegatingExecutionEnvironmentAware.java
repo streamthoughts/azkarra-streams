@@ -43,7 +43,7 @@ public class DelegatingExecutionEnvironmentAware<T> implements StreamsExecutionE
      * {@inheritDoc}
      */
     @Override
-    public void setExecutionEnvironment(final StreamsExecutionEnvironment environment) {
+    public void setExecutionEnvironment(final StreamsExecutionEnvironment<?> environment) {
         if (delegate instanceof StreamsExecutionEnvironmentAware) {
             ((StreamsExecutionEnvironmentAware)delegate).setExecutionEnvironment(environment);
         }
