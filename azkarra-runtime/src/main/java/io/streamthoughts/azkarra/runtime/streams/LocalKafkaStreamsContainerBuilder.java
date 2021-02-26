@@ -21,9 +21,8 @@ package io.streamthoughts.azkarra.runtime.streams;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainerAware;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsFactory;
-import io.streamthoughts.azkarra.api.streams.State;
-import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
 import io.streamthoughts.azkarra.api.streams.consumer.MonitorOffsetsConsumerInterceptor;
 import io.streamthoughts.azkarra.api.streams.errors.DelegatingUncaughtExceptionHandler;
 import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler;
@@ -31,7 +30,6 @@ import io.streamthoughts.azkarra.api.streams.listener.CompositeStateListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateRestoreListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeUncaughtExceptionHandler;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
-import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.processor.StateRestoreListener;
@@ -155,8 +153,8 @@ public class LocalKafkaStreamsContainerBuilder {
             if (streamsConfig.hasPath(INTERCEPTORS_CONFIG_KEY)) {
                 interceptorClasses = "," + streamsConfig.getString(INTERCEPTORS_CONFIG_KEY);
             }
-            var interceptorClassesConfig = Conf.of(INTERCEPTORS_CONFIG_KEY, interceptorClasses
-            );
+
+            var interceptorClassesConfig = Conf.of(INTERCEPTORS_CONFIG_KEY, interceptorClasses);
             return Conf.of(interceptorClassesConfig, streamsConfig);
         }
     }
@@ -184,30 +182,35 @@ public class LocalKafkaStreamsContainerBuilder {
          */
         @Override
         public KafkaStreams make(final Topology topology, final Conf streamsConfig) {
-            // delegate KafkaStreams instantiation to user-factory.
+
+            // Delegate KafkaStreams instantiation to user-factory.
+            if (KafkaStreamsContainerAware.class.isAssignableFrom(factory.getClass())) {
+                ((KafkaStreamsContainerAware)factory).setKafkaStreamsContainer(container);
+            }
+
             final KafkaStreams kafkaStreams = factory.make(topology, streamsConfig);
 
-            kafkaStreams.setStateListener(getStateListener());
-            kafkaStreams.setUncaughtExceptionHandler(getUncaughtExceptionHandler());
-            kafkaStreams.setGlobalStateRestoreListener(new CompositeStateRestoreListener(restoreListeners));
+            kafkaStreams.setStateListener(buildStateListener());
+            kafkaStreams.setUncaughtExceptionHandler(buildUncaughtExceptionHandler());
+            kafkaStreams.setGlobalStateRestoreListener(buildGlobalStateRestoreListener());
 
             return kafkaStreams;
         }
 
-        private CompositeStateListener getStateListener() {
-            final CompositeStateListener compositeStateListener = new CompositeStateListener(stateListeners);
-            compositeStateListener.addListener((newState, oldState) -> {
-                final StateChangeEvent event = new StateChangeEvent(
-                    Time.SYSTEM.milliseconds(),
-                    State.Standards.valueOf(newState.name()),
-                    State.Standards.valueOf(oldState.name())
-                );
-                container.stateChanges(event);
-            });
-            return compositeStateListener;
+        public CompositeStateRestoreListener buildGlobalStateRestoreListener() {
+            final CompositeStateRestoreListener listener = new CompositeStateRestoreListener(restoreListeners);
+            listener.setKafkaStreamsContainer(container);
+            return listener;
         }
 
-        private CompositeUncaughtExceptionHandler getUncaughtExceptionHandler() {
+        private CompositeStateListener buildStateListener() {
+            final CompositeStateListener listener = new CompositeStateListener(stateListeners);
+            listener.addListener(new LocalStateListener());
+            listener.setKafkaStreamsContainer(container);
+            return listener;
+        }
+
+        private CompositeUncaughtExceptionHandler buildUncaughtExceptionHandler() {
             final var compositeUncaughtExceptionHandler = new CompositeUncaughtExceptionHandler();
             compositeUncaughtExceptionHandler.addHandler((t, e) -> {
                 container.logger().error("Handling uncaught streams thread exception: {}", e.getMessage());

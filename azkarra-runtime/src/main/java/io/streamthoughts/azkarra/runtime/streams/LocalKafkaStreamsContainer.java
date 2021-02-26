@@ -326,7 +326,7 @@ public class LocalKafkaStreamsContainer implements
      *
      * @param state the KafkaStreams state.
      */
-    private void setState(final State state) {
+    public void setState(final State state) {
         this.state = new TimestampedValue<>(state);
     }
 

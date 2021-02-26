@@ -18,6 +18,8 @@
  */
 package io.streamthoughts.azkarra.api.streams.listener;
 
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainerAware;
 import org.apache.kafka.streams.KafkaStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,17 +31,17 @@ import java.util.Objects;
 /**
  * A {@link KafkaStreams.StateListener} that delegates to one or more {@link KafkaStreams.StateListener} in order.
  */
-public class CompositeStateListener implements KafkaStreams.StateListener {
+public class CompositeStateListener implements KafkaStreams.StateListener, KafkaStreamsContainerAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(CompositeStateListener.class);
 
-    private final Collection<KafkaStreams.StateListener> delegates = new ArrayList<>();
+    private final Collection<KafkaStreams.StateListener> listeners = new ArrayList<>();
 
     /**
      * Creates a new {@link CompositeStateListener} instance.
      */
     public CompositeStateListener() {
-        this.delegates.addAll(new ArrayList<>());
+        this.listeners.addAll(new ArrayList<>());
     }
 
     /**
@@ -49,12 +51,12 @@ public class CompositeStateListener implements KafkaStreams.StateListener {
      */
     public CompositeStateListener(final Collection<KafkaStreams.StateListener> delegates) {
         Objects.requireNonNull(delegates, "'delegates' cannot be null");
-        this.delegates.addAll(delegates);
+        this.listeners.addAll(delegates);
     }
 
     public CompositeStateListener addListener(final KafkaStreams.StateListener listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
-        delegates.add(listener);
+        listeners.add(listener);
         return this;
     }
 
@@ -65,7 +67,7 @@ public class CompositeStateListener implements KafkaStreams.StateListener {
     public void onChange(final KafkaStreams.State newState,
                          final KafkaStreams.State oldState) {
 
-        for (KafkaStreams.StateListener delegate : this.delegates) {
+        for (KafkaStreams.StateListener delegate : this.listeners) {
             try {
                 delegate.onChange(newState, oldState);
             } catch (final Exception e) {
@@ -74,6 +76,18 @@ public class CompositeStateListener implements KafkaStreams.StateListener {
                     newState,
                     oldState),
                 e);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setKafkaStreamsContainer(final KafkaStreamsContainer container) {
+        for (KafkaStreams.StateListener listener : listeners) {
+            if (KafkaStreamsContainerAware.class.isAssignableFrom(listener.getClass())) {
+                ((KafkaStreamsContainerAware)listener).setKafkaStreamsContainer(container);
             }
         }
     }

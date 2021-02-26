@@ -18,7 +18,10 @@
  */
 package io.streamthoughts.azkarra.api.streams.listener;
 
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainerAware;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.processor.StateRestoreListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +33,11 @@ import java.util.Objects;
 /**
  * A {@link StateRestoreListener} that delegates to one or more {@link StateRestoreListener} in order.
  */
-public class CompositeStateRestoreListener implements StateRestoreListener {
+public class CompositeStateRestoreListener implements StateRestoreListener, KafkaStreamsContainerAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(CompositeStateRestoreListener.class);
 
-    private final Collection<StateRestoreListener> delegates;
+    private final Collection<StateRestoreListener> listeners;
 
     /**
      * Creates a new {@link CompositeStateRestoreListener} instance.
@@ -43,7 +46,7 @@ public class CompositeStateRestoreListener implements StateRestoreListener {
      */
     public CompositeStateRestoreListener(final Collection<StateRestoreListener> delegates) {
         Objects.requireNonNull(delegates, "delegates cannot be null");
-        this.delegates = new ArrayList<>(delegates);
+        this.listeners = new ArrayList<>(delegates);
     }
 
     /**
@@ -55,7 +58,7 @@ public class CompositeStateRestoreListener implements StateRestoreListener {
                                final long startingOffset,
                                final long endingOffset) {
 
-        for (StateRestoreListener listener : delegates) {
+        for (StateRestoreListener listener : listeners) {
             try {
                 listener.onRestoreStart(topicPartition, storeName, startingOffset, endingOffset);
             } catch (final Exception e) {
@@ -82,7 +85,7 @@ public class CompositeStateRestoreListener implements StateRestoreListener {
                                 final String storeName,
                                 final long batchEndOffset,
                                 final long numRestored) {
-        for (StateRestoreListener listener : delegates) {
+        for (StateRestoreListener listener : listeners) {
             try {
                 listener.onBatchRestored(topicPartition, storeName, batchEndOffset, numRestored);
             } catch (final Exception e) {
@@ -108,7 +111,7 @@ public class CompositeStateRestoreListener implements StateRestoreListener {
     public void onRestoreEnd(final TopicPartition topicPartition,
                              final String storeName,
                              final long totalRestored) {
-        for (StateRestoreListener listener : delegates) {
+        for (StateRestoreListener listener : listeners) {
             try {
                 listener.onRestoreEnd(topicPartition, storeName, totalRestored);
             } catch (final Exception e) {
@@ -121,6 +124,18 @@ public class CompositeStateRestoreListener implements StateRestoreListener {
                     storeName,
                     totalRestored),
                     e);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setKafkaStreamsContainer(final KafkaStreamsContainer container) {
+        for (StateRestoreListener listener : listeners) {
+            if (KafkaStreamsContainerAware.class.isAssignableFrom(listener.getClass())) {
+                ((KafkaStreamsContainerAware)listener).setKafkaStreamsContainer(container);
             }
         }
     }

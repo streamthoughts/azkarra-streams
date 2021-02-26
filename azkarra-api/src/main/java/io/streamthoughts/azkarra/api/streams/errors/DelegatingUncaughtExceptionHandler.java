@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 
 /**
- * This class can be used to  delegate {@link Thread.UncaughtExceptionHandler} exception handling to an
+ * This class can be used to delegate {@link Thread.UncaughtExceptionHandler} exception handling to an
  * a given {@link StreamThreadExceptionHandler} implementation.
  *
  * @see StreamThreadExceptionHandler
