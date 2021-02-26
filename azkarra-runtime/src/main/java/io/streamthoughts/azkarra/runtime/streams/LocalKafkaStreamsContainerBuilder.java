@@ -30,6 +30,7 @@ import io.streamthoughts.azkarra.api.streams.listener.CompositeStateListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateRestoreListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeUncaughtExceptionHandler;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
+import io.streamthoughts.azkarra.commons.streams.LoggingStateRestoreListener;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.processor.StateRestoreListener;
@@ -159,7 +160,7 @@ public class LocalKafkaStreamsContainerBuilder {
         }
     }
 
-    private class DelegatingKafkaStreamsFactory implements KafkaStreamsFactory {
+    private class DelegatingKafkaStreamsFactory implements KafkaStreamsFactory, KafkaStreamsContainerAware {
 
         private final KafkaStreamsFactory factory;
         private LocalKafkaStreamsContainer container;
@@ -171,10 +172,6 @@ public class LocalKafkaStreamsContainerBuilder {
          */
         DelegatingKafkaStreamsFactory(final KafkaStreamsFactory factory) {
             this.factory = Objects.requireNonNull(factory, "factory cannot be null");
-        }
-
-        void setKafkaStreamsContainer(final LocalKafkaStreamsContainer container) {
-            this.container = container;
         }
 
         /**
@@ -199,13 +196,15 @@ public class LocalKafkaStreamsContainerBuilder {
 
         public CompositeStateRestoreListener buildGlobalStateRestoreListener() {
             final CompositeStateRestoreListener listener = new CompositeStateRestoreListener(restoreListeners);
+            listener.addListener(new UpdateContainerStateRestoreListener());
+            listener.addListener(new LoggingStateRestoreListener());
             listener.setKafkaStreamsContainer(container);
             return listener;
         }
 
         private CompositeStateListener buildStateListener() {
             final CompositeStateListener listener = new CompositeStateListener(stateListeners);
-            listener.addListener(new LocalStateListener());
+            listener.addListener(new UpdateContainerStateListener());
             listener.setKafkaStreamsContainer(container);
             return listener;
         }
@@ -224,6 +223,14 @@ public class LocalKafkaStreamsContainerBuilder {
                 .forEach(compositeUncaughtExceptionHandler::addHandler);
             }
             return compositeUncaughtExceptionHandler;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void setKafkaStreamsContainer(final KafkaStreamsContainer container) {
+            this.container = (LocalKafkaStreamsContainer) container;
         }
     }
 }

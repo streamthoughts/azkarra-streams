@@ -25,7 +25,7 @@ import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
 import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.streams.KafkaStreams;
 
-public class LocalStateListener implements KafkaStreams.StateListener, KafkaStreamsContainerAware {
+final class UpdateContainerStateListener implements KafkaStreams.StateListener, KafkaStreamsContainerAware {
 
     private LocalKafkaStreamsContainer container;
 

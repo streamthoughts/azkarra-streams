@@ -106,6 +106,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
@@ -152,6 +153,8 @@ public class LocalKafkaStreamsContainer implements
     private final List<EventStream<?, ?>> eventStreams = new LinkedList<>();
 
     private final Map<String, EventStreamPublisher<?, ?>> publishers = new LinkedHashMap<>();
+
+    private final ReentrantLock consumerLock = new ReentrantLock();
 
     /**
      * The {@link Executor} which is used top start/stop the internal streams in a non-blocking way.
@@ -324,10 +327,13 @@ public class LocalKafkaStreamsContainer implements
     /**
      * Sets the current state of the streams.
      *
-     * @param state the KafkaStreams state.
+     * @param newState the new state of the Kafka Streams.
      */
-    public void setState(final State state) {
-        this.state = new TimestampedValue<>(state);
+    public void setState(final State newState) {
+        if (state == null || newState != state.value()) {
+            State oldState = state != null ? state.value() : null;
+            stateChanges(new StateChangeEvent(newState, oldState));
+        }
     }
 
     /**
@@ -479,16 +485,18 @@ public class LocalKafkaStreamsContainer implements
             .flatMap(t -> t.topicPartitions().stream())
             .collect(Collectors.toSet());
 
-        final Map<TopicPartition, Long> logEndOffsets = LogOffsetsFetcher.fetchLogEndOffsetsFor(
-            getConsumer(),
-            activeTopicPartitions
-        );
+        final Map<TopicPartition, Long> logEndOffsets;
+        final Map<TopicPartition, Long> logStartOffsets;
 
-        final Map<TopicPartition, Long> logStartOffsets = LogOffsetsFetcher.fetchLogStartOffsetsFor(
-            getConsumer(),
-            activeTopicPartitions
-        );
-
+        consumerLock.lock();
+        try {
+            Consumer<byte[], byte[]> consumer = getConsumer();
+            logEndOffsets = LogOffsetsFetcher.fetchLogEndOffsetsFor(consumer, activeTopicPartitions);
+            logStartOffsets = LogOffsetsFetcher.fetchLogStartOffsetsFor(consumer, activeTopicPartitions);
+        } finally {
+            consumerLock.unlock();
+        }
+        
         final Set<ConsumerClientOffsets> consumerAndOffsets = consumerGroupOffsets.consumers()
             .stream()
             .map(client -> {

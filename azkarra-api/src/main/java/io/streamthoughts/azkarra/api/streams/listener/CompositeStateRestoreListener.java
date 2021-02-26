@@ -21,7 +21,6 @@ package io.streamthoughts.azkarra.api.streams.listener;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainerAware;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.processor.StateRestoreListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +41,15 @@ public class CompositeStateRestoreListener implements StateRestoreListener, Kafk
     /**
      * Creates a new {@link CompositeStateRestoreListener} instance.
      *
-     * @param delegates the list of {@link StateRestoreListener}.
+     * @param listeners the list of {@link StateRestoreListener}.
      */
-    public CompositeStateRestoreListener(final Collection<StateRestoreListener> delegates) {
-        Objects.requireNonNull(delegates, "delegates cannot be null");
-        this.listeners = new ArrayList<>(delegates);
+    public CompositeStateRestoreListener(final Collection<StateRestoreListener> listeners) {
+        Objects.requireNonNull(listeners, "listeners cannot be null");
+        this.listeners = new ArrayList<>(listeners);
+    }
+
+    public void addListener(final StateRestoreListener listener) {
+        listeners.add(listener);
     }
 
     /**
