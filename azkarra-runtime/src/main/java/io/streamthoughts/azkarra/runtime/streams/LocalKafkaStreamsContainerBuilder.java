@@ -30,7 +30,6 @@ import io.streamthoughts.azkarra.api.streams.errors.StreamThreadExceptionHandler
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeStateRestoreListener;
 import io.streamthoughts.azkarra.api.streams.listener.CompositeUncaughtExceptionHandler;
-import io.streamthoughts.azkarra.api.streams.rocksdb.AzkarraRocksDBConfigSetter;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.time.Time;
 import org.apache.kafka.streams.KafkaStreams;
@@ -43,7 +42,6 @@ import java.util.Objects;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.MAIN_CONSUMER_PREFIX;
-import static org.apache.kafka.streams.StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS_CONFIG;
 
 /**
  * Default builder class for creating and configuring a new wrapped {@link KafkaStreams} instance.
@@ -51,7 +49,6 @@ import static org.apache.kafka.streams.StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS
 public class LocalKafkaStreamsContainerBuilder {
 
     private final static List<StreamsConfigDecorator> CONFIG_DECORATORS = List.of(
-        new RocksDBConfigDecorator(),
         new MonitorConsumerInterceptorConfigDecorator()
     );
 
@@ -142,27 +139,6 @@ public class LocalKafkaStreamsContainerBuilder {
          */
         Conf apply(final Conf streamsConfig);
 
-    }
-
-    public static class RocksDBConfigDecorator implements StreamsConfigDecorator {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Conf apply(final Conf streamsConfig) {
-
-            if (streamsConfig.hasPath(ROCKSDB_CONFIG_SETTER_CLASS_CONFIG)) {
-                return streamsConfig;
-            }
-
-            Conf rocksDBConf = Conf.of(
-                    ROCKSDB_CONFIG_SETTER_CLASS_CONFIG,
-                    AzkarraRocksDBConfigSetter.class.getName()
-            );
-
-            return Conf.of(rocksDBConf, streamsConfig);
-        }
     }
 
     private static class MonitorConsumerInterceptorConfigDecorator implements StreamsConfigDecorator {

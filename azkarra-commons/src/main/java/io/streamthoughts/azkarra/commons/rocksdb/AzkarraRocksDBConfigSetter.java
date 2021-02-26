@@ -16,12 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.rocksdb;
+package io.streamthoughts.azkarra.commons.rocksdb;
 
-import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
-import io.streamthoughts.azkarra.api.streams.rocksdb.internal.OpaqueMemoryResource;
-import io.streamthoughts.azkarra.api.streams.rocksdb.internal.ResourceInitializer;
-import io.streamthoughts.azkarra.api.util.Utils;
+import io.streamthoughts.azkarra.commons.rocksdb.internal.OpaqueMemoryResource;
+import io.streamthoughts.azkarra.commons.rocksdb.internal.ResourceInitializer;
 import org.apache.kafka.common.Configurable;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.streams.state.RocksDBConfigSetter;
@@ -53,7 +51,7 @@ public class AzkarraRocksDBConfigSetter implements RocksDBConfigSetter, Configur
     /**
      * @see org.apache.kafka.streams.state.internals.RocksDBStore
      */
-    public static final int ROCKSDB_BLOCK_CACHE_SIZE_DEFAULT = 50 * 1024 * 1024; // 50 MB
+    public static final long ROCKSDB_BLOCK_CACHE_SIZE_DEFAULT = 50 * 1024 * 1024; // 50 MB
 
     private static final RocksDBMemoryManager MEMORY_MANAGER = new RocksDBMemoryManager();
 
@@ -187,12 +185,12 @@ public class AzkarraRocksDBConfigSetter implements RocksDBConfigSetter, Configur
                 .ifPresent(options::setMaxBackgroundFlushes);
     }
 
-    @VisibleForTesting
+    /** VisibleForTesting **/
     AzkarraRocksDBConfigSetterConfig getConfig() {
         return rocksDBConfig;
     }
 
-    @VisibleForTesting
+    /** VisibleForTesting **/
     OpaqueMemoryResource<RocksDBSharedResources> getSharedResources() {
         return sharedResources;
     }
@@ -202,11 +200,19 @@ public class AzkarraRocksDBConfigSetter implements RocksDBConfigSetter, Configur
      */
     @Override
     public void close(final String storeName, final Options options) {
-        objectsToClose.forEach(Utils::closeQuietly);
+        LOG.info("Closing additional resources for RocksDB store {}", storeName);
+        objectsToClose.forEach(AzkarraRocksDBConfigSetter::closeQuietly);
         objectsToClose.clear();
 
         if (sharedResources != null) {
-            Utils.closeQuietly(sharedResources);
+            closeQuietly(sharedResources);
+        }
+    }
+
+    private static void closeQuietly(final AutoCloseable closeable) {
+        try {
+            closeable.close();
+        } catch (Throwable ignored) {
         }
     }
 }

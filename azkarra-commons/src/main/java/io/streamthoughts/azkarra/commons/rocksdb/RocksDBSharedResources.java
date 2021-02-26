@@ -16,9 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.rocksdb;
+package io.streamthoughts.azkarra.commons.rocksdb;
 
-import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
 import org.rocksdb.Cache;
 import org.rocksdb.WriteBufferManager;
 
@@ -64,7 +63,7 @@ final class RocksDBSharedResources implements AutoCloseable {
         }
     }
 
-    @VisibleForTesting
+    /** VisibleForTesting **/
     boolean isClosed() {
         return closed.get();
     }

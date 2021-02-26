@@ -16,23 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.rocksdb.internal;
+package io.streamthoughts.azkarra.commons.rocksdb.internal;
 
 /**
- * A {@code MemoryResourceDisposer} can be used to dispose a shared
- * resource after it is not used any more.
+ * A {@code ResourceInitializer} is used to initialize a new resource.
  *
- * @see OpaqueMemoryResource
- * @param <E>   the exception type.
+ * @param <T>   the resource type.
  */
-
 @FunctionalInterface
-public interface ResourceDisposer<E extends Throwable> {
+public interface ResourceInitializer<T> {
 
     /**
-     * Release the memory shared resource.
+     * Creates a new resource.
      *
-     * @throws E    if the resource cannot be disposed.
+     * @return  the resource.
+     *
+     * @throws Exception if the resource cannot be created/allocated.
      */
-    void dispose() throws E;
+    T apply() throws Exception;
 }

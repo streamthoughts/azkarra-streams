@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.rocksdb;
+package io.streamthoughts.azkarra.commons.rocksdb;
 
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
@@ -43,16 +43,16 @@ public class AzkarraRocksDBConfigSetterConfig extends AbstractConfig {
     public static final String ROCKSDB_STATS_DUMP_PERIOD_SEC_DOC = "The RocksDB statistics dump period in seconds.";
 
     public static final String ROCKSDB_STATS_ENABLE_CONFIG = CONFIG_PREFIX + "stats.enable";
-    public static final String ROCKSDB_STATS_ENABLE_DOC = "Enable RocksDB statistics";
+    private static final String ROCKSDB_STATS_ENABLE_DOC = "Enable RocksDB statistics";
 
     public static final String ROCKSDB_MAX_LOG_FILE_SIZE_CONFIG = CONFIG_PREFIX + "log.max.file.size";
-    public static final String ROCKSDB_MAX_LOG_FILE_SIZE_DOC = "The RocksDB maximum log file size.";
+    private static final String ROCKSDB_MAX_LOG_FILE_SIZE_DOC = "The RocksDB maximum log file size.";
 
     public static final String ROCKSDB_LOG_DIR_CONFIG = CONFIG_PREFIX + "log.dir";
-    public static final String ROCKSDB_LOG_DIR_DOC = "The RocksDB log directory.";
+    private static final String ROCKSDB_LOG_DIR_DOC = "The RocksDB log directory.";
 
     public static final String ROCKSDB_LOG_LEVEL_CONFIG = CONFIG_PREFIX + "log.level";
-    public static final String ROCKSDB_LOG_LEVEL_DOC = "The RocksDB log level";
+    private static final String ROCKSDB_LOG_LEVEL_DOC = "The RocksDB log level";
 
     // corresponds to write_buffer_number in RocksDB
     public static final String ROCKSDB_MAX_WRITE_BUFFER_NUMBER_CONFIG = CONFIG_PREFIX + "max.write.buffer.number";
@@ -93,25 +93,29 @@ public class AzkarraRocksDBConfigSetterConfig extends AbstractConfig {
             "The total size to be used for caching uncompressed data blocks. ";
 
     public static final String ROCKSDB_COMPACTION_STYLE_CONFIG = CONFIG_PREFIX + "compaction.style";
+    private static final String ROCKSDB_COMPACTION_STYLE_DOC = "The compaction style.";
+
     public static final String ROCKSDB_COMPRESSION_TYPE_CONFIG = CONFIG_PREFIX + "compression.type";
+    private static final String ROCKSDB_COMPRESSION_TYPE_DOC = "The compression type.";
+
     public static final String ROCKSDB_FILES_OPEN_CONFIG = CONFIG_PREFIX + "files.open";
-    public static final String ROCKSDB_FILES_OPEN_DOC =
+    private static final String ROCKSDB_FILES_OPEN_DOC =
             "The maximum number of open files that can be used per RocksDB instance.";
 
     public static final String ROCKSDB_BACKGROUND_THREADS_FLUSH_POOL_CONFIG = CONFIG_PREFIX + "background.thread.flush.pool";
-    public static final String ROCKSDB_BACKGROUND_THREADS_FLUSH_POOL_DOC =
+    private static final String ROCKSDB_BACKGROUND_THREADS_FLUSH_POOL_DOC =
             "The number of threads to be used for the background flush process.";
 
     public static final String ROCKSDB_BACKGROUND_THREADS_COMPACTION_POOL_CONFIG = CONFIG_PREFIX + "background.thread.compaction.pool";
-    public static final String ROCKSDB_BACKGROUND_THREADS_COMPACTION_POOL_DOC =
+    private static final String ROCKSDB_BACKGROUND_THREADS_COMPACTION_POOL_DOC =
             "The number of threads to be used for the background compaction process.";
 
     public static final String ROCKSDB_MAX_BACKGROUND_COMPACTIONS_CONFIG = CONFIG_PREFIX + "max.background.compactions";
-    public static final String ROCKSDB_MAX_BACKGROUND_COMPACTIONS_DOC =
+    private static final String ROCKSDB_MAX_BACKGROUND_COMPACTIONS_DOC =
             "The maximum number of concurrent background compactions";
 
     public static final String ROCKSDB_MAX_BACKGROUND_FLUSHES_CONFIG = CONFIG_PREFIX + "max.background.flushes";
-    public static final String ROCKSDB_MAX_BACKGROUND_FLUSHES_DOC =
+    private static final String ROCKSDB_MAX_BACKGROUND_FLUSHES_DOC =
             "The maximum number of concurrent flush operations";
 
     /**
@@ -182,8 +186,8 @@ public class AzkarraRocksDBConfigSetterConfig extends AbstractConfig {
     /**
      * Gets the {@link #ROCKSDB_BLOCK_CACHE_SIZE_CONFIG} option.
      */
-    Optional<Integer> getBlockCacheSize() {
-        return Optional.ofNullable(getInt(ROCKSDB_BLOCK_CACHE_SIZE_CONFIG));
+    Optional<Long> getBlockCacheSize() {
+        return Optional.ofNullable(getLong(ROCKSDB_BLOCK_CACHE_SIZE_CONFIG));
     }
 
     /**
@@ -310,7 +314,7 @@ public class AzkarraRocksDBConfigSetterConfig extends AbstractConfig {
                         null,
                         new ValidEnum(CompactionStyle.class),
                         ConfigDef.Importance.LOW,
-                        ROCKSDB_BLOCK_CACHE_SIZE_DOC
+                        ROCKSDB_COMPACTION_STYLE_DOC
                 )
 
                 .define(
@@ -319,12 +323,12 @@ public class AzkarraRocksDBConfigSetterConfig extends AbstractConfig {
                         null,
                         new ValidEnum(CompressionType.class),
                         ConfigDef.Importance.LOW,
-                        ROCKSDB_BLOCK_CACHE_SIZE_DOC
+                        ROCKSDB_COMPRESSION_TYPE_DOC
                 )
 
                 .define(
                         ROCKSDB_BLOCK_CACHE_SIZE_CONFIG,
-                        ConfigDef.Type.INT,
+                        ConfigDef.Type.LONG,
                         null,
                         ConfigDef.Importance.HIGH,
                         ROCKSDB_BLOCK_CACHE_SIZE_DOC

@@ -16,10 +16,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams.rocksdb;
+package io.streamthoughts.azkarra.commons.rocksdb;
 
-import io.streamthoughts.azkarra.api.streams.rocksdb.internal.OpaqueMemoryResource;
-import io.streamthoughts.azkarra.api.streams.rocksdb.internal.ResourceInitializer;
+import io.streamthoughts.azkarra.commons.rocksdb.internal.OpaqueMemoryResource;
+import io.streamthoughts.azkarra.commons.rocksdb.internal.ResourceInitializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
