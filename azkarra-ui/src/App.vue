@@ -218,20 +218,21 @@ export default {
         return Promise.reject(error);
       }
       let response = error.response;
-      if (!(error.config.hasOwnProperty('errorInterceptorEnabled') && !error.config.handlerEnabled)) {
+
+      if (!(error.config.hasOwnProperty('errorInterceptorEnabled') && !error.config.errorInterceptorEnabled)) {
         let status = response.status;
-        let error = response.data === '' ? {error_code: status, message: error.message} : response.data;
+        let data = response.data;
+        let error = _.isUndefined(data) && data === '' ? {error_code: status, message: error.message} : data;
         switch (status) {
           case 401:
           case 403:
-            // auth modal should not be opened if server is in headless mode.
-            that.openAuthModal = true;
             that.$notify({
               group: 'default',
               title: `${response.statusText} (#${notificationId++})`,
               text: 'Authentication is required',
               type: 'warn'
             });
+            that.openAuthModal = true;
             break;
           case 404:
             that.$notify({

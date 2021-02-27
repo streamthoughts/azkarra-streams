@@ -31,7 +31,7 @@ class AzkarraApi {
     }
 
     getHealth() {
-        return httpClient.get("/health", {errorInterceptorEnabled: false});
+        return httpClient.get("/health", { errorInterceptorEnabled : false });
     }
 
     getInfo() {
