@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.api.config;
 
 import io.streamthoughts.azkarra.api.errors.MissingConfException;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +131,15 @@ public interface Conf {
      * @return a new {@link Conf} instance.
      */
     static Conf of(final Conf...configurations) {
+        return of(Arrays.asList(configurations));
+    }
+
+    /**
+     * Static helper that can be used to merge multiple {@link Conf} instances.
+     *
+     * @return a new {@link Conf} instance.
+     */
+    static Conf of(final Collection<? extends Conf> configurations) {
         Conf config = empty();
         for (Conf conf : configurations) {
             if (conf != null) {

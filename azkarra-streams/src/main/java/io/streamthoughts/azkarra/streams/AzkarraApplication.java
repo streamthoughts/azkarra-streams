@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -31,7 +31,6 @@ import io.streamthoughts.azkarra.api.server.ServerInfo;
 import io.streamthoughts.azkarra.api.spi.EmbeddedHttpServerProvider;
 import io.streamthoughts.azkarra.api.util.Network;
 import io.streamthoughts.azkarra.http.ServerConfig;
-import io.streamthoughts.azkarra.http.ServerConfigBuilder;
 import io.streamthoughts.azkarra.streams.autoconfigure.AutoConfigure;
 import io.streamthoughts.azkarra.streams.banner.AzkarraBanner;
 import io.streamthoughts.azkarra.streams.banner.BannerPrinterBuilder;
@@ -48,7 +47,6 @@ import org.slf4j.event.Level;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -156,9 +154,6 @@ public class AzkarraApplication {
      */
     public AzkarraApplication setHttpServerEnable(boolean httpServerEnable) {
         isHttpServerEnable = httpServerEnable;
-        if (this.isHttpServerEnable) {
-            this.httpServerConf = ServerConfig.newBuilder().setListener(Network.HOSTNAME).build();
-        }
         return this;
     }
 
@@ -169,11 +164,7 @@ public class AzkarraApplication {
      * @return                  this {@link AzkarraApplication} instance.
      */
     public AzkarraApplication setHttpServerConf(final Conf httpServerConf) {
-        final ServerConfigBuilder builder = ServerConfig.newBuilder(httpServerConf);
-        if (!httpServerConf.hasPath(ServerConfig.HTTP_SERVER_LISTENER_CONFIG)) {
-            builder.setListener(Network.HOSTNAME);
-        }
-        this.httpServerConf = builder.build();
+        this.httpServerConf = Conf.of(httpServerConf, this.httpServerConf);
         return this;
     }
 
@@ -445,18 +436,19 @@ public class AzkarraApplication {
     }
 
     private Conf buildHttpServerConfig() {
-        // Get the user-defined configuration.
-        Conf applicationHttpServerConf = httpServerConf;
+        final List<Conf> allServerConfigs = new ArrayList<>();
 
-        // Get all declared server configurations.
-        final Collection<ServerConfig> allServerConfigs = context.getAllComponents(ServerConfig.class);
+        // Add the user-defined configuration.
+        allServerConfigs.add(httpServerConf);
+
+        // Add all declared server configurations.
+        allServerConfigs.addAll(context.getAllComponents(ServerConfig.class));
+
+        // Add default configuration for listener.
+        allServerConfigs.add( ServerConfig.newBuilder().setListener(Network.HOSTNAME).build());
 
         // Merge all configurations.
-        for (ServerConfig config : allServerConfigs) {
-            applicationHttpServerConf = applicationHttpServerConf.withFallback(config);
-        }
-
-        return applicationHttpServerConf;
+        return Conf.of(allServerConfigs);
     }
 
     private EmbeddedHttpServer loadEmbeddedHttpServerImplementation() {
