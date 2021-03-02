@@ -28,6 +28,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import io.undertow.util.StatusCodes;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
 import java.util.Map;
@@ -124,6 +125,16 @@ public class ExchangeHelper {
         exchange.setStatusCode(statusCode);
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, CONTENT_TYPE);
         exchange.getResponseSender().send(JSON.serialize(response), StandardCharsets.UTF_8);
+    }
+
+    public static void sendTextValue(final HttpServerExchange exchange, final Object value) {
+        final String s = value instanceof Double ?
+                new BigDecimal(value.toString()).stripTrailingZeros().toPlainString()
+                : value.toString();
+        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+        exchange
+                .setStatusCode(200)
+                .getResponseSender().send(s, StandardCharsets.UTF_8);
     }
 
     private static Optional<String> getFirst(final String name,

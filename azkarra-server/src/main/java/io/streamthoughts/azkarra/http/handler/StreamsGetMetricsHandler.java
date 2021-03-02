@@ -45,6 +45,7 @@ import java.util.function.Predicate;
 import static io.streamthoughts.azkarra.http.ExchangeHelper.getOptionalQueryParam;
 import static io.streamthoughts.azkarra.http.ExchangeHelper.getQueryParam;
 import static io.streamthoughts.azkarra.http.ExchangeHelper.sendJsonResponse;
+import static io.streamthoughts.azkarra.http.ExchangeHelper.sendTextValue;
 import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_FILTER_EMPTY;
 import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_FORMAT;
 import static io.streamthoughts.azkarra.http.utils.Constants.HTTP_QUERY_PARAM_FORMAT_VALUE_PROMETHEUS;
@@ -111,9 +112,8 @@ public class StreamsGetMetricsHandler extends AbstractStreamHttpHandler {
                 throw new MetricNotFoundException("{group=\"" + group.get() + "\"}");
             }
 
-            boolean extractValue = exchange.getRelativePath().endsWith("/value");
-            if (name.isPresent() && extractValue) {
-                sendJsonResponse(exchange, metric.get().value());
+            if (name.isPresent() && exchange.getRelativePath().endsWith("/value")) {
+                sendTextValue(exchange, metric.get().value());
             } else {
                 sendJsonResponse(exchange, groupSet);
             }
