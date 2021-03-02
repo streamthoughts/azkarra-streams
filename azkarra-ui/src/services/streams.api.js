@@ -48,6 +48,10 @@ class StreamApiV1 {
         return httpClient.get(API_BASE_PATH + '/' + id + "/metrics");
     }
 
+    getInstanceMetricValue(id, group, name) {
+        return httpClient.get(API_BASE_PATH + '/' + id + '/metrics/group/' + group + '/metric/' + name + '/value');
+    }
+
     getAllInstancesIds() {
         return httpClient.get(API_BASE_PATH);
     }

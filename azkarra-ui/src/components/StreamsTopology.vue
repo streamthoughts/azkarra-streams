@@ -18,7 +18,7 @@
 */
 <template>
   <div id="component-topology-container" class="container-fluid">
-    <topology-dag v-bind:topology="topology"></topology-dag>
+    <topology-dag v-bind:topology="topology" v-bind:text="text"></topology-dag>
   </div>
 </template>
 
@@ -33,7 +33,8 @@ export default {
   props: ['id'],
   data: function () {
     return {
-      topology: {}
+      topology: {},
+      text: ''
     }
   },
   created() {
@@ -46,7 +47,11 @@ export default {
   methods: {
     load() {
       let that = this;
-      streamsApiV1.getInstanceTopologyById(this.id).then(response => that.topology = response.data);
+      streamsApiV1.getInstanceTopologyById(this.id)
+          .then(response => that.topology = response.data);
+
+      streamsApiV1.getInstanceMetricValue(this.id, "stream-metrics", "topology-description")
+          .then(response => that.text = response.data);
     },
   },
 }

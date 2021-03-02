@@ -34,11 +34,9 @@
       </div>
     </div>
     <template v-for="topic in topics" :key="topic.name">
-      <div class="mb-3">
-        <div class="tab-pane-title mb-1">
-          Topic : {{ topic.name }}
-        </div>
-        <div class="tab-pane-content bg-white rounded box-shadow bordered">
+      <div class="panel border bg-white rounded box-shadow">
+        <div class="panel-heading">Topic : {{ topic.name }}</div>
+        <div class="panel-body border-0">
           <table class="table">
             <thead>
             <tr class="d-flex">
@@ -93,7 +91,6 @@
         </div>
       </div>
     </template>
-    {{ offsets }}
   </div>
 </template>
 

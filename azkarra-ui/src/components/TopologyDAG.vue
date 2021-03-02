@@ -43,9 +43,30 @@
     </div>
     <div class="panel border bg-white rounded box-shadow">
       <div class="panel-heading">
-        Topology
+        <ul class="list-inline">
+          <li class="list-inline-item">Topologies</li>
+          <div class="fl-left">
+            <li class="list-inline-item">
+              <button class="btn btn-primary"
+                      type="button"
+                      v-bind:disabled="active"
+                      v-on:click="toggle()"><i class="fas fa-project-diagram"></i></button>
+            </li>
+            <li class="list-inline-item">
+              <button class="btn btn-primary"
+                      type="button"
+                      v-bind:disabled="!active"
+                      v-on:click="toggle()"><i class="fas fa-align-justify"></i></button>
+            </li>
+          </div>
+        </ul>
       </div>
-      <div id="svg-container" class="panel-body pl-0 pr-0"></div>
+      <div v-show="!active" class="panel-body">
+        <pre>{{ text }}</pre>
+      </div>
+      <div v-show="active" class="panel-body pl-0 pr-0">
+        <div id="svg-container"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -56,13 +77,14 @@ import * as d3 from "d3";
 
 export default {
   name: 'topology-graph',
-  props: ['topology'],
+  props: ['topology', 'text'],
   data: function () {
     return {
       subTopologyCount: 0,
       sourceCount: 0,
       sinkCount: 0,
-      storeCount: 0
+      storeCount: 0,
+      active: true,
     }
   },
   mounted: function () {
@@ -72,6 +94,10 @@ export default {
     'topology': 'build'
   },
   methods: {
+
+    toggle() {
+      this.active = !this.active;
+    },
 
     build() {
       if (this.topology.subTopologies !== undefined) {
@@ -618,7 +644,7 @@ text.topology-node {
 
 .g-sub-topology-node.g-sub-topology-node-topic rect {
   fill: $color-green-light;
-  stroke:  $color-green-light;
+  stroke: $color-green-light;
 }
 
 .topology-node-link-v, .topology-node-link-h {
