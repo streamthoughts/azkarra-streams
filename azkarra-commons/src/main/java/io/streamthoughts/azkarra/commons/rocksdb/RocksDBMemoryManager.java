@@ -21,6 +21,8 @@ package io.streamthoughts.azkarra.commons.rocksdb;
 import io.streamthoughts.azkarra.commons.rocksdb.internal.OpaqueMemoryResource;
 import io.streamthoughts.azkarra.commons.rocksdb.internal.ResourceDisposer;
 import io.streamthoughts.azkarra.commons.rocksdb.internal.ResourceInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -31,6 +33,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * The {@code RocksDBMemoryManager} is used to manage allocated resources shared across RocksDB instances.
  */
 final class RocksDBMemoryManager {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RocksDBMemoryManager.class);
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -52,6 +56,7 @@ final class RocksDBMemoryManager {
         lock.lock();
         try {
             if (leasedResource == null) {
+                LOG.info("Initializing RocksDB shared resources: Write-Buffer-Manager and Cache");
                 RocksDBSharedResources resource = initializer.apply();
                 leasedResource = new LeasedResource<>(resource);
             }
@@ -72,7 +77,9 @@ final class RocksDBMemoryManager {
             }
 
             if (leasedResource.removeLeaseHolder(leaseHolder)) {
+                LOG.info("Closing RocksDB shared resources: Write-Buffer-Manager and Cache");
                 leasedResource.close();
+                leasedResource = null;
             }
         } finally {
             lock.unlock();
