@@ -62,10 +62,9 @@ public class LoggingStateRestoreListener implements StateRestoreListener, StateR
         final long offsetToRestore = endingOffset - startingOffset;
         totalOffsetToRestore.put(topicPartition, offsetToRestore);
 
-        StateRestoreInfo info = new StateRestoreInfo(storeName);
+        StateRestoreInfo info = stateToRestore.computeIfAbsent(storeName, StateRestoreInfo::new);
         info.addTopicPartitionRestoreInfo(new StatePartitionRestoreInfo(topicPartition, startingOffset, endingOffset));
 
-        stateToRestore.put(storeName, info);
         startTimes.put(topicPartition, Time.SYSTEM.milliseconds());
     }
 
