@@ -25,13 +25,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StreamsExtensionBuilder {
+public final class StreamsExtensionBuilder {
 
     private static final String EXTENSION_PREFIX = "ioazkarra";
 
     private String applicationId;
     private String applicationServer;
-    private Map<String, Object> additional = new HashMap<>();
+    private final Map<String, Object> additional = new HashMap<>();
 
     public static StreamsExtensionBuilder newBuilder() {
         return new StreamsExtensionBuilder();
@@ -41,7 +41,7 @@ public class StreamsExtensionBuilder {
     }
 
     /**
-     * Sets the Kafka Streams application .erver.
+     * Sets the Kafka Streams {@code application.server}.
      *
      * @param   applicationServer the{@link org.apache.kafka.streams.StreamsConfig#APPLICATION_SERVER_CONFIG} property.
      * @return  {@code this}
@@ -52,7 +52,7 @@ public class StreamsExtensionBuilder {
     }
 
     /**
-     * Sets the Kafka Streams application.id.
+     * Sets the Kafka Streams {@code application.id}.
      *
      * @param   applicationId the{@link org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG} property.
      * @return  {@code this}

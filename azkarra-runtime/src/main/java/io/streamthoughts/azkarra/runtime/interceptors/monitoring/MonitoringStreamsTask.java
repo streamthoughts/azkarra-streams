@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -18,26 +18,12 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors.monitoring;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.streamthoughts.azkarra.api.time.Time;
-import io.streamthoughts.azkarra.runtime.interceptors.monitoring.ce.CloudEventsBuilder;
-import io.streamthoughts.azkarra.runtime.interceptors.monitoring.ce.CloudEventsEntity;
-import io.streamthoughts.azkarra.runtime.interceptors.monitoring.ce.CloudEventsExtension;
-import io.streamthoughts.azkarra.serialization.json.AzkarraSimpleModule;
-import io.streamthoughts.azkarra.serialization.json.Json;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.Headers;
-import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -51,20 +37,6 @@ public final class MonitoringStreamsTask extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(MonitoringStreamsTask.class);
 
-    private static final Json JSON = new Json(new ObjectMapper());
-    private static final String DEFAULT_EVENT_TYPE = "io.streamthoughts.azkarra.streams.stateupdateevent";
-    private static final String DEFAULT_CONTENT_TYPE = "application/json";
-    private static final String CE_SPEC_VERSION = "1.0";
-
-    private static final Headers RECORD_HEADERS = new RecordHeaders()
-            .add("content-type", "application/cloudevents+json; charset=UTF-8".getBytes(StandardCharsets.UTF_8));
-
-    static {
-        JSON.registerModule(new AzkarraSimpleModule());
-        JSON.registerModule(new JavaTimeModule());
-        JSON.configure(o -> o.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true));
-    }
-
     private final CountDownLatch isShutdownLatch;
 
     private final AtomicBoolean shutdown;
@@ -73,47 +45,33 @@ public final class MonitoringStreamsTask extends Thread {
 
     private long lastSentEventTimeMs = 0L;
 
-    private volatile LinkedBlockingQueue<KafkaStreamsMetadata> changes;
-
-    private final CloudEventsContext evtContext;
-
-    private final String topic;
-
-    private final Producer<byte[], byte[]> producer;
-
-    private final CloudEventsExtension azkarraExtensions;
-
-    private final CloudEventsExtension customExtensions;
+    private final LinkedBlockingQueue<KafkaStreamsMetadata> changes;
 
     private final Reportable<? extends KafkaStreamsMetadata> reportable;
 
-    private final byte[] key;
+    private final List<MonitoringReporter> reporters;
+
+    private final String applicationId;
 
     /**
      * Creates a new {@link MonitoringStreamsTask} instance.
+     *
+     * @param applicationId the application id.
+     * @param reporters     the list of reporters to be used.
+     * @param reportable    the {@link Reportable}.
+     * @param intervalMs    the report interval in milliseconds.
      */
-    public MonitoringStreamsTask(final CloudEventsContext evtContext,
-                                 final CloudEventsExtension customExtensions,
+    public MonitoringStreamsTask(final String applicationId,
+                                 final List<MonitoringReporter> reporters,
                                  final Reportable<? extends KafkaStreamsMetadata> reportable,
-                                 final long intervalMs,
-                                 final Producer<byte[], byte[]> producer,
-                                 final String topic) {
-        this.evtContext = Objects.requireNonNull(evtContext, "evtContext can't be null");
-        this.reportable = Objects.requireNonNull(reportable, "reportable can't be null");
-        this.producer = Objects.requireNonNull(producer, "producer can't be null");
-        this.topic = Objects.requireNonNull(topic, "topic can't be null");
+                                 final long intervalMs) {
+        this.applicationId = Objects.requireNonNull(applicationId, "applicationId should not be null");
+        this.reportable = Objects.requireNonNull(reportable, "reportable should be null");
+        this.reporters = Objects.requireNonNull(reporters, "reporters should not be null");
         this.intervalMs = intervalMs;
         this.isShutdownLatch = new CountDownLatch(1);
         this.shutdown = new AtomicBoolean(false);
-        this.customExtensions = customExtensions;
-        changes = new LinkedBlockingQueue<>();
-        azkarraExtensions = StreamsExtensionBuilder.newBuilder()
-            .withApplicationId(evtContext.applicationId())
-            .withApplicationServer(evtContext.applicationServer())
-            .with("monitorintervalms", intervalMs)
-            .build();
-
-        key = evtContext.applicationId().getBytes(StandardCharsets.UTF_8);
+        this. changes = new LinkedBlockingQueue<>();
     }
 
     public void offer(final KafkaStreamsMetadata state) {
@@ -131,13 +89,13 @@ public final class MonitoringStreamsTask extends Thread {
      */
     @Override
     public void run() {
-        LOG.info("Starting the StreamsStateReporterTask for application: {}", evtContext.applicationId());
+        LOG.info("Starting the StreamsStateReporterTask for application: {}", applicationId);
         try {
             while (!shutdown.get()) {
                 final long start = Time.SYSTEM.milliseconds();
                 // Check if we do need do send an event.
                 if (maybeSendStatesEvent(start)) {
-                    report(buildEvent(reportable.report()));
+                    report(reportable.report());
                 }
                 try {
                     pollAndReportOrWait(shutdown.get() ? Duration.ZERO : timeUntilNextLoop());
@@ -150,22 +108,37 @@ public final class MonitoringStreamsTask extends Thread {
         } catch (Exception e) {
             LOG.error(
                 "Unexpected error while reporting state for streams application : {}. Stopping task.",
-                    evtContext.applicationId(),
+                applicationId,
                 e
             );
             shutdown.set(true);
         } finally {
             // Closing or flushing the producer is not the responsibility of this Task.
             isShutdownLatch.countDown();
-            LOG.info("StreamsStateReporterTask has been stopped for application: {}", evtContext.applicationId());
+            LOG.info("StreamsStateReporterTask has been stopped for application: {}", applicationId);
         }
     }
 
     private void pollAndReportOrWait(final Duration duration) throws InterruptedException {
         final KafkaStreamsMetadata change = changes.poll(duration.toMillis(), TimeUnit.MILLISECONDS);
         if (change != null) {
-            report(buildEvent(change));
+            report(change);
         }
+    }
+
+    private void report(final KafkaStreamsMetadata metadata) {
+        for (MonitoringReporter reporter : reporters) {
+            try {
+                reporter.report(metadata);
+            } catch (Exception e) {
+                LOG.error(
+                    "Failed to report KafkaStreams metadata using reporter '{}'",
+                    reporter.getClass().getSimpleName(),
+                    e
+                );
+            }
+        }
+        lastSentEventTimeMs = Time.SYSTEM.milliseconds();
     }
 
     private Duration timeUntilNextLoop() {
@@ -177,36 +150,12 @@ public final class MonitoringStreamsTask extends Thread {
         return now - lastSentEventTimeMs >= intervalMs;
     }
 
-    private CloudEventsEntity<KafkaStreamsMetadata> buildEvent(final KafkaStreamsMetadata data) {
-        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-        return CloudEventsBuilder.<KafkaStreamsMetadata>newBuilder()
-            .withId(evtContext.cloudEventId(now))
-            .withSource(evtContext.cloudEventSource())
-            .withSubject(evtContext.cloudEventSubject())
-            .withType(DEFAULT_EVENT_TYPE)
-            .withSpecVersion(CE_SPEC_VERSION)
-            .withTime(now)
-            .withData(data)
-            .withDataContentType(DEFAULT_CONTENT_TYPE)
-            .withExtension(azkarraExtensions)
-            .withExtension(customExtensions)
-            .build();
-    }
-
-
-    private void report(final CloudEventsEntity<KafkaStreamsMetadata> event) {
-        final byte[] byteValue = JSON.serialize(event).getBytes(StandardCharsets.UTF_8);
-        producer.send(new ProducerRecord<>(topic, null, key, byteValue, RECORD_HEADERS));
-        lastSentEventTimeMs = event.attributes().time().toInstant().toEpochMilli();
-    }
-
     public void shutdown() {
-        if (shutdown.get()) return;
-        //interrupt(); // interrupt the thread to not wait for new changes.
-        shutdown.set(true);
-        try {
-            isShutdownLatch.await(intervalMs, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ignored) {
+        if (shutdown.compareAndSet(false, true)) {
+            try {
+                isShutdownLatch.await(intervalMs, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 

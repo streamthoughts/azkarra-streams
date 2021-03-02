@@ -22,10 +22,10 @@ import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CloudEventsBuilder<T> extends CloudEventsAttributes {
+public final class CloudEventsBuilder<T> extends CloudEventsAttributes {
 
     private T data;
-    private List<CloudEventsExtension> extensions;
+    private final List<CloudEventsExtension> extensions;
 
     public static <T> CloudEventsBuilder<T> newBuilder() {
         return new CloudEventsBuilder<>();

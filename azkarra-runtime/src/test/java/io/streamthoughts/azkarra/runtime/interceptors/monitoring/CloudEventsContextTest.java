@@ -18,6 +18,7 @@
  */
 package io.streamthoughts.azkarra.runtime.interceptors.monitoring;
 
+import io.streamthoughts.azkarra.runtime.interceptors.monitoring.ce.CloudEventsContext;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -19,12 +19,14 @@
 package io.streamthoughts.azkarra.runtime.interceptors;
 
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.runtime.interceptors.monitoring.MonitoringReporter;
 import io.streamthoughts.azkarra.runtime.interceptors.monitoring.ce.CloudEventsExtension;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.record.CompressionType;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +65,12 @@ public class MonitoringStreamsInterceptorConfig {
     /** {@code monitoring.streams.interceptor.ce.extensions} */
     public static final String MONITORING_INTERCEPTOR_EXTENSIONS_CONFIG = "monitoring.streams.interceptor.ce.extensions";
 
+    /** {@code monitoring.streams.interceptor.info.enabled.stores.lag} */
+    public static final String MONITORING_INTERCEPTOR_REPORTERS_CLASSES_CONFIG = "monitoring.streams.interceptor.reporters";
+
+    /** {@code monitoring.streams.interceptor.enable} */
+    public static String MONITORING_STREAMS_INTERCEPTOR_KAFKA_REPORTER_ENABLE_CONFIG = "monitoring.streams.interceptor.kafka.reporter.enabled";
+
     private static final Map<String, Object> PRODUCER_DEFAULT_OVERRIDES = Map.of(
         ProducerConfig.LINGER_MS_CONFIG, "100",
         ProducerConfig.ACKS_CONFIG, "1",
@@ -93,15 +101,25 @@ public class MonitoringStreamsInterceptorConfig {
         return MONITORING_INTERCEPTOR_PRODUCER_PREFIX + "." + producerProp;
     }
 
+    public boolean isKafkaReporterEnabled() {
+        return originals.getOptionalBoolean(MONITORING_STREAMS_INTERCEPTOR_KAFKA_REPORTER_ENABLE_CONFIG).orElse(true);
+    }
+
+    public Collection<MonitoringReporter> getReporters() {
+        if (!originals.hasPath(MONITORING_INTERCEPTOR_REPORTERS_CLASSES_CONFIG))
+            return Collections.emptyList();
+
+        return originals.getClasses(MONITORING_INTERCEPTOR_REPORTERS_CLASSES_CONFIG, MonitoringReporter.class);
+    }
+
     /**
      * Get the period the interceptor should use to send a streams state event (Default is 10 seconds).
      *
      * @return the period in milliseconds.
      */
-    public long getIntervalMs() {
+    public Optional<Long> getIntervalMs() {
         return originals
-            .getOptionalLong(MONITORING_INTERCEPTOR_INTERVAL_MS_CONFIG)
-            .orElse(MONITORING_INTERCEPTOR_INTERVAL_MS_DEFAULT);
+            .getOptionalLong(MONITORING_INTERCEPTOR_INTERVAL_MS_CONFIG);
     }
 
     /**
@@ -119,10 +137,8 @@ public class MonitoringStreamsInterceptorConfig {
      *
      * @return  the name of the topic.
      */
-    public String getTopic() {
-        return originals
-            .getOptionalString(MONITORING_INTERCEPTOR_TOPIC_CONFIG)
-            .orElse(MONITORING_INTERCEPTOR_TOPIC_DEFAULT);
+    public Optional<String> getTopic() {
+        return originals.getOptionalString(MONITORING_INTERCEPTOR_TOPIC_CONFIG);
     }
 
     /**

@@ -23,14 +23,33 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Represents a list of Cloud Events Extension.
+ */
+@FunctionalInterface
 public interface CloudEventsExtension {
 
+    /**
+     * Gets the extensions.
+     */
     Map<String, Object> toAttributesExtensions();
 
+    /**
+     * Helper method to create a new {@link CloudEventsExtension} for the given key-value pair.
+     *
+     * @param key       the extension key.
+     * @param value     the extension value.
+     * @return          a new {@link CloudEventsExtension}.
+     */
     static CloudEventsExtension of(final String key, final Object value) {
         return () -> Collections.singletonMap(key, value);
     }
 
+    /**
+     * Helper method to convert a collection of {@link CloudEventsExtension} to Map.
+     * @param extensions    the extensions to convert.
+     * @return              the {@link Map}.
+     */
     static Map<String, Object> marshal(final Collection<CloudEventsExtension> extensions) {
         return extensions.stream()
             .map(CloudEventsExtension::toAttributesExtensions)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -21,38 +21,44 @@ package io.streamthoughts.azkarra.runtime.interceptors;
 import io.streamthoughts.azkarra.api.StreamsLifecycleChain;
 import io.streamthoughts.azkarra.api.StreamsLifecycleContext;
 import io.streamthoughts.azkarra.api.StreamsLifecycleInterceptor;
+import io.streamthoughts.azkarra.api.annotations.VisibleForTesting;
+import io.streamthoughts.azkarra.api.components.BaseComponentModule;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.config.Configurable;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainerAware;
 import io.streamthoughts.azkarra.api.streams.StateChangeEvent;
+import io.streamthoughts.azkarra.api.util.Utils;
+import io.streamthoughts.azkarra.runtime.interceptors.monitoring.KafkaMonitoringReporter;
 import io.streamthoughts.azkarra.runtime.interceptors.monitoring.KafkaStreamsMetadata;
 import io.streamthoughts.azkarra.runtime.interceptors.monitoring.MonitoringStreamsTask;
-import io.streamthoughts.azkarra.runtime.interceptors.monitoring.CloudEventsContext;
-import org.apache.kafka.clients.producer.Producer;
+import io.streamthoughts.azkarra.runtime.interceptors.monitoring.MonitoringReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+
+import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_INTERCEPTOR_INTERVAL_MS_DEFAULT;
 
 /**
  * Interceptor to monitor {@link org.apache.kafka.streams.KafkaStreams} instance.
  * Publishes periodically a streams state event to a Kafka topic.
  */
-public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor, Configurable {
+public class MonitoringStreamsInterceptor
+        extends BaseComponentModule
+        implements StreamsLifecycleInterceptor, Configurable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MonitoringStreamsInterceptor.class);
-
-    private static final String PRODUCER_CLIENT_ID_SUFFIX = "-monitoring-producer";
-
     private final AtomicInteger taskGenerationId = new AtomicInteger(0);
 
     private MonitoringStreamsInterceptorConfig config;
-
-    private Producer<byte[], byte[]> producer;
 
     private MonitoringStreamsTask task;
 
@@ -60,12 +66,62 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
 
     private KafkaStreamsContainer container;
 
+    private final List<MonitoringReporter> reporters = new ArrayList<>();
+
+    private long intervalMs = MONITORING_INTERCEPTOR_INTERVAL_MS_DEFAULT;
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void configure(final Conf configuration) {
+        super.configure(configuration);
+
         config = new MonitoringStreamsInterceptorConfig(configuration);
+
+        if (config.getIntervalMs().isPresent())
+            intervalMs = config.getIntervalMs().get();
+
+        // Gets and configure all configured reporters
+        Collection<MonitoringReporter> configured = new ArrayList<>(config.getReporters());
+        if (config.isKafkaReporterEnabled()) {
+            configured.add(new KafkaMonitoringReporter());
+        }
+        for (MonitoringReporter reporter :configured) {
+            Configurable.mayConfigure(reporter, configuration);
+        }
+
+        // Registers all configured reporters.
+        this.reporters.addAll(configured);
+
+        // Registers all component reporters
+        this.reporters.addAll(getAllComponents(MonitoringReporter.class));
+    }
+
+    /**
+     * Sets the interval in milliseconds to be used for reporting the state of the monitored Kafka Streams instance.
+     * @param intervalMs    the interval in milliseconds.
+     * @return              {@code this}.
+     */
+    public MonitoringStreamsInterceptor withIntervalMs(final long intervalMs) {
+        this.intervalMs = intervalMs;
+        return this;
+    }
+
+    /**
+     * Registers a {@link MonitoringReporter} to this interceptor.
+     *
+     * @param reporter  the reporter to be registered.
+     * @return          {@code this}.
+     */
+    public MonitoringStreamsInterceptor withMonitoringReporter(final MonitoringReporter reporter) {
+        this.reporters.add(Objects.requireNonNull(reporter, "reporter should not be null"));
+        return this;
+    }
+
+    @VisibleForTesting
+    List<MonitoringReporter> reporters() {
+        return reporters;
     }
 
     /**
@@ -75,39 +131,29 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
     public void onStart(final StreamsLifecycleContext context,
                         final StreamsLifecycleChain chain) {
         LOG.info("Starting the MonitoringStreamsInterceptor for application = {}.", context.applicationId());
+
         container = context.container();
         container.addStateChangeWatcher(new ReporterStateChangeWatcher());
 
-        final String clientId = context.applicationId() + PRODUCER_CLIENT_ID_SUFFIX;
-        final Map<String, Object> producerConfigs = config.getProducerConfigs(clientId);
-        producer = container.createNewProducer(producerConfigs);
+        for (MonitoringReporter reporter : reporters) {
+            if (KafkaStreamsContainerAware.class.isAssignableFrom(reporter.getClass())) {
+                ((KafkaStreamsContainerAware) reporter).setKafkaStreamsContainer(container);
+            }
+        }
 
-        final var advertisedServer = config.getAdvertisedServer().orElse(container.endpoint().get().listener());
-        final var eventsContext = new CloudEventsContext(container.applicationId(), advertisedServer, queryClusterId());
         taskSupplier = () -> new MonitoringStreamsTask(
-            eventsContext,
-            config.getExtensions(),
+            container.applicationId(),
+            reporters,
             () -> new KafkaStreamsMetadata(
                 container.state(),
                 container.threadMetadata(),
                 container.offsets(),
                 config.isStoresLagsEnabled() ? container.allLocalStorePartitionInfos() : Collections.emptyList()
             ),
-            config.getIntervalMs(),
-            producer,
-            config.getTopic()
+            intervalMs
         );
         startTask(container.applicationId());
         chain.execute();
-    }
-
-    private String queryClusterId() {
-        try {
-            return container.getAdminClient().describeCluster().clusterId().get();
-        } catch (Exception e) {
-            LOG.error("Failed to describe cluster Id. Use default value 'unknown'", e);
-            return "unknown";
-        }
     }
 
     /**
@@ -123,14 +169,17 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
             try {
                 LOG.info("Closing MonitoringStreamsInterceptor for application = {}.", id);
                 closeTasks();
-                producer.flush();
+                closeReporters();
             } catch (Exception e) {
                 LOG.error("Unexpected error occurred while closing reporting task", e);
             } finally {
-                producer.close();
                 LOG.info("MonitoringStreamsInterceptor has been closed for application = {}.", id);
             }
         }
+    }
+
+    private void closeReporters() {
+        reporters.forEach(Utils::closeQuietly);
     }
 
     private void closeTasks() {

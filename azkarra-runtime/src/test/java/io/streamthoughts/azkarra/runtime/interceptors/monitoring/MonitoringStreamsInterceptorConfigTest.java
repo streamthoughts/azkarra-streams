@@ -27,23 +27,11 @@ import java.util.Map;
 import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_INTERCEPTOR_ADVERTISED_SERVER_CONFIG;
 import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_INTERCEPTOR_EXTENSIONS_CONFIG;
 import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_INTERCEPTOR_INTERVAL_MS_CONFIG;
-import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_INTERCEPTOR_INTERVAL_MS_DEFAULT;
 import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_INTERCEPTOR_TOPIC_CONFIG;
-import static io.streamthoughts.azkarra.runtime.interceptors.MonitoringStreamsInterceptorConfig.MONITORING_INTERCEPTOR_TOPIC_DEFAULT;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MonitoringStreamsInterceptorConfigTest {
-
-    @Test
-    public void shouldGetDefaultConfigsGivenNoProps() {
-        MonitoringStreamsInterceptorConfig config = new MonitoringStreamsInterceptorConfig(Conf.empty());
-        assertEquals(MONITORING_INTERCEPTOR_INTERVAL_MS_DEFAULT, config.getIntervalMs());
-        assertEquals(MONITORING_INTERCEPTOR_TOPIC_DEFAULT, config.getTopic());
-        assertTrue(config.getAdvertisedServer().isEmpty());
-        assertTrue(config.getExtensions().toAttributesExtensions().isEmpty());
-    }
 
     @Test
     public void shouldGetProvidedAdvertisedConfig() {
@@ -58,7 +46,7 @@ public class MonitoringStreamsInterceptorConfigTest {
         MonitoringStreamsInterceptorConfig config = new MonitoringStreamsInterceptorConfig(
             Conf.of(MONITORING_INTERCEPTOR_INTERVAL_MS_CONFIG, 5000)
         );
-        assertEquals(5000L, config.getIntervalMs());
+        assertEquals(5000L, config.getIntervalMs().get());
     }
 
     @Test
@@ -66,7 +54,7 @@ public class MonitoringStreamsInterceptorConfigTest {
         MonitoringStreamsInterceptorConfig config = new MonitoringStreamsInterceptorConfig(
             Conf.of(MONITORING_INTERCEPTOR_TOPIC_CONFIG, "test-topic")
         );
-        assertEquals("test-topic", config.getTopic());
+        assertEquals("test-topic", config.getTopic().get());
     }
 
     @Test

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class CloudEventsEntity<T> {
+public final class CloudEventsEntity<T> {
 
       private final CloudEventsAttributes attributes;
 

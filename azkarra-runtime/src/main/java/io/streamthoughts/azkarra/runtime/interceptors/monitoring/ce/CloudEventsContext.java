@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.runtime.interceptors.monitoring;
+package io.streamthoughts.azkarra.runtime.interceptors.monitoring.ce;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -25,7 +25,7 @@ import java.util.Objects;
  * This class is used to wrap information about a Cloud Events
  * in the context of Kafka Streams.
  */
-public class CloudEventsContext {
+public final class CloudEventsContext {
 
     // Azkarra Resource Name (ARN) prefix.
     private static final String RESOURCE_NAME_SERVER_PREFIX = "arn://kafka=%s";
@@ -54,23 +54,23 @@ public class CloudEventsContext {
         this.cloudEventSubject = buildCloudEventSubject();
     }
 
-    String applicationId() {
+    public String applicationId() {
         return applicationId;
     }
 
-    String applicationServer() {
+    public String applicationServer() {
         return applicationServer;
     }
 
-    String cloudEventSource() {
+    public String cloudEventSource() {
         return cloudEventSource;
     }
 
-    String cloudEventSubject() {
+    public String cloudEventSubject() {
         return cloudEventSubject;
     }
 
-    String cloudEventId(final ZonedDateTime now) {
+    public String cloudEventId(final ZonedDateTime now) {
         return "appid:" + applicationId + ";appsrv:" + applicationServer + ";ts:" + now.toInstant().toEpochMilli();
     }
 
