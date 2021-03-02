@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.streams.State;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
-import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
+import io.streamthoughts.azkarra.api.streams.store.LocalStatePartitionsInfo;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.processor.ThreadMetadata;
 
@@ -43,7 +43,7 @@ public class KafkaStreamsMetadata {
 
     private final ConsumerGroupOffsets offsets;
 
-    private final List<LocalStorePartitionLags> stores;
+    private final List<LocalStatePartitionsInfo> stores;
 
     /**
      * Creates a new {@link KafkaStreamsMetadata} instance.
@@ -55,7 +55,7 @@ public class KafkaStreamsMetadata {
     public KafkaStreamsMetadata(final TimestampedValue<State> state,
                                 final Set<ThreadMetadata> threads,
                                 final ConsumerGroupOffsets offsets,
-                                final List<LocalStorePartitionLags> stores) {
+                                final List<LocalStatePartitionsInfo> stores) {
         this.state = Objects.requireNonNull(state, "state cannot be null");
         this.threads = Objects.requireNonNull(threads, "threads cannot be null");
         this.offsets = Objects.requireNonNull(offsets, "offsets cannot be null");
@@ -83,7 +83,7 @@ public class KafkaStreamsMetadata {
     }
 
     @JsonProperty("stores")
-    public List<LocalStorePartitionLags> stores() {
+    public List<LocalStatePartitionsInfo> stores() {
         return stores;
     }
 

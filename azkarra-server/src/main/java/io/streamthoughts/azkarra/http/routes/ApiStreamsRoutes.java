@@ -58,8 +58,8 @@ public class ApiStreamsRoutes implements RoutingHandlerProvider {
             = "/streams/{id}/metadata";
     private static final String PATH_STREAMS_METRICS
             = "/streams/{id}/metrics";
-    private static final String PATH_STREAMS_STORE_OFFSETS
-            = "/streams/{id}/store-offsets";
+    private static final String PATH_STREAMS_STORES
+            = "/streams/{id}/stores";
     private static final String PATH_STREAMS_METRICS_GROUP
             = "/streams/{id}/metrics/group/{group}";
     private static final String PATH_STREAMS_METRICS_GROUP_METRIC
@@ -126,11 +126,11 @@ public class ApiStreamsRoutes implements RoutingHandlerProvider {
                             .metadata()
                 )
             )
-            .get(APIVersions.PATH_V1 + PATH_STREAMS_STORE_OFFSETS, exchange ->
+            .get(APIVersions.PATH_V1 + PATH_STREAMS_STORES, exchange ->
                 sendJsonResponse(
                     exchange,
                     service.getStreamsContainerById(getQueryParam(exchange, HTTP_QUERY_PARAM_ID))
-                        .allLocalStorePartitionLags()
+                        .allLocalStorePartitionInfos()
                 )
             )
             .get(APIVersions.PATH_V1 + PATH_STREAMS_TOPOLOGY, exchange ->

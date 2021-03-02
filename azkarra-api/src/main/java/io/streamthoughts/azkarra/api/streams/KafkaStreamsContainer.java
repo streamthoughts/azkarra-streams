@@ -28,7 +28,7 @@ import io.streamthoughts.azkarra.api.model.TimestampedValue;
 import io.streamthoughts.azkarra.api.monad.Tuple;
 import io.streamthoughts.azkarra.api.query.QueryableKafkaStreams;
 import io.streamthoughts.azkarra.api.streams.consumer.ConsumerGroupOffsets;
-import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
+import io.streamthoughts.azkarra.api.streams.store.LocalStatePartitionsInfo;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.util.Endpoint;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -223,12 +223,12 @@ public interface KafkaStreamsContainer extends QueryableKafkaStreams {
     boolean checkEndpoint(final Endpoint endpoint);
 
     /**
-     * Gets the partition lag for all local state store.
+     * Gets the partition restoration and lag for all local state store.
      *
      * @see KafkaStreams#allLocalStorePartitionLags().
-     * @return the list of {@link LocalStorePartitionLags}.
+     * @return the list of {@link LocalStatePartitionsInfo}.
      */
-    List<LocalStorePartitionLags> allLocalStorePartitionLags();
+    List<LocalStatePartitionsInfo> allLocalStorePartitionInfos();
 
     /**
      * Describes the local {@code KafkaStreams} instance.

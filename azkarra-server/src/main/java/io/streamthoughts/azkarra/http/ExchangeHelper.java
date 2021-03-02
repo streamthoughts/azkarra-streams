@@ -21,16 +21,12 @@ package io.streamthoughts.azkarra.http;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.streamthoughts.azkarra.http.error.InvalidHttpQueryParamException;
-import io.streamthoughts.azkarra.http.serialization.json.GenericRecordSerializer;
 import io.streamthoughts.azkarra.serialization.SerializationException;
-import io.streamthoughts.azkarra.serialization.json.AzkarraSimpleModule;
 import io.streamthoughts.azkarra.serialization.json.Json;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import io.undertow.util.StatusCodes;
-import org.apache.avro.generic.GenericRecord;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
@@ -47,10 +43,6 @@ public class ExchangeHelper {
     public static final Json JSON = new Json(new ObjectMapper());
 
     static {
-        final SimpleModule module = new SimpleModule();
-        module.addSerializer(GenericRecord.class, new GenericRecordSerializer());
-        JSON.registerModule(module);
-        JSON.registerModule(new AzkarraSimpleModule());
         JSON.configure(om -> om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
     }
 

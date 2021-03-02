@@ -50,12 +50,14 @@ import io.streamthoughts.azkarra.api.streams.consumer.ConsumerLogOffsets;
 import io.streamthoughts.azkarra.api.streams.consumer.GlobalConsumerOffsetsRegistry;
 import io.streamthoughts.azkarra.api.streams.consumer.LogOffsetsFetcher;
 import io.streamthoughts.azkarra.api.streams.internal.InternalStreamsLifeCycleChain;
-import io.streamthoughts.azkarra.api.streams.store.LocalStorePartitionLags;
-import io.streamthoughts.azkarra.api.streams.store.PartitionLogOffsetsAndLag;
+import io.streamthoughts.azkarra.api.streams.store.LocalStatePartitionsInfo;
+import io.streamthoughts.azkarra.api.streams.store.StatePartitionLagInfo;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyDefinition;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import io.streamthoughts.azkarra.api.time.Time;
 import io.streamthoughts.azkarra.api.util.Endpoint;
+import io.streamthoughts.azkarra.commons.streams.StateRestoreInfo;
+import io.streamthoughts.azkarra.commons.streams.StateRestoreService;
 import io.streamthoughts.azkarra.runtime.query.LocalQueryCall;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -154,6 +156,8 @@ public class LocalKafkaStreamsContainer implements
 
     private final Map<String, EventStreamPublisher<?, ?>> publishers = new LinkedHashMap<>();
 
+    private StateRestoreService stateRestoreService;
+
     private final ReentrantLock consumerLock = new ReentrantLock();
 
     /**
@@ -172,6 +176,7 @@ public class LocalKafkaStreamsContainer implements
         STOPPED(1, 3);                  // 4
 
         private final Set<Integer> validTransitions = new HashSet<>();
+
         ContainerState(final Integer... validTransitions) {
             this.validTransitions.addAll(Arrays.asList(validTransitions));
         }
@@ -209,9 +214,9 @@ public class LocalKafkaStreamsContainer implements
         this.topologyDefinition = topologyDefinition;
         this.containerId = containerId;
         this.endpoint = streamsConfig()
-            .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
-            .map(Endpoint::of)
-            .orElse(null);
+                .getOptionalString(StreamsConfig.APPLICATION_SERVER_CONFIG)
+                .map(Endpoint::of)
+                .orElse(null);
         topologyDefinition.getEventStreams().forEach(this::registerEventStream);
     }
 
@@ -219,27 +224,27 @@ public class LocalKafkaStreamsContainer implements
      * {@inheritDoc}
      */
     @Override
-    public <K, V> LocalQueryCall<K, V> newQueryCall(final QueryRequest request)  throws InvalidQueryException {
+    public <K, V> LocalQueryCall<K, V> newQueryCall(final QueryRequest request) throws InvalidQueryException {
         final LocalExecutableQuery<K, V> executable = request.compile();
         return new LocalQueryCall<>(this, executable);
     }
 
     /**
-     *Asynchronously start the underlying {@link KafkaStreams} instance.
+     * Asynchronously start the underlying {@link KafkaStreams} instance.
      *
      * @param executor the {@link Executor} instance to be used for starting the streams.
      */
     public Future<State> start(final Executor executor) {
         LOG.info("Starting KafkaStreams container for name='{}', version='{}', id='{}'.",
-            topologyDefinition.getName(),
-            topologyDefinition.getVersion(),
-            applicationId());
+                topologyDefinition.getName(),
+                topologyDefinition.getVersion(),
+                applicationId());
 
         LOG.info("StreamsLifecycleInterceptors : {}",
-        interceptors
-            .stream()
-            .map(StreamsLifecycleInterceptor::name)
-            .collect(joining("\n\t", "\n\t", "")));
+                interceptors
+                        .stream()
+                        .map(StreamsLifecycleInterceptor::name)
+                        .collect(joining("\n\t", "\n\t", "")));
 
         setContainerState(ContainerState.STARTING);
         started = Time.SYSTEM.milliseconds();
@@ -247,11 +252,11 @@ public class LocalKafkaStreamsContainer implements
         this.executor = executor;
         stateChangeWatchers.clear(); // Remove all watchers that was registered during a previous run.
         kafkaStreams = streamsFactory.make(
-            topologyDefinition.getTopology(),
-            streamsConfig
+                topologyDefinition.getTopology(),
+                streamsConfig
         );
 
-        for (EventStream<? ,?> stream : eventStreams) {
+        for (EventStream<?, ?> stream : eventStreams) {
             var eventType = stream.type();
             if (publishers.put(eventType, new AsyncMulticastEventStreamPublisher<>(stream)) != null) {
                 throw new AzkarraException("Cannot register two event-streams for type: " + eventType);
@@ -264,29 +269,29 @@ public class LocalKafkaStreamsContainer implements
         return CompletableFuture.supplyAsync(() -> {
             LOG.info("Executing stream-lifecycle interceptor chain (id={})", applicationId());
             StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
-                interceptors.iterator(),
-                (interceptor, chain) -> interceptor.onStart(newStreamsLifecycleContext(), chain),
-                () -> {
-                    try {
-                        LOG.info("Starting KafkaStreams (id={})", applicationId());
-                        kafkaStreams.start();
-                    } catch (StreamsException e) {
-                        lastObservedException = e;
-                        throw e;
+                    interceptors.iterator(),
+                    (interceptor, chain) -> interceptor.onStart(newStreamsLifecycleContext(), chain),
+                    () -> {
+                        try {
+                            LOG.info("Starting KafkaStreams (id={})", applicationId());
+                            kafkaStreams.start();
+                        } catch (StreamsException e) {
+                            lastObservedException = e;
+                            throw e;
+                        }
                     }
-                }
             );
             streamsLifeCycle.execute();
             KafkaStreams.State state = kafkaStreams.state();
             LOG.info(
-                "Completed KafkaStreamsContainer initialization (id={}, state={})",
-                applicationId(),
-                state
+                    "Completed KafkaStreamsContainer initialization (id={}, state={})",
+                    applicationId(),
+                    state
             );
             setContainerState(ContainerState.STARTED);
             return state().value();
 
-         }, executor);
+        }, executor);
     }
 
     /**
@@ -353,7 +358,7 @@ public class LocalKafkaStreamsContainer implements
             return Optional.empty();
         }
         return Try.failable(() ->
-            streamsConfig().getClass(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serde.class)
+                streamsConfig().getClass(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serde.class)
         ).toOptional();
     }
 
@@ -419,9 +424,9 @@ public class LocalKafkaStreamsContainer implements
     @Override
     public TopologyMetadata topologyMetadata() {
         return new TopologyMetadata(
-            topologyDefinition.getName(),
-            topologyDefinition.getVersion(),
-            topologyDefinition.getDescription()
+                topologyDefinition.getName(),
+                topologyDefinition.getVersion(),
+                topologyDefinition.getDescription()
         );
     }
 
@@ -438,8 +443,8 @@ public class LocalKafkaStreamsContainer implements
     @Override
     public Set<MetricGroup> metrics(final KafkaMetricFilter filter) {
         final Map<MetricName, ? extends Metric> kafkaMetrics = initialized()
-            ? kafkaStreams.metrics() :
-            Collections.emptyMap();
+                ? kafkaStreams.metrics() :
+                Collections.emptyMap();
 
         Map<String, List<io.streamthoughts.azkarra.api.model.Metric>> m = new HashMap<>(kafkaMetrics.size());
         for (Map.Entry<MetricName, ? extends org.apache.kafka.common.Metric> elem : kafkaMetrics.entrySet()) {
@@ -447,11 +452,11 @@ public class LocalKafkaStreamsContainer implements
             final org.apache.kafka.common.Metric metricValue = elem.getValue();
 
             final io.streamthoughts.azkarra.api.model.Metric metric = new io.streamthoughts.azkarra.api.model.Metric(
-                metricName.name(),
-                metricName.group(),
-                metricName.description(),
-                metricName.tags(),
-                metricValue.metricValue()
+                    metricName.name(),
+                    metricName.group(),
+                    metricName.description(),
+                    metricName.tags(),
+                    metricValue.metricValue()
             );
             final boolean filtered = filter.test(Tuple.of(metricName.group(), metric));
             if (filtered) {
@@ -460,9 +465,9 @@ public class LocalKafkaStreamsContainer implements
         }
 
         return m.entrySet()
-            .stream()
-            .map(e -> new MetricGroup(e.getKey(), e.getValue()))
-            .collect(Collectors.toSet());
+                .stream()
+                .map(e -> new MetricGroup(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -475,15 +480,15 @@ public class LocalKafkaStreamsContainer implements
         }
 
         final ConsumerGroupOffsets consumerGroupOffsets = GlobalConsumerOffsetsRegistry
-            .getInstance()
-            .offsetsFor(applicationId())
-            .snapshot();
+                .getInstance()
+                .offsetsFor(applicationId())
+                .snapshot();
 
         final Set<TopicPartition> activeTopicPartitions = threadMetadata()
-            .stream()
-            .flatMap(t -> t.activeTasks().stream())
-            .flatMap(t -> t.topicPartitions().stream())
-            .collect(Collectors.toSet());
+                .stream()
+                .flatMap(t -> t.activeTasks().stream())
+                .flatMap(t -> t.topicPartitions().stream())
+                .collect(Collectors.toSet());
 
         final Map<TopicPartition, Long> logEndOffsets;
         final Map<TopicPartition, Long> logStartOffsets;
@@ -496,24 +501,24 @@ public class LocalKafkaStreamsContainer implements
         } finally {
             consumerLock.unlock();
         }
-        
+
         final Set<ConsumerClientOffsets> consumerAndOffsets = consumerGroupOffsets.consumers()
-            .stream()
-            .map(client -> {
-                Set<ConsumerLogOffsets> offsets = client.positions()
-                    .stream()
-                    .map(logOffsets -> {
-                        if (!activeTopicPartitions.contains(logOffsets.topicPartition()))
-                            return null;
-                        return logOffsets
-                            .logEndOffset(logEndOffsets.get(logOffsets.topicPartition()))
-                            .logStartOffset(logStartOffsets.get(logOffsets.topicPartition()));
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-                return new ConsumerClientOffsets(client.clientId(), client.streamThread(), offsets);
-            })
-            .collect(Collectors.toSet());
+                .stream()
+                .map(client -> {
+                    Set<ConsumerLogOffsets> offsets = client.positions()
+                            .stream()
+                            .map(logOffsets -> {
+                                if (!activeTopicPartitions.contains(logOffsets.topicPartition()))
+                                    return null;
+                                return logOffsets
+                                        .logEndOffset(logEndOffsets.get(logOffsets.topicPartition()))
+                                        .logStartOffset(logStartOffsets.get(logOffsets.topicPartition()));
+                            })
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    return new ConsumerClientOffsets(client.clientId(), client.streamThread(), offsets);
+                })
+                .collect(Collectors.toSet());
         return new ConsumerGroupOffsets(consumerGroupOffsets.group(), consumerAndOffsets);
     }
 
@@ -597,7 +602,8 @@ public class LocalKafkaStreamsContainer implements
         synchronized (containerStateLock) {
             if (!setContainerState(ContainerState.PENDING_SHUTDOWN)) {
                 LOG.warn(
-                    "KafkaStreamsContainer is already in the pending shutdown state, wait to complete shutdown (id={})",
+                      "LocalKafkaStreamsContainer is already in the pending shutdown state,"
+                    + " wait to complete shutdown (id={})",
                     applicationId());
                 proceed = false;
             }
@@ -626,16 +632,16 @@ public class LocalKafkaStreamsContainer implements
             final Thread shutdownThread = new Thread(() -> {
                 LOG.info("Closing KafkaStreamsContainer (id={})", applicationId());
                 StreamsLifecycleChain streamsLifeCycle = new InternalStreamsLifeCycleChain(
-                    interceptors.iterator(),
-                    (interceptor, chain) -> interceptor.onStop(newStreamsLifecycleContext(), chain),
-                    () -> {
-                        kafkaStreams.close();
-                        if (cleanUp) {
-                            LOG.info("Cleanup local states (id={})", applicationId());
-                            kafkaStreams.cleanUp();
+                        interceptors.iterator(),
+                        (interceptor, chain) -> interceptor.onStop(newStreamsLifecycleContext(), chain),
+                        () -> {
+                            kafkaStreams.close();
+                            if (cleanUp) {
+                                LOG.info("Cleanup local states (id={})", applicationId());
+                                kafkaStreams.cleanUp();
+                            }
+                            LOG.info("KafkaStreams closed completely (id={})", applicationId());
                         }
-                        LOG.info("KafkaStreams closed completely (id={})", applicationId());
-                    }
                 );
                 streamsLifeCycle.execute();
                 closeInternals();
@@ -655,10 +661,10 @@ public class LocalKafkaStreamsContainer implements
         final long waitMs = timeout.toMillis();
         if (waitMs > 0 && !waitUntilContainerIsStopped(waitMs)) {
             LOG.debug(
-                "KafkaStreamsContainer cannot transit to {} within {}ms (id={})",
-                ContainerState.STOPPED,
-                waitMs,
-                applicationId()
+                    "KafkaStreamsContainer cannot transit to {} within {}ms (id={})",
+                    ContainerState.STOPPED,
+                    waitMs,
+                    applicationId()
             );
         }
     }
@@ -720,7 +726,7 @@ public class LocalKafkaStreamsContainer implements
         // It seems to be safe to restart this container immediately
         if (containerState.isValidTransition(ContainerState.STARTING)) {
             restartNow();
-        // Else we should ensure that all the container resources are properly closed before restarting.
+            // Else we should ensure that all the container resources are properly closed before restarting.
         } else {
             // Do NOT clean-up states while restarting the streams.
             closeAndOptionallyRestart(false, Duration.ZERO, true);
@@ -741,25 +747,30 @@ public class LocalKafkaStreamsContainer implements
      * {@inheritDoc}
      */
     @Override
-    public List<LocalStorePartitionLags> allLocalStorePartitionLags() {
+    public List<LocalStatePartitionsInfo> allLocalStorePartitionInfos() {
         return kafkaStreams.allLocalStorePartitionLags()
-            .entrySet()
-            .stream()
-            .map(entry  -> {
-                var storeName = entry.getKey();
-                var positions = new ArrayList<PartitionLogOffsetsAndLag>(entry.getValue().size());
-                entry.getValue().forEach((partition, lag) -> {
-                    var offsetsAndLag = new PartitionLogOffsetsAndLag(
-                        partition,
-                        lag.currentOffsetPosition(),
-                        lag.endOffsetPosition(),
-                        lag.offsetLag()
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    var state = entry.getKey();
+                    var positions = new ArrayList<StatePartitionLagInfo>(entry.getValue().size());
+                    entry.getValue().forEach((partition, lag) -> {
+                        var offsetsAndLag = new StatePartitionLagInfo(
+                                partition,
+                                lag.currentOffsetPosition(),
+                                lag.endOffsetPosition(),
+                                lag.offsetLag()
+                        );
+                        positions.add(offsetsAndLag);
+                    });
+                    final StateRestoreInfo stateRestoreInfo = stateRestoreService.getStateRestoreInfo(state);
+                    return new LocalStatePartitionsInfo(
+                            state,
+                            positions,
+                            stateRestoreInfo.getAllPartitionRestoreInfos()
                     );
-                    positions.add(offsetsAndLag);
-                });
-                return new LocalStorePartitionLags(storeName, positions);
-            })
-            .collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
     }
 
     public List<KafkaStreamsInstance> allInstances() {
@@ -768,15 +779,15 @@ public class LocalKafkaStreamsContainer implements
         }
         final Collection<StreamsMetadata> allMetadata = kafkaStreams.allMetadata();
         return allMetadata.stream()
-            .map(metadata -> {
-                final Endpoint endpoint = new Endpoint(metadata.hostInfo().host(), metadata.hostInfo().port());
-                return new KafkaStreamsInstance(
-                    checkEndpoint(endpoint) ? containerId : null,
-                    endpoint,
-                    checkEndpoint(endpoint),
-                    toKafkaStreamsMetadata(metadata)
-                );
-            }).collect(Collectors.toList());
+                .map(metadata -> {
+                    final Endpoint endpoint = new Endpoint(metadata.hostInfo().host(), metadata.hostInfo().port());
+                    return new KafkaStreamsInstance(
+                            checkEndpoint(endpoint) ? containerId : null,
+                            endpoint,
+                            checkEndpoint(endpoint),
+                            toKafkaStreamsMetadata(metadata)
+                    );
+                }).collect(Collectors.toList());
 
     }
 
@@ -786,31 +797,30 @@ public class LocalKafkaStreamsContainer implements
     @Override
     public KafkaStreamsInstance describe() {
         var metadata = allInstances()
-            .stream()
-            .filter(KafkaStreamsInstance::isLocal)
-            .findFirst()
-            .map(KafkaStreamsInstance::metadata)
-            .orElse(KafkaStreamsMetadata.EMPTY);
+                .stream()
+                .filter(KafkaStreamsInstance::isLocal)
+                .findFirst()
+                .map(KafkaStreamsInstance::metadata)
+                .orElse(KafkaStreamsMetadata.EMPTY);
         return getLocalInstance(metadata);
     }
 
     public KafkaStreamsInstance getLocalInstance(final KafkaStreamsMetadata metadata) {
         return new KafkaStreamsInstance(
-            containerId,
-            endpoint,
-            true,
-            metadata
+                containerId,
+                endpoint,
+                true,
+                metadata
         );
     }
-
 
     /**
      * {@inheritDoc}
      */
     @Override
     public <K> Optional<KeyQueryMetadata> findMetadataForStoreAndKey(final String storeName,
-                                                                      final K key,
-                                                                      final Serializer<K> keySerializer) {
+                                                                     final K key,
+                                                                     final Serializer<K> keySerializer) {
         Objects.requireNonNull(storeName, "storeName cannot be null");
         Objects.requireNonNull(key, "key cannot be null");
         Objects.requireNonNull(keySerializer, "keySerializer cannot be null");
@@ -819,7 +829,7 @@ public class LocalKafkaStreamsContainer implements
 
         KeyQueryMetadata metadata = kafkaStreams.queryMetadataForKey(storeName, key, keySerializer);
         return metadata == null || metadata.equals(KeyQueryMetadata.NOT_AVAILABLE) ?
-            Optional.empty(): Optional.of(metadata);
+                Optional.empty() : Optional.of(metadata);
     }
 
     /**
@@ -870,9 +880,9 @@ public class LocalKafkaStreamsContainer implements
     @Override
     public Set<Endpoint> findAllEndpointsForStore(final String storeName) {
         return kafkaStreams.allMetadataForStore(storeName)
-            .stream()
-            .map(metadata -> new Endpoint(metadata.hostInfo().host(), metadata.hostInfo().port()))
-            .collect(Collectors.toSet());
+                .stream()
+                .map(metadata -> new Endpoint(metadata.hostInfo().host(), metadata.hostInfo().port()))
+                .collect(Collectors.toSet());
     }
 
     private <T> LocalStoreAccessor<T> getLocalStoreAccess(final String storeName,
@@ -933,24 +943,24 @@ public class LocalKafkaStreamsContainer implements
 
     private static KafkaStreamsMetadata toKafkaStreamsMetadata(final StreamsMetadata metadata) {
         return new KafkaStreamsMetadata(
-            metadata.stateStoreNames(),
-            groupByTopicThenGet(metadata.topicPartitions()),
-            metadata.standbyStateStoreNames(),
-            groupByTopicThenGet(metadata.standbyTopicPartitions())
+                metadata.stateStoreNames(),
+                groupByTopicThenGet(metadata.topicPartitions()),
+                metadata.standbyStateStoreNames(),
+                groupByTopicThenGet(metadata.standbyTopicPartitions())
         );
     }
 
     private static Set<TopicPartitions> groupByTopicThenGet(final Set<TopicPartition> topicPartitions) {
 
         return topicPartitions
-            .stream()
-            .collect(Collectors.groupingBy(TopicPartition::topic))
-            .entrySet()
-            .stream()
-            .map( entry -> new TopicPartitions(
-               entry.getKey(),
-               entry.getValue().stream().map(TopicPartition::partition).collect(Collectors.toSet()))
-            ).collect(Collectors.toSet());
+                .stream()
+                .collect(Collectors.groupingBy(TopicPartition::topic))
+                .entrySet()
+                .stream()
+                .map(entry -> new TopicPartitions(
+                        entry.getKey(),
+                        entry.getValue().stream().map(TopicPartition::partition).collect(Collectors.toSet()))
+                ).collect(Collectors.toSet());
     }
 
     private static Map<String, Object> getAdminClientConfigs(final Map<String, Object> configs) {
@@ -1000,10 +1010,14 @@ public class LocalKafkaStreamsContainer implements
         return this.endpoint.equals(endpoint);
     }
 
+    void setStateRestoreService(final StateRestoreService stateRestoreService) {
+        this.stateRestoreService = stateRestoreService;
+    }
+
     private void validateInitialized() {
         if (!initialized())
             throw new IllegalStateException(
-                "This container is not started. Cannot get access to KafkaStreams instance.");
+                    "This container is not started. Cannot get access to KafkaStreams instance.");
     }
 
     private void closeInternals() {
@@ -1021,7 +1035,7 @@ public class LocalKafkaStreamsContainer implements
 
     /**
      * @return {@code true} if the {@link KafkaStreams} is not equal {@code null},
-     *                      i.e container has been started at least once.
+     * i.e container has been started at least once.
      */
     private boolean initialized() {
         return kafkaStreams != null;

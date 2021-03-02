@@ -1,0 +1,53 @@
+v1.LocalStatePartitionsInfo:
+  required:
+    - name
+    - positions
+  properties:
+    name:
+      type: string
+    partition_restore_infos:
+      type: array
+      items:
+        $ref: '#/v1.StatePartitionRestoreInfo'
+      default: [ ]
+    partition_lag_infos:
+      type: array
+      items:
+        $ref: '#/v1.StatePartitionLagInfo'
+      default: [ ]
+
+v1.StatePartitionRestoreInfo:
+  properties:
+    topic:
+      type: string
+    partition:
+      type: integer
+    starting_offset:
+      type: integer
+      format: int64
+    ending_offset:
+      type: integer
+      format: int64
+    total_restored:
+      type: integer
+      format: int64
+    duration:
+      type: string
+v1.StatePartitionLagInfo:
+  required:
+    - name
+    - current_offset
+    - log_end_offset
+    - offset_lag
+  properties:
+    partition:
+      type: integer
+    current_offset:
+      type: integer
+      format: int64
+    log_end_offset:
+      type: integer
+      format: int64
+    offset_lag:
+      type: integer
+      format: int64

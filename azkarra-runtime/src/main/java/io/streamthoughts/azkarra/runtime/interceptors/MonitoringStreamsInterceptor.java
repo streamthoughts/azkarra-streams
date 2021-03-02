@@ -91,7 +91,7 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
                 container.state(),
                 container.threadMetadata(),
                 container.offsets(),
-                config.isStoresLagsEnabled() ? container.allLocalStorePartitionLags() : Collections.emptyList()
+                config.isStoresLagsEnabled() ? container.allLocalStorePartitionInfos() : Collections.emptyList()
             ),
             config.getIntervalMs(),
             producer,
@@ -162,7 +162,7 @@ public class MonitoringStreamsInterceptor implements StreamsLifecycleInterceptor
                     new TimestampedValue<>(event.timestamp(), event.newState()),
                     container.threadMetadata(),
                     container.offsets(),
-                    config.isStoresLagsEnabled() ? container.allLocalStorePartitionLags() : Collections.emptyList()
+                    config.isStoresLagsEnabled() ? container.allLocalStorePartitionInfos() : Collections.emptyList()
                 ));
             }
             container.addStateChangeWatcher(this);

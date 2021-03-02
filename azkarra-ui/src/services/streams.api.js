@@ -72,6 +72,11 @@ class StreamApiV1 {
         return httpClient.get(API_BASE_PATH + '/' + id + "/topology");
     }
 
+    getInstanceStoresById(id) {
+        return httpClient.get(API_BASE_PATH + '/' + id + "/stores");
+    }
+
+
     fetchAllInstances() {
         var that = this
         return httpClient.get(API_BASE_PATH).then(response => {

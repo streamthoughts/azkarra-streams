@@ -1,5 +1,5 @@
 get:
-  description: gets the partition lag for all local state store
+  description: gets the partition lag and restoration info for all local state store
   operationId: getStreamsInstanceStoreOffsets
   parameters:
     - description: identifier of the KafkaStreams instance, also known as the 'container.id'
@@ -17,7 +17,7 @@ get:
           schema:
             type: array
             items:
-              $ref: '../schemas/streams.store-offsets.v1.yaml#/v1.LocalStorePartitionLags'
+              $ref: '../schemas/streams.states.v1.yaml#/v1.LocalStatePartitionsInfo'
             default: [ ]
       description: OK
     "401":

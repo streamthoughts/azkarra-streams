@@ -101,7 +101,16 @@
              role="tab"
              aria-controls="nav-streams-offsets"
              aria-selected="false">
-            <span class="nav-link-text">Consumers/Offsets</span>
+            <span class="nav-link-text">Consumers Offsets</span>
+          </a>
+          <a class="nav-item nav-link"
+             id="nav-streams-store-tab"
+             data-toggle="tab"
+             href="#nav-streams-stores"
+             role="tab"
+             aria-controls="nav-streams-offsets"
+             aria-selected="false">
+            <span class="nav-link-text">States Offsets</span>
           </a>
           <template v-if="streams.exception">
             <a class="nav-item nav-link"
@@ -221,6 +230,10 @@
                  aria-labelledby="nav-streams-offsets-tab">
               <streams-offsets v-bind:id="id"></streams-offsets>
             </div>
+            <div class="tab-pane fade" id="nav-streams-stores" role="tabpanel"
+                 aria-labelledby="nav-streams-store-tab">
+              <streams-stores v-bind:id="id"></streams-stores>
+            </div>
             <div class="tab-pane fade" id="nav-streams-error-trace" role="tabpanel"
                  aria-labelledby="nav-streams-metrics-tab">
               <div class="panel border bg-white rounded box-shadow">
@@ -290,6 +303,7 @@ import StreamsMetrics from './StreamsMetrics.vue';
 import StreamsConfig from './StreamsConfig.vue';
 import StreamsOffsets from './StreamsOffsets.vue';
 import StreamsStatus from './StreamsStatus.vue';
+import StreamsStores from './StreamsStores.vue';
 import VueModal from './VueModal.vue';
 import VueJsonPretty from 'vue-json-pretty';
 
@@ -303,6 +317,7 @@ export default {
     'streams-config': StreamsConfig,
     'streams-offsets': StreamsOffsets,
     'streams-status': StreamsStatus,
+    'streams-stores': StreamsStores,
     'vue-json-pretty': VueJsonPretty,
     'vue-modal': VueModal,
   },

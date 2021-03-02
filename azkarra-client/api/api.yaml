@@ -39,7 +39,7 @@ paths:
   /api/v1/streams/{containerId}/metadata:
     $ref: "./paths/streams.getStreamsInstanceMetadata.yaml"
   /api/v1/streams/{containerId}/store-offsets:
-    $ref: "./paths/streams.getStreamsInstanceStoreOffsets.yaml"
+    $ref: "./paths/streams.getStreamsInstanceStates.yaml"
   /api/v1/streams/{containerId}/metrics:
     $ref: "./paths/streams.getStreamsInstanceMetrics.yaml"
   /api/v1/streams/{containerId}/metrics/group/{group}:

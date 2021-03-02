@@ -19,6 +19,8 @@
 package io.streamthoughts.azkarra.http;
 
 import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.AzkarraContextAware;
@@ -49,7 +51,9 @@ import io.streamthoughts.azkarra.http.security.auth.AuthenticationContextHolder;
 import io.streamthoughts.azkarra.http.security.auth.PasswordCredentials;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandler;
 import io.streamthoughts.azkarra.http.security.handler.SecurityHandlerFactory;
+import io.streamthoughts.azkarra.http.serialization.json.GenericRecordSerializer;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
+import io.streamthoughts.azkarra.serialization.json.AzkarraSimpleModule;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -63,6 +67,7 @@ import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import okhttp3.OkHttpClient;
+import org.apache.avro.generic.GenericRecord;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -137,9 +142,16 @@ public class UndertowEmbeddedServer implements EmbeddedHttpServer {
         serverConfig = ServerConfig.of(config);
         serverInfo = new ServerInfo(serverConfig.getListener(), serverConfig.getPort(), serverConfig.isSslEnable());
 
-        // Find and register all user-specified Jackson modules
+        // Register all user-specific Jackson modules
         Collection<Module> jacksonModules = context.getAllComponents(Module.class);
         ExchangeHelper.JSON.registerModules(jacksonModules);
+
+        // Register additional Azkarra modules
+        ExchangeHelper.JSON.registerModule(new AzkarraSimpleModule());
+        ExchangeHelper.JSON.registerModule(new JavaTimeModule());
+        ExchangeHelper.JSON.registerModule(new SimpleModule()
+                .addSerializer(GenericRecord.class, new GenericRecordSerializer())
+        );
 
         initializeSslContext();
         registerHttpRemoteStateStoreClient();

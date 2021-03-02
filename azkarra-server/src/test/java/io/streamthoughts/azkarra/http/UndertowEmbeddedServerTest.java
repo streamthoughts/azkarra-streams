@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.util.VersionUtil;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
@@ -45,8 +46,9 @@ public class UndertowEmbeddedServerTest {
 
         ObjectMapper mapper = ExchangeHelper.JSON.unwrap();
         Set<Object> registeredModuleIds = mapper.getRegisteredModuleIds();
-        Assertions.assertEquals(2, registeredModuleIds.size());
+        Assertions.assertEquals(3, registeredModuleIds.size());
         Assertions.assertTrue(registeredModuleIds.contains(AzkarraSimpleModule.class.getName()));
+        Assertions.assertTrue(registeredModuleIds.contains(JavaTimeModule.class.getName()));
         Assertions.assertTrue(registeredModuleIds.contains(MyCustomModule.class.getName()));
     }
 

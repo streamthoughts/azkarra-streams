@@ -187,29 +187,34 @@ public class LocalKafkaStreamsContainerBuilder {
 
             final KafkaStreams kafkaStreams = factory.make(topology, streamsConfig);
 
-            kafkaStreams.setStateListener(buildStateListener());
-            kafkaStreams.setUncaughtExceptionHandler(buildUncaughtExceptionHandler());
-            kafkaStreams.setGlobalStateRestoreListener(buildGlobalStateRestoreListener());
+            initStateListener(kafkaStreams);
+            initUncaughtExceptionHandler(kafkaStreams);
+            initGlobalStateRestoreListener(kafkaStreams);
 
             return kafkaStreams;
         }
 
-        public CompositeStateRestoreListener buildGlobalStateRestoreListener() {
+        public void initGlobalStateRestoreListener(final KafkaStreams kafkaStreams) {
+
+            final LoggingStateRestoreListener loggingListener = new LoggingStateRestoreListener();
+            container.setStateRestoreService(loggingListener);
+
             final CompositeStateRestoreListener listener = new CompositeStateRestoreListener(restoreListeners);
+            listener.addListener(loggingListener);
             listener.addListener(new UpdateContainerStateRestoreListener());
-            listener.addListener(new LoggingStateRestoreListener());
             listener.setKafkaStreamsContainer(container);
-            return listener;
+
+            kafkaStreams.setGlobalStateRestoreListener(listener);
         }
 
-        private CompositeStateListener buildStateListener() {
+        private void initStateListener(final KafkaStreams kafkaStreams) {
             final CompositeStateListener listener = new CompositeStateListener(stateListeners);
             listener.addListener(new UpdateContainerStateListener());
             listener.setKafkaStreamsContainer(container);
-            return listener;
+            kafkaStreams.setStateListener(listener);
         }
 
-        private CompositeUncaughtExceptionHandler buildUncaughtExceptionHandler() {
+        private void initUncaughtExceptionHandler(final KafkaStreams kafkaStreams) {
             final var compositeUncaughtExceptionHandler = new CompositeUncaughtExceptionHandler();
             compositeUncaughtExceptionHandler.addHandler((t, e) -> {
                 container.logger().error("Handling uncaught streams thread exception: {}", e.getMessage());
@@ -222,7 +227,7 @@ public class LocalKafkaStreamsContainerBuilder {
                 .map(handler -> new DelegatingUncaughtExceptionHandler(container, handler))
                 .forEach(compositeUncaughtExceptionHandler::addHandler);
             }
-            return compositeUncaughtExceptionHandler;
+            kafkaStreams.setUncaughtExceptionHandler(compositeUncaughtExceptionHandler);
         }
 
         /**

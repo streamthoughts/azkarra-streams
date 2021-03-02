@@ -29,19 +29,21 @@ import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 /**
  * A {@link StateRestoreListener} implementation which logs state restoration progress.
  */
-public class LoggingStateRestoreListener implements StateRestoreListener {
+public class LoggingStateRestoreListener implements StateRestoreListener, StateRestoreService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoggingStateRestoreListener.class);
 
     private final Map<TopicPartition, Long> totalOffsetToRestore = new ConcurrentHashMap<>();
-    private final Map<TopicPartition, Long> totalRecordRestored = new ConcurrentHashMap<>();
     private final Map<TopicPartition, Long> startTimes = new ConcurrentHashMap<>();
+
+    private final Map<String, StateRestoreInfo> stateToRestore = new ConcurrentHashMap<>();
 
     /**
      * {@inheritDoc}
@@ -59,6 +61,11 @@ public class LoggingStateRestoreListener implements StateRestoreListener {
 
         final long offsetToRestore = endingOffset - startingOffset;
         totalOffsetToRestore.put(topicPartition, offsetToRestore);
+
+        StateRestoreInfo info = new StateRestoreInfo(storeName);
+        info.addTopicPartitionRestoreInfo(new StatePartitionRestoreInfo(topicPartition, startingOffset, endingOffset));
+
+        stateToRestore.put(storeName, info);
         startTimes.put(topicPartition, Time.SYSTEM.milliseconds());
     }
 
@@ -71,8 +78,10 @@ public class LoggingStateRestoreListener implements StateRestoreListener {
                                 final long batchEndOffset,
                                 final long numRestored) {
 
-        final Long totalRestored =  totalRecordRestored.getOrDefault(topicPartition, 0L) + numRestored;
-        totalRecordRestored.put(topicPartition, totalRestored);
+        final long totalRestored = stateToRestore.get(storeName)
+                .getTopicPartitionRestoreInfo(topicPartition)
+                .incrementTotalRestored(numRestored);
+
         LOG.info(
                 "Batch restored for store '{}' on topicPartition '{}': "
                 + "batchEndOffset={}, numRecordRestored={}, totalRestored={}. "
@@ -103,15 +112,18 @@ public class LoggingStateRestoreListener implements StateRestoreListener {
                              final long totalRestored) {
 
         final long startTs = startTimes.remove(topicPartition);
+        final Duration duration = Duration.between(Instant.ofEpochMilli(startTs), Instant.now());
         LOG.info(
                 "Restoration completed for store '{}' on topicPartition '{}', totalRestored={}. Duration: {}",
                 storeName,
                 topicPartition,
                 totalRestored,
-                humanReadableFormat(Duration.between(Instant.ofEpochMilli(startTs), Instant.now()))
+                humanReadableFormat(duration)
         );
+        stateToRestore.get(storeName)
+                .getTopicPartitionRestoreInfo(topicPartition)
+                .setDuration(duration);
         totalOffsetToRestore.remove(topicPartition);
-        totalRecordRestored.remove(topicPartition);
     }
 
     private static final Pattern PATTERN = Pattern.compile("(\\d[HMS])(?!$)");
@@ -120,5 +132,15 @@ public class LoggingStateRestoreListener implements StateRestoreListener {
         return PATTERN.matcher(duration.toString().substring(2)).
                 replaceAll("$1 ")
                 .toLowerCase();
+    }
+
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StateRestoreInfo getStateRestoreInfo(final String state) {
+        return stateToRestore.get(Objects.requireNonNull(state, "state should not be null"));
     }
 }

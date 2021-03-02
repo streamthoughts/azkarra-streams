@@ -28,7 +28,7 @@ public final class GlobalConsumerOffsetsRegistry implements ConsumerGroupOffsets
         return INSTANCE;
     }
 
-    private ConcurrentHashMap<String, ConsumerGroupOffsetsState> consumerGroupPositions;
+    private final ConcurrentHashMap<String, ConsumerGroupOffsetsState> consumerGroupPositions;
 
     /**
      * Creates a new {@link GlobalConsumerOffsetsRegistry} instance.

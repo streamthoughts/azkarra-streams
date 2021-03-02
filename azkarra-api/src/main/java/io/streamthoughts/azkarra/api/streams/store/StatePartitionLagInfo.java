@@ -18,11 +18,13 @@
  */
 package io.streamthoughts.azkarra.api.streams.store;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.util.Objects;
 
-public class PartitionLogOffsetsAndLag {
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public class StatePartitionLagInfo {
 
     /**
      * The log partition.
@@ -44,41 +46,37 @@ public class PartitionLogOffsetsAndLag {
      */
     private final long lag;
 
-    public PartitionLogOffsetsAndLag(final int partition,
-                                     final long currentOffset,
-                                     final long logEndOffset,
-                                     final long offsetLag) {
+    public StatePartitionLagInfo(final int partition,
+                                 final long currentOffset,
+                                 final long logEndOffset,
+                                 final long offsetLag) {
         this.partition = partition;
         this.currentOffset = currentOffset;
         this.logEndOffset = logEndOffset;
         this.lag = offsetLag;
     }
 
-    @JsonProperty("partition")
-    public int partition() {
+    public int getPartition() {
         return partition;
     }
 
-    @JsonProperty("current_offset")
-    public long currentOffset() {
+    public long getCurrentOffset() {
         return currentOffset;
     }
 
-    @JsonProperty("log_end_offset")
-    public long logEndOffset() {
+    public long getLogEndOffset() {
         return logEndOffset;
     }
 
-    @JsonProperty("offset_lag")
-    public long offsetLag() {
+    public long getOffsetLag() {
         return lag;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PartitionLogOffsetsAndLag)) return false;
-        PartitionLogOffsetsAndLag that = (PartitionLogOffsetsAndLag) o;
+        if (!(o instanceof StatePartitionLagInfo)) return false;
+        StatePartitionLagInfo that = (StatePartitionLagInfo) o;
         return partition == that.partition &&
                 currentOffset == that.currentOffset &&
                 logEndOffset == that.logEndOffset &&
