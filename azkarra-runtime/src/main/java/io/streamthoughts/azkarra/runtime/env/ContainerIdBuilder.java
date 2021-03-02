@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,25 +16,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.runtime.env;
 
 import io.streamthoughts.azkarra.api.ApplicationId;
+import io.streamthoughts.azkarra.api.ContainerId;
 import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 
 /**
- * Class for building {@link org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG}.
+ * A {@code ContainerIdBuilder} is used to build {@link ContainerId}.
  */
-public interface ApplicationIdBuilder {
+public interface ContainerIdBuilder {
 
     /**
-     * Builds the {@link org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG} for
-     * the specified topology and configuration.
+     * Builds the identifier that will be used for identifying the {@link KafkaStreamsContainer} running the topology.
      *
      * @param metadata  the topology's metadata.
      * @param config    the topology's configuration.
      *
-     * @return a new {@link ApplicationId} instance.
+     * @return a new {@link ContainerId} instance.
      */
-    ApplicationId buildApplicationId(final TopologyMetadata metadata, final Conf config);
+    ContainerId buildContainerId(final ApplicationId applicationId,
+                                 final TopologyMetadata metadata,
+                                 final Conf config);
 }

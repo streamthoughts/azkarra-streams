@@ -138,7 +138,7 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
            .stream()
            .flatMap(env -> env.getApplicationById(new ApplicationId(id)).stream())
            .findFirst()
-           .orElseThrow(() -> new NotFoundException("Failed to found KafkaStreams application for id " + id));
+           .orElseThrow(() -> new NotFoundException("Failed to find KafkaStreams application for id " + id));
     }
 
     /**

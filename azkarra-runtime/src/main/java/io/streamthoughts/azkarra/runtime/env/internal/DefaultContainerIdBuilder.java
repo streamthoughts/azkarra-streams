@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,25 +16,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra.api.streams;
+package io.streamthoughts.azkarra.runtime.env.internal;
 
 import io.streamthoughts.azkarra.api.ApplicationId;
+import io.streamthoughts.azkarra.api.ContainerId;
 import io.streamthoughts.azkarra.api.config.Conf;
 import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
+import io.streamthoughts.azkarra.runtime.env.ContainerIdBuilder;
 
-/**
- * Class for building {@link org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG}.
- */
-public interface ApplicationIdBuilder {
+public class DefaultContainerIdBuilder implements ContainerIdBuilder {
+
+    public static final String CONTAINER_ID_CONFIG = "container.id";
 
     /**
-     * Builds the {@link org.apache.kafka.streams.StreamsConfig#APPLICATION_ID_CONFIG} for
-     * the specified topology and configuration.
-     *
-     * @param metadata  the topology's metadata.
-     * @param config    the topology's configuration.
-     *
-     * @return a new {@link ApplicationId} instance.
+     * {@inheritDoc}
      */
-    ApplicationId buildApplicationId(final TopologyMetadata metadata, final Conf config);
+    @Override
+    public ContainerId buildContainerId(final ApplicationId applicationId,
+                                        final TopologyMetadata metadata,
+                                        final Conf config) {
+        if (config.hasPath(CONTAINER_ID_CONFIG))
+            return new BasicContainerId(config.getString(CONTAINER_ID_CONFIG));
+
+        return BasicContainerId.create(applicationId);
+    }
 }
