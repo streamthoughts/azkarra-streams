@@ -37,6 +37,7 @@ public interface MonitoringReporter extends AutoCloseable, Configurable {
 
     /**
      * Called periodically by the monitoring tasks.
+     * This method can be called after {@link #close()} has been invoked if the stream instance is restarted.
      *
      * @param metadata  the {@link KafkaStreamsMetadata} change to report.
      */
@@ -53,6 +54,7 @@ public interface MonitoringReporter extends AutoCloseable, Configurable {
 
     /**
      * Closes this {@link MonitoringReporter}.
+     * Called when a {@link io.streamthoughts.azkarra.api.streams.KafkaStreamsContainer} is stopped.
      */
     @Override
     default void close() {

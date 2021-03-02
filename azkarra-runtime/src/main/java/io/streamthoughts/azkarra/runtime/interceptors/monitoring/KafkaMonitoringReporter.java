@@ -195,5 +195,7 @@ public class KafkaMonitoringReporter implements MonitoringReporter, KafkaStreams
     @Override
     public void close() {
         producer.close();
+        producer = null;
+        initialized.set(false);
     }
 }
