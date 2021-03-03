@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 
 import static io.streamthoughts.azkarra.commons.rocksdb.AzkarraRocksDBConfigSetterConfig.ROCKSDB_BACKGROUND_THREADS_COMPACTION_POOL_CONFIG;
 import static io.streamthoughts.azkarra.commons.rocksdb.AzkarraRocksDBConfigSetterConfig.ROCKSDB_BACKGROUND_THREADS_FLUSH_POOL_CONFIG;
+import static io.streamthoughts.azkarra.commons.rocksdb.AzkarraRocksDBConfigSetterConfig.ROCKSDB_BLOCK_CACHE_SIZE_CONFIG;
 import static io.streamthoughts.azkarra.commons.rocksdb.AzkarraRocksDBConfigSetterConfig.ROCKSDB_COMPACTION_STYLE_CONFIG;
 import static io.streamthoughts.azkarra.commons.rocksdb.AzkarraRocksDBConfigSetterConfig.ROCKSDB_COMPRESSION_TYPE_CONFIG;
 import static io.streamthoughts.azkarra.commons.rocksdb.AzkarraRocksDBConfigSetterConfig.ROCKSDB_FILES_OPEN_CONFIG;
@@ -171,28 +172,52 @@ public class RocksDBConfig implements Supplier<Conf> {
     }
 
     // STATISTICS
+
+    /**
+     * @see AzkarraRocksDBConfigSetterConfig#ROCKSDB_STATS_ENABLE_CONFIG
+     */
     public RocksDBConfig withStatisticsEnabled(boolean enableStats) {
         configs.put(ROCKSDB_STATS_ENABLE_CONFIG, String.valueOf(enableStats));
         return this;
     }
 
+    /**
+     * @see AzkarraRocksDBConfigSetterConfig#ROCKSDB_STATS_DUMP_PERIOD_SEC_CONFIG
+     */
     public RocksDBConfig withStatsDumpPeriod(final Duration duration) {
         configs.put(ROCKSDB_STATS_DUMP_PERIOD_SEC_CONFIG, String.valueOf(duration.toSeconds()));
         return this;
     }
 
+    /**
+     * @see AzkarraRocksDBConfigSetterConfig#ROCKSDB_LOG_LEVEL_CONFIG
+     */
     public RocksDBConfig withLogDir(final String logDir) {
         configs.put(ROCKSDB_LOG_DIR_CONFIG, logDir);
         return this;
     }
 
+    /**
+     * @see AzkarraRocksDBConfigSetterConfig#ROCKSDB_LOG_LEVEL_CONFIG
+     */
     public RocksDBConfig withLogLevel(final String level) {
         configs.put(ROCKSDB_LOG_LEVEL_CONFIG, level);
         return this;
     }
 
+    /**
+     * @see AzkarraRocksDBConfigSetterConfig#ROCKSDB_MAX_LOG_FILE_SIZE_CONFIG
+     */
     public RocksDBConfig withLogMaxFileSize(final int logMaxFileSize) {
         configs.put(ROCKSDB_MAX_LOG_FILE_SIZE_CONFIG, String.valueOf(logMaxFileSize));
+        return this;
+    }
+
+    /**
+     * @see AzkarraRocksDBConfigSetterConfig#ROCKSDB_BLOCK_CACHE_SIZE_CONFIG
+     */
+    public RocksDBConfig withBlockCacheSize(final long blockCacheSize) {
+        configs.put(ROCKSDB_BLOCK_CACHE_SIZE_CONFIG, String.valueOf(blockCacheSize));
         return this;
     }
 
