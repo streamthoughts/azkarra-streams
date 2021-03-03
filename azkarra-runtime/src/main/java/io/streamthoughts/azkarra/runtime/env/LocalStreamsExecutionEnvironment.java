@@ -76,7 +76,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * The default {@link StreamsExecutionEnvironment} implementation.
+ * A {@link StreamsExecutionEnvironment} implementation that runs and manages {@link KafkaStreams} instance locally.
  */
 public class LocalStreamsExecutionEnvironment implements
         StreamsExecutionEnvironment<LocalStreamsExecutionEnvironment>,
@@ -106,7 +106,7 @@ public class LocalStreamsExecutionEnvironment implements
      * @return a new {@link LocalStreamsExecutionEnvironment} instance.
      */
     public static LocalStreamsExecutionEnvironment create(final String name) {
-        return create(Conf.empty(), name);
+        return create(name, Conf.empty());
     }
 
     /**
@@ -117,7 +117,7 @@ public class LocalStreamsExecutionEnvironment implements
      * @return a new {@link LocalStreamsExecutionEnvironment} instance.
      */
     public static LocalStreamsExecutionEnvironment create(final Conf settings) {
-        return create(settings, EnvironmentNameGenerator.generate());
+        return create(ENVIRONMENT_DEFAULT_NAME, settings);
     }
 
     /**
@@ -128,7 +128,7 @@ public class LocalStreamsExecutionEnvironment implements
      * @param name     the name to be used for identifying this environment.
      * @return a new {@link LocalStreamsExecutionEnvironment} instance.
      */
-    public static LocalStreamsExecutionEnvironment create(final Conf settings, final String name) {
+    public static LocalStreamsExecutionEnvironment create(final String name, final Conf settings) {
         return new LocalStreamsExecutionEnvironment(settings, name);
     }
 
@@ -194,6 +194,7 @@ public class LocalStreamsExecutionEnvironment implements
         this.applicationIdBuilderSupplier = DefaultApplicationIdBuilder::new;
         this.topologies = new LinkedList<>();
         this.containerIdBuilder = new DefaultContainerIdBuilder();
+        this.isDefault = name.equalsIgnoreCase(ENVIRONMENT_DEFAULT_NAME);
         setState(State.CREATED);
     }
 
@@ -725,15 +726,6 @@ public class LocalStreamsExecutionEnvironment implements
     @Override
     public void setAzkarraContext(final AzkarraContext context) {
         this.context = context;
-    }
-
-    private static final class EnvironmentNameGenerator {
-
-        private static final AtomicInteger NUM = new AtomicInteger(1);
-
-        static String generate() {
-            return String.format("__streams_env_%02d", NUM.getAndIncrement());
-        }
     }
 
     /**

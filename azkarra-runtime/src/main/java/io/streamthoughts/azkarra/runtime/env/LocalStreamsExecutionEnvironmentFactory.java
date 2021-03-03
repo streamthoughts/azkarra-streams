@@ -46,7 +46,7 @@ public class LocalStreamsExecutionEnvironmentFactory
      */
     @Override
     public LocalStreamsExecutionEnvironment create(final String name, final Conf conf) {
-        return initialize(LocalStreamsExecutionEnvironment.create(conf, name));
+        return initialize(LocalStreamsExecutionEnvironment.create(name, conf));
     }
 
     /**

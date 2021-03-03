@@ -44,6 +44,8 @@ import java.util.function.Supplier;
  */
 public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironment<T>> extends HasName {
 
+    String ENVIRONMENT_DEFAULT_NAME = "default";
+
     /**
      * Gets the type of this {@link StreamsExecutionEnvironment}.
      *
