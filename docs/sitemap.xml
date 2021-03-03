@@ -8,6 +8,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/overview/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/overview/</loc>
     <lastmod>2020-05-09T00:43:49+02:00</lastmod>
   </url>
@@ -88,13 +93,23 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/getting-started/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/topologyprovider/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/topologyprovider/</loc>
     <lastmod>2020-09-26T22:32:46+02:00</lastmod>
   </url>
   
   <url>
-    <loc>http://www.azkarrastreams.io/docs/getting-started/</loc>
-    <lastmod>2020-09-24T12:45:36+02:00</lastmod>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/getting-started/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -108,6 +123,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/overview/azkarra/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/overview/azkarra/</loc>
     <lastmod>2020-06-12T16:43:36+02:00</lastmod>
   </url>
@@ -115,6 +135,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/project-info/getting_the_code/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/getting_the_code/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -143,8 +168,18 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/overview/contribution-guidelines/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/overview/contribution-guidelines/</loc>
     <lastmod>2020-05-09T00:43:49+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/streamsexecutionenvironment/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -158,6 +193,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/maven_modules/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/project-info/maven_modules/</loc>
     <lastmod>2020-05-09T00:43:49+02:00</lastmod>
   </url>
@@ -165,6 +205,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -193,6 +238,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/configuration/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/configuration/</loc>
     <lastmod>2020-09-25T23:44:26+02:00</lastmod>
   </url>
@@ -200,6 +250,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/azkarra-dashboard/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-dashboard/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -213,13 +268,23 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/azkarracontext/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/azkarracontext/</loc>
-    <lastmod>2020-09-26T22:32:46+02:00</lastmod>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/azkarra-metrics/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-metrics/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -233,6 +298,16 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/developer-guide/azkarraapplication/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-worker/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/azkarra-worker/</loc>
     <lastmod>2020-06-26T18:45:17+02:00</lastmod>
   </url>
@@ -243,8 +318,8 @@
   </url>
   
   <url>
-    <loc>http://www.azkarrastreams.io/docs/developer-guide/azkarraapplication/</loc>
-    <lastmod>2020-05-09T00:43:49+02:00</lastmod>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/azkarraapplication/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -258,6 +333,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/examples/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/examples/</loc>
     <lastmod>2020-05-20T23:37:10+02:00</lastmod>
   </url>
@@ -268,13 +348,23 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/dependencyinjection/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/dependencyinjection/</loc>
     <lastmod>2020-05-09T00:43:49+02:00</lastmod>
   </url>
   
   <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/</loc>
-    <lastmod>2020-09-25T23:44:26+02:00</lastmod>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/streamslifecycleinterceptors/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -288,13 +378,23 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/errormanagement/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/errormanagement/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/embeddedwebserver/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/</loc>
-    <lastmod>2020-09-26T22:32:46+02:00</lastmod>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -308,6 +408,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/security/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/developer-guide/security/</loc>
     <lastmod>2020-05-09T00:43:49+02:00</lastmod>
   </url>
@@ -315,6 +420,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/faq/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/faq/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -328,8 +438,18 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/reference/</loc>
     <lastmod>2020-05-09T00:43:49+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/developer-guide/rocksdb/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -338,8 +458,8 @@
   </url>
   
   <url>
-    <loc>http://www.azkarrastreams.io/docs/developer-guide/rocksdb/</loc>
-    <lastmod>2020-05-09T00:43:49+02:00</lastmod>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/rocksdb/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -353,8 +473,18 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/project-info/</loc>
     <lastmod>2020-05-09T00:43:49+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/reference/api-docs/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -363,8 +493,8 @@
   </url>
   
   <url>
-    <loc>http://www.azkarrastreams.io/docs/reference/api-docs/</loc>
-    <lastmod>2020-09-24T13:17:19+02:00</lastmod>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/api-docs/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -393,6 +523,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/application/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/reference/rest-apis/application/</loc>
     <lastmod>2019-11-29T15:27:51+01:00</lastmod>
   </url>
@@ -405,6 +540,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -423,6 +563,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/environment/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/reference/rest-apis/environment/</loc>
     <lastmod>2019-11-29T15:27:51+01:00</lastmod>
   </url>
@@ -435,6 +580,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/health/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/health/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -453,6 +603,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/info/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/reference/rest-apis/info/</loc>
     <lastmod>2019-11-29T15:27:51+01:00</lastmod>
   </url>
@@ -465,6 +620,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/streams/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/streams/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -483,6 +643,11 @@
   </url>
   
   <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/topology/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://www.azkarrastreams.io/docs/reference/rest-apis/topology/</loc>
     <lastmod>2019-11-29T15:27:51+01:00</lastmod>
   </url>
@@ -495,6 +660,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/versions/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/versions/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -519,7 +689,7 @@
   
   <url>
     <loc>http://www.azkarrastreams.io/</loc>
-    <lastmod>2020-05-09T00:43:49+02:00</lastmod>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
   <url>
@@ -545,6 +715,11 @@
   <url>
     <loc>http://www.azkarrastreams.io/v0-7/docs/</loc>
     <lastmod>2020-06-17T21:51:25+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://www.azkarrastreams.io/v0-8/docs/</loc>
+    <lastmod>2021-03-03T14:37:10+01:00</lastmod>
   </url>
   
 </urlset>

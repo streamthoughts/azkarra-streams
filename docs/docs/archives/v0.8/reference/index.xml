@@ -1,0 +1,50 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Azkarra Streams – Reference</title>
+    <link>http://www.azkarrastreams.io/docs/archives/v0.8/reference/</link>
+    <description>Recent content in Reference on Azkarra Streams</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Fri, 29 Nov 2019 00:00:00 +0000</lastBuildDate>
+    
+	  <atom:link href="http://www.azkarrastreams.io/docs/archives/v0.8/reference/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>Docs: Azkarra Streams API Docs</title>
+      <link>http://www.azkarrastreams.io/docs/archives/v0.8/reference/api-docs/</link>
+      <pubDate>Tue, 12 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/reference/api-docs/</guid>
+      <description>
+        
+        
+        &lt;p&gt;The latest Azkarra Streams API (0.8.0) documentation can be found on &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.8.0&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Prior releases : &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.3&#34;&gt;0.3&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.4&#34;&gt;0.4&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.5.0&#34;&gt;0.5.0&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.6.0&#34;&gt;0.6.0&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.7.0&#34;&gt;0.7.0&lt;/a&gt;, &lt;a href=&#34;http://www.azkarrastreams.io/apidocs/0.8.0&#34;&gt;0.8.0&lt;/a&gt;&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title>Docs: Azkarra Streams REST Interface</title>
+      <link>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/</link>
+      <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/</guid>
+      <description>
+        
+        
+        &lt;p&gt;Azkarra Streams embeds an HTTP server which exposes a REST API to manage available topologies and streams jobs running locally.
+By default, the server listens on port 8080.&lt;/p&gt;
+&lt;h2 id=&#34;contenttype&#34;&gt;Content-Type&lt;/h2&gt;
+&lt;p&gt;Currently, the REST API only supports &lt;code&gt;application/json&lt;/code&gt; as both the request and response entity content type.&lt;/p&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

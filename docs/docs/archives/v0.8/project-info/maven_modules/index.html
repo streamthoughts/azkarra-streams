@@ -1,0 +1,2288 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="generator" content="Hugo 0.60.1" />
+
+<META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
+
+
+
+<link rel="shortcut icon" href="/favicons/favicon.ico" >
+<link rel="apple-touch-icon" href="/favicons/apple-touch-icon-180x180.png" sizes="180x180">
+<link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicons/android-36x36.png" sizes="36x36">
+<link rel="icon" type="image/png" href="/favicons/android-48x48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/favicons/android-72x72.png" sizes="72x72">
+<link rel="icon" type="image/png" href="/favicons/android-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favicons/android-144x144.png" sizes="144x144">
+<link rel="icon" type="image/png" href="/favicons/android-192x192.png" sizes="192x192">
+
+<title>Maven modules | Azkarra Streams</title><meta property="og:title" content="Maven modules" />
+<meta property="og:description" content="Information about the maven modules.
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.azkarrastreams.io/docs/archives/v0.8/project-info/maven_modules/" />
+<meta property="article:published_time" content="2020-05-09T00:00:00+00:00" />
+<meta property="article:modified_time" content="2021-03-03T14:37:10+01:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta itemprop="name" content="Maven modules">
+<meta itemprop="description" content="Information about the maven modules.
+">
+<meta itemprop="datePublished" content="2020-05-09T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2021-03-03T14:37:10&#43;01:00" />
+<meta itemprop="wordCount" content="194">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Maven modules"/>
+<meta name="twitter:description" content="Information about the maven modules.
+"/>
+
+
+
+
+
+
+
+<link rel="preload" href="/scss/main.min.d43252479f128b92439b4e4c1309b018a382e35b54612de5cfc082d087573155.css" as="style">
+<link href="/scss/main.min.d43252479f128b92439b4e4c1309b018a382e35b54612de5cfc082d087573155.css" rel="stylesheet" integrity="">
+
+
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+
+  </head>
+  <body class="td-page">
+    <header>
+      
+
+<nav class="js-navbar-scroll navbar navbar-expand navbar-dark flex-column flex-md-row td-navbar">
+        <a class="navbar-brand" href="/">
+		<span class="navbar-logo"><svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg20" viewBox="0 0 169.33334 169.33333" height="640" width="640"><defs id="defs14"><linearGradient id="linearGradient1128"><stop style="stop-color:#2880c1;stop-opacity:1" offset="0" id="stop1124" /><stop style="stop-color:#26b793;stop-opacity:1" offset="1" id="stop1126" /></linearGradient><linearGradient id="linearGradient1026"><stop id="stop1022" offset="0" style="stop-color:#2880c1;stop-opacity:1" /><stop id="stop1024" offset="1" style="stop-color:#26b793;stop-opacity:.97083336" /></linearGradient><linearGradient gradientTransform="translate(-9.0871639,-0.80180858)" gradientUnits="userSpaceOnUse" y2="256.77591" x2="168.91434" y1="256.77591" x1="84.189896" id="linearGradient932" xlink:href="#linearGradient1026" /><linearGradient gradientUnits="userSpaceOnUse" y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" id="linearGradient1122" xlink:href="#linearGradient1128" /><linearGradient y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" gradientUnits="userSpaceOnUse" id="linearGradient1160" xlink:href="#linearGradient1128" /><linearGradient y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" gradientUnits="userSpaceOnUse" id="linearGradient1162" xlink:href="#linearGradient1128" /><linearGradient y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" gradientUnits="userSpaceOnUse" id="linearGradient1164" xlink:href="#linearGradient1128" /><linearGradient y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" gradientUnits="userSpaceOnUse" id="linearGradient1166" xlink:href="#linearGradient1128" /><linearGradient y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" gradientUnits="userSpaceOnUse" id="linearGradient1168" xlink:href="#linearGradient1128" /><linearGradient y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" gradientUnits="userSpaceOnUse" id="linearGradient1170" xlink:href="#linearGradient1128" /><linearGradient y2="255.88335" x2="163.04314" y1="255.88335" x1="83.795662" gradientUnits="userSpaceOnUse" id="linearGradient1172" xlink:href="#linearGradient1128" /><linearGradient gradientTransform="matrix(1.0715473,0,0,0.74752329,-20.311107,2.4777858)" gradientUnits="userSpaceOnUse" y2="257.31247" x2="77.319756" y1="257.31247" x1="43.34914" id="linearGradient1195" xlink:href="#linearGradient1128" /></defs><g transform="translate(2.5336669,-91.234683)" id="layer1"><rect y="88.307976" x="-3.7217979" height="173.05557" width="172.14816" id="rect842" style="opacity:1;fill:#fff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.89503562;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:.86776859;paint-order:normal" /><text id="text24" y="182.86746" x="3.3061366" style="font-style:normal;font-weight:400;font-size:43.55392838px;line-height:30.85000229;font-family:sans-serif;letter-spacing:0;word-spacing:0;fill:#343a40;fill-opacity:1;stroke:none;stroke-width:.27221209"><tspan style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Light';fill:#343a40;fill-opacity:1;stroke-width:.27221209" y="182.86746" x="3.3061366" id="tspan22">Azkarra</tspan></text><g transform="matrix(1.0715474,0,0,1.0715474,-13.664274,-80.480358)" id="text28" style="font-style:normal;font-weight:400;font-size:21.16666603px;line-height:1.25;font-family:sans-serif;letter-spacing:0;word-spacing:0;opacity:1;fill:url(#linearGradient1122);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" aria-label="streams"><path id="path1093" style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';opacity:1;fill:url(#linearGradient1160);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" d="m79.986796 262.92126c-.945444.0-1.869722-.11289-2.772833-.33867-.903111-.23989-1.622777-.53622-2.159-.889l.106758-1.25983c.508.32456 2.115742-.15067 2.835409.061.719667.19755 1.007613-.0795 1.699057-.0795 1.397.0 2.513109-.33737 2.513109-1.02882.0-.32455-.1905-.55739-.5715-.6985s-.966611-.26105-1.756833-.35983c-.931333-.14111-1.700389-.30339-2.307166-.48683-.606778-.18345-1.135945-.508-1.5875-.97367-.437445-.46567-.656167-1.12889-.656167-1.98967.0-.71967.204611-1.35467.613833-1.905.423333-.56444 1.030111-1.00188 1.820334-1.31233.804333-.31045 1.749777-.46567 2.836333-.46567.804333.0 1.601611.0917 2.391833.27517.804333.16933 1.467556.40922 1.989667.71967l-1.100667 2.3495c-1.001889-.56445-2.0955-.84667-3.280833-.84667-.705556.0-1.234723.0988-1.5875.29633-.352778.19756-.529167.45156-.529167.762.0.35278.1905.59973.5715.74084s.987778.27516 1.820333.40216c.931333.15523 1.693333.32456 2.286.508.592667.16933 1.107722.48683 1.545167.9525.437445.46567.656167 1.11478.656167 1.94734.0.70555-.211667 1.3335-.635 1.88383s-1.044222.98072-1.862667 1.29117c-.804333.29633-1.763889.4445-2.878667.4445z" /><path id="path1095" style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';opacity:1;fill:url(#linearGradient1162);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" d="m94.745254 262.20159q-.486833.35983-1.2065.55033-.6985.16934-1.481667.16934-2.031999.0-3.153833-1.03717-1.100666-1.03717-1.100666-3.048v-4.67783h-1.756834v-2.54h1.756834v-2.77284h3.301999v2.77284h2.836334v2.54h-2.836334v4.6355q0 .71966.359834 1.12183.381.381 1.058333.381.783167.0 1.3335-.42333z" /><path id="path1097" style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';opacity:1;fill:url(#linearGradient1164);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" d="m99.77333 252.86709q.59267-.8255 1.5875-1.24883 1.016-.42334 2.32833-.42334v3.048q-.55033-.0423-.74083-.0423-1.41817.0-2.2225.80433-.804333.78317-.804333 2.37067v5.37633h-3.302v-11.38766h3.153833z" /><path id="path1099" style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';opacity:1;fill:url(#linearGradient1166);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" d="m116.70402 257.10042q0 .0635-.0635.889h-8.61484q.23284 1.05834 1.10067 1.67217t2.159.61383q.889.0 1.56633-.254.6985-.27516 1.29117-.84666l1.75683 1.905q-1.60866 1.8415-4.699 1.8415-1.92616.0-3.40783-.74084-1.48167-.762-2.286-2.0955-.80433-1.3335-.80433-3.02683.0-1.67217.78316-3.00567.80434-1.35466 2.18017-2.0955 1.397-.762 3.1115-.762 1.67217.0 3.02683.71967 1.35467.71967 2.11667 2.07433.78317 1.3335.78317 3.1115zm-5.9055-3.40783q-1.12184.0-1.88384.635t-.93133 1.73567h5.60917q-.16934-1.0795-.93134-1.7145-.762-.65617-1.86266-.65617z" /><path id="path1101" style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';opacity:1;fill:url(#linearGradient1168);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" d="m123.16481 251.19492q2.64584.0 4.064 1.27 1.41817 1.24884 1.41817 3.78884v6.49816h-3.09033v-1.41816q-.93134 1.5875-3.47134 1.5875-1.31233.0-2.286-.4445-.9525-.4445-1.4605-1.22767t-.508-1.778q0-1.5875 1.18534-2.49767 1.2065-.91016 3.70416-.91016h2.62467q0-1.0795-.65617-1.651-.65616-.59267-1.9685-.59267-.91016.0-1.79916.29633-.86784.27517-1.48167.762l-1.18533-2.30716q.93133-.65617 2.2225-1.016 1.31233-.35984 2.68816-.35984zm-.254 9.50384q.84667.0 1.50284-.381.65616-.40217.93133-1.16417v-1.16417h-2.26483l-2.032 1.3335q0 .635.48683 1.016.508.35984 1.37583.35984z" /><path id="path1103" style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';opacity:1;fill:url(#linearGradient1170);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" d="m146.21928 251.19492q2.13783.0 3.38667 1.27 1.27 1.24884 1.27 3.76767v6.51933h-3.302v-6.01133q0-1.35467-.5715-2.01083-.55034-.67734-1.5875-.67734-1.16417.0-1.8415.762-.67734.74084-.67734 2.2225v5.715h-3.302v-6.01133l-2.159-2.68817q-1.143.0-1.82033.762-.67733.74084-.67733 2.2225v5.715h-3.302v-11.38766h3.15383v1.31233q.635-.71967 1.54517-1.10067.93133-.381 2.032-.381 1.2065.0 2.18016.48684.97367.46566 1.56634 1.37583.6985-.889 1.75683-1.37583 1.0795-.48684 2.3495-.48684z" /><path id="path1105" style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';opacity:1;fill:url(#linearGradient1172);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:.26458332" d="m157.6668 262.92126q-1.41816.0-2.77283-.33867-1.35467-.35983-2.159-.889l1.10067-2.37067q.762.48684 1.8415.80434 1.0795.29633 2.11666.29633l2.0955-1.03717q0-.48683-.5715-.6985-.5715-.21166-1.75683-.35983-1.397-.21167-2.30717-.48683-.91016-.27517-1.5875-.97367-.65616-.6985-.65616-1.98967.0-1.0795.61383-1.905.635-.84666 1.82033-1.31233 1.2065-.46567 2.83634-.46567 1.2065.0 2.39183.27517 1.2065.254 1.98967.71967l-1.10067 2.3495q-1.50283-.84667-3.28083-.84667-1.05834.0-1.5875.29633-.52917.29634-.52917.762.0.52917.5715.74084.5715.21166 1.82033.40216 1.397.23284 2.286.508.889.254 1.54517.9525.65617.6985.65617 1.94734.0 1.05833-.635 1.88383t-1.86267 1.29117q-1.2065.4445-2.87867.4445z" /></g><rect ry="1.3393987" y="198.56728" x="58.576443" height="2.6787975" width="15.238855" id="rect1046" style="opacity:1;fill:#2880c1;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.84619355;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0;paint-order:normal" /><rect ry="1.3393987" y="198.56728" x="51.501339" height="2.6787975" width="6.1259227" id="rect1046-56" style="opacity:1;fill:#2880c1;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.4386003;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0;paint-order:normal" /><rect ry="1.3393987" y="198.4592" x="3.2218206" height="2.6787975" width="42.982685" id="rect1046-56-2" style="opacity:1;fill:#2880c1;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:6.45954132;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0;paint-order:normal" /><rect ry=".93437928" y="193.89046" x="26.139544" height="1.8687586" width="36.401131" id="rect1046-56-2-9" style="opacity:1;fill:url(#linearGradient1195);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:4.96499634;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0;paint-order:normal" /></g></svg></span>
+	</a>
+	<div class="td-navbar-nav-scroll ml-md-auto" id="main_navbar">
+		<ul class="navbar-nav mt-2 mt-lg-0">
+			
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				<a class="nav-link" href="/docs/overview/azkarra/" ><span>What is Azkarra ?</span></a>
+			</li>
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				
+				
+				<a class="nav-link active" href="/docs/" ><span class="active">Documentation</span></a>
+			</li>
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				
+				
+				<a class="nav-link" href="/blog/" ><span>News</span></a>
+			</li>
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				
+				
+				<a class="nav-link" href="/community/" ><span>Community</span></a>
+			</li>
+			
+			<li class="nav-item mr-4 mb-2 mb-lg-0">
+				
+				
+				
+				
+				<a class="nav-link" href="https://github.com/streamthoughts/azkarra-streams" target="_blank" ><span>GitHub</span></a>
+			</li>
+			
+			
+			<li class="nav-item dropdown d-none d-lg-block">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	Releases
+</a>
+<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+	
+	<a class="dropdown-item" href="/docs">master</a>
+	
+	<a class="dropdown-item" href="/v0-8/docs">v0.8.x</a>
+	
+	<a class="dropdown-item" href="/v0-7/docs">v0.7.x</a>
+	
+	<a class="dropdown-item" href="/v0-6/docs">v0.6.x</a>
+	
+</div>
+
+			</li>
+			
+			
+		</ul>
+	</div>
+	<div class="navbar-nav d-none d-lg-block">
+</div>
+</nav>
+
+    </header>
+    <div class="container-fluid td-outer">
+      <div class="td-main">
+        <div class="row flex-xl-nowrap">
+          <div class="col-12 col-md-3 col-xl-2 td-sidebar d-print-none">
+            
+
+
+
+
+<div id="td-sidebar-menu" class="td-sidebar__inner">
+  
+  <form class="td-sidebar__search d-flex align-items-center">
+    
+
+    <button class="btn btn-link td-sidebar__toggle d-md-none p-0 ml-3 fas fa-bars" type="button" data-toggle="collapse" data-target="#td-section-nav" aria-controls="td-docs-nav" aria-expanded="false" aria-label="Toggle section navigation">
+    </button>
+  </form>
+  
+  <nav class="collapse td-sidebar-nav pt-2 pl-4" id="td-section-nav">
+    
+    
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/" class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">Documentation</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="docs">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/overview/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Overview</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-overview">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/overview/azkarra/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-overview-azkarra">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/overview/contribution-guidelines/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Contribution Guidelines</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-overview-contribution-guidelines">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/getting-started/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Getting Started</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-getting-started">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/developer-guide/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Developer Guide</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-developer-guide">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-topologyprovider" href="/docs/developer-guide/topologyprovider/">TopologyProvider</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-streamsexecutionenvironment" href="/docs/developer-guide/streamsexecutionenvironment/">StreamsExecutionEnvironment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-configuration" href="/docs/developer-guide/configuration/">Configuration</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-azkarracontext" href="/docs/developer-guide/azkarracontext/">AzkarraContext</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-azkarraapplication" href="/docs/developer-guide/azkarraapplication/">AzkarraApplication</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-dependencyinjection" href="/docs/developer-guide/dependencyinjection/">Dependency Injection</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-streamslifecycleinterceptors" href="/docs/developer-guide/streamslifecycleinterceptors/">The StreamsLifecycle Intercepting Chain</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-errormanagement" href="/docs/developer-guide/errormanagement/">Error Management</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-embeddedwebserver" href="/docs/developer-guide/embeddedwebserver/">Embedded Web Server</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-security" href="/docs/developer-guide/security/">Security</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-developer-guide-rocksdb" href="/docs/developer-guide/rocksdb/">RocksDB</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/azkarra-dashboard/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Dashboard</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-azkarra-dashboard">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/azkarra-metrics/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Metrics</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-azkarra-metrics">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/azkarra-worker/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Worker</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-azkarra-worker">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/examples/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Tutorials and Shared Resources</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-examples">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/faq/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">FAQ</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-faq">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/reference/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Reference</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-reference">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/reference/api-docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams API Docs</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-reference-api-docs">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/reference/rest-apis/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams REST Interface</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-reference-rest-apis">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-reference-rest-apis-application" href="/docs/reference/rest-apis/application/">Applications</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-reference-rest-apis-environment" href="/docs/reference/rest-apis/environment/">Environment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-reference-rest-apis-health" href="/docs/reference/rest-apis/health/">Health</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-reference-rest-apis-info" href="/docs/reference/rest-apis/info/">Info</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-reference-rest-apis-streams" href="/docs/reference/rest-apis/streams/">Streams</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-reference-rest-apis-topology" href="/docs/reference/rest-apis/topology/">Topologies</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-reference-rest-apis-versions" href="/docs/reference/rest-apis/versions/">Version</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/archives/" class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">Archives</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="archives">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/v0-6/docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">v0.6</a>
+  </li>
+  <ul>
+    <li class="collapse " id="v0-6-docs">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/overview/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Overview</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-overview">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/getting-started/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Getting Started</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-getting-started">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Developer Guide</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/03_configuration/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Configuration</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-03-configuration">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/01_topology/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">TopologyProvider</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-01-topology">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/02_streamsexecutionenvironment/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">StreamsExecutionEnvironment</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-02-streamsexecutionenvironment">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/04_azkarracontext/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">AzkarraContext</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-04-azkarracontext">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/05_azkarraapplication/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">AzkarraApplication</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-05-azkarraapplication">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/06_dependencyinjection/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Dependency Injection</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-06-dependencyinjection">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/08_streamslifecycleinterceptor/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">The StreamsLifecycle Intercepting Chain</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-08-streamslifecycleinterceptor">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/07_errormanagement/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Error Management</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-07-errormanagement">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/09_security/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Security</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-09-security">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/developer-guide/10_rocksdb/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">RocksDB</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-developer-guide-10-rocksdb">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/examples/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Examples</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-examples">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/azkarra-worker/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Worker</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-azkarra-worker">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/reference/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Reference</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-reference">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/reference/api-docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams API Docs</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-reference-api-docs">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/reference/rest-apis/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams REST Interface</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-reference-rest-apis">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-6-reference-rest-apis-application" href="/docs/archives/v0.6/reference/rest-apis/application/">Applications</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-6-reference-rest-apis-environment" href="/docs/archives/v0.6/reference/rest-apis/environment/">Environment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-6-reference-rest-apis-health" href="/docs/archives/v0.6/reference/rest-apis/health/">Health</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-6-reference-rest-apis-info" href="/docs/archives/v0.6/reference/rest-apis/info/">Info</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-6-reference-rest-apis-streams" href="/docs/archives/v0.6/reference/rest-apis/streams/">Streams</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-6-reference-rest-apis-topology" href="/docs/archives/v0.6/reference/rest-apis/topology/">Topologies</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-6-reference-rest-apis-versions" href="/docs/archives/v0.6/reference/rest-apis/versions/">Version</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.6/contribution-guidelines/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Contribution Guidelines</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-6-contribution-guidelines">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/v0-7/docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">v0.7</a>
+  </li>
+  <ul>
+    <li class="collapse " id="v0-7-docs">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/overview/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Overview</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-overview">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/overview/azkarra/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-overview-azkarra">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/overview/contribution-guidelines/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Contribution Guidelines</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-overview-contribution-guidelines">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/getting-started/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Getting Started</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-getting-started">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/developer-guide/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Developer Guide</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-developer-guide">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-topologyprovider" href="/docs/archives/v0.7/developer-guide/topologyprovider/">TopologyProvider</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-streamsexecutionenvironment" href="/docs/archives/v0.7/developer-guide/streamsexecutionenvironment/">StreamsExecutionEnvironment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-configuration" href="/docs/archives/v0.7/developer-guide/configuration/">Configuration</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-azkarracontext" href="/docs/archives/v0.7/developer-guide/azkarracontext/">AzkarraContext</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-azkarraapplication" href="/docs/archives/v0.7/developer-guide/azkarraapplication/">AzkarraApplication</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-dependencyinjection" href="/docs/archives/v0.7/developer-guide/dependencyinjection/">Dependency Injection</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-streamslifecycleinterceptors" href="/docs/archives/v0.7/developer-guide/streamslifecycleinterceptors/">The StreamsLifecycle Intercepting Chain</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-errormanagement" href="/docs/archives/v0.7/developer-guide/errormanagement/">Error Management</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-embeddedwebserver" href="/docs/archives/v0.7/developer-guide/embeddedwebserver/">Embedded Web Server</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-security" href="/docs/archives/v0.7/developer-guide/security/">Security</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-developer-guide-rocksdb" href="/docs/archives/v0.7/developer-guide/rocksdb/">RocksDB</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/azkarra-dashboard/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Dashboard</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-azkarra-dashboard">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/azkarra-metrics/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Metrics</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-azkarra-metrics">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/azkarra-worker/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Worker</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-azkarra-worker">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/examples/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Tutorials and Shared Resources</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-examples">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/faq/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">FAQ</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-faq">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/reference/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Reference</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-reference">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/reference/api-docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams API Docs</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-reference-api-docs">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/reference/rest-apis/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams REST Interface</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-reference-rest-apis">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-application" href="/docs/archives/v0.7/reference/rest-apis/application/">Applications</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-environment" href="/docs/archives/v0.7/reference/rest-apis/environment/">Environment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-health" href="/docs/archives/v0.7/reference/rest-apis/health/">Health</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-info" href="/docs/archives/v0.7/reference/rest-apis/info/">Info</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-streams" href="/docs/archives/v0.7/reference/rest-apis/streams/">Streams</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-topology" href="/docs/archives/v0.7/reference/rest-apis/topology/">Topologies</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-reference-rest-apis-versions" href="/docs/archives/v0.7/reference/rest-apis/versions/">Version</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.7/project-info/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Project Info</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-7-project-info">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-project-info-getting-the-code" href="/docs/archives/v0.7/project-info/getting_the_code/">Getting the code</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-7-project-info-maven-modules" href="/docs/archives/v0.7/project-info/maven_modules/">Maven modules</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/v0-8/docs/" class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">v0.8</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="v0-8-docs">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/overview/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Overview</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-overview">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/overview/azkarra/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-overview-azkarra">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/overview/contribution-guidelines/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Contribution Guidelines</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-overview-contribution-guidelines">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/getting-started/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Getting Started</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-getting-started">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/developer-guide/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Developer Guide</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-developer-guide">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-topologyprovider" href="/docs/archives/v0.8/developer-guide/topologyprovider/">TopologyProvider</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-streamsexecutionenvironment" href="/docs/archives/v0.8/developer-guide/streamsexecutionenvironment/">StreamsExecutionEnvironment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-configuration" href="/docs/archives/v0.8/developer-guide/configuration/">Configuration</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-azkarracontext" href="/docs/archives/v0.8/developer-guide/azkarracontext/">AzkarraContext</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-azkarraapplication" href="/docs/archives/v0.8/developer-guide/azkarraapplication/">AzkarraApplication</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-dependencyinjection" href="/docs/archives/v0.8/developer-guide/dependencyinjection/">Dependency Injection</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-streamslifecycleinterceptors" href="/docs/archives/v0.8/developer-guide/streamslifecycleinterceptors/">The StreamsLifecycle Intercepting Chain</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-errormanagement" href="/docs/archives/v0.8/developer-guide/errormanagement/">Error Management</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-embeddedwebserver" href="/docs/archives/v0.8/developer-guide/embeddedwebserver/">Embedded Web Server</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-security" href="/docs/archives/v0.8/developer-guide/security/">Security</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-developer-guide-rocksdb" href="/docs/archives/v0.8/developer-guide/rocksdb/">RocksDB</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/azkarra-dashboard/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Dashboard</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-azkarra-dashboard">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/azkarra-metrics/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Metrics</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-azkarra-metrics">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/azkarra-worker/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Worker</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-azkarra-worker">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/examples/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Tutorials and Shared Resources</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-examples">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/faq/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">FAQ</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-faq">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/reference/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Reference</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-reference">
+      
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/reference/api-docs/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams API Docs</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-reference-api-docs">
+      
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/reference/rest-apis/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Azkarra Streams REST Interface</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-archives-v0-8-reference-rest-apis">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-reference-rest-apis-application" href="/docs/archives/v0.8/reference/rest-apis/application/">Applications</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-reference-rest-apis-environment" href="/docs/archives/v0.8/reference/rest-apis/environment/">Environment</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-reference-rest-apis-health" href="/docs/archives/v0.8/reference/rest-apis/health/">Health</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-reference-rest-apis-info" href="/docs/archives/v0.8/reference/rest-apis/info/">Info</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-reference-rest-apis-streams" href="/docs/archives/v0.8/reference/rest-apis/streams/">Streams</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-reference-rest-apis-topology" href="/docs/archives/v0.8/reference/rest-apis/topology/">Topologies</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-reference-rest-apis-versions" href="/docs/archives/v0.8/reference/rest-apis/versions/">Version</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/archives/v0.8/project-info/" class="align-left pl-0 pr-2 active td-sidebar-link td-sidebar-link__section">Project Info</a>
+  </li>
+  <ul>
+    <li class="collapse show" id="docs-archives-v0-8-project-info">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-archives-v0-8-project-info-getting-the-code" href="/docs/archives/v0.8/project-info/getting_the_code/">Getting the code</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page  active" id="m-docs-archives-v0-8-project-info-maven-modules" href="/docs/archives/v0.8/project-info/maven_modules/">Maven modules</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+      
+      
+
+
+
+
+
+
+<ul class="td-sidebar-nav__section pr-md-3">
+  <li class="td-sidebar-nav__section-title">
+    <a  href="/docs/project-info/" class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Project Info</a>
+  </li>
+  <ul>
+    <li class="collapse " id="docs-project-info">
+      
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-project-info-getting-the-code" href="/docs/project-info/getting_the_code/">Getting the code</a>
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-docs-project-info-maven-modules" href="/docs/project-info/maven_modules/">Maven modules</a>
+      
+      
+    </li>
+  </ul>
+</ul>
+
+      
+      
+    </li>
+  </ul>
+</ul>
+
+  </nav>
+</div>
+
+
+
+
+          </div>
+          <div class="d-none d-xl-block col-xl-2 td-toc d-print-none">
+            
+
+
+
+
+
+
+<div class="td-page-meta ml-2 pb-1 pt-2 mb-0">
+
+
+
+
+
+<a href="https://github.com/streamthoughts/azkarra-streams/edit/master/site/content/en/docs/Archives/v0.8/Project%20Info/maven_modules.md" target="_blank"><i class="fa fa-edit fa-fw"></i> Edit this page</a>
+<a href="https://github.com/streamthoughts/azkarra-streams/issues/new?title=Maven%20modules" target="_blank"><i class="fab fa-github fa-fw"></i> Create documentation issue</a>
+
+
+<a href="https://github.com/streamthoughts/azkarra-streams/issues/new" target="_blank"><i class="fas fa-tasks fa-fw"></i> Create project issue</a>
+
+</div>
+
+
+
+
+
+
+
+
+          </div>
+          <main class="col-12 col-md-9 col-xl-8 pl-md-5" role="main">
+            
+  
+
+            <nav aria-label="breadcrumb" class="d-none d-md-block d-print-none">
+	<ol class="breadcrumb spb-1">
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="breadcrumb-item" >
+	<a href="http://www.azkarrastreams.io/docs/">Documentation</a>
+</li>
+
+
+
+
+<li class="breadcrumb-item" >
+	<a href="http://www.azkarrastreams.io/archives/">Archives</a>
+</li>
+
+
+
+
+<li class="breadcrumb-item" >
+	<a href="http://www.azkarrastreams.io/v0-8/docs/">v0.8</a>
+</li>
+
+
+
+
+<li class="breadcrumb-item" >
+	<a href="http://www.azkarrastreams.io/docs/archives/v0.8/project-info/">Project Info</a>
+</li>
+
+
+
+
+<li class="breadcrumb-item active" aria-current="page">
+	<a href="http://www.azkarrastreams.io/docs/archives/v0.8/project-info/maven_modules/">Maven modules</a>
+</li>
+
+	</ol>
+</nav	>
+
+            
+<div class="td-content">
+	<h1>Maven modules</h1>
+    <div class="lead">Information about the maven modules.</div>
+	       
+	<p>The Azkarra Sterams projects is organized around multiple maven modules:</p>
+<ul>
+<li>
+<p><strong>azkarra-api</strong> : The Azkarra Streams core API. This project contains the main Java interfaces and annotations (e.g <code>AzkarraContext</code>, <code>StreamsExecutionEnvironment</code>, <code>StreamsLifecicleInterceptor</code>, etc).</p>
+</li>
+<li>
+<p><strong>azkarra-archetype</strong> : The archetype project for Azkarra Streams.</p>
+</li>
+<li>
+<p><strong>azkarra-commons</strong> :  This project provides miscellaneous reusable codes for Kafka Streams applications (i.e <code>DeserializationExceptionHandler</code>, <code>Serializer</code>, <code>Serdes</code>, etc). Azkarra Commons does not depend on other modules and can therefore be used directly by any Kafka Streams project.</p>
+</li>
+<li>
+<p><strong>azkarra-examples</strong> : This project contains demo applications and code samples for Azkarra Streams API.</p>
+</li>
+<li>
+<p><strong>azkarra-json-serializers</strong> : This project provides general JSON serializers for Azkarra Streams API, using Jackson API.</p>
+</li>
+<li>
+<p><strong>azkarra-metrics</strong> : Azkarra Metrics. This project integrates Azkarra and Micrometer allowing metrics collection for Azkarra applications.</p>
+</li>
+<li>
+<p><strong>azkarra-runtime</strong> : Azkarra Runtime. This project implements Azkarra API.</p>
+</li>
+<li>
+<p><strong>azkarra-server</strong> : The Azkarra Streams embedded web server.</p>
+</li>
+<li>
+<p><strong>azkarra-streams</strong> :	The main dependency for bootstrapping a new Azkarra Streams application. Azkarra Streams provides capabilities like component-scan, auto-configuration, etc.</p>
+</li>
+<li>
+<p><strong>azkarra-ui</strong> : The Azkarra Dashboard. This module contains all the source code for main user interface of Azkarra Streams.</p>
+</li>
+<li>
+<p><strong>azkarra-worker</strong> : The main distribution to install and deploy a single Azkarra Streams application as a standalone worker.</p>
+</li>
+</ul>
+
+	
+	
+	<div class="text-muted mt-5 pt-3 border-top">Last modified March 3, 2021: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/ca3e155bad3115074d2525dccffbb4060acd39af">docs(site): update docs for 0.9.x (ca3e155)</a>
+</div>
+</div>
+
+
+          </main>
+        </div>
+      </div>
+      
+<footer class="bg-dark py-5 row d-print-none">
+  <div class="container-fluid mx-sm-5">
+    <div class="row">
+      <div class="col-6 col-sm-4 text-xs-center order-sm-2">
+        
+        
+        
+      </div>
+      <div class="col-6 col-sm-4 text-right text-xs-center order-sm-3">
+        
+        
+        
+<ul class="list-inline mb-0">
+  
+  <li class="list-inline-item mx-2 h3" data-toggle="tooltip" data-placement="top" title="GitHub" aria-label="GitHub">
+    <a class="text-white" target="_blank" href="https://github.com/streamthoughts/azkarra-streams">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+  <li class="list-inline-item mx-2 h3" data-toggle="tooltip" data-placement="top" title="Slack" aria-label="Slack">
+    <a class="text-white" target="_blank" href="https://communityinviter.com/apps/azkarra-streams/azkarra-streams-community">
+      <i class="fab fa-slack"></i>
+    </a>
+  </li>
+  
+</ul>
+
+        
+        
+      </div>
+      <div class="col-12 col-sm-4 text-center py-2 order-sm-2">
+        <small class="text-white">&copy; 2021 The Azkarra Streams Authors All Rights Reserved</small>
+        
+	
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+    </div>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+<script src="/js/main.min.74d05cd0b3df0e79c4dc4c8e6abf658d72b50a7be054de663184b2dbfa7ec24d.js" integrity="sha256-dNBc0LPfDnnE3EyOar9ljXK1CnvgVN5mMYSy2/p&#43;wk0=" crossorigin="anonymous"></script>
+
+
+
+  </body>
+</html>

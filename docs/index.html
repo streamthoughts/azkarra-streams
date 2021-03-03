@@ -115,6 +115,8 @@
 	
 	<a class="dropdown-item" href="/docs">master</a>
 	
+	<a class="dropdown-item" href="/v0-8/docs">v0.8.x</a>
+	
 	<a class="dropdown-item" href="/v0-7/docs">v0.7.x</a>
 	
 	<a class="dropdown-item" href="/v0-6/docs">v0.6.x</a>
@@ -233,7 +235,7 @@
 				        <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">Version</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">getVersion</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 				    <span style="color:#ce5c00;font-weight:bold">}</span>
 				    <span style="color:#5c35cc;font-weight:bold">@Override</span>
-				    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">get</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
+				    <span style="color:#204a87;font-weight:bold">public</span> <span style="color:#000">Topology</span> <span style="color:#000">topology</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">{</span>
 				        <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">StreamsBuilder</span> <span style="color:#000">builder</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87;font-weight:bold">new</span> <span style="color:#000">StreamsBuilder</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 				        <span style="color:#204a87;font-weight:bold">final</span> <span style="color:#000">KStream</span><span style="color:#ce5c00;font-weight:bold">&lt;</span><span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">,</span> <span style="color:#000">String</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">words</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">builder</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">stream</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;streams-plaintext-input&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">;</span>
 				        <span style="color:#000">words</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">flatMapValues</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">value</span> <span style="color:#ce5c00;font-weight:bold">-</span><span style="color:#ce5c00;font-weight:bold">&gt;</span> <span style="color:#000">Arrays</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">asList</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#000">value</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">toLowerCase</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#c4a000">split</span><span style="color:#ce5c00;font-weight:bold">(</span><span style="color:#4e9a06">&#34;\\s&#34;</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span><span style="color:#ce5c00;font-weight:bold">)</span>
@@ -405,7 +407,7 @@
         
       </div>
       <div class="col-12 col-sm-4 text-center py-2 order-sm-2">
-        <small class="text-white">&copy; 2020 The Azkarra Streams Authors All Rights Reserved</small>
+        <small class="text-white">&copy; 2021 The Azkarra Streams Authors All Rights Reserved</small>
         
 	
       </div>

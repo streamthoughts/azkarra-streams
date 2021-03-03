@@ -41,5 +41,19 @@
       </description>
     </item>
     
+    <item>
+      <title>Docs: Docs Release v0.8</title>
+      <link>http://www.azkarrastreams.io/v0-8/docs/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/v0-8/docs/</guid>
+      <description>
+        
+        
+        &lt;p&gt;This section is where the user documentation for Azkrarra Streams lives - all the information that users need to understand and successfully use Azkarra Streams.&lt;/p&gt;
+
+      </description>
+    </item>
+    
   </channel>
 </rss>
