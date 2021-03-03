@@ -1,5 +1,5 @@
 ---
-date: 2020-09-24
+date: 2021-03-03
 title: "StreamsLifecycleInterceptor"
 linkTitle: "The StreamsLifecycle Intercepting Chain"
 weight: 70
@@ -41,7 +41,7 @@ public interface StreamsLifecycleInterceptor {
     }
 }
 ```
-The information about the current streams application, such as the application ID or the topology description,  can be retrieved from the `StreamsLifecycleContext` argument.
+The information about the current stream application, such as the application ID or the topology description,  can be retrieved from the `StreamsLifecycleContext` argument.
 The `StreamsLifecycleContext` object can also be used for updating the current state of the Kafka Streams instance.
 
 ## 2 Registering an Interceptor
@@ -50,7 +50,7 @@ The `StreamsLifecycleContext` object can also be used for updating the current s
 the `AzkarraContext` class or dynamically using the component-scan mechanism. 
 The `AzkarraContext` will be responsible to add the registered interceptors to the `StreamsExecutionEnvironment`s and topologies.
 
-The interceptors can also be directly add on a `StreamsExecutionEnvironment` level using the `addStreamsLifecycleInterceptor` method.
+The interceptors can also be directly add on a `LocalStreamsExecutionEnvironment` level using the `addStreamsLifecycleInterceptor` method.
 When, an interceptor is add to an environment, then it will be executed for all topologies running in that environment.
 
 ```java
@@ -60,7 +60,7 @@ env.addStreamsLifecycleInterceptor(() -> new MyCustomInterceptor());
 Finally, interceptors can be defined per topology through the used of the  `Executed#withInterceptor` method.
 
 ```java
-env.addTopology(
+env.registerTopology(
     ()-> new WordCountTopology(), 
     Executed.as("wordcount").withInterceptor(() -> new MyCustomInterceptor())
 );
@@ -113,13 +113,14 @@ You can also add and configure a `AutoCreateTopicsInterceptor` to a `StreamsExec
 Here is a simple example : 
 
 ```java
-StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create();
-env.addStreamsLifecycleInterceptor( () -> {
-    AutoCreateTopicsInterceptor interceptor = new AutoCreateTopicsInterceptor();
-    interceptor.setReplicationFactor((short)3);
-    interceptor.setNumPartitions(6);
-    return interceptor;
-});
+LocalStreamsExecutionEnvironment
+    .create()
+    .addStreamsLifecycleInterceptor( () -> {
+        AutoCreateTopicsInterceptor interceptor = new AutoCreateTopicsInterceptor();
+        interceptor.setReplicationFactor((short)3);
+        interceptor.setNumPartitions(6);
+        return interceptor;
+    });
 ```
 
 ### 5.2 Defining the list of Topics
@@ -128,14 +129,15 @@ By default, the `AutoCreateTopicsInterceptor` resolves the list of topics to be 
 But, you can also specify your own list of `NewTopic` to be created.
 
 ```java
-env.addStreamsLifecycleInterceptor( () -> {
-    AutoCreateTopicsInterceptor interceptor = new AutoCreateTopicsInterceptor();
-    interceptor.setTopics(Collections.singletonList(
-            new NewTopic("my-source-topic", 6, (short)3))
-    );
-    return interceptor;
-
-});
+LocalStreamsExecutionEnvironment
+    .create()
+    .addStreamsLifecycleInterceptor( () -> {
+        AutoCreateTopicsInterceptor interceptor = new AutoCreateTopicsInterceptor();
+        interceptor.setTopics(Collections.singletonList(
+                new NewTopic("my-source-topic", 6, (short)3))
+        );
+        return interceptor;
+    });
 ```
 
 When, the `AutoCreateTopicsInterceptor` is enable on context-level, the `AzkarraContext` will lookup for registered components of type `NewTopic`.
@@ -304,12 +306,29 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 
 | Property                                | Type                | Description                                                         |
 |-----------------------------------------|-------------------- |---------------------------------------------------------------------|
-| `monitoring.streams.interceptor.enable`                 | boolean  | If `true`, enable and configure the interceptor |
+| `monitoring.streams.interceptor.enable`                  | boolean  | If `true`, enable and configure the interceptor |
 | `monitoring.streams.interceptor.interval.ms`             | long     | The period the interceptor should use to send a streams state event (Default is 10 seconds).
 | `monitoring.streams.interceptor.topic`                   | string   | The topic on which monitoring event will be sent (Default is `_azkarra-streams-monitoring`). |
 | `monitoring.streams.interceptor.advertised.server`       | string   | The server name that will be included in monitoring events. If not specified, the streams `application.server` property is used. |
 | `monitoring.streams.interceptor.ce.extensions`           | list     | The list of extension attributes that should be included in monitoring events. |
-| `monitoring.streams.interceptor.info.enabled.stores.lag` | boolean     |  If `true`, the interceptor will also report offset-lag for local state stores |
+| `monitoring.streams.interceptor.info.enabled.stores.lag` | boolean  | If `true`, the interceptor will also report offset-lag for local state stores |
+| `monitoring.streams.interceptor.reporters`               | list     | List of reporters to be used |
+| `monitoring.streams.interceptor.kafka.reporter.enabled`  | boolean  | If `true` enable the default Kafka reporter |
+## 6.3 MonitoringReporter
+
+As of Azkarra v0.9.0, you can implement the interface `MonitoringRepoter` to plug you own custom logic for reporting Kafka Stream metadata.
+
+Reporters can be registered as standard components or through the configuration property `monitoring.streams.interceptor.reporters`.
+
+Example: 
+```java
+@Component
+public class ConsoleMonitoringReporter implements MonitoringRepoter {
+    public void report(final KafkaStreamMetadata metadata) {
+        System.out.println("Monitored KafkaStreams: " + metadata);
+    }
+}
+```
 
 ## 7 KafkaBrokerReaderInterceptor
 

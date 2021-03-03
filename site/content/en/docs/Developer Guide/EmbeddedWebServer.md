@@ -30,16 +30,18 @@ public class SimpleStreamsApp {
 }
 ```
 
-In addition, the embedded web server can be enable using the `AzkarraApplication#enableHttpServer()` method.
+In addition, the embedded web server can be enabled using the `AzkarraApplication#enableHttpServer()` method.
 
 ```java
-var serverConfig = ServerConfig
+var conf = ServerConfig
     .newBuilder()
     .setListener("localhost")
     .setPort(8080)
     .build();
 
-application.enableHttpServer(true, serverConfig)
+application
+    .setHttpServerEnable(true)
+    .setHttpServerConf(conf)
 ```
 
 {{% alert title="StreamsConfig.APPLICATION_SERVER_CONFIG" color="info" %}}

@@ -1,5 +1,5 @@
 ---
-date: 2020-09-24
+date: 2021-03-03
 title: "Getting Started"
 linkTitle: "Getting Started"
 weight: 10
@@ -27,7 +27,7 @@ First, run this following command :
 ```bash
 $> mvn archetype:generate -DarchetypeGroupId=io.streamthoughts \
 -DarchetypeArtifactId=azkarra-quickstart-java \
--DarchetypeVersion=0.8.0 \
+-DarchetypeVersion=0.9.0 \
 -DgroupId=azkarra.streams \
 -DartifactId=azkarra-getting-started \
 -Dversion=1.0-SNAPSHOT \
@@ -146,17 +146,21 @@ Azkarra will use this version to generate a meaningful config `application.id` f
 With Azkarra, you doesn't have to create a new `KafkaStreams` instance to run the `Topology`. This is done internally by the Azkarra API.
 
 Instead of that, you are going to create a new `StreamsExecutionEnvironment` instance in the main method. 
-The `StreamsExecutionEnvironment` is used to handle the lifecycle of one or multiple `KafkaStreams` instances. Furthermore, this can be used for
+A `StreamsExecutionEnvironment` handles the lifecycle of one or multiple `KafkaStreams` instances. Furthermore, it can be used for
 setting common configuration and/or registering multiple listeners to be applied on all running Kafka Streams instances. 
 
+Currently, Azkarra ships with single `StreamsExecutionEnvironment` implementation called `LocalStreamsExecutionEnvironment`
+that will run you `Topology` locally.
+
 ```java
-StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create();
+LocalStreamsExecutionEnvironment env = LocalStreamsExecutionEnvironment.create("default");
 ```
-The code above, will create a new environment with an empty configuration.
+
+The code above, will create a new environment named `default` and with no specific configuration.
 
 Moreover, an Azkarra application is not limited to a single environment. 
 For example, if you need to run a Kafka Streams application multiple time, you can create one environment for each target Kafka Cluster.
-Thus, each environment will have its own configuration which can be passed through the method `DefaultStreamsExecutionEnvironment#create`.
+Thus, each environment will have its own configuration which can be passed through the method `LocalStreamsExecutionEnvironment#create`.
 
 Next, let's define the configuration that we are going to use for deploying the application.
 
@@ -174,13 +178,12 @@ Then, we can register the `WordCountTopologyProvider` previously define to our e
 
 ```java
 Conf config = Conf.of("streams", props);
-env.addTopology(WordCountTopologyProvider::new, Executed.as("wordcount").withConfig(config));
+env.registerTopology(WordCountTopologyProvider::new, Executed.as("wordcount").withConfig(config));
 ```
 
-The streams configuration is passed through an `Executed` object. This object can also be used for naming or describing your topology.
+The streams configuration is passed through the `Executed` object. This object can also be used for naming or describing your topology.
 
-Note that with Azkarra, we don't manipulate`Map` or `Properties` objects to configure a Kafka Streams 
-application but we use a `Conf` object.
+Note that with Azkarra, we don't manipulate `Map` or `Properties` objects to configure a `KafkaStreams` instance but we use a `Conf` object.
 
 Finally, we are going to start the environment. Note, that the `start()` method is always non-blocking.
 
@@ -213,25 +216,26 @@ import java.util.HashMap;
 public class StreamingApp {
 
     public static void main(final String[] args) {
-        // First, create an environment for executing our Topology.
-        StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create();
-
-        // Then, define the Kafka Streams configuration,
+        // (1) Define the Kafka Streams configuration
         var props = new HashMap<String, Object>();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
 
-        // And register the TopologyProvider to the environment.
         var config = Conf.of("streams", props);
-        env.addTopology(
+
+        // (2) Create an environment for executing our Topology.
+        StreamsExecutionEnvironment env = LocalStreamsExecutionEnvironment.create("default");
+        
+        env.registerTopology(
             WordCountTopologyProvider::new,
             Executed.as("wordcount").withConfig(config)
         );
 
-        // Finally, start the streams environment.
+        // (3) Create an environment for executing our Topology.
         env.start();
     }
+
     public static class WordCountTopologyProvider implements TopologyProvider {
         @Override
         public String version() { return "1.0"; }
@@ -314,7 +318,7 @@ var config = Conf.of(
 );
 
 // And register the TopologyProvider to the environment.
-env.addTopology(
+env.registerTopology(
     WordCountTopologyProvider::new,
     Executed.as("wordcount").withConfig(config)
 );
@@ -324,7 +328,7 @@ Instead of configuring our streams and our provider on the topology-level, we ca
 All topologies will then automatically inherit the configuration of their `StreamsExecutionEnvironment`.
 
 ```java
-StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create(config);
+LocalStreamsExecutionEnvironment env = LocalStreamsExecutionEnvironment.create("default", config);
 ```
 
 Making a topology configurable is always recommend. This can be useful, for example, if you need to test a topology with different parameters.
@@ -355,7 +359,7 @@ import java.util.HashMap;
 public class StreamingApp {
 
     public static void main(final String[] args) {
-        // First, define the Kafka Streams configuration,
+        // (1) Define the Kafka Streams configuration
         var props = new HashMap<String, Object>();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -368,14 +372,13 @@ public class StreamingApp {
             "state.store.name", "WordCount"
         );
 
-        // Then, create an environment for executing our Topology.
-        StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create(config);
-
-        // And register the TopologyProvider to the environment.
-        env.addTopology(WordCountTopologyProvider::new, Executed.as("wordcount"));
-
-        // Finally, start the streams environment.
-        env.start();
+        // (2) Create an environment for executing our Topology
+        // (3) Register the TopologyProvider to the environment
+        // (4) Start the streams environment
+        LocalStreamsExecutionEnvironment
+            .create("default", config)                                                  
+            .registerTopology(WordCountTopologyProvider::new, Executed.as("wordcount")) 
+            .start();                                                                   
     }
 
     public static class WordCountTopologyProvider implements TopologyProvider , Configurable {
@@ -413,18 +416,18 @@ public class StreamingApp {
 }
 ```
 There is still one missing piece to our application. 
-Indeed, it's always recommend to configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.
+Indeed, it's always recommended to configure a Java shutdown hook to ensure that our JVM shutdowns are handled gracefully.
 
 ## Adding a ShutdownHook
 For adding a shutdown hook we are going to refactor our application by introducing a new concept called `AzkarraContext`.
-An `AzkarraContext` is used to manage lifecycle of one or more `StreamsExecutionEnvironment`. Like an environment an `AzkarraContext`
+The `AzkarraContext` is used to manage the lifecycle of one or more `StreamsExecutionEnvironment`. Like an environment, the `AzkarraContext`
 can also be configured and all environments will automatically inherit from it. 
 
 Replace your `main()` method with the code below : 
 
 ```java
 public static void main(final String[] args) {
-    // First, define the Kafka Streams configuration,
+    // (1) Define the Kafka Streams configuration
     var props = new HashMap<String, Object>();
     props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
     props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -437,27 +440,25 @@ public static void main(final String[] args) {
         "state.store.name", "WordCount"
     );
 
-    // Then, create an environment for executing our Topology.
-    StreamsExecutionEnvironment env = DefaultStreamsExecutionEnvironment.create();
+    var env = LocalStreamsExecutionEnvironment
+        .create("default", config)                                                  // (2) Create an environment for executing our Topology
+        .registerTopology(WordCountTopologyProvider::new, Executed.as("wordcount")) // (3) Register the TopologyProvider to the environment
+                                                                             
 
-    // And register the TopologyProvider to the environment.
-    env.addTopology(WordCountTopologyProvider::new, Executed.as("wordcount"));
-
-    // Finally, create and start an Azkarra Context.
     DefaultAzkarraContext.create(config)
-        .addExecutionEnvironment(env)
-        .setRegisterShutdownHook(true)
-        .start();
+        .addExecutionEnvironment(env)                                               // (4) Add the execution environment
+        .setRegisterShutdownHook(true)                                              // (5) Register shutdown hook
+        .start();                                                                   // (6) Start the streams environment
 }
 ```
-As you can see, this is the `AzkarraContext` which is responsible for starting the environment. 
+As you can see, this is now the `AzkarraContext` which is responsible for starting the environment. 
 In addition, we have moved the configuration from the `StreamsExecutionEnvironment` to the `AzkarraContext`.
 
 The Azkarra API is designed to allow sensible overriding of properties. Configuration are considered in the following order :
 
-- Topology (using the `Executed`).
-- StreamsExecutionEnvironment (using `create()` or `setConfiguration`).
-- AzkarraContext (using `create()` or `setConfiguration`).
+* `Topology` (using the `Executed`).
+* `StreamsExecutionEnvironment` (using `create()` or `setConfiguration`).
+* `AzkarraContext` (using `create()` or `setConfiguration`).
 
 (Note : You should always have a single `AzkarraContext` per application even if Azkarra does not enforce a singleton pattern.)
 
@@ -514,10 +515,10 @@ Congratulation! You just run you first KafkaStreams application using Azkarra.
 
 **But, Azkarra is not limited to that and can do much more.**  So let’s go ahead and explore what is making Azkarra so cool!
 
-(In the following section we will omitted the code for the WordCountTopology for clarity)
+(In the following section we will be omitted the code for the WordCountTopology for clarity)
 
 ## Simplifying our Application
-In the previous example, we have manually created a `StreamsExecutionEnvironment` and added the `WordCountTopologyProvider`.
+In the previous example, we have manually created a `StreamsExecutionEnvironment` and registered the `WordCountTopologyProvider`.
 Actually, our objective was to give you an overview of Azkarra's main concepts. 
 Defining environments in a programmatic way gives you flexibility but can be sometime cumbersome.
 
@@ -533,9 +534,9 @@ context.setRegisterShutdownHook(true).start();
 ```
 
 ## Externalizing Context Configuration
-The externalization of configuration is a requirement to deploy any application in production.
+Usually, the externalization of configuration is a requirement to deploy any application in production.
 
-For that purpose, Azkarra provide the class so-called `AzkarraConf`. 
+For that purpose, Azkarra provide the class `AzkarraConf`. 
 Internally, it uses the [Config](https://github.com/lightbend/config) library developed by Lightbend to ease the configuration of your application from an external file.
 
 First, we will update the file `src/main/resources/application.conf` to contain the following code :
@@ -692,17 +693,24 @@ Azkarra ships with an embedded non-blocking HTTP server (based on Undertow) to e
 These APIs can be used not only to manage your local Kafka Streams instances and Topologies 
 but also to execute interactive queries on your application states stores.
 
-The HTTP-Server can be enable and configured via the `AzkarraApplication` as follows : 
+The HTTP-Server can be enabled and configured via the `AzkarraApplication` as follows : 
 
 ```java
-AzkarraConf config = AzkarraConf.create();
+AzkarraConf config = ;
+
+// (1) Create Embedded HTTP-server configuration
+final ServerConfig serverConfig = ServerConfig
+        .newBuilder()
+        .setListener("localhost")
+        .setPort(8082)
+        .build();
 
 new AzkarraApplication(StreamingApp.class)
-    .setConfiguration(config)
-     // Enable http server and set the context.
-    .enableHttpServer(true, HttpServerConf.with("localhost", 8080))
-    .setRegisterShutdownHook(true)
-    .run(args);
+    .setConfiguration(AzkarraConf.create())
+    .setHttpServerEnable(true)                   // (2) Enable HTTP-Server
+    .setHttpServerConf(serverConfig)             // (3) Configure HTTP-Server
+    .setRegisterShutdownHook(true)               // (4) Register the shutdown-hook
+    .run(args);                                  // (5) Start the application
 ```
 
 Let's have a look to some REST APIs.
@@ -834,5 +842,5 @@ azkarra {
 ## Azkarra Web UI
 
 And, finally, we saved the best for last! 
-Azkarra also provide a default WebUI for exploring your local streams application.
+Azkarra also provides a default WebUI for exploring your local streams application.
 [Azkarra Streams Web UI](http://localhost:8080/ui)

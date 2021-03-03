@@ -1,5 +1,5 @@
 ---
-date: 2020-02-12
+date: 2021-03-03
 title: "AzkarraApplication"
 linkTitle: "AzkarraApplication"
 weight: 50
@@ -35,12 +35,14 @@ AzkarraApplication application = new AzkarraApplication()
 azkarra {
   // The context configuration
   context {
-    // The default configuration for streams application.
-    streams {
-      bootstrap.servers = "localhost:9092"
-      default.key.serde = "org.apache.kafka.common.serialization.Serdes$StringSerde"
-      default.value.serde = "org.apache.kafka.common.serialization.Serdes$StringSerde"
-    }
+
+  }
+
+  // The global configuration for all Kafka Streams instances
+  streams {
+    bootstrap.servers = "localhost:9092"
+    default.key.serde = "org.apache.kafka.common.serialization.Serdes$StringSerde"
+    default.value.serde = "org.apache.kafka.common.serialization.Serdes$StringSerde"
   }
   ...
 }
@@ -125,7 +127,7 @@ application.setEnableComponentScan(true);
 By enabling *auto-start* all `TopologyProvider`  that was registered during component-scanning will be automatically added to the given `StreamExecutionEnvironment`.
 
 ```java
-application.setAutoStart(true, "__default");
+application.setAutoStart(true, "default");
 ```
 
 ## 5 The `@AzkarraStreamsApplication` annotation

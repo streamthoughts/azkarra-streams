@@ -47,7 +47,7 @@ title: "Azkarra Streams"
 				        return Version.getVersion();
 				    }
 				    @Override
-				    public Topology get() {
+				    public Topology topology() {
 				        final StreamsBuilder builder = new StreamsBuilder();
 				        final KStream<String, String> words = builder.stream("streams-plaintext-input");
 				        words.flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\s")))

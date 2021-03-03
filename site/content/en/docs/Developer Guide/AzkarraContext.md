@@ -61,12 +61,12 @@ A `StreamsExecutionEnvironment` can be registered to the `AzkarraContext` using 
 context.addExecutionEnvironment(env);
 ```
 
-By default, the `AzkarraContext` will always create a default `StreamsExecutionEnvironment` named **__default**.
+By default, the `AzkarraContext` will always create a default `StreamsExecutionEnvironment` named **default**.
 
-You can retrieved the default environment as follows:
+You can retrieve the default environment as follows:
 
 ```java
-StreamsExecutionEnvironment defaultExecutionEnvironment = context.defaultExecutionEnvironment();
+StreamsExecutionEnvironment defaultExecutionEnvironment = context.getDefaultEnvironment();
 ```
 
 Note that all registered environments must have a distinct name.
