@@ -2849,7 +2849,7 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h2 id=&#34;63-monitoringreporter&#34;&gt;6.3 MonitoringReporter&lt;/h2&gt;
-&lt;p&gt;As of Azkarra v0.9.0, you can implement the interface &lt;code&gt;MonitoringRepoter&lt;/code&gt; to plug you own custom logic for reporting Kafka Stream metadata.&lt;/p&gt;
+&lt;p&gt;As of Azkarra v0.9.0, you can implement the interface &lt;code&gt;MonitoringReporter&lt;/code&gt; to plug you own custom logic for reporting Kafka Stream metadata.&lt;/p&gt;
 &lt;p&gt;Reporters can be registered as standard components or through the configuration property &lt;code&gt;monitoring.streams.interceptor.reporters&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Example:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#5c35cc;font-weight:bold&#34;&gt;@Component&lt;/span&gt;
