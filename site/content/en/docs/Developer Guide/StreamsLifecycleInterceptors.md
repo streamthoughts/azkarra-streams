@@ -316,7 +316,7 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
 | `monitoring.streams.interceptor.kafka.reporter.enabled`  | boolean  | If `true` enable the default Kafka reporter |
 ## 6.3 MonitoringReporter
 
-As of Azkarra v0.9.0, you can implement the interface `MonitoringRepoter` to plug you own custom logic for reporting Kafka Stream metadata.
+As of Azkarra v0.9.0, you can implement the interface `MonitoringReporter` to plug you own custom logic for reporting Kafka Stream metadata.
 
 Reporters can be registered as standard components or through the configuration property `monitoring.streams.interceptor.reporters`.
 
