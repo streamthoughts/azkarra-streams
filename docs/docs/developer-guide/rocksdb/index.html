@@ -26,12 +26,12 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/docs/developer-guide/rocksdb/" />
 <meta property="article:published_time" content="2021-03-03T00:00:00+00:00" />
-<meta property="article:modified_time" content="2021-03-03T14:37:10+01:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:modified_time" content="2021-03-11T00:13:08+01:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="RocksDB">
 <meta itemprop="description" content="How to tune internal RocksDB state stores ?
 ">
 <meta itemprop="datePublished" content="2021-03-03T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2021-03-03T14:37:10&#43;01:00" />
+<meta itemprop="dateModified" content="2021-03-11T00:13:08&#43;01:00" />
 <meta itemprop="wordCount" content="411">
 
 
@@ -2240,10 +2240,10 @@ enable log statistics for performance debugging and shared memory usage.</p>
 <td>The ratio of cache memory that is reserved for high priority blocks (e.g.: indexes, filters and compressions blocks).</td>
 </tr>
 <tr>
-<td><code>rocksdb.memory.strict.capacity.limit</code>| boolean</td>
+<td><code>rocksdb.memory.strict.capacity.limit</code></td>
+<td>boolean</td>
 <td>false</td>
 <td>Create a block cache with strict capacity limit, i.e., insert to the cache will fail when cache is full. This property is only used when &lsquo;rocksdb.memory.managed&rsquo; is set to true or &lsquo;rocksdb.block.cache.size&rsquo; is set.</td>
-<td></td>
 </tr>
 <tr>
 <td><code>rocksdb.block.cache.size</code></td>
@@ -2270,16 +2270,16 @@ enable log statistics for performance debugging and shared memory usage.</p>
 <td>The maximum number of open files that can be used per RocksDB instance.</td>
 </tr>
 <tr>
-<td><code>rocksdb.background.thread.flush.pool</code>| integer</td>
+<td><code>rocksdb.background.thread.flush.pool</code></td>
+<td>integer</td>
 <td></td>
 <td>The number of threads to be used for the background flush process.</td>
-<td></td>
 </tr>
 <tr>
-<td><code>rocksdb.background.compaction.flush.pool</code>| integer</td>
+<td><code>rocksdb.background.compaction.flush.pool</code></td>
+<td>integer</td>
 <td></td>
 <td>The number of threads to be used for the background compaction process.</td>
-<td></td>
 </tr>
 <tr>
 <td><code>rocksdb.max.background.flushes</code></td>
@@ -2318,7 +2318,7 @@ enable log statistics for performance debugging and shared memory usage.</p>
 
 	
 	
-	<div class="text-muted mt-5 pt-3 border-top">Last modified March 3, 2021: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/ca3e155bad3115074d2525dccffbb4060acd39af">docs(site): update docs for 0.9.x (ca3e155b)</a>
+	<div class="text-muted mt-5 pt-3 border-top">Last modified March 11, 2021: <a  href="https://github.com/streamthoughts/azkarra-streams/commit/a6f4f624e47b8c6856949acce3ddab9e31391832">fix(site): fix RocksDB config table (a6f4f624)</a>
 </div>
 </div>
 
