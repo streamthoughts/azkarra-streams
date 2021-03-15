@@ -23,18 +23,18 @@
 <title>Release v0.9.0 | Azkarra Streams</title><meta property="og:title" content="Release v0.9.0" />
 <meta property="og:description" content="Azkarra Streams v0.9.0 is now available!
 Below is a summary of the issues addressed in the 0.9.0 release of Azkarra Streams.
-New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsInterceptor (#83) 2922f0e feat(runtime): add timeout option to WaitForSourceTopicsInterceptor (#82) c8af92c feat(runtime): update MonitoringStreamsInterceptor to report state offset lags (#103) f7eae4e feat(runtime): add new KafkaBrokerReadyInterceptor (#51) a0e7cbd feat(api/server): add support for HTTP Server-Sent Event (#100) d19949f feat(server): allow to only return successfull records from IQ d9a559d feat(api): add ConfValue annotation  Improvements and Bug fixes  a28ae57 refactor(api): add new params wait." />
+New Features  689a9e3 feat(ui): enhance Azkarra UI to display the raw string topology description (#126) 3bdaadb feat(runtime): enhance MonitoringStreamsInterceptor to support pluggable reporters (#124) 9d844f3 feat(all): add new tab for displaying state store offsets and lags in Azkarra UI (#123) 1d9d3ad feat(runtime): add a default StateRestoreListener to provide custom KafkaStreams states (#121) 20a7965 feat(api/runtime): add new interface KafkaStreamsContainerAware (#120) 7fa4bce feat(all): fix and move AzkarraRocksDBConfigSetter to azkarra-commons module (#116) d8980ef feat(ui/client): enhance UI and fix azkarra-client build 3401c86 feat(api): allow more fine-tuning of RocksDB instances (#116) c6c8d64 feat(streams): add StreamsConfigEntryLoader eed9aa9 feat(client): add Java Client for Azkarra 4f67fc6 feat(all): refactor and add new endpoints for topologies acb82f5 feat(api): allow to configure maxBlockingTime on EventStream  Improvements and Bug fixes  f97bd55 fix(api): add missing method withBlockCacheSize to RocksDBConfig ba57b14 refactor(api/runtime): set default environment name for LocalStreamsExecutionEnvironment d63ad8e fix(commons): fix resources is not reallocated when stream is restarted 0a71b8e fix(commons): fix NPE LoggingStateRestoreListener 2064b6d fix(runtime): fix producer already closed MonitoringReporter b390c62 fix(runtime): fix breaking change due to random container id a5c5100 fix(api): remove deprecated class ConfBuilder 4bce06e fix(ui): add a visited map to prevent duplicate node from showing up 471c3d1 fix(server): enforce content-type to JSON for ExceptionMapper 36f0bb0 fix(server): fix Kafka Streams metric values should be returned with content-type text/plain (#125) c4b80c4 fix(ui): fix authentication modale does not show up 4ea170b fix(streams): fix regression on server configuration 74a4502 fix(api/runtime): fix IllegalStateException when providing KafkaStreamFactory (#119) 456ece2 fix(metrics): fix missing @component on ConfigEntryLoader a5c5100 fix(api): remove deprecated class ConfBuilder 781a800 fix(ui/runtime): cleanup UI and fix local container  Sub-Tasks  0cc9862 deps(all): bump kafka streams version to 2." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.azkarrastreams.io/blog/2021/03/03/release-v0.9.0/" />
 <meta property="article:published_time" content="2021-03-03T00:00:00+00:00" />
-<meta property="article:modified_time" content="2021-03-08T15:35:50+01:00" /><meta property="og:site_name" content="Azkarra Streams" />
+<meta property="article:modified_time" content="2021-03-15T15:33:37+01:00" /><meta property="og:site_name" content="Azkarra Streams" />
 <meta itemprop="name" content="Release v0.9.0">
 <meta itemprop="description" content="Azkarra Streams v0.9.0 is now available!
 Below is a summary of the issues addressed in the 0.9.0 release of Azkarra Streams.
-New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsInterceptor (#83) 2922f0e feat(runtime): add timeout option to WaitForSourceTopicsInterceptor (#82) c8af92c feat(runtime): update MonitoringStreamsInterceptor to report state offset lags (#103) f7eae4e feat(runtime): add new KafkaBrokerReadyInterceptor (#51) a0e7cbd feat(api/server): add support for HTTP Server-Sent Event (#100) d19949f feat(server): allow to only return successfull records from IQ d9a559d feat(api): add ConfValue annotation  Improvements and Bug fixes  a28ae57 refactor(api): add new params wait.">
+New Features  689a9e3 feat(ui): enhance Azkarra UI to display the raw string topology description (#126) 3bdaadb feat(runtime): enhance MonitoringStreamsInterceptor to support pluggable reporters (#124) 9d844f3 feat(all): add new tab for displaying state store offsets and lags in Azkarra UI (#123) 1d9d3ad feat(runtime): add a default StateRestoreListener to provide custom KafkaStreams states (#121) 20a7965 feat(api/runtime): add new interface KafkaStreamsContainerAware (#120) 7fa4bce feat(all): fix and move AzkarraRocksDBConfigSetter to azkarra-commons module (#116) d8980ef feat(ui/client): enhance UI and fix azkarra-client build 3401c86 feat(api): allow more fine-tuning of RocksDB instances (#116) c6c8d64 feat(streams): add StreamsConfigEntryLoader eed9aa9 feat(client): add Java Client for Azkarra 4f67fc6 feat(all): refactor and add new endpoints for topologies acb82f5 feat(api): allow to configure maxBlockingTime on EventStream  Improvements and Bug fixes  f97bd55 fix(api): add missing method withBlockCacheSize to RocksDBConfig ba57b14 refactor(api/runtime): set default environment name for LocalStreamsExecutionEnvironment d63ad8e fix(commons): fix resources is not reallocated when stream is restarted 0a71b8e fix(commons): fix NPE LoggingStateRestoreListener 2064b6d fix(runtime): fix producer already closed MonitoringReporter b390c62 fix(runtime): fix breaking change due to random container id a5c5100 fix(api): remove deprecated class ConfBuilder 4bce06e fix(ui): add a visited map to prevent duplicate node from showing up 471c3d1 fix(server): enforce content-type to JSON for ExceptionMapper 36f0bb0 fix(server): fix Kafka Streams metric values should be returned with content-type text/plain (#125) c4b80c4 fix(ui): fix authentication modale does not show up 4ea170b fix(streams): fix regression on server configuration 74a4502 fix(api/runtime): fix IllegalStateException when providing KafkaStreamFactory (#119) 456ece2 fix(metrics): fix missing @component on ConfigEntryLoader a5c5100 fix(api): remove deprecated class ConfBuilder 781a800 fix(ui/runtime): cleanup UI and fix local container  Sub-Tasks  0cc9862 deps(all): bump kafka streams version to 2.">
 <meta itemprop="datePublished" content="2021-03-03T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2021-03-08T15:35:50&#43;01:00" />
-<meta itemprop="wordCount" content="518">
+<meta itemprop="dateModified" content="2021-03-15T15:33:37&#43;01:00" />
+<meta itemprop="wordCount" content="335">
 
 
 
@@ -42,7 +42,7 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
 <meta name="twitter:title" content="Release v0.9.0"/>
 <meta name="twitter:description" content="Azkarra Streams v0.9.0 is now available!
 Below is a summary of the issues addressed in the 0.9.0 release of Azkarra Streams.
-New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsInterceptor (#83) 2922f0e feat(runtime): add timeout option to WaitForSourceTopicsInterceptor (#82) c8af92c feat(runtime): update MonitoringStreamsInterceptor to report state offset lags (#103) f7eae4e feat(runtime): add new KafkaBrokerReadyInterceptor (#51) a0e7cbd feat(api/server): add support for HTTP Server-Sent Event (#100) d19949f feat(server): allow to only return successfull records from IQ d9a559d feat(api): add ConfValue annotation  Improvements and Bug fixes  a28ae57 refactor(api): add new params wait."/>
+New Features  689a9e3 feat(ui): enhance Azkarra UI to display the raw string topology description (#126) 3bdaadb feat(runtime): enhance MonitoringStreamsInterceptor to support pluggable reporters (#124) 9d844f3 feat(all): add new tab for displaying state store offsets and lags in Azkarra UI (#123) 1d9d3ad feat(runtime): add a default StateRestoreListener to provide custom KafkaStreams states (#121) 20a7965 feat(api/runtime): add new interface KafkaStreamsContainerAware (#120) 7fa4bce feat(all): fix and move AzkarraRocksDBConfigSetter to azkarra-commons module (#116) d8980ef feat(ui/client): enhance UI and fix azkarra-client build 3401c86 feat(api): allow more fine-tuning of RocksDB instances (#116) c6c8d64 feat(streams): add StreamsConfigEntryLoader eed9aa9 feat(client): add Java Client for Azkarra 4f67fc6 feat(all): refactor and add new endpoints for topologies acb82f5 feat(api): allow to configure maxBlockingTime on EventStream  Improvements and Bug fixes  f97bd55 fix(api): add missing method withBlockCacheSize to RocksDBConfig ba57b14 refactor(api/runtime): set default environment name for LocalStreamsExecutionEnvironment d63ad8e fix(commons): fix resources is not reallocated when stream is restarted 0a71b8e fix(commons): fix NPE LoggingStateRestoreListener 2064b6d fix(runtime): fix producer already closed MonitoringReporter b390c62 fix(runtime): fix breaking change due to random container id a5c5100 fix(api): remove deprecated class ConfBuilder 4bce06e fix(ui): add a visited map to prevent duplicate node from showing up 471c3d1 fix(server): enforce content-type to JSON for ExceptionMapper 36f0bb0 fix(server): fix Kafka Streams metric values should be returned with content-type text/plain (#125) c4b80c4 fix(ui): fix authentication modale does not show up 4ea170b fix(streams): fix regression on server configuration 74a4502 fix(api/runtime): fix IllegalStateException when providing KafkaStreamFactory (#119) 456ece2 fix(metrics): fix missing @component on ConfigEntryLoader a5c5100 fix(api): remove deprecated class ConfBuilder 781a800 fix(ui/runtime): cleanup UI and fix local container  Sub-Tasks  0cc9862 deps(all): bump kafka streams version to 2."/>
 
 
 
@@ -50,8 +50,8 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
 
 
 
-<link rel="preload" href="/scss/main.min.d43252479f128b92439b4e4c1309b018a382e35b54612de5cfc082d087573155.css" as="style">
-<link href="/scss/main.min.d43252479f128b92439b4e4c1309b018a382e35b54612de5cfc082d087573155.css" rel="stylesheet" integrity="">
+<link rel="preload" href="/scss/main.min.5c022bb1bcdbd2d7181d4d78f7760ca212f032b4798bc8e14fbb26be825833d3.css" as="style">
+<link href="/scss/main.min.5c022bb1bcdbd2d7181d4d78f7760ca212f032b4798bc8e14fbb26be825833d3.css" rel="stylesheet" integrity="">
 
 
 <script
@@ -98,7 +98,7 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
 				
 				
 				
-				<a class="nav-link active" href="/blog/" ><span class="active">News</span></a>
+				<a class="nav-link active" href="/blog/" ><span class="active">Blog</span></a>
 			</li>
 			
 			<li class="nav-item mr-4 mb-2 mb-lg-0">
@@ -175,7 +175,7 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
 
 <ul class="td-sidebar-nav__section pr-md-3">
   <li class="td-sidebar-nav__section-title">
-    <a  href="/blog/" class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">News</a>
+    <a  href="/blog/" class="align-left pl-0 pr-2 td-sidebar-link td-sidebar-link__section">Blog</a>
   </li>
   <ul>
     <li class="collapse show" id="blog">
@@ -197,6 +197,12 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
   <ul>
     <li class="collapse " id="blog-news">
       
+      
+      
+      
+      
+      
+      <a class="td-sidebar-link td-sidebar-link__page " id="m-blog-2021-03-11-azkarra-streams-0-9-0-release" href="/blog/2021/03/11/azkarra-streams-0.9.0-release/">Azkarra Streams 0.9.0 release</a>
       
       
       
@@ -307,9 +313,6 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
     <li><a href="#new-features">New Features</a></li>
     <li><a href="#improvements-and-bug-fixes">Improvements and Bug fixes</a></li>
     <li><a href="#subtasks">Sub-Tasks</a></li>
-    <li><a href="#new-features1">New Features</a></li>
-    <li><a href="#improvements-and-bug-fixes1">Improvements and Bug fixes</a></li>
-    <li><a href="#subtasks1">Sub-Tasks</a></li>
   </ul>
 </nav>
 
@@ -332,38 +335,6 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
 <p>Below is a summary of the issues addressed in the 0.9.0 release of Azkarra Streams.</p>
 <h2 id="new-features">New Features</h2>
 <ul>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/48c856e">48c856e</a> feat(runtime): add exclude topics to WaitForSourceTopicsInterceptor (#83)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/2922f0e">2922f0e</a> feat(runtime): add timeout option to WaitForSourceTopicsInterceptor (#82)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/c8af92c">c8af92c</a> feat(runtime): update MonitoringStreamsInterceptor to report state offset lags (#103)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/f7eae4e">f7eae4e</a> feat(runtime): add new KafkaBrokerReadyInterceptor (#51)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/a0e7cbd">a0e7cbd</a> feat(api/server): add support for HTTP Server-Sent Event (#100)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/d19949f">d19949f</a> feat(server): allow to only return successfull records from IQ</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/d9a559d">d9a559d</a> feat(api): add ConfValue annotation</li>
-</ul>
-<h2 id="improvements-and-bug-fixes">Improvements and Bug fixes</h2>
-<ul>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/a28ae57">a28ae57</a> refactor(api): add new params wait.for.topics.enable</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/d6feb38">d6feb38</a> refactor(runtime): remove AzkarraContextConfig class (#74)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/d383da2">d383da2</a> fix(server): load AzkarraRestExtension using external component classLoaders</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/e80a4e5">e80a4e5</a> fix(api): exclude Kotlin packages during annotation scan (#107)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/754651d">754651d</a> refactor(runtime): refactor AutoCreateTopicsInterceptor to use adminClient created from streams container</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/456f6c5">456f6c5</a> fix(server): fix invalid JSON return from GenericRecordSerializer</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/c32ccdb">c32ccdb</a> fix(server): fix JSON encoding for avro record with logical-type</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/dcda57a">dcda57a</a> refactor(api): clean and improve Annotation resolution</li>
-</ul>
-<h2 id="subtasks">Sub-Tasks</h2>
-<ul>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/2f49f83">2f49f83</a> build(all): bump dependencies versions</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/dcdfe2e">dcdfe2e</a> refactor(streams): upgrade to Kafka Streams 2.6</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/63af93a">63af93a</a> refactor(streams): normalize the method returning Topology</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/04165df">04165df</a> build(maven): add wrapper for Maven 3.6.3 (#64)</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/05910a7">05910a7</a> refactor(api): extract interface from KafkaStreamsContainer</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/6d64b46">6d64b46</a> refactor(api/runtime): refactor creation of KafkaStreamsContainer</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/401648c">401648c</a> build(deps): bump log4j.version from 2.12.1 to 2.13.3</li>
-<li><a href="https://github.com/streamthoughts/azkarra-streams/commit/7cd68ce">7cd68ce</a> refactor(streams): deprecate ConfBuilder in favor to Conf</li>
-</ul>
-<h2 id="new-features1">New Features</h2>
-<ul>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/689a9e3">689a9e3</a> feat(ui): enhance Azkarra UI to display the raw string topology description (#126)</li>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/3bdaadb">3bdaadb</a> feat(runtime): enhance MonitoringStreamsInterceptor to support pluggable reporters (#124)</li>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/9d844f3">9d844f3</a> feat(all): add new tab for displaying state store offsets and lags in Azkarra UI (#123)</li>
@@ -377,7 +348,7 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/4f67fc6">4f67fc6</a> feat(all): refactor and add new endpoints for topologies</li>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/acb82f5">acb82f5</a> feat(api): allow to configure maxBlockingTime on EventStream</li>
 </ul>
-<h2 id="improvements-and-bug-fixes1">Improvements and Bug fixes</h2>
+<h2 id="improvements-and-bug-fixes">Improvements and Bug fixes</h2>
 <ul>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/f97bd55">f97bd55</a> fix(api): add missing method withBlockCacheSize to RocksDBConfig</li>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/ba57b14">ba57b14</a> refactor(api/runtime): set default environment name for LocalStreamsExecutionEnvironment</li>
@@ -396,7 +367,7 @@ New Features  48c856e feat(runtime): add exclude topics to WaitForSourceTopicsIn
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/a5c5100">a5c5100</a> fix(api): remove deprecated class ConfBuilder</li>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/781a800">781a800</a> fix(ui/runtime): cleanup UI and fix local container</li>
 </ul>
-<h2 id="subtasks1">Sub-Tasks</h2>
+<h2 id="subtasks">Sub-Tasks</h2>
 <ul>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/0cc9862">0cc9862</a> deps(all): bump kafka streams version to 2.7.x #117</li>
 <li><a href="https://github.com/streamthoughts/azkarra-streams/commit/78ce9f4">78ce9f4</a> refactor(all): extract RestApiQueryCall</li>

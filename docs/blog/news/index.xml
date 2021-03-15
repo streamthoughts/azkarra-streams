@@ -14,6 +14,109 @@
     
     
     <item>
+      <title>Blog: Azkarra Streams 0.9.0 release 🚀</title>
+      <link>http://www.azkarrastreams.io/blog/2021/03/11/azkarra-streams-0.9.0-release/</link>
+      <pubDate>Thu, 11 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.azkarrastreams.io/blog/2021/03/11/azkarra-streams-0.9.0-release/</guid>
+      <description>
+        
+        
+        &lt;p&gt;A few days ago we released &lt;a href=&#34;https://www.azkarrastreams.io/&#34;&gt;Azkarra&lt;/a&gt; Streams V0.9, and like every new release, it brings new features that make it easier to develop streams processing applications based on &lt;a href=&#34;https://kafka.apache.org/documentation/streams/&#34;&gt;Kafka Streams&lt;/a&gt;. This version also represents a milestone since it includes important changes to Azkarra’s internal and public APIs in order to prepare the next steps of the project.&lt;/p&gt;
+&lt;p&gt;This blog post summarizes the most important improvements.&lt;/p&gt;
+&lt;h2 id=&#34;kafka-streams-memory-management&#34;&gt;Kafka Streams Memory Management&lt;/h2&gt;
+&lt;p&gt;Kafka Streams uses &lt;a href=&#34;https://rocksdb.org/&#34;&gt;RocksDB&lt;/a&gt; for maintaining internal state stores. Usually, and depending on the number of states and the data throughput your application have to managed, it can be necessary to change the default settings of internal RocksDB instances. These can be specified through the rocksdb.config.setter configuration and the implementation of the RocksDBConfigSetter interface.&lt;/p&gt;
+&lt;p&gt;This release provides a new default &lt;a href=&#34;https://www.azkarrastreams.io/docs/developer-guide/rocksdb/&#34;&gt;AzkarraRocksDBConfigSetter&lt;/a&gt; class that allows advanced RocksDB tuning and helps to control the total memory usage across all instances.&lt;/p&gt;
+&lt;p&gt;For example, the configuraton below shows how to configure a block-cache size of 256MB shared across all RocksDB instances with a Write-Buffer-Manager of block.cache.size * 0.5.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-hocon&#34; data-lang=&#34;hocon&#34;&gt;azkarra {
+ streams {
+  rocksdb.memory.managed = true
+  rocksdb.memory.write.buffer.ratio = 0.5
+  rocksdb.memory.high.prio.pool.ratio = 0.1
+  rocksdb.block.cache.size = 268435456
+ }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;For more information about how to configure RocksDB you can follow the official &lt;a href=&#34;https://github.com/facebook/rocksdb/wiki/RocksDB-Tuning-Guide&#34;&gt;Tuning Guide&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;monitoring-state-store-recovery-process&#34;&gt;Monitoring State Store Recovery Process&lt;/h2&gt;
+&lt;p&gt;Azkarra now automatically configures a LoggingStateRestoreListener which logs and captures the states of the restoration process for each store. In addition, those information are exposed through the REST endpoint GET /api/v1/streams/:id/stores :&lt;/p&gt;
+&lt;p&gt;Example (JSON response):&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;[&lt;/span&gt;
+  &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;Count&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;partition_restore_infos&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;[&lt;/span&gt;
+      &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;starting_offset&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;ending_offset&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;total_restored&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;duration&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;PT0.102756S&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;partition&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;topic&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;complex-word-count-topology-0-10-0-s-n-a-p-s-h-o-t-Count-changelog&amp;#34;&lt;/span&gt;
+      &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
+    &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;partition_lag_infos&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;[&lt;/span&gt;
+      &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;partition&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;current_offset&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;log_end_offset&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;&amp;#34;offset_lag&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#0000cf;font-weight:bold&#34;&gt;0&lt;/span&gt;
+      &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
+    &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;]&lt;/span&gt;
+  &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;exporting-kafka-streams-states-anywhere&#34;&gt;Exporting Kafka Streams States Anywhere&lt;/h2&gt;
+&lt;p&gt;Since Azkarra v0.7, you can use the&lt;a href=&#34;https://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/&#34;&gt;StreamsLifecycleInterceptor&lt;/a&gt; so-called&lt;a href=&#34;https://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/#86-monitoringstreamsinterceptor&#34;&gt;MonitoringStreamsInterceptor&lt;/a&gt; that periodically publishes the state of your KafkaStreams instance, directly into a Kafka Topic, in the form of events that adhere to the &lt;a href=&#34;https://cloudevents.io/&#34;&gt;CloudEvents&lt;/a&gt; specification.&lt;/p&gt;
+&lt;p&gt;The &lt;a href=&#34;https://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/#86-monitoringstreamsinterceptor&#34;&gt;MonitoringStreamsInterceptor&lt;/a&gt; has been enhanced so that you can more easily report the states of your instances in third-party systems other than Kafka (e.g., DataDog). For this, Azkarra v0.9 introduces the new pluggable interface MonitoringReporter. Custom reporters can be configured through the monitoring.streams.interceptors.reporters property or declared as components.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#5c35cc;font-weight:bold&#34;&gt;@Component&lt;/span&gt;
+&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;ConsoleMonitoringReporter&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;implements&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;MonitoringRepoter&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
+
+    &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;report&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;final&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;KafkaStreamMetadata&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;metadata&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color:#000&#34;&gt;System&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;Monitored KafkaStreams: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;metadata&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;azkarra-dashboard&#34;&gt;Azkarra Dashboard&lt;/h2&gt;
+&lt;p&gt;The UI of Azkarra Dashboard has been polished to provide a better user experience. In addition, a new tab has been added to get direct access to the state stores lag and offsets, as well as, information about their recovery process.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://www.azkarrastreams.io/images/azkarra-streams-overview.gif&#34; alt=&#34;Azkarra Streams — Dashboard —v0.9.0&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;azkarra-api-changes&#34;&gt;Azkarra API Changes&lt;/h2&gt;
+&lt;h3 id=&#34;localstreamsexecutionenvironment&#34;&gt;LocalStreamsExecutionEnvironment&lt;/h3&gt;
+&lt;p&gt;This new release makes some changes to the Azkarra Low-Level APIs, including the existing StreamsExecutionEnvironment interface. Specifically, the DefaultStreamsExecutionEnvironment has been replaced by newLocalStreamsExecutionEnvironment class which is used to run local KafkaStreams instances.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;LocalStreamsExecutionEnvironment&lt;/span&gt;
+ &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;create&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;default&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#000&#34;&gt;config&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;                                                
+ &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;registerTopology&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;
+        &lt;span style=&#34;color:#000&#34;&gt;WordCountTopologyProvider&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#204a87;font-weight:bold&#34;&gt;new&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;,&lt;/span&gt;
+        &lt;span style=&#34;color:#000&#34;&gt;Executed&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;as&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#4e9a06&#34;&gt;&amp;#34;wordcount&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;
+ &lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Currently, these changes do not directly impact applications developed with Azkarra. Indeed, they were motivated by the aim to bring in a future version additional implementations that will allow deploying and managing Azkarra instances running remotely, i.e., in Kubernetes :)&lt;/p&gt;
+&lt;h3 id=&#34;azkarra-client&#34;&gt;Azkarra Client&lt;/h3&gt;
+&lt;p&gt;Additionally, Azkarra 0.9 introduces a new module named azkarra-client that provides a simple Java Client API for Azkarra Streams, generated through the &lt;a href=&#34;https://swagger.io/specification/&#34;&gt;OpenAPI Specification&lt;/a&gt;. Currently, the Client API is already used by Azkarra itself for executing remote Interactive Queries and will be leveraged in future versions to manage complete remote Azkarra instances.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;KafkaStreamsContainerAware&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Azkarra provides the new interface KafkaStreamsContainerAware that can be implemented by classes implementing :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;org.apache.kafka.streams.KafkaStreams.StateListener&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;org.apache.kafka.streams.processor.StateRestoreListener&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;io.streamthoughts.azkarra.api.streams.kafkaStreamsFactory&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;support-for-apache-kafka-27&#34;&gt;Support for Apache Kafka 2.7&lt;/h2&gt;
+&lt;p&gt;Finally, Azkarra Streams is always built on the most recent version of Kafka. Therefore, this new release adds support for version 2.7.&lt;/p&gt;
+&lt;h2 id=&#34;join-the-azkarra-streams-community-on-slack&#34;&gt;Join the Azkarra Streams community on Slack&lt;/h2&gt;
+&lt;p&gt;The Azkarra project has a dedicated Slack to help and discuss the community. &lt;a href=&#34;https://communityinviter.com/apps/azkarra-streams/azkarra-streams-community&#34;&gt;Join Us!&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;I would like to thank you, the early adopters of Azkarra who, through their feedback and support, help the project to become more and more robust after each new version.&lt;/p&gt;
+&lt;p&gt;Please, share this article if you like this project. You can even add a ⭐ to the GitHub repository to support us.&lt;/p&gt;
+&lt;p&gt;Also, the project is open for contributions. So feel free to propose your ideas or project needs and of course to create pull requests (PR).&lt;/p&gt;
+&lt;p&gt;Thank you very much&lt;/p&gt;
+
+      </description>
+    </item>
+    
+    <item>
       <title>Blog: Introducing Azkarra Streams</title>
       <link>http://www.azkarrastreams.io/blog/2019/11/27/introducing-azkarra-streams/</link>
       <pubDate>Wed, 27 Nov 2019 00:00:00 +0000</pubDate>
@@ -31,7 +134,7 @@
 
 
 &lt;div class=&#34;card rounded p-2 td-post-card mb-4 mt-4&#34; style=&#34;max-width: 510px&#34;&gt;
-	&lt;img class=&#34;card-img-top&#34; src=&#34;http://www.azkarrastreams.io/blog/2019/11/27/introducing-azkarra-streams/logo_hu78b51037b0115fe6011de71f157cde98_14594_500x200_fill_catmullrom_smart1_2.png&#34; width=&#34;500&#34; height=&#34;200&#34;&gt;
+	&lt;img class=&#34;card-img-top&#34; src=&#34;http://www.azkarrastreams.io/blog/2019/11/27/introducing-azkarra-streams/logo_hu942fcf0762aa07b10165e100bb9d2011_26944_500x200_fill_catmullrom_smart1_2.png&#34; width=&#34;500&#34; height=&#34;200&#34;&gt;
 	
 	&lt;div class=&#34;card-body px-0 pt-2 pb-0&#34;&gt;
 		&lt;p class=&#34;card-text&#34;&gt;
