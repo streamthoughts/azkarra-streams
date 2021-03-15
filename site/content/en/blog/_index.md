@@ -1,6 +1,6 @@
 ---
-title: "Docsy Blog"
-linkTitle: "News"
+title: "Azkarra Framework Blog"
+linkTitle: "Blog"
 menu:
   main:
     weight: 30

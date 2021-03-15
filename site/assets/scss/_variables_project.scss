@@ -25,17 +25,26 @@ $danger: #ED6A5A !default;
 $white: #fff !default;
 $light: $white !default;
 
-.td-box, .td-content {
-    a {
-        color: $blue-light;
-        text-decoration: none;
-        background-color: transparent;
-        -webkit-text-decoration-skip: objects;
+.btn-primary.disabled,
+.btn-primary:disabled {
+    color: #fff!important;
+}
 
-        &:hover {
-            color: $blue;
-        }
+p > a {
+    color: $primary!important;
+
+    &:hover {
+        text-decoration: underline;
+        text-decoration-color: $green-light;
     }
+}
+
+.btn-primary:hover,
+.btn-primary:focus  {
+    color: #1f6497!important;
+    border-color: #1f6497!important;
+    background: #ffffff!important;
+    border: 2px solid #1f6497!important;
 }
 
 .td-box--1 {
