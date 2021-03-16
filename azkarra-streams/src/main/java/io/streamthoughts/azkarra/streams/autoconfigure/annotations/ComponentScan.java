@@ -29,5 +29,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ComponentScan {
 
-    boolean value() default true;
+    Class<?>[] packageClasses () default {};
+    String[] packages() default {};
+    boolean enable() default true;
+    String[] value() default {};
 }

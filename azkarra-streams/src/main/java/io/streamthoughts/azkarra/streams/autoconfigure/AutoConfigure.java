@@ -20,6 +20,7 @@ package io.streamthoughts.azkarra.streams.autoconfigure;
 
 import io.streamthoughts.azkarra.api.AzkarraContext;
 import io.streamthoughts.azkarra.api.util.AnnotationResolver;
+import io.streamthoughts.azkarra.api.util.ClassUtils;
 import io.streamthoughts.azkarra.runtime.context.DefaultAzkarraContext;
 import io.streamthoughts.azkarra.streams.AzkarraApplication;
 import io.streamthoughts.azkarra.streams.autoconfigure.annotations.AzkarraStreamsApplication;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -79,18 +81,19 @@ public class AutoConfigure {
         loadAutoStartEnvironmentNameIfEnable(mainApplicationClass)
             .ifPresent(env -> application.setAutoStart(true, env));
 
-        isComponentScanEnable(mainApplicationClass)
-            .ifPresent(application::setEnableComponentScan);
+        loadComponentScan(mainApplicationClass).ifPresent(scan -> {
+            application.setEnableComponentScan(scan.enable());
+            application.addSources(scan.packageClasses());
+            application.addSources(Arrays.stream(scan.packages()).map(ClassUtils::forName).toArray(Class<?>[]::new));
+        });
     }
 
-    private static Optional<Boolean> isComponentScanEnable(final Class<?> source) {
+    private static Optional<ComponentScan> loadComponentScan(final Class<?> source) {
         Set<Annotation> annotations = allAnnotationsOfType(source, ComponentScan.class);
-        Optional<Boolean> optional = annotations.stream()
-            .map(a -> ((ComponentScan) a).value())
-            .findFirst();
+        Optional<ComponentScan> optional = annotations.stream().map(o -> (ComponentScan)o).findFirst();
 
         return optional.or(() -> isAnnotatedWith(source, AzkarraStreamsApplication.class) ?
-            isHttpServerEnable(AzkarraStreamsApplication.class) : Optional.empty());
+                loadComponentScan(AzkarraStreamsApplication.class) : Optional.empty());
     }
 
     private static Optional<Boolean> isHttpServerEnable(final Class<?> source) {
