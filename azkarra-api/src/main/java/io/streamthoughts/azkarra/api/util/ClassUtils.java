@@ -28,12 +28,20 @@ import java.util.Set;
 
 public class ClassUtils {
 
-    public static  <T> T newInstance(final Class<T> cls, final ClassLoader classLoader) {
+    public static <T> T newInstance(final Class<T> cls, final ClassLoader classLoader) {
         ClassLoader saveLoader = ClassUtils.compareAndSwapLoaders(classLoader);
         try {
             return ClassUtils.newInstance(cls);
         } finally {
             ClassUtils.compareAndSwapLoaders(saveLoader);
+        }
+    }
+
+    public static Class<?> forName(final String cls) {
+        try {
+            return Class.forName(cls);
+        } catch (ClassNotFoundException e) {
+            throw new AzkarraException("Failed to get class for name '" + cls + "'", e);
         }
     }
 
