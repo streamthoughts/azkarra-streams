@@ -316,7 +316,10 @@ public class AzkarraApplication {
         if (registerShutdownHook) {
             context.setRegisterShutdownHook(true);
         }
-        context.addConfiguration(configuration.getSubConf(withAzkarraPrefix(CONTEXT_CONFIG_KEY)));
+
+        if (configuration.hasPath(withAzkarraPrefix(CONTEXT_CONFIG_KEY))) {
+            context.addConfiguration(configuration.getSubConf(withAzkarraPrefix(CONTEXT_CONFIG_KEY)));
+        }
 
         if (isComponentScanEnable()) {
             var scanner = new ReflectiveComponentScanner(context.getComponentFactory());
