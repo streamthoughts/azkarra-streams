@@ -18,6 +18,10 @@
  */
 package io.streamthoughts.azkarra.api.components;
 
+import io.streamthoughts.azkarra.api.ApplicationId;
+import io.streamthoughts.azkarra.api.config.Conf;
+import io.streamthoughts.azkarra.api.streams.ApplicationIdBuilder;
+import io.streamthoughts.azkarra.api.streams.topology.TopologyMetadata;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,5 +40,19 @@ public class ComponentNameGeneratorTest {
         String name = ComponentNameGenerator.DEFAULT.generate(descriptor);
         assertNotNull(name);
         assertEquals("componentNameGeneratorTest", name);
+    }
+
+    @Test
+    public void testGivenAnonymousClass() {
+        ComponentDescriptor descriptor = new SimpleComponentDescriptor(
+            "NAME",
+            new Object(){}.getClass(),
+            Object::new,
+            true
+        );
+
+        String name = ComponentNameGenerator.DEFAULT.generate(descriptor);
+        assertNotNull(name);
+        assertEquals("componentNameGeneratorTest$1", name);
     }
 }

@@ -32,7 +32,14 @@ public interface ComponentNameGenerator {
          */
         @Override
         public <T> String generate(final ComponentDescriptor<T> descriptor) {
-            String className = descriptor.type().getSimpleName();
+            final Class<T> type = descriptor.type();
+            String className;
+            if (!type.isAnonymousClass()) {
+                className = type.getSimpleName();
+            } else {
+                className = type.getName();
+                className = className.substring(className.lastIndexOf(".") + 1, className.length());
+            }
             return Character.toLowerCase(className.charAt(0)) + className.substring(1);
         }
     };
