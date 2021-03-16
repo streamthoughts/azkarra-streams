@@ -190,8 +190,6 @@ public class LocalStreamsExecutionEnvironment implements
         this.configuration = Objects.requireNonNull(config, "config cannot be null");
         this.activeStreams = new HashMap<>();
         this.interceptors = new LinkedList<>();
-        this.kafkaStreamsFactory = () -> KafkaStreamsFactory.DEFAULT;
-        this.applicationIdBuilderSupplier = DefaultApplicationIdBuilder::new;
         this.topologies = new LinkedList<>();
         this.containerIdBuilder = new DefaultContainerIdBuilder();
         this.isDefault = name.equalsIgnoreCase(ENVIRONMENT_DEFAULT_NAME);
@@ -525,6 +523,14 @@ public class LocalStreamsExecutionEnvironment implements
             }
             configuration = newConfig;
         }
+        if (streamThreadExceptionHandler == null)
+            streamThreadExceptionHandler = CloseKafkaStreamsOnThreadException::new;
+
+        if (applicationIdBuilderSupplier == null)
+            applicationIdBuilderSupplier = DefaultApplicationIdBuilder::new;
+
+        if (kafkaStreamsFactory == null)
+            kafkaStreamsFactory = () -> KafkaStreamsFactory.DEFAULT;
     }
 
     private ApplicationId start(final TopologyDefinitionHolder topologyHolder) {
@@ -552,9 +558,6 @@ public class LocalStreamsExecutionEnvironment implements
                 metadata,
                 topologyConfig
         ));
-
-        if (streamThreadExceptionHandler == null)
-            streamThreadExceptionHandler = CloseKafkaStreamsOnThreadException::new;
 
         var threadExceptionHandler = supply(streamThreadExceptionHandler, topologyConfig);
 
