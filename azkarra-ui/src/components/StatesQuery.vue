@@ -19,28 +19,29 @@
 <template>
   <div id="query-container">
     <div class="main-content-header">
-      <h1 class="main-title">Interactive Queries</h1>
+      <ul class="list-inline">
+        <li class="list-inline-item">
+         <h1 class="main-title">Interactive Queries</h1>
+        </li>
+        <li class="list-inline-item">
+          Status: <span class="badge badge-success badge-pill">{{ response.status }}</span>
+        </li>
+        <li class="list-inline-item">
+          Took: <span class="badge badge-info badge-pill">{{ response.took }}ms</span>
+        </li>
+        <li class="list-inline-item">
+          Server: <span class="badge badge-secondary badge-pill">{{ response.server }}</span>
+        </li>
+        <li class="list-inline-item" v-if="response.error">
+          error: <span class="badge badge-secondary badge-pill">{{ response.error }}</span>
+        </li>
+      </ul>
     </div>
     <div class="main-content-body container-fluid">
       <div class="row">
         <div class="col-8">
-          <h3 class="mb-6">Query Results</h3>
           <span class="text-no-data" v-if="!response.status">No query executed</span>
           <div class="query-response-container" v-if="response.status">
-            <ul class="list-inline left-border">
-              <li class="list-inline-item">
-                Status: <span class="badge badge-success badge-pill">{{ response.status }}</span>
-              </li>
-              <li class="list-inline-item">
-                Took: <span class="badge badge-info badge-pill">{{ response.took }}ms</span>
-              </li>
-              <li class="list-inline-item">
-                Server: <span class="badge badge-secondary badge-pill">{{ response.server }}</span>
-              </li>
-              <li class="list-inline-item" v-if="response.error">
-                error: <span class="badge badge-secondary badge-pill">{{ response.error }}</span>
-              </li>
-            </ul>
             <div class="custom-control custom-checkbox custom-control-inline">
               <input v-model="displayJsonValue"
                      class="custom-control-input"
@@ -336,7 +337,7 @@ export default {
       showRecordIndex: true,
       showRecordTimestamp: true,
       displayJsonValue: false,
-      response: {},
+      response: { },
       query: {
         params: {},
         options: {
@@ -454,7 +455,7 @@ export default {
 <style scoped>
 #query-col-form {
   display: block;
-  position: fixed;
+  width:100%;
 }
 
 .nav-tabs .nav-link .badge {
