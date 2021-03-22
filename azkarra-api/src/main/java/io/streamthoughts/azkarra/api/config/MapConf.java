@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -97,7 +98,9 @@ public class MapConf extends AbstractConf {
     @Override
     public Set<String> keySet() {
         final HashSet<String> keySet = new HashSet<>(parameters.keySet());
-        keySet.addAll(fallback.keySet());
+        if (fallback != null) {
+            keySet.addAll(fallback.keySet());
+        }
         return keySet;
     }
 
@@ -106,7 +109,8 @@ public class MapConf extends AbstractConf {
      */
     @Override
     public Object getValue(final String path) {
-        return findForPathOrThrow(path, Conf::getValue);
+        final Object o = findForPathOrThrow(path, Conf::getValue);
+        return Optional.ofNullable((Object)asConfOrNull(o, path)).orElse(o);
     }
 
     /**
@@ -200,14 +204,23 @@ public class MapConf extends AbstractConf {
     @Override
     public Conf getSubConf(final String path) {
         Object o = findForPathOrThrow(path, Conf::getSubConf);
+        final Conf conf = asConfOrNull(o, path);
+        if (conf == null) {
+            throw new InvalidConfException(
+                    "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> [Map, Conf]");
+        }
+        return conf;
+
+    }
+
+    private Conf asConfOrNull(final Object o, final String path) {
         Conf conf;
         if(o instanceof Map)
             conf = Conf.of((Map)o) ;
         else if (o instanceof Conf)
             conf = (Conf)o;
         else {
-            throw new InvalidConfException(
-                "Type mismatch for path '" + path + "': " + o.getClass().getSimpleName() + "<> [Map, Conf]");
+            return null;
         }
         if (fallback != null && fallback.hasPath(path)) {
             conf = conf.withFallback(fallback.getSubConf(path));
