@@ -456,6 +456,24 @@ export default {
   display: block;
   position: fixed;
 }
+
+.nav-tabs .nav-link .badge {
+    padding: 8px 12px 8px 12px;
+    position: relative;
+    display: block;
+}
+
+.nav-tabs .nav-link.active .badge:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #343a40;
+    height: 2px;
+    width: 100%;
+}
+
 </style>
 
 
