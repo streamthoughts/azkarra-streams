@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2019-2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -25,6 +25,9 @@ import static io.streamthoughts.azkarra.api.events.LimitHandler.BlockingQueueLim
 
 /**
  * Provides built-in {@link LimitHandler} implementation.
+ *
+ * @see BlockingRecordQueue
+ * @see EventStream
  *
  * @since 0.8.0
  */
@@ -56,10 +59,10 @@ public class LimitHandlers {
      * @return a new {@link LimitHandler} that retrieves and drops the head of the queue when limit is reached.
      */
     public static LimitHandler dropHeadOnLimitReached() {
-        return new FailOnLimitReached();
+        return new DropHeadOnLimitReached();
     }
 
-    private static final class LogAndContinueOnLimitReached implements LimitHandler {
+    static final class LogAndContinueOnLimitReached implements LimitHandler {
 
         /**
          * {@inheritDoc}
@@ -70,7 +73,7 @@ public class LimitHandlers {
         }
     }
 
-    private static final class DropHeadOnLimitReached implements LimitHandler {
+    static final class DropHeadOnLimitReached implements LimitHandler {
 
         /**
          * {@inheritDoc}
@@ -83,7 +86,7 @@ public class LimitHandlers {
     }
 
 
-    private static final class FailOnLimitReached implements LimitHandler {
+    static final class FailOnLimitReached implements LimitHandler {
         /**
          * {@inheritDoc}
          */

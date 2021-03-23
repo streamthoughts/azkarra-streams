@@ -18,22 +18,24 @@
  */
 package io.streamthoughts.azkarra.api.events;
 
-import java.util.List;
+import org.junit.jupiter.api.Test;
 
-/**
- * EventStreamsProvider.
- *
- * @see EventStream
- *
- * @since 0.8.0
- */
-public interface EventStreamProvider {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    /**
-     * Returns the list of {@link EventStream}
-     *
-     * @return  a list of {@link EventStream}. Must not return {@code null}.
-     */
-    List<EventStream> eventStreams();
+public class LimitHandlersTest {
 
+    @Test
+    public void should_return_LogAndContinueOnLimitReached() {
+        assertTrue(LimitHandlers.logAndContinueOnLimitReached() instanceof LimitHandlers.LogAndContinueOnLimitReached);
+    }
+
+    @Test
+    public void should_return_FailOnLimitReached() {
+        assertTrue(LimitHandlers.throwExceptionOnLimitReached() instanceof LimitHandlers.FailOnLimitReached);
+    }
+
+    @Test
+    public void should_return_DropHeadOnLimitReached() {
+        assertTrue(LimitHandlers.dropHeadOnLimitReached() instanceof LimitHandlers.DropHeadOnLimitReached);
+    }
 }
