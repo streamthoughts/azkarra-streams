@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,22 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.streamthoughts.azkarra;
+package io.streamthoughts.azkarra.streams;
 
-import io.streamthoughts.azkarra.streams.AzkarraApplication;
-import io.streamthoughts.azkarra.streams.config.AzkarraConf;
+import io.streamthoughts.azkarra.api.errors.AzkarraException;
 
-/**
- * The default main class for starting an Azkarra worker.
- */
-public class AzkarraWorker {
+public class ApplicationStartupException extends AzkarraException {
 
-    public static void main(final String[] args) {
-        final AzkarraConf azkarraConf = AzkarraConf.create();
-        new AzkarraApplication()
-            .setConfiguration(azkarraConf)
-            .setEnableComponentScan(true)
-            .setHttpServerEnable(true)
-            .run(args);
+    public ApplicationStartupException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }

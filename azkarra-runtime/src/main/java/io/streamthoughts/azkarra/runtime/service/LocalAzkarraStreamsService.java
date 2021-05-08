@@ -51,9 +51,9 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     @Override
     public Set<String> listAllKafkaStreamsContainerIds() {
         return context.getAllEnvironments()
-            .stream()
-            .flatMap(environment -> HasId.getIds(environment.getContainerIds()).stream())
-            .collect(Collectors.toSet());
+                .stream()
+                .flatMap(environment -> HasId.getIds(environment.getContainerIds()).stream())
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -62,9 +62,9 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     @Override
     public Set<String> listAllKafkaStreamsApplicationIds() {
         return context.getAllEnvironments()
-            .stream()
-            .flatMap(environment -> HasId.getIds(environment.getApplicationIds()).stream())
-            .collect(Collectors.toSet());
+                .stream()
+                .flatMap(environment -> HasId.getIds(environment.getApplicationIds()).stream())
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -73,11 +73,11 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     @Override
     public KafkaStreamsContainer getStreamsContainerById(final String containerId) {
         final Optional<KafkaStreamsContainer> container = context
-            .getAllEnvironments()
-            .stream()
-            .flatMap(environment -> environment.getContainers().stream())
-            .filter(o -> o.containerId().equals(containerId))
-            .findFirst();
+                .getAllEnvironments()
+                .stream()
+                .flatMap(environment -> environment.getContainers().stream())
+                .filter(o -> o.containerId().equals(containerId))
+                .findFirst();
 
         if (container.isPresent()) {
             return container.get();
@@ -90,8 +90,20 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public Collection<KafkaStreamsContainer> getAllStreamsContainersById(final String applicationId) {
-        var environment = getStreamsApplicationById(applicationId).environment();
-        return context.getEnvironmentForName(environment).getContainers();
+        final ApplicationId id = new ApplicationId(applicationId);
+        // Find the first environment containing an application with the specified ID.
+        // This is OK as long as there are not two applications with the same id running on
+        // two different environments, i.e., two Kafka Clusters.
+        final Optional<StreamsExecutionEnvironment<?>> environment = context.getAllEnvironments()
+                .stream()
+                .filter(env -> env.getApplicationById(id).isPresent())
+                .findFirst();
+
+        if (environment.isEmpty()) {
+            throw new NotFoundException(
+                    "Failed to find Kafka Streams instance for application id '" + applicationId + "'");
+        }
+        return environment.get().getContainersById(id);
     }
 
     /**
@@ -99,9 +111,9 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
      */
     @Override
     public ApplicationId startStreamsTopology(final String topologyType,
-                                            final String topologyVersion,
-                                            final String env,
-                                            final Executed executed) {
+                                              final String topologyVersion,
+                                              final String env,
+                                              final Executed executed) {
         return context.addTopology(topologyType, topologyVersion, env, executed).orElse(null);
     }
 
@@ -120,9 +132,9 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     public void addNewEnvironment(final String name, final String type, final Conf conf) {
         var factories = context.getAllComponents(StreamsExecutionEnvironmentFactory.class);
         var opt = factories
-            .stream()
-            .filter(factory -> factory.type().equals(type))
-            .findAny();
+                .stream()
+                .filter(factory -> factory.type().equals(type))
+                .findAny();
         if (opt.isEmpty()) {
             throw new InvalidStreamsEnvironmentException("Cannot find factory for environment type " + type);
         }
@@ -135,10 +147,10 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
     @Override
     public KafkaStreamsApplication getStreamsApplicationById(final String id) {
         return context.getAllEnvironments()
-           .stream()
-           .flatMap(env -> env.getApplicationById(new ApplicationId(id)).stream())
-           .findFirst()
-           .orElseThrow(() -> new NotFoundException("Failed to find KafkaStreams application for id " + id));
+                .stream()
+                .flatMap(env -> env.getApplicationById(new ApplicationId(id)).stream())
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Failed to find KafkaStreams application for id " + id));
     }
 
     /**
@@ -179,7 +191,7 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
             env.terminate(id);
         } else {
             throw new NotFoundException(
-                "Failed to find an environment running KafkaStreams containers for container id '" + id + "'."
+                    "Failed to find an environment running KafkaStreams containers for container id '" + id + "'."
             );
         }
     }
@@ -203,8 +215,8 @@ public class LocalAzkarraStreamsService extends AbstractAzkarraStreamsService {
             env.terminate(id);
         } else {
             throw new NotFoundException(
-                "Failed to find an environment running KafkaStreams containers for application.id '"
-                + applicationId + "'."
+                    "Failed to find an environment running KafkaStreams containers for application.id '"
+                            + applicationId + "'."
             );
         }
     }

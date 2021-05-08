@@ -107,8 +107,6 @@ public class AzkarraApplication {
 
     private Banner.Mode bannerMode;
 
-    private boolean registerShutdownHook;
-
     private boolean enableComponentScan;
 
     private boolean isHttpServerEnable;
@@ -138,7 +136,6 @@ public class AzkarraApplication {
         this.sources = new ArrayList<>(Arrays.asList(sources));
         this.isHttpServerEnable = false;
         this.enableComponentScan = false;
-        this.registerShutdownHook = true;
         this.autoStart = new AutoStart(false, null);
         this.banner = new AzkarraBanner();
         this.bannerMode =  Banner.Mode.CONSOLE;
@@ -185,17 +182,6 @@ public class AzkarraApplication {
      */
     public AzkarraApplication setEnableComponentScan(final boolean enableComponentScan) {
         this.enableComponentScan = enableComponentScan;
-        return this;
-    }
-
-    /**
-     * Sets if the created {@link AzkarraContext} should have a shutdown hook registered.
-     *
-     * Defaults to {@code true} to ensure that JVM shutdowns are handled gracefully.
-     * @param registerShutdownHook if the shutdown hook should be registered.
-     */
-    public AzkarraApplication setRegisterShutdownHook(final boolean registerShutdownHook) {
-        this.registerShutdownHook = registerShutdownHook;
         return this;
     }
 
@@ -302,10 +288,11 @@ public class AzkarraApplication {
      * Runs this {@link AzkarraApplication}.
      */
     public AzkarraContext run(final String[] args) {
+        long start = System.currentTimeMillis();
         // Banner should be print first.
         printBanner();
 
-        LOG.info("Starting new Azkarra application");
+        LOG.info("Starting Azkarra application");
         AutoConfigure autoConfigure = new AutoConfigure();
         autoConfigure.load(this);
 
@@ -313,25 +300,25 @@ public class AzkarraApplication {
             configuration = new ArgsConf(args).withFallback(configuration);
         }
 
-        if (registerShutdownHook) {
-            context.setRegisterShutdownHook(true);
-        }
-
         if (configuration.hasPath(withAzkarraPrefix(CONTEXT_CONFIG_KEY))) {
             context.addConfiguration(configuration.getSubConf(withAzkarraPrefix(CONTEXT_CONFIG_KEY)));
         }
 
-        if (isComponentScanEnable()) {
-            var scanner = new ReflectiveComponentScanner(context.getComponentFactory());
-            context.registerSingleton(scanner);
+        try {
+            if (isComponentScanEnable()) {
+                var scanner = new ReflectiveComponentScanner(context.getComponentFactory());
+                context.registerSingleton(scanner);
 
-            // Scan all sub-packages of the root package of Azkarra for declared components.
-            scanner.scanForPackage("io.streamthoughts.azkarra");
+                // Scan all sub-packages of the root package of Azkarra for declared components.
+                scanner.scanForPackage("io.streamthoughts.azkarra");
 
-            configuration.getOptionalString(withAzkarraPrefix(COMPONENT_PATHS_CONFIG_KEY))
-                         .ifPresent(scanner::scan);
+                configuration.getOptionalString(withAzkarraPrefix(COMPONENT_PATHS_CONFIG_KEY))
+                        .ifPresent(scanner::scan);
 
-            sources.stream().map(Class::getPackage).forEach(scanner::scanForPackage);
+                sources.stream().map(Class::getPackage).forEach(scanner::scanForPackage);
+            }
+        } catch (Exception e) {
+            throw new ApplicationStartupException("Error scanning components: " + e.getMessage(), e);
         }
 
         final List<ApplicationConfigEntryLoader> configLoaders = new ArrayList<>();
@@ -352,10 +339,24 @@ public class AzkarraApplication {
             context.addListener(new EmbeddedServerLifecycle(embeddedHttpServer, buildHttpServerConfig()));
         }
 
-        context.start();
-        LOG.info("Azkarra application started.");
-        autoStart.runIfEnable(context);
-        return context;
+        try {
+            context.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Application shutting down");
+                }
+                context.stop();
+                LOG.info("Application stopped");
+            }));
+
+            final long end = System.currentTimeMillis();
+            final long took = end - start;
+            LOG.info("Startup completed in {}ms.", took);
+            autoStart.runIfEnable(context);
+            return context;
+        } catch (Exception e) {
+            throw new ApplicationStartupException("Error starting application: " + e.getMessage(), e);
+        }
     }
 
     private boolean isComponentScanEnable() {

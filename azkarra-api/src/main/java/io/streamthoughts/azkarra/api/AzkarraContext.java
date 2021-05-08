@@ -53,16 +53,6 @@ public interface AzkarraContext extends ConfigurableComponentFactory, ComponentR
     AzkarraContext addListener(final AzkarraContextListener listener);
 
     /**
-     * Sets if the created {@link AzkarraContext} should have a shutdown hook registered.
-     *
-     * Defaults to {@code true} to ensure that JVM shutdowns are handled gracefully.
-     * @param registerShutdownHook if the shutdown hook should be registered
-     *
-     * @return          this {@link AzkarraContext} instance.
-     */
-    AzkarraContext setRegisterShutdownHook(final boolean registerShutdownHook);
-
-    /**
      * Returns the global context streamsConfig of this {@link AzkarraContext} instance.
      *
      * @return a {@link Conf} instance.

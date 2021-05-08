@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * A {@code StreamsExecutionEnvironment} manages the execution and the lifecycle of one or many {@link KafkaStreams}
@@ -93,14 +94,27 @@ public interface StreamsExecutionEnvironment<T extends StreamsExecutionEnvironme
     StreamsTopologyExecution newTopologyExecution(final StreamsTopologyMeta meta, final Executed executed);
 
     /**
-     * Returns all containers for active Kafka Streams applications.
+     * Returns all {@link KafkaStreamsContainer} for active Kafka Streams applications.
      *
      * @return a collection of {@link KafkaStreamsContainer} applications.
      */
     Collection<KafkaStreamsContainer> getContainers();
 
     /**
-     * Gets a {@link KafkaStreamsContainer} for the specified id.
+     * Gets all {@link KafkaStreamsContainer} for the specified {@code application.id}.
+     *
+     * @param id the {@link ApplicationId}.
+     * @return a collection of {@link KafkaStreamsContainer} applications.
+     */
+    default Collection<KafkaStreamsContainer> getContainersById(final ApplicationId id) {
+        return getContainers()
+                .stream()
+                .filter(c -> c.applicationId().equals(id.id()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a {@link KafkaStreamsContainer} for the specified container id.
      *
      * @param id the {@link ContainerId}.
      * @return the {@link KafkaStreamsContainer}.

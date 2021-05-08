@@ -52,18 +52,22 @@ class AutoStart {
     }
 
     public void runIfEnable(final AzkarraContext context) {
-        if (enable) {
-            String target = findDefaultExecutionEnvironmentOrThrow(context);
-            LOG.info("Auto register all Kafka Streams topologies into environment '{}'", target);
-            final Set<TopologyDescriptor> topologies = context.getTopologyDescriptors(target);
-            for (TopologyDescriptor desc : topologies) {
-                context.addTopology(
+        if (!enable) {
+            LOG.info("Auto start disabled.");
+            return;
+        }
+
+        LOG.info("Auto start enabled.");
+        String target = findDefaultExecutionEnvironmentOrThrow(context);
+        LOG.info("Starting all registered stream applications into environment: '{}'.", target);
+        final Set<TopologyDescriptor> topologies = context.getTopologyDescriptors(target);
+        for (TopologyDescriptor desc : topologies) {
+            context.addTopology(
                     desc.className(),
                     desc.version().toString(),
                     environment,
                     new InternalExecuted()
-                );
-            }
+            );
         }
     }
 

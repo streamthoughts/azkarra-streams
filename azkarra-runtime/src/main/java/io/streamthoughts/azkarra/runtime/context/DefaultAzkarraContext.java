@@ -60,7 +60,6 @@ import io.streamthoughts.azkarra.runtime.modules.InteractiveQueryServiceModule;
 import io.streamthoughts.azkarra.runtime.query.DefaultInteractiveQueryService;
 import io.streamthoughts.azkarra.runtime.service.LocalAzkarraStreamsService;
 import io.streamthoughts.azkarra.runtime.streams.topology.InternalExecuted;
-import io.streamthoughts.azkarra.runtime.util.ShutdownHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,8 +130,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
         factory.setComponentAliasesGenerator(new ClassComponentAliasesGenerator());
         return new DefaultAzkarraContext(configuration, factory);
     }
-
-    private boolean registerShutdownHook;
 
     private final Map<String, StreamsExecutionEnvironment<?>> environments;
 
@@ -230,15 +227,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
     public AzkarraContext addListener(final AzkarraContextListener listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         listeners.add(listener);
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AzkarraContext setRegisterShutdownHook(final boolean registerShutdownHook) {
-        this.registerShutdownHook = registerShutdownHook;
         return this;
     }
 
@@ -498,7 +486,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
         }
         LOG.info("Starting AzkarraContext");
         componentFactory.init(getConfiguration());
-        registerShutdownHook();
         try {
             listeners.addAll(getAllComponents(AzkarraContextListener.class));
             Collections.sort(listeners);
@@ -592,12 +579,6 @@ public class DefaultAzkarraContext implements AzkarraContext {
                             .create(DEFAULT_ENV_NAME)
                             .isDefault(true)
             );
-        }
-    }
-
-    private void registerShutdownHook() {
-        if (registerShutdownHook) {
-            ShutdownHook.register(this::stop);
         }
     }
 
