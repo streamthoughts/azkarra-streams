@@ -121,7 +121,7 @@ public final class Health {
 
         private String name;
         private Status status;
-        private Map<String, Object> details;
+        private final Map<String, Object> details;
 
         /**
          * Creates a new {@link Builder} instance.
@@ -175,13 +175,24 @@ public final class Health {
         /**
          * Adds a details entry for the {@link Health} indicator.
          *
+         * @param details   the details.
+         * @return          this {@link Builder} instance.
+         */
+        public Builder withDetails(final Map<String, Object> details) {
+            this.details.putAll(details);
+            return this;
+        }
+
+        /**
+         * Adds a details entry for the {@link Health} indicator.
+         *
          * @param key   the detail key.
          * @param value the detail value.
          * @return      this {@link Builder} instance.
          */
         public Builder withDetails(final String key, final Object value) {
-            Objects.requireNonNull(key, "key cannot be null");
-            Objects.requireNonNull(key, "value cannot be null");
+            Objects.requireNonNull(key, "'key' should not be null");
+            Objects.requireNonNull(value, "'value' should not be null");
             details.put(key, value);
             return this;
         }

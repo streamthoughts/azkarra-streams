@@ -26,7 +26,7 @@ import io.streamthoughts.azkarra.http.health.Health;
 import io.streamthoughts.azkarra.http.health.HealthAggregator;
 import io.streamthoughts.azkarra.http.health.HealthIndicator;
 import io.streamthoughts.azkarra.http.health.Status;
-import io.streamthoughts.azkarra.http.health.internal.StreamsHealthIndicator;
+import io.streamthoughts.azkarra.http.health.internal.KafkaStreamsHealthIndicator;
 import io.streamthoughts.azkarra.http.spi.RoutingHandlerProvider;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -48,7 +48,7 @@ public class ApiHealthRoutes implements HttpHandler, RoutingHandlerProvider, Azk
     @Override
     public void setAzkarraContext(final AzkarraContext context) {
         this.context = context;
-        this.context.registerSingleton(StreamsHealthIndicator.class, StreamsHealthIndicator::new);
+        this.context.registerSingleton(KafkaStreamsHealthIndicator.class, KafkaStreamsHealthIndicator::new);
     }
 
     /**

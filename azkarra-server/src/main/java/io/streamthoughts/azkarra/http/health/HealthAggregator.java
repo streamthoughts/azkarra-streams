@@ -19,14 +19,16 @@
 package io.streamthoughts.azkarra.http.health;
 
 import io.streamthoughts.azkarra.http.health.internal.DefaultStatusAggregator;
-import java.util.List;
+
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * The {@link HealthAggregator} aggregates multiple {@link Health} instances into a single one.
  */
 public final class HealthAggregator {
 
-    private StatusAggregator statusAggregator;
+    private final StatusAggregator statusAggregator;
 
     public HealthAggregator() {
         this(new DefaultStatusAggregator());
@@ -39,14 +41,33 @@ public final class HealthAggregator {
     /**
      * Aggregates the specified {@link Health} instances to a single one.
      *
-     * @param healths   the list of {@link Health} to aggregate.
-     * @return          the aggregated {@link Health}.
+     * @param healths the list of {@link Health} to aggregate.
+     * @return the aggregated {@link Health}.
      */
-    public Health aggregate(final List<Health> healths) {
+    public Health aggregate(final Collection<Health> healths) {
+        return aggregate(null, healths);
+    }
 
+    /**
+     * Aggregates the specified {@link Health} instances to a single one.
+     *
+     * @param name    the aggregate health name.
+     * @param healths the list of {@link Health} to aggregate.
+     * @return the aggregated {@link Health}.
+     */
+    public Health aggregate(final String name, final Collection<Health> healths) {
         final Health.Builder builder = new Health.Builder().up();
+        Optional.ofNullable(name).ifPresent(builder::withName);
         if (!healths.isEmpty()) {
-            healths.forEach(h -> builder.withDetails(h.getName(), h));
+            healths.forEach(h -> builder.withDetails(
+                    h.getName(),
+                    // avoid redundancy by removing the health name
+                    new Health.Builder()
+                            .withStatus(h.getStatus())
+                            .withDetails(h.getDetails())
+                            .build()
+                    )
+            );
             final Status status = statusAggregator.aggregateStatus(StatusAggregator.getAllStatus(healths));
             builder.withStatus(status);
         }
