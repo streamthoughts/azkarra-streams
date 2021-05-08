@@ -29,12 +29,14 @@ import java.util.UUID;
 public class SafeDeserializerConfig extends AbstractConfig {
 
     public static final String SAFE_DESERIALIZER_DEFAULT_VALUE_CONFIG = "safe.deserializer.default.object";
-    public static final String SAFE_DESERIALIZER_DEFAULT_VALUE_DOC    = "The default object value to return when an " +
+    public static final String SAFE_DESERIALIZER_DEFAULT_VALUE_DOC = "The default object value to return when an " +
             "input record cannot be de-serialized (default is null)";
 
     private final Class<?> objectValueType;
+
     /**
      * Creates a new {@link SafeDeserializerConfig} instance.
+     *
      * @param originals the originals configuration.
      */
     public SafeDeserializerConfig(final Class<?> objectValueType, final Map<?, ?> originals) {
@@ -49,8 +51,8 @@ public class SafeDeserializerConfig extends AbstractConfig {
     public static ConfigDef configDef(final ConfigDef.Type type) {
 
         return new ConfigDef()
-            .define(SAFE_DESERIALIZER_DEFAULT_VALUE_CONFIG, type, null, ConfigDef.Importance.HIGH,
-                    SAFE_DESERIALIZER_DEFAULT_VALUE_DOC);
+                .define(SAFE_DESERIALIZER_DEFAULT_VALUE_CONFIG, type, null, ConfigDef.Importance.HIGH,
+                        SAFE_DESERIALIZER_DEFAULT_VALUE_DOC);
     }
 
     static private <T> Object mayConvert(final Object o, final Class<T> type) {
@@ -58,13 +60,13 @@ public class SafeDeserializerConfig extends AbstractConfig {
 
         Object result = o;
         if (byte[].class.isAssignableFrom(type)) {
-            result = ((String)o).getBytes();
+            result = ((String) o).getBytes();
         } else if (ByteBuffer.class.isAssignableFrom(type)) {
-            result = ByteBuffer.wrap(((String)o).getBytes());
+            result = ByteBuffer.wrap(((String) o).getBytes());
         } else if (Bytes.class.isAssignableFrom(type)) {
-            result = Bytes.wrap(((String)o).getBytes());
+            result = Bytes.wrap(((String) o).getBytes());
         } else if (UUID.class.isAssignableFrom(type)) {
-            result = UUID.fromString((String)o);
+            result = UUID.fromString((String) o);
         }
         return result;
     }

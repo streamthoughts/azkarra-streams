@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 StreamThoughts.
+ * Copyright 2021 StreamThoughts.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -19,16 +19,26 @@
 package io.streamthoughts.azkarra.commons.error;
 
 /**
- * The default record-headers added to record write to the dead-letter-topic.
+ * The types of exceptions that may be thrown by a stream application.
  */
-public class ExceptionHeader {
+public enum ExceptionType {
 
-    public static final String ERROR_EXCEPTION_STACKTRACE  = "__errors.exception.stacktrace";
-    public static final String ERROR_EXCEPTION_MESSAGE     = "__errors.exception.message";
-    public static final String ERROR_EXCEPTION_CLASS_NAME  = "__errors.exception.class.name";
-    public static final String ERROR_TIMESTAMP             = "__errors.timestamp";
-    public static final String ERROR_APPLICATION_ID        = "__errors.application.id";
-    public static final String ERROR_RECORD_TOPIC          = "__errors.record.topic";
-    public static final String ERROR_RECORD_PARTITION      = "__errors.record.partition";
-    public static final String ERROR_RECORD_OFFSET         = "__errors.record.offset";
+    /**
+     * An exception thrown during record deserialization.
+     *
+     * @see org.apache.kafka.streams.errors.DeserializationExceptionHandler
+     */
+    DESERIALIZATION,
+
+    /**
+     * An exception thrown during record production.
+     *
+     * @see org.apache.kafka.streams.errors.ProductionExceptionHandler
+     */
+    PRODUCTION,
+
+    /**
+     * An exception thrown during record processing.
+     */
+    PROCESSING,
 }

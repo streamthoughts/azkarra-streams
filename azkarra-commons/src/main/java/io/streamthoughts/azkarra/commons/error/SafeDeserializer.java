@@ -30,7 +30,7 @@ public class SafeDeserializer<T> implements Deserializer<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SafeDeserializer.class);
 
-    private Deserializer<T> deserializer;
+    private final Deserializer<T> deserializer;
 
     private final Class<T> type;
 
@@ -39,7 +39,7 @@ public class SafeDeserializer<T> implements Deserializer<T> {
     /**
      * Creates a new {@link SafeDeserializer} instance.
      *
-     * @param deserializer  the {@link Deserializer} to delegate.
+     * @param deserializer the {@link Deserializer} to delegate.
      */
     public SafeDeserializer(final Deserializer<T> deserializer,
                             final T defaultValue) {
@@ -49,7 +49,7 @@ public class SafeDeserializer<T> implements Deserializer<T> {
     /**
      * Creates a new {@link SafeDeserializer} instance.
      *
-     * @param deserializer  the {@link Deserializer} to delegate.
+     * @param deserializer the {@link Deserializer} to delegate.
      */
     public SafeDeserializer(final Deserializer<T> deserializer,
                             final Class<T> type) {
@@ -59,7 +59,7 @@ public class SafeDeserializer<T> implements Deserializer<T> {
     /**
      * Creates a new {@link SafeDeserializer} instance.
      *
-     * @param deserializer  the {@link Deserializer} to delegate.
+     * @param deserializer the {@link Deserializer} to delegate.
      */
     private SafeDeserializer(final Deserializer<T> deserializer,
                              final T defaultValue,
@@ -90,8 +90,8 @@ public class SafeDeserializer<T> implements Deserializer<T> {
             return this.deserializer.deserialize(topic, data);
         } catch (Throwable t) {
             LOG.error(
-                "Unexpected exception occurred during deserialization: {}. Returned default object.",
-                t.getMessage()
+                    "Unexpected exception occurred during deserialization: {}. Returned default object.",
+                    t.getMessage()
             );
             return defaultObject;
         }
@@ -106,8 +106,8 @@ public class SafeDeserializer<T> implements Deserializer<T> {
             return this.deserializer.deserialize(topic, headers, data);
         } catch (Throwable t) {
             LOG.error(
-                "Unexpected exception occurred during deserialization: {}. Returned default object.",
-                t.getMessage()
+                    "Unexpected exception occurred during deserialization: {}. Returned default object.",
+                    t.getMessage()
             );
             return defaultObject;
         }
