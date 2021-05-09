@@ -1,5 +1,5 @@
 *.java linguist-detectable=true
 *.xml linguist-detectable=false
 azkarra-ui/* linguist-detectable=false
-site/* linguist-documentation 
+site/* linguist-vendored 
 docs/* linguist-documentation
