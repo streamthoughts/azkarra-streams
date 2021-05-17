@@ -19,6 +19,7 @@
 package io.streamthoughts.azkarra.commons.error;
 
 import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.utils.Time;
 
 import java.io.PrintWriter;
@@ -49,26 +50,25 @@ public final class ExceptionHeaders {
      * @return the {@link Headers}.
      */
     static Headers addExceptionHeaders(final Headers headers, final Failed failed) {
-        final Exception exception = failed.exception();
+        final Throwable exception = failed.exception();
 
-        headers.add(ERROR_EXCEPTION_STACKTRACE, toByteArray(getStacktrace(exception)));
-        headers.add(ERROR_EXCEPTION_MESSAGE, toByteArray(exception.getMessage()));
-        headers.add(ERROR_EXCEPTION_CLASS_NAME, toByteArray(exception.getClass().getName()));
-        headers.add(ERROR_TIMESTAMP, toByteArray(Time.SYSTEM.milliseconds()));
-        headers.add(ERROR_APPLICATION_ID, toByteArray(failed.applicationId()));
-        headers.add(ERROR_TYPE, toByteArray(failed.exceptionTypes().name()));
+        Headers enriched = new RecordHeaders(headers);
+        enriched.add(ERROR_EXCEPTION_STACKTRACE, toByteArray(getStacktrace(exception)));
+        enriched.add(ERROR_EXCEPTION_MESSAGE, toByteArray(exception.getMessage()));
+        enriched.add(ERROR_EXCEPTION_CLASS_NAME, toByteArray(exception.getClass().getName()));
+        enriched.add(ERROR_TIMESTAMP, toByteArray(Time.SYSTEM.milliseconds()));
+        enriched.add(ERROR_APPLICATION_ID, toByteArray(failed.applicationId()));
+        enriched.add(ERROR_TYPE, toByteArray(failed.exceptionTypes().name()));
 
         failed.recordTopic()
-                .ifPresent(it -> headers.add(ERROR_RECORD_TOPIC, toByteArray(it)));
+                .ifPresent(it -> enriched.add(ERROR_RECORD_TOPIC, toByteArray(it)));
         failed.recordPartition()
-                .ifPresent(it -> headers.add(ERROR_RECORD_PARTITION, toByteArray(it)));
+                .ifPresent(it -> enriched.add(ERROR_RECORD_PARTITION, toByteArray(it)));
         failed.recordOffset()
-                .ifPresent(it -> headers.add(ERROR_RECORD_OFFSET, toByteArray(it)));
+                .ifPresent(it -> enriched.add(ERROR_RECORD_OFFSET, toByteArray(it)));
         failed.recordType()
-                .ifPresent(it -> headers.add(ERROR_RECORD_TOPIC_TYPE, toByteArray(it.name())));
-        failed.customHeaders().forEach(headers::add);
-
-        return headers;
+                .ifPresent(it -> enriched.add(ERROR_RECORD_TOPIC_TYPE, toByteArray(it.name())));
+        return enriched;
     }
 
     /**

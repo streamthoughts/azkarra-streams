@@ -47,7 +47,7 @@ public class DeadLetterTopicDeserializationExceptionHandlerTest {
 
   @BeforeEach
   public void tearDown() {
-    GlobalDeadLetterTopicManager.clear();
+    GlobalDeadLetterTopicCollector.clear();
   }
 
   @Test
@@ -55,10 +55,12 @@ public class DeadLetterTopicDeserializationExceptionHandlerTest {
 
     MockProducer<byte[], byte[]> mkProducer =
         new MockProducer<>(true, new ByteArraySerializer(), new ByteArraySerializer());
-    GlobalDeadLetterTopicManager.initialize(
-            GlobalDeadLetterTopicManagerConfig.create()
+
+    GlobalDeadLetterTopicCollector.getOrCreate(
+            GlobalDeadLetterTopicCollectorConfig.create()
             .withProducer(mkProducer)
-            .withAutoCreateTopicEnabled(false));
+            .withAutoCreateTopicEnabled(false)
+    );
 
     final var handler = new DeadLetterTopicDeserializationExceptionHandler();
     handler.configure(Map.of(StreamsConfig.APPLICATION_ID_CONFIG, "test-app"));

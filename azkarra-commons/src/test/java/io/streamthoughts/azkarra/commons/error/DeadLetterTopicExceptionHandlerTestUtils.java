@@ -119,7 +119,6 @@ public class DeadLetterTopicExceptionHandlerTestUtils {
     assertEquals(ExceptionHeaders.getStacktrace(e), headers.get(ERROR_EXCEPTION_STACKTRACE));
     assertNotNull(headers.get(ERROR_TIMESTAMP));
     assertEquals("test-header-value", headers.get("test-header-key"));
-
     return headers;
   }
 }

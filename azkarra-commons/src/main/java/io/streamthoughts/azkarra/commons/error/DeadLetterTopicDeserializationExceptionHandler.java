@@ -18,11 +18,9 @@
  */
 package io.streamthoughts.azkarra.commons.error;
 
-import io.streamthoughts.azkarra.commons.error.internal.AbstractDeadLetterTopicExceptionHandler;
 import io.streamthoughts.azkarra.commons.error.internal.FailedRecordContextBuilder;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.errors.DeserializationExceptionHandler;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.slf4j.Logger;
@@ -75,41 +73,39 @@ public class DeadLetterTopicDeserializationExceptionHandler
                 record.offset(),
                 extractedOutputTopic);
 
-        if (GlobalDeadLetterTopicManager.initialized()) {
-            final Headers headers =
-                    ExceptionHeaders.addExceptionHeaders(
-                            record.headers(),
-                            Failed.withDeserializationError(applicationId(), exception)
-                                    .withRecordTopic(record.topic())
-                                    .withRecordPartition(record.partition())
-                                    .withRecordOffset(record.offset())
-                                    .withRecordType(Failed.RecordType.SOURCE)
-                                    .withCustomHeaders(customHeaders())
-                    );
-
-            final ProducerRecord<byte[], byte[]> producerRecord = new ProducerRecord<>(
+        if (GlobalDeadLetterTopicCollector.isCreated()) {
+            final Failed failed = Failed.withDeserializationError(applicationId(), exception)
+                    .withRecordType(Failed.RecordType.SOURCE)
+                    .withRecordTopic(record.topic())
+                    .withRecordPartition(record.partition())
+                    .withRecordOffset(record.offset())
+                    .withRecordTimestamp(record.timestamp())
+                    .withRecordHeaders(record.headers());
+            GlobalDeadLetterTopicCollector.get().send(
                     extractedOutputTopic,
-                    null,
-                    record.timestamp(),
                     record.key(),
                     record.value(),
-                    headers
+                    Serdes.ByteArray().serializer(),
+                    Serdes.ByteArray().serializer(),
+                    failed
             );
-
-            GlobalDeadLetterTopicManager.send(producerRecord);
         } else {
             LOG.warn("Failed to send corrupted record to Dead Letter Topic. "
-                    + "GlobalDeadLetterTopicManager is not initialized.");
+                    + "GlobalDeadLetterTopicCollector is not initialized.");
         }
 
-        final HandlerResponse response = getHandlerResponseForExceptionOrElse(exception, HandlerResponse.CONTINUE);
+        final ExceptionHandlerResponse response = getHandlerResponseForExceptionOrElse(
+                exception,
+                ExceptionHandlerResponse.CONTINUE
+        );
+
         switch (response) {
             case CONTINUE:
                 return DeserializationHandlerResponse.CONTINUE;
             case FAIL:
                 return DeserializationHandlerResponse.FAIL;
             default:
-                throw new IllegalArgumentException("Unsupported HandlerResponse: " + response);
+                throw new IllegalArgumentException("Unsupported DeserializationHandlerResponse: " + response);
         }
     }
 
@@ -123,7 +119,6 @@ public class DeadLetterTopicDeserializationExceptionHandler
                 .withOffset(record.offset())
                 .withHeaders(record.headers())
                 .build();
-
         return extractor.extract(record.key(), record.value(), recordContext);
     }
 }

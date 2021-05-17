@@ -47,7 +47,18 @@ public class DefaultDeadLetterTopicNameExtractor implements DeadLetterTopicNameE
     public String extract(final byte[] key,
                           final byte[] value,
                           final FailedRecordContext recordContext) {
-        return recordContext.topic() + config.getSuffix();
+        if (config.getTopic().isPresent())
+            return config.getTopic().get();
+
+        return Optional
+                .ofNullable(recordContext.topic())
+                .map(topic -> topic + config.getSuffix())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Failed to extract Dead Letter Topic Name using "
+                        + " context=" + recordContext
+                        + ", configured topic='null'"
+                        + ", configured suffix='" + config.getSuffix() + "'"
+                ));
     }
 
     private static class DefaultDeadLetterTopicNameExtractorConfig extends AbstractConfig {

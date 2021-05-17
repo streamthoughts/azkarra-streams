@@ -30,7 +30,7 @@ import org.apache.kafka.streams.processor.RecordContext;
  */
 public final class FailedRecordContextBuilder {
 
-    private Exception exception;
+    private Throwable exception;
     private ExceptionType exceptionType;
     private Long offset;
     private Long timestamp;
@@ -45,7 +45,7 @@ public final class FailedRecordContextBuilder {
      * @param exceptionType the type of the exception.
      * @return              a new {@link FailedRecordContextBuilder}.
      */
-    public static FailedRecordContextBuilder with(final Exception exception,
+    public static FailedRecordContextBuilder with(final Throwable exception,
                                                   final ExceptionType exceptionType) {
         return new FailedRecordContextBuilder(exception, exceptionType);
 
@@ -58,7 +58,7 @@ public final class FailedRecordContextBuilder {
      * @param exceptionType the type of the exception.
      * @return              a new {@link FailedRecordContextBuilder}.
      */
-    public static FailedRecordContextBuilder with(final Exception exception,
+    public static FailedRecordContextBuilder with(final Throwable exception,
                                                   final ExceptionType exceptionType,
                                                   final RecordContext context) {
 
@@ -75,8 +75,8 @@ public final class FailedRecordContextBuilder {
      * @param exception         the exception.
      * @param exceptionType     the type of the exception.
      */
-    private FailedRecordContextBuilder(final Exception exception,
-                                      final ExceptionType exceptionType) {
+    private FailedRecordContextBuilder(final Throwable exception,
+                                       final ExceptionType exceptionType) {
         this.exception = exception;
         this.exceptionType = exceptionType;
     }

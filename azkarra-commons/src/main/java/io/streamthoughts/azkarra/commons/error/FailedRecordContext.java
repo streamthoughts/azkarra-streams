@@ -28,7 +28,7 @@ public interface FailedRecordContext extends RecordContext {
     /**
      * @return the exception that was handle.
      */
-    Exception exception();
+    Throwable exception();
 
     /**
      * @return the exception type.

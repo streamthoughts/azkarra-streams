@@ -63,10 +63,10 @@ public class DeadLetterTopicExceptionHandlerConfigTest {
                 DLQ_DEFAULT_FAIL_ERRORS_CONFIG,
                 AuthorizationException.class.getName(),
                 DLQ_DEFAULT_RESPONSE_CONFIG,
-                HandlerResponse.CONTINUE.name()),
+                ExceptionHandlerResponse.CONTINUE.name()),
             ExceptionType.DESERIALIZATION);
 
-    assertEquals(HandlerResponse.CONTINUE, config.defaultHandlerResponseOrElse(null));
+    assertEquals(ExceptionHandlerResponse.CONTINUE, config.defaultHandlerResponseOrElse(null));
 
     final Set<Class<?>> fatalExceptions = config.getFatalExceptions();
     assertEquals(1, fatalExceptions.size());
@@ -83,13 +83,13 @@ public class DeadLetterTopicExceptionHandlerConfigTest {
         new DeadLetterTopicExceptionHandlerConfig(
             Map.of(
                 DLQ_DEFAULT_RESPONSE_CONFIG,
-                HandlerResponse.CONTINUE.name(),
+                ExceptionHandlerResponse.CONTINUE.name(),
                 prefixForDeserializationHandler(DLQ_RESPONSE_CONFIG),
-                HandlerResponse.FAIL.name()
+                ExceptionHandlerResponse.FAIL.name()
             ),
             ExceptionType.DESERIALIZATION
         );
-    assertEquals(HandlerResponse.FAIL, config.defaultHandlerResponseOrElse(null));
+    assertEquals(ExceptionHandlerResponse.FAIL, config.defaultHandlerResponseOrElse(null));
   }
 
   @Test
@@ -98,13 +98,13 @@ public class DeadLetterTopicExceptionHandlerConfigTest {
             new DeadLetterTopicExceptionHandlerConfig(
                     Map.of(
                             DLQ_DEFAULT_RESPONSE_CONFIG,
-                            HandlerResponse.CONTINUE.name(),
+                            ExceptionHandlerResponse.CONTINUE.name(),
                             prefixForProductionHandler(DLQ_RESPONSE_CONFIG),
-                            HandlerResponse.FAIL.name()
+                            ExceptionHandlerResponse.FAIL.name()
                     ),
                     ExceptionType.PRODUCTION
             );
-    assertEquals(HandlerResponse.FAIL, config.defaultHandlerResponseOrElse(null));
+    assertEquals(ExceptionHandlerResponse.FAIL, config.defaultHandlerResponseOrElse(null));
   }
 
   @Test

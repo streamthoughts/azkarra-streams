@@ -18,7 +18,21 @@
  */
 package io.streamthoughts.azkarra.commons.error;
 
-public enum HandlerResponse {
+import org.apache.kafka.streams.errors.DeserializationExceptionHandler;
+import org.apache.kafka.streams.errors.ProductionExceptionHandler;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
+
+/**
+ * This class regroups all responses that may be returned by a Kafka Streams exception handler.
+ *
+ * @see DeserializationExceptionHandler.DeserializationHandlerResponse
+ * @see ProductionExceptionHandler.ProductionExceptionHandlerResponse
+ * @see StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse
+ */
+public enum ExceptionHandlerResponse {
   CONTINUE,
-  FAIL
+  FAIL,
+  REPLACE_THREAD,
+  SHUTDOWN_CLIENT,
+  SHUTDOWN_APPLICATION
 }

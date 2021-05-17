@@ -18,10 +18,9 @@
  */
 package io.streamthoughts.azkarra.commons.error;
 
-import io.streamthoughts.azkarra.commons.error.internal.AbstractDeadLetterTopicExceptionHandler;
 import io.streamthoughts.azkarra.commons.error.internal.FailedRecordContextBuilder;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.errors.ProductionExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +62,8 @@ public class DeadLetterTopicProductionExceptionHandler
     public ProductionExceptionHandlerResponse handle(
             final ProducerRecord<byte[], byte[]> record, final Exception exception) {
 
-        final HandlerResponse response =
-                getHandlerResponseForExceptionOrElse(exception, HandlerResponse.FAIL);
+        final ExceptionHandlerResponse response =
+                getHandlerResponseForExceptionOrElse(exception, ExceptionHandlerResponse.FAIL);
 
         final String extractedOutputTopic = extractOutputTopicName(record, exception);
 
@@ -75,20 +74,27 @@ public class DeadLetterTopicProductionExceptionHandler
                 response,
                 exception);
 
-        if (GlobalDeadLetterTopicManager.initialized()) {
-            final ProducerRecord<byte[], byte[]> producerRecord =
-                    new ProducerRecord<>(
-                            extractedOutputTopic,
-                            null,
-                            record.timestamp(),
-                            record.key(),
-                            record.value(),
-                            getEnrichedHeaders(record, exception));
+        if (GlobalDeadLetterTopicCollector.isCreated()) {
+            final Failed failed = Failed
+                    .withProductionError(applicationId(), exception)
+                    .withRecordTopic(record.topic())
+                    .withRecordPartition(record.partition())
+                    .withRecordTimestamp(record.timestamp())
+                    .withRecordType(Failed.RecordType.SINK)
+                    .withRecordHeaders(record.headers());
 
-            GlobalDeadLetterTopicManager.send(producerRecord);
+            GlobalDeadLetterTopicCollector.get().send(
+                extractedOutputTopic,
+                    record.key(),
+                    record.value(),
+                    Serdes.ByteArray().serializer(),
+                    Serdes.ByteArray().serializer(),
+                    failed
+
+            );
         } else {
             LOG.warn("Failed to send corrupted record to Dead Letter Topic. "
-                         + "GlobalDeadLetterTopicManager is not initialized.");
+                    + "GlobalDeadLetterTopicCollector is not initialized.");
         }
 
         switch (response) {
@@ -97,19 +103,8 @@ public class DeadLetterTopicProductionExceptionHandler
             case FAIL:
                 return ProductionExceptionHandlerResponse.FAIL;
             default:
-                throw new IllegalArgumentException("Unsupported HandlerResponse: " + response);
+                throw new IllegalArgumentException("Unsupported ProductionExceptionHandlerResponse: " + response);
         }
-    }
-
-    private Headers getEnrichedHeaders(final ProducerRecord<byte[], byte[]> record,
-                                       final Exception exception) {
-        return ExceptionHeaders.addExceptionHeaders(
-                record.headers(),
-                Failed.withProductionError(applicationId(), exception)
-                        .withRecordTopic(record.topic())
-                        .withRecordPartition(record.partition())
-                        .withRecordType(Failed.RecordType.SINK)
-                        .withCustomHeaders(customHeaders()));
     }
 
     private String extractOutputTopicName(final ProducerRecord<byte[], byte[]> record,

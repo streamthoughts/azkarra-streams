@@ -26,7 +26,7 @@ import java.util.Optional;
 
 final class InternalFailedRecordContext implements FailedRecordContext {
 
-    private final Exception exception;
+    private final Throwable exception;
     private final ExceptionType exceptionType;
     private final Long offset;
     private final Long timestamp;
@@ -37,13 +37,13 @@ final class InternalFailedRecordContext implements FailedRecordContext {
     /**
      * Creates a new {@link InternalFailedRecordContext} instance.
      */
-    InternalFailedRecordContext(final Exception exception,
-                                       final ExceptionType exceptionType,
-                                       final Long offset,
-                                       final Long timestamp,
-                                       final Integer partition,
-                                       final String topic,
-                                       final Headers headers) {
+    InternalFailedRecordContext(final Throwable exception,
+                                final ExceptionType exceptionType,
+                                final Long offset,
+                                final Long timestamp,
+                                final Integer partition,
+                                final String topic,
+                                final Headers headers) {
         this.exception = exception;
         this.exceptionType = exceptionType;
         this.offset = offset;
@@ -57,7 +57,7 @@ final class InternalFailedRecordContext implements FailedRecordContext {
      * {@inheritDoc}
      */
     @Override
-    public Exception exception() {
+    public Throwable exception() {
         return exception;
     }
 
@@ -114,14 +114,14 @@ final class InternalFailedRecordContext implements FailedRecordContext {
      */
     @Override
     public String toString() {
-        return "InternalFailedRecordContext{" +
+        return "[" +
                 "exception=" + exception +
                 ", exceptionType=" + exceptionType +
                 ", offset=" + offset +
                 ", timestamp=" + timestamp +
                 ", partition=" + partition +
-                ", topic='" + topic + '\'' +
+                ", topic=" + topic +
                 ", headers=" + headers +
-                '}';
+                ']';
     }
 }

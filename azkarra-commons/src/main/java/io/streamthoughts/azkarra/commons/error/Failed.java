@@ -18,12 +18,11 @@
  */
 package io.streamthoughts.azkarra.commons.error;
 
-import java.util.Collections;
-import java.util.List;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeaders;
+
 import java.util.Objects;
 import java.util.Optional;
-
-import org.apache.kafka.common.header.Header;
 
 public class Failed {
 
@@ -38,7 +37,7 @@ public class Failed {
      * @param exception     the exception that was handled.
      * @return a new {@link Failed} instance.
      */
-    public static Failed withDeserializationError(final String applicationId, final Exception exception) {
+    public static Failed withDeserializationError(final String applicationId, final Throwable exception) {
         return new Failed(applicationId, exception, ExceptionType.DESERIALIZATION);
     }
 
@@ -49,19 +48,42 @@ public class Failed {
      * @param exception     the exception that was handled.
      * @return a new {@link Failed} instance.
      */
-    public static Failed withProductionError(final String applicationId, final Exception exception) {
+    public static Failed withProductionError(final String applicationId, final Throwable exception) {
         return new Failed(applicationId, exception, ExceptionType.PRODUCTION);
     }
 
-    private final Exception exception;
+    /**
+     * Helper method to create a new {@link Failed} for the given stream exception.
+     *
+     * @param applicationId the stream application id, i.e., {@code application.id}.
+     * @param exception     the exception that was handled.
+     * @return a new {@link Failed} instance.
+     */
+    public static Failed withStreamError(final String applicationId, final Throwable exception) {
+        return new Failed(applicationId, exception, ExceptionType.STREAM);
+    }
+
+    /**
+     * Helper method to create a new {@link Failed} for the given processing exception.
+     *
+     * @param applicationId the stream application id, i.e., {@code application.id}.
+     * @param exception     the exception that was handled.
+     * @return a new {@link Failed} instance.
+     */
+    public static Failed withProcessingError(final String applicationId, final Throwable exception) {
+        return new Failed(applicationId, exception, ExceptionType.PROCESSING);
+    }
+
+    private final Throwable exception;
     private final String applicationId;
     private final ExceptionType exceptionTypes;
     private String topic;
     private Integer partition;
     private Long offset;
+    private Long timestamp;
     private RecordType recordType;
 
-    private List<Header> customHeaders = Collections.emptyList();
+    private Headers headers = new RecordHeaders();
 
     /**
      * Creates a new {@link Failed} instance.
@@ -70,9 +92,9 @@ public class Failed {
      * @param exception      the exception that was handled.
      * @param exceptionTypes the exception type.
      */
-    public Failed(final String applicationId,
-                  final Exception exception,
-                  final ExceptionType exceptionTypes) {
+    private Failed(final String applicationId,
+                   final Throwable exception,
+                   final ExceptionType exceptionTypes) {
         this.applicationId = Objects.requireNonNull(applicationId, "'applicationId' should not be null");
         this.exception = Objects.requireNonNull(exception, "'exception' should not be null");
         this.exceptionTypes = Objects.requireNonNull(exceptionTypes, "'exceptionTypes' should not be null");
@@ -122,71 +144,83 @@ public class Failed {
         return this;
     }
 
+    public Failed withRecordTimestamp(final Long timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
+
     /**
      * Sets the headers to add to the record send to the DLQ.
      *
-     * @param customHeaders the headers.
+     * @param headers the headers.
      * @return {@code this}
      */
-    public Failed withCustomHeaders(final List<Header> customHeaders) {
-        this.customHeaders = customHeaders;
+    public Failed withRecordHeaders(final Headers headers) {
+        this.headers = headers;
         return this;
     }
 
     /**
      * @return the stream application id, i.e., {@code application.id}.
      */
-    public String applicationId() {
+    String applicationId() {
         return applicationId;
     }
 
     /**
      * @return the {@link ExceptionType}.
      */
-    public ExceptionType exceptionTypes() {
+    ExceptionType exceptionTypes() {
         return exceptionTypes;
     }
 
     /**
      * @return the {@link Exception}.
      */
-    public Exception exception() {
+    Throwable exception() {
         return exception;
     }
 
     /**
      * @return the record topic.
      */
-    public Optional<String> recordTopic() {
+    Optional<String> recordTopic() {
         return Optional.ofNullable(topic);
     }
 
     /**
      * @return the record partition.
      */
-    public Optional<Integer> recordPartition() {
+    Optional<Integer> recordPartition() {
         return Optional.ofNullable(partition);
     }
 
     /**
      * @return the record offset.
      */
-    public Optional<Long> recordOffset() {
+    Optional<Long> recordOffset() {
         return Optional.ofNullable(offset);
     }
 
     /**
      * @return the record type.
      */
-    public Optional<RecordType> recordType() {
+    Optional<RecordType> recordType() {
         return Optional.ofNullable(recordType);
     }
 
     /**
-     * @return the custom headers.
+     * @return the record headers.
      */
-    public List<Header> customHeaders() {
-        return customHeaders;
+    Headers headers() {
+        return headers;
+    }
+
+    /**
+     * @return the record timestamp.
+     */
+    Optional<Long> recordTimestamp() {
+        return Optional.ofNullable(timestamp);
     }
 
     /**
@@ -204,7 +238,7 @@ public class Failed {
                 Objects.equals(partition, failed.partition) &&
                 Objects.equals(offset, failed.offset) &&
                 recordType == failed.recordType &&
-                Objects.equals(customHeaders, failed.customHeaders);
+                Objects.equals(headers, failed.headers);
     }
 
     /**
@@ -220,7 +254,7 @@ public class Failed {
                 partition,
                 offset,
                 recordType,
-                customHeaders
+                headers
         );
     }
 
@@ -237,7 +271,7 @@ public class Failed {
                 ", partition=" + partition +
                 ", offset=" + offset +
                 ", recordType=" + recordType +
-                ", customHeaders=" + customHeaders +
+                ", customHeaders=" + headers +
                 '}';
     }
 }

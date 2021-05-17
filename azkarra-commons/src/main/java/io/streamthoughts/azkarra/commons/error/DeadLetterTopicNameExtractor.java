@@ -39,8 +39,8 @@ public interface DeadLetterTopicNameExtractor extends Configurable {
     /**
      * Extracts the topic name to send to. The topic will be automatically created if it does not already exist.
      *
-     * @see GlobalDeadLetterTopicManager
-     * @see GlobalDeadLetterTopicManagerConfig
+     * @see GlobalDeadLetterTopicCollector
+     * @see GlobalDeadLetterTopicCollectorConfig
      *
      * @param key           the record key
      * @param value         the record value

@@ -41,4 +41,11 @@ public enum ExceptionType {
      * An exception thrown during record processing.
      */
     PROCESSING,
+
+    /**
+     * An uncaught exception thrown by a stream thread.
+     *
+     * @see org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler
+     */
+    STREAM,
 }

@@ -18,8 +18,6 @@
  */
 package io.streamthoughts.azkarra.commons.error;
 
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
@@ -28,7 +26,6 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,21 +55,6 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
     public static final String DLQ_DEFAULT_TOPIC_NAME_EXTRACTOR_CONFIG = DLQ_DEFAULT_PREFIX_CONFIG + "topic.extractor";
     public static final String DLQ_DEFAULT_TOPIC_NAME_EXTRACTOR_DOC = "topic.extractor";
 
-    public static final String DLQ_AUTO_CREATE_TOPIC_ENABLED_CONFIG
-            = "exception.handler.dlq.topics.auto.create.enabled";
-    private static final String DLQ_AUTO_CREATE_TOPIC_ENABLED_DOC
-            = "If set to true, missing DLQ topic are automatically created.";
-
-    public static final String DLQ_AUTO_CREATE_TOPIC_PARTITIONS_CONFIG
-            = "exception.handler.dlq.topics.partitions";
-    private static final String DLQ_AUTO_CREATE_TOPIC_PARTITIONS_DOC
-            = "The number of partitions to be used for DLQ topics.";
-
-    public static final String DLQ_AUTO_CREATE_TOPIC_REPLICATION_CONFIG
-            = "exception.handler.dlq.topics.replication.factor";
-    private static final String DLQ_AUTO_CREATE_TOPIC_REPLICATION_DOC
-            = "The replication factor to be used for DLQ topics.";
-
     public static final String DLQ_DEFAULT_RESPONSE_CONFIG
             = DLQ_DEFAULT_PREFIX_CONFIG + DLQ_RESPONSE_CONFIG;
     private static final String DLQ_DEFAULT_RESPONSE_DOC =
@@ -90,12 +72,6 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
 
     public static final String DLQ_DEFAULT_HEADERS_PREFIX_CONFIG =
             DLQ_DEFAULT_PREFIX_CONFIG + DLQ_HEADERS_PREFIX_CONFIG;
-
-    public static final String DLQ_GLOBAL_PRODUCER_PREFIX_CONFIG =
-            "exception.handler.dlq.global.producer.";
-
-    public static final String DLQ_GLOBAL_ADMIN_PREFIX_CONFIG =
-            "exception.handler.dlq.global.admin.";
 
     public static final String DLQ_PRODUCTION_PREFIX_CONFIG =
             "exception.handler.dlq.production.";
@@ -170,18 +146,6 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
         return prefix;
     }
 
-    public boolean isAutoCreateTopicEnabled() {
-        return getBoolean(DLQ_AUTO_CREATE_TOPIC_ENABLED_CONFIG);
-    }
-
-    public Integer topicPartitions() {
-        return getInt(DLQ_AUTO_CREATE_TOPIC_PARTITIONS_CONFIG);
-    }
-
-    public Short topicReplicationFactor() {
-        return getShort(DLQ_AUTO_CREATE_TOPIC_REPLICATION_CONFIG);
-    }
-
     public DeadLetterTopicNameExtractor topicNameExtractor() {
         DeadLetterTopicNameExtractor extractor = overriddenConfig.getConfiguredInstance(
                 DLQ_TOPIC_NAME_EXTRACTOR_CONFIG,
@@ -204,25 +168,11 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
                 .collect(Collectors.toList());
     }
 
-    public HandlerResponse defaultHandlerResponseOrElse(final HandlerResponse defaultResponse) {
+    public ExceptionHandlerResponse defaultHandlerResponseOrElse(final ExceptionHandlerResponse defaultResponse) {
         return Optional.ofNullable(overriddenConfig.getString(DLQ_RESPONSE_CONFIG))
                 .or(() -> Optional.ofNullable(getString(DLQ_DEFAULT_RESPONSE_CONFIG)))
-                .map(it -> HandlerResponse.valueOf(it.toUpperCase()))
+                .map(it -> ExceptionHandlerResponse.valueOf(it.toUpperCase()))
                 .orElse(defaultResponse);
-    }
-
-    public Map<String, Object> globalProducerConfigs() {
-        final HashMap<String, Object> producerConfigs = new HashMap<>();
-        producerConfigs.putAll(getProducerConfigs(originals()));
-        producerConfigs.putAll(originalsWithPrefix(DLQ_GLOBAL_PRODUCER_PREFIX_CONFIG));
-        return producerConfigs;
-    }
-
-    public Map<String, Object> globalAdminConfigs() {
-        final HashMap<String, Object> adminConfigs = new HashMap<>();
-        adminConfigs.putAll(getAdminClientConfigs(originals()));
-        adminConfigs.putAll(originalsWithPrefix(DLQ_GLOBAL_ADMIN_PREFIX_CONFIG));
-        return adminConfigs;
     }
 
     public Set<Class<?>> getFatalExceptions() {
@@ -251,7 +201,6 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
     public static ConfigDef configDef(final String prefix, final String group) {
         int orderInGroup = 0;
         return new ConfigDef()
-
                 .define(
                         prefix + DLQ_FAIL_ERRORS_CONFIG,
                         ConfigDef.Type.LIST,
@@ -295,39 +244,6 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
                         orderInGroup++,
                         ConfigDef.Width.NONE,
                         prefix + DLQ_TOPIC_NAME_EXTRACTOR_CONFIG
-                )
-                .define(
-                        DLQ_AUTO_CREATE_TOPIC_ENABLED_CONFIG,
-                        ConfigDef.Type.BOOLEAN,
-                        true,
-                        ConfigDef.Importance.HIGH,
-                        DLQ_AUTO_CREATE_TOPIC_ENABLED_DOC,
-                        group,
-                        orderInGroup++,
-                        ConfigDef.Width.NONE,
-                        DLQ_AUTO_CREATE_TOPIC_ENABLED_CONFIG
-                )
-                .define(
-                        DLQ_AUTO_CREATE_TOPIC_PARTITIONS_CONFIG,
-                        ConfigDef.Type.INT,
-                        null,
-                        ConfigDef.Importance.HIGH,
-                        DLQ_AUTO_CREATE_TOPIC_PARTITIONS_DOC,
-                        group,
-                        orderInGroup++,
-                        ConfigDef.Width.NONE,
-                        DLQ_AUTO_CREATE_TOPIC_PARTITIONS_CONFIG
-                )
-                .define(
-                        DLQ_AUTO_CREATE_TOPIC_REPLICATION_CONFIG,
-                        ConfigDef.Type.SHORT,
-                        null,
-                        ConfigDef.Importance.HIGH,
-                        DLQ_AUTO_CREATE_TOPIC_REPLICATION_DOC,
-                        group,
-                        orderInGroup++,
-                        ConfigDef.Width.NONE,
-                        DLQ_AUTO_CREATE_TOPIC_REPLICATION_CONFIG
                 );
     }
 
@@ -344,24 +260,5 @@ public class DeadLetterTopicExceptionHandlerConfig extends AbstractConfig {
         public EnrichedExceptionHandlerConfig(final ConfigDef definition, final Map<?, ?> originals) {
             super(definition, originals);
         }
-    }
-
-    private static Map<String, Object> getAdminClientConfigs(final Map<String, Object> configs) {
-        return getConfigsForKeys(configs, AdminClientConfig.configNames());
-    }
-
-    private static Map<String, Object> getProducerConfigs(final Map<String, Object> configs) {
-        return getConfigsForKeys(configs, ProducerConfig.configNames());
-    }
-
-    private static Map<String, Object> getConfigsForKeys(
-            final Map<String, Object> configs, final Set<String> keys) {
-        final Map<String, Object> parsed = new HashMap<>();
-        for (final String configName : keys) {
-            if (configs.containsKey(configName)) {
-                parsed.put(configName, configs.get(configName));
-            }
-        }
-        return parsed;
     }
 }
