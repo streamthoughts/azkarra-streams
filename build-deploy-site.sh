@@ -17,8 +17,8 @@ build_and_deploy(){
   echo "Buildind Hugo site"
   rm -rf docs/*
   rm $HUGO_DIST_DIR && mkdir -p $HUGO_DIST_DIR
-  git config --global user.email circleci@circleci
-  git config --global user.name CircleCI
+  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  git config --global user.name "github-actions[bot]"
   # update hugo theme submodule
   git submodule sync && git submodule update --init --recursive
   # install hugo and build

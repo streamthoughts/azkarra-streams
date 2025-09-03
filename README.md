@@ -52,7 +52,7 @@ $ ./mvnw clean package -DskipTests
     
 ## Documentation
 
-If you want to read more about using **Azkarra Streams**, the documentation can be found on [www.azkarrastreams.io](https://www.azkarrastreams.io/)
+If you want to read more about using **Azkarra Streams**, the documentation can be found on [https://www.streamthoughts.github.io/azkarra-streams](https://www.azkarrastreams.io/)
 
 ## 💡Contributions
 

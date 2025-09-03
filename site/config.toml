@@ -1,4 +1,4 @@
-baseURL = "http://www.azkarrastreams.io"
+baseURL = "https://streamthoughts.github.io/azkarra-streams"
 title = "Azkarra Streams"
 description = "Framework to make it easy to develop and manage streaming microservices based on Apache Kafka Streams"
 publishDir = "../docs"
