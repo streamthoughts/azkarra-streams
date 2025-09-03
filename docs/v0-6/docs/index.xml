@@ -1,11 +1,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Docs Release v0.6</title>
-    <link>http://www.azkarrastreams.io/v0-6/docs/</link>
+    <link>https://streamthoughts.github.io/azkarra-streams/v0-6/docs/</link>
     <description>Recent content in Docs Release v0.6 on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     
-	  <atom:link href="http://www.azkarrastreams.io/v0-6/docs/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/v0-6/docs/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>Docs: Overview</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/overview/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/overview/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/overview/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/overview/</guid>
       <description>
         
         
@@ -59,8 +59,8 @@ It combines the simplicity of writing and deploying standard Java and Scala appl
 &lt;h2 id=&#34;where-should-i-go-next&#34;&gt;Where should I go next?&lt;/h2&gt;
 &lt;p&gt;Give your users next steps from the Overview. For example:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.azkarrastreams.io/azkarra-streams/docs/getting-started/&#34;&gt;Getting Started&lt;/a&gt;: Get started with Azkarra Streams&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.azkarrastreams.io/azkarra-streams/docs/examples/&#34;&gt;Examples&lt;/a&gt;: Check out some example code!&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/docs/getting-started/&#34;&gt;Getting Started&lt;/a&gt;: Get started with Azkarra Streams&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/azkarra-streams/docs/examples/&#34;&gt;Examples&lt;/a&gt;: Check out some example code!&lt;/li&gt;
 &lt;/ul&gt;
 
       </description>
@@ -68,10 +68,10 @@ It combines the simplicity of writing and deploying standard Java and Scala appl
     
     <item>
       <title>Docs: Getting Started</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/getting-started/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/getting-started/</link>
       <pubDate>Mon, 06 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/getting-started/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/getting-started/</guid>
       <description>
         
         
@@ -748,10 +748,10 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
     
     <item>
       <title>Docs: Developer Guide</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/developer-guide/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/developer-guide/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/developer-guide/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/developer-guide/</guid>
       <description>
         
         
@@ -762,10 +762,10 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
     
     <item>
       <title>Docs: Examples</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/examples/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/examples/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/examples/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/examples/</guid>
       <description>
         
         
@@ -782,10 +782,10 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
     
     <item>
       <title>Docs: Azkarra Worker</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/azkarra-worker/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/azkarra-worker/</link>
       <pubDate>Mon, 06 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/azkarra-worker/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/azkarra-worker/</guid>
       <description>
         
         
@@ -844,10 +844,10 @@ from which the components will be scanned.&lt;/p&gt;
     
     <item>
       <title>Docs: Reference</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/reference/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/reference/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/</guid>
       <description>
         
         
@@ -857,10 +857,10 @@ from which the components will be scanned.&lt;/p&gt;
     
     <item>
       <title>Docs: Contribution Guidelines</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/contribution-guidelines/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/contribution-guidelines/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/contribution-guidelines/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/contribution-guidelines/</guid>
       <description>
         
         

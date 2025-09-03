@@ -1,11 +1,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Docs Release v0.8</title>
-    <link>http://www.azkarrastreams.io/v0-8/docs/</link>
+    <link>https://streamthoughts.github.io/azkarra-streams/v0-8/docs/</link>
     <description>Recent content in Docs Release v0.8 on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     
-	  <atom:link href="http://www.azkarrastreams.io/v0-8/docs/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/v0-8/docs/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>Docs: Overview</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/overview/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/overview/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/overview/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/overview/</guid>
       <description>
         
         
@@ -28,10 +28,10 @@
     
     <item>
       <title>Docs: Getting Started</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/getting-started/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/getting-started/</link>
       <pubDate>Thu, 24 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/getting-started/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/getting-started/</guid>
       <description>
         
         
@@ -711,10 +711,10 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
     
     <item>
       <title>Docs: Developer Guide</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/</guid>
       <description>
         
         
@@ -725,10 +725,10 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
     
     <item>
       <title>Docs: Azkarra Dashboard</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-dashboard/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/azkarra-dashboard/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-dashboard/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/azkarra-dashboard/</guid>
       <description>
         
         
@@ -738,10 +738,10 @@ Azkarra also provide a default WebUI for exploring your local streams applicatio
     
     <item>
       <title>Docs: Azkarra Metrics</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-metrics/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/azkarra-metrics/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-metrics/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/azkarra-metrics/</guid>
       <description>
         
         
@@ -953,10 +953,10 @@ the &lt;code&gt;AzkarraContext&lt;/code&gt; initialization.&lt;/p&gt;
     
     <item>
       <title>Docs: Azkarra Worker</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-worker/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/azkarra-worker/</link>
       <pubDate>Fri, 26 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/azkarra-worker/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/azkarra-worker/</guid>
       <description>
         
         
@@ -1015,10 +1015,10 @@ from which the components will be scanned.&lt;/p&gt;
     
     <item>
       <title>Docs: Tutorials and Shared Resources</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/examples/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/examples/</link>
       <pubDate>Wed, 20 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/examples/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/examples/</guid>
       <description>
         
         
@@ -1055,10 +1055,10 @@ from which the components will be scanned.&lt;/p&gt;
     
     <item>
       <title>Docs: FAQ</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/faq/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/faq/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/faq/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/faq/</guid>
       <description>
         
         
@@ -1092,10 +1092,10 @@ from which the components will be scanned.&lt;/p&gt;
     
     <item>
       <title>Docs: Reference</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/reference/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/reference/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/</guid>
       <description>
         
         
@@ -1105,10 +1105,10 @@ from which the components will be scanned.&lt;/p&gt;
     
     <item>
       <title>Docs: Project Info</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/project-info/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/project-info/</guid>
       <description>
         
         

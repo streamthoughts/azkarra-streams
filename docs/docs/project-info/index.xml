@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Project Info</title>
-    <link>http://www.azkarrastreams.io/docs/project-info/</link>
+    <link>https://streamthoughts.github.io/azkarra-streams/docs/project-info/</link>
     <description>Recent content in Project Info on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Sat, 09 May 2020 00:00:00 +0000</lastBuildDate>
     
-	  <atom:link href="http://www.azkarrastreams.io/docs/project-info/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/docs/project-info/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -16,10 +16,10 @@
     
     <item>
       <title>Docs: Getting the code</title>
-      <link>http://www.azkarrastreams.io/docs/project-info/getting_the_code/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/project-info/getting_the_code/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/project-info/getting_the_code/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/project-info/getting_the_code/</guid>
       <description>
         
         
@@ -51,10 +51,10 @@ $ hugo server --watch --verbose --disableFastRender
     
     <item>
       <title>Docs: Maven modules</title>
-      <link>http://www.azkarrastreams.io/docs/project-info/maven_modules/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/project-info/maven_modules/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/project-info/maven_modules/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/project-info/maven_modules/</guid>
       <description>
         
         

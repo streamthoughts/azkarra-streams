@@ -1,12 +1,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Azkarra Streams REST Interface</title>
-    <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/</link>
+    <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/</link>
     <description>Recent content in Azkarra Streams REST Interface on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Fri, 29 Nov 2019 00:00:00 +0000</lastBuildDate>
     
-	  <atom:link href="http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -16,10 +16,10 @@
     
     <item>
       <title>Docs: Applications</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/application/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/application/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/application/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/application/</guid>
       <description>
         
         
@@ -173,10 +173,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Environment</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/environment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/environment/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/environment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/environment/</guid>
       <description>
         
         
@@ -189,10 +189,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Health</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/health/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/health/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/health/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/health/</guid>
       <description>
         
         
@@ -227,10 +227,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Info</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/info/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/info/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/info/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/info/</guid>
       <description>
         
         
@@ -259,10 +259,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Streams</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/streams/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/streams/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/streams/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/streams/</guid>
       <description>
         
         
@@ -508,10 +508,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Topologies</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/topology/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/topology/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/topology/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/topology/</guid>
       <description>
         
         
@@ -540,10 +540,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Version</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/versions/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/versions/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/versions/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/versions/</guid>
       <description>
         
         

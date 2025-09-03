@@ -1,11 +1,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – Documentation</title>
-    <link>http://www.azkarrastreams.io/docs/</link>
+    <link>https://streamthoughts.github.io/azkarra-streams/docs/</link>
     <description>Recent content in Documentation on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     
-	  <atom:link href="http://www.azkarrastreams.io/docs/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/docs/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>Docs: TopologyProvider</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/topologyprovider/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/topologyprovider/</link>
       <pubDate>Sat, 26 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/topologyprovider/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/topologyprovider/</guid>
       <description>
         
         
@@ -75,10 +75,10 @@ One of the current limitations of Azkarra is that &lt;code&gt;TopologyProvider&l
     
     <item>
       <title>Docs: TopologyProvider</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/topologyprovider/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/topologyprovider/</link>
       <pubDate>Sat, 26 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/topologyprovider/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/topologyprovider/</guid>
       <description>
         
         
@@ -135,10 +135,10 @@ One of the current limitations of Azkarra is that &lt;code&gt;TopologyProvider&l
     
     <item>
       <title>Docs: Getting the code</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/project-info/getting_the_code/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/project-info/getting_the_code/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/project-info/getting_the_code/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/project-info/getting_the_code/</guid>
       <description>
         
         
@@ -170,10 +170,10 @@ $ hugo server --watch --verbose --disableFastRender
     
     <item>
       <title>Docs: Getting the code</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/getting_the_code/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/project-info/getting_the_code/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/getting_the_code/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/project-info/getting_the_code/</guid>
       <description>
         
         
@@ -205,10 +205,10 @@ $ hugo server --watch --verbose --disableFastRender
     
     <item>
       <title>Docs: Getting the code</title>
-      <link>http://www.azkarrastreams.io/docs/project-info/getting_the_code/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/project-info/getting_the_code/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/project-info/getting_the_code/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/project-info/getting_the_code/</guid>
       <description>
         
         
@@ -240,10 +240,10 @@ $ hugo server --watch --verbose --disableFastRender
     
     <item>
       <title>Docs: TopologyProvider</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/topologyprovider/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/topologyprovider/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/topologyprovider/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/topologyprovider/</guid>
       <description>
         
         
@@ -300,10 +300,10 @@ One of the current limitations of Azkarra is that &lt;code&gt;TopologyProvider&l
     
     <item>
       <title>Docs: StreamsExecutionEnvironment</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/streamsexecutionenvironment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/streamsexecutionenvironment/</link>
       <pubDate>Sat, 26 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/streamsexecutionenvironment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/streamsexecutionenvironment/</guid>
       <description>
         
         
@@ -419,10 +419,10 @@ The generated application is in the form: &lt;code&gt;&amp;lt;env_name&amp;gt;-&
     
     <item>
       <title>Docs: StreamsExecutionEnvironment</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/streamsexecutionenvironment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/streamsexecutionenvironment/</link>
       <pubDate>Sat, 26 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/streamsexecutionenvironment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/streamsexecutionenvironment/</guid>
       <description>
         
         
@@ -538,10 +538,10 @@ The generated application is in the form: &lt;code&gt;&amp;lt;env_name&amp;gt;-&
     
     <item>
       <title>Docs: Maven modules</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/project-info/maven_modules/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/project-info/maven_modules/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/project-info/maven_modules/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/project-info/maven_modules/</guid>
       <description>
         
         
@@ -587,10 +587,10 @@ The generated application is in the form: &lt;code&gt;&amp;lt;env_name&amp;gt;-&
     
     <item>
       <title>Docs: Maven modules</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/maven_modules/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/project-info/maven_modules/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/project-info/maven_modules/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/project-info/maven_modules/</guid>
       <description>
         
         
@@ -636,10 +636,10 @@ The generated application is in the form: &lt;code&gt;&amp;lt;env_name&amp;gt;-&
     
     <item>
       <title>Docs: Maven modules</title>
-      <link>http://www.azkarrastreams.io/docs/project-info/maven_modules/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/project-info/maven_modules/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/project-info/maven_modules/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/project-info/maven_modules/</guid>
       <description>
         
         
@@ -685,10 +685,10 @@ The generated application is in the form: &lt;code&gt;&amp;lt;env_name&amp;gt;-&
     
     <item>
       <title>Docs: StreamsExecutionEnvironment</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/streamsexecutionenvironment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/streamsexecutionenvironment/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/streamsexecutionenvironment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/streamsexecutionenvironment/</guid>
       <description>
         
         
@@ -804,10 +804,10 @@ The generated application is in the form: &lt;code&gt;&amp;lt;env_name&amp;gt;-&
     
     <item>
       <title>Docs: Configuration</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/configuration/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/configuration/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/configuration/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/configuration/</guid>
       <description>
         
         
@@ -848,10 +848,10 @@ with the &lt;code&gt;Conf&lt;/code&gt; provided through the &lt;code&gt;Executed
     
     <item>
       <title>Docs: Configuration</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/configuration/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/configuration/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/configuration/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/configuration/</guid>
       <description>
         
         
@@ -892,10 +892,10 @@ with the &lt;code&gt;Conf&lt;/code&gt; provided through the &lt;code&gt;Executed
     
     <item>
       <title>Docs: Configuration</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/configuration/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/configuration/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/configuration/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/configuration/</guid>
       <description>
         
         
@@ -923,10 +923,10 @@ with the &lt;code&gt;Conf&lt;/code&gt; provided through the &lt;code&gt;Executed
     
     <item>
       <title>Docs: AzkarraContext</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/azkarracontext/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/azkarracontext/</link>
       <pubDate>Sat, 26 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/azkarracontext/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/azkarracontext/</guid>
       <description>
         
         
@@ -975,7 +975,7 @@ You should ensure that only one &lt;code&gt;AzkarraContext&lt;/code&gt; instance
 
 &lt;div class=&#34;alert alert-primary&#34; role=&#34;alert&#34;&gt;
 &lt;h4 class=&#34;alert-heading&#34;&gt;Dependency Injection&lt;/h4&gt;
-The concepts of component enable the implementation of the &lt;a href=&#34;http://www.azkarrastreams.io/docs/developer-guide/dependencyinjection/&#34;&gt;dependency injection&lt;/a&gt; pattern in Azkarra.
+The concepts of component enable the implementation of the &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/dependencyinjection/&#34;&gt;dependency injection&lt;/a&gt; pattern in Azkarra.
 &lt;/div&gt;
 
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;registerComponent&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;WordCountTopologyProvider&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
@@ -1020,10 +1020,10 @@ The concepts of component enable the implementation of the &lt;a href=&#34;http:
     
     <item>
       <title>Docs: AzkarraContext</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/azkarracontext/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/azkarracontext/</link>
       <pubDate>Sat, 26 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/azkarracontext/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/azkarracontext/</guid>
       <description>
         
         
@@ -1072,7 +1072,7 @@ You should ensure that only one &lt;code&gt;AzkarraContext&lt;/code&gt; instance
 
 &lt;div class=&#34;alert alert-primary&#34; role=&#34;alert&#34;&gt;
 &lt;h4 class=&#34;alert-heading&#34;&gt;Dependency Injection&lt;/h4&gt;
-The concepts of component enable the implementation of the &lt;a href=&#34;http://www.azkarrastreams.io/docs/developer-guide/dependencyinjection/&#34;&gt;dependency injection&lt;/a&gt; pattern in Azkarra.
+The concepts of component enable the implementation of the &lt;a href=&#34;https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/dependencyinjection/&#34;&gt;dependency injection&lt;/a&gt; pattern in Azkarra.
 &lt;/div&gt;
 
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#000&#34;&gt;context&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;registerComponent&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#000&#34;&gt;WordCountTopologyProvider&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c4a000&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#ce5c00;font-weight:bold&#34;&gt;;&lt;/span&gt;
@@ -1117,10 +1117,10 @@ The concepts of component enable the implementation of the &lt;a href=&#34;http:
     
     <item>
       <title>Docs: AzkarraContext</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/azkarracontext/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/azkarracontext/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/azkarracontext/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/azkarracontext/</guid>
       <description>
         
         
@@ -1215,10 +1215,10 @@ The concepts of component enable the implementation of the &lt;a href=&#34;./dep
     
     <item>
       <title>Docs: AzkarraApplication</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/azkarraapplication/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/azkarraapplication/</link>
       <pubDate>Wed, 03 Mar 2021 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/azkarraapplication/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/azkarraapplication/</guid>
       <description>
         
         
@@ -1369,10 +1369,10 @@ Therefore, you can simply annotated you main class with &lt;code&gt;@AzkarraStre
     
     <item>
       <title>Docs: AzkarraApplication</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/azkarraapplication/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/azkarraapplication/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/azkarraapplication/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/azkarraapplication/</guid>
       <description>
         
         
@@ -1521,10 +1521,10 @@ Therefore, you can simply annotated you main class with &lt;code&gt;@AzkarraStre
     
     <item>
       <title>Docs: AzkarraApplication</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/azkarraapplication/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/azkarraapplication/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/azkarraapplication/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/azkarraapplication/</guid>
       <description>
         
         
@@ -1673,10 +1673,10 @@ Therefore, you can simply annotated you main class with &lt;code&gt;@AzkarraStre
     
     <item>
       <title>Docs: Dependency Injection</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/dependencyinjection/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/dependencyinjection/</link>
       <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/dependencyinjection/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/dependencyinjection/</guid>
       <description>
         
         
@@ -1946,10 +1946,10 @@ This is for example the case for components that are directly used by your topol
     
     <item>
       <title>Docs: Dependency Injection</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/dependencyinjection/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/dependencyinjection/</link>
       <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/dependencyinjection/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/dependencyinjection/</guid>
       <description>
         
         
@@ -2219,10 +2219,10 @@ This is for example the case for components that are directly used by your topol
     
     <item>
       <title>Docs: Dependency Injection</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/dependencyinjection/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/dependencyinjection/</link>
       <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/dependencyinjection/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/dependencyinjection/</guid>
       <description>
         
         
@@ -2492,10 +2492,10 @@ This is for example the case for components that are directly used by your topol
     
     <item>
       <title>Docs: StreamsLifecycleInterceptor</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/streamslifecycleinterceptors/</link>
       <pubDate>Wed, 03 Mar 2021 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/streamslifecycleinterceptors/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/streamslifecycleinterceptors/</guid>
       <description>
         
         
@@ -2898,10 +2898,10 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
     
     <item>
       <title>Docs: StreamsLifecycleInterceptor</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/streamslifecycleinterceptors/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/streamslifecycleinterceptors/</link>
       <pubDate>Thu, 24 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/streamslifecycleinterceptors/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/streamslifecycleinterceptors/</guid>
       <description>
         
         
@@ -3282,10 +3282,10 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
     
     <item>
       <title>Docs: StreamsLifecycleInterceptor</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/streamslifecycleinterceptors/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/streamslifecycleinterceptors/</link>
       <pubDate>Sat, 09 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/streamslifecycleinterceptors/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/streamslifecycleinterceptors/</guid>
       <description>
         
         
@@ -3586,10 +3586,10 @@ Note : Configuration options, the CloudEvent fields and there semantics etc, may
     
     <item>
       <title>Docs: Error Management</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/errormanagement/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/errormanagement/</link>
       <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/errormanagement/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/errormanagement/</guid>
       <description>
         
         
@@ -3724,10 +3724,10 @@ A dedicated &lt;code&gt;KafkaProducer&lt;/code&gt; can be created by configuring
     
     <item>
       <title>Docs: Error Management</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/errormanagement/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/errormanagement/</link>
       <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/errormanagement/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/errormanagement/</guid>
       <description>
         
         
@@ -3862,10 +3862,10 @@ A dedicated &lt;code&gt;KafkaProducer&lt;/code&gt; can be created by configuring
     
     <item>
       <title>Docs: Error Management</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/errormanagement/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/errormanagement/</link>
       <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/errormanagement/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/errormanagement/</guid>
       <description>
         
         
@@ -4000,10 +4000,10 @@ A dedicated &lt;code&gt;KafkaProducer&lt;/code&gt; can be created by configuring
     
     <item>
       <title>Docs: Embedded Web Server</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/embeddedwebserver/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/embeddedwebserver/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/embeddedwebserver/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/embeddedwebserver/</guid>
       <description>
         
         
@@ -4272,10 +4272,10 @@ Thus you will have to establish one SSE connections for each Kafka Streams appli
     
     <item>
       <title>Docs: Embedded Web Server</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/embeddedwebserver/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/embeddedwebserver/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/embeddedwebserver/</guid>
       <description>
         
         
@@ -4546,10 +4546,10 @@ Thus you will have to establish one SSE connections for each Kafka Streams appli
     
     <item>
       <title>Docs: Embedded Web Server</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/embeddedwebserver/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/embeddedwebserver/</link>
       <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/embeddedwebserver/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/embeddedwebserver/</guid>
       <description>
         
         
@@ -4725,10 +4725,10 @@ The &lt;code&gt;AzkarraRestExtension&lt;/code&gt; interface extends the &lt;code
     
     <item>
       <title>Docs: Security</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/security/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/security/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/security/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/security/</guid>
       <description>
         
         
@@ -4940,10 +4940,10 @@ For example, the principal attached to a user authenticated using SSL Client is 
     
     <item>
       <title>Docs: Security</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/security/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/security/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/security/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/security/</guid>
       <description>
         
         
@@ -5155,10 +5155,10 @@ For example, the principal attached to a user authenticated using SSL Client is 
     
     <item>
       <title>Docs: Security</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/security/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/security/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/security/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/security/</guid>
       <description>
         
         
@@ -5370,10 +5370,10 @@ For example, the principal attached to a user authenticated using SSL Client is 
     
     <item>
       <title>Docs: RocksDB</title>
-      <link>http://www.azkarrastreams.io/docs/developer-guide/rocksdb/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/rocksdb/</link>
       <pubDate>Wed, 03 Mar 2021 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/developer-guide/rocksdb/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/developer-guide/rocksdb/</guid>
       <description>
         
         
@@ -5538,10 +5538,10 @@ enable log statistics for performance debugging and shared memory usage.&lt;/p&g
     
     <item>
       <title>Docs: RocksDB</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/rocksdb/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/rocksdb/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/developer-guide/rocksdb/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/developer-guide/rocksdb/</guid>
       <description>
         
         
@@ -5626,10 +5626,10 @@ Depending of the throughput of your application, you may want to tune internal R
     
     <item>
       <title>Docs: RocksDB</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/rocksdb/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/rocksdb/</link>
       <pubDate>Wed, 12 Feb 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/developer-guide/rocksdb/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/developer-guide/rocksdb/</guid>
       <description>
         
         
@@ -5714,10 +5714,10 @@ Depending of the throughput of your application, you may want to tune internal R
     
     <item>
       <title>Docs: Applications</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/reference/rest-apis/application/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/rest-apis/application/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/reference/rest-apis/application/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/rest-apis/application/</guid>
       <description>
         
         
@@ -5871,10 +5871,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Applications</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/application/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/application/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/application/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/application/</guid>
       <description>
         
         
@@ -6028,10 +6028,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Applications</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/application/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/rest-apis/application/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/application/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/rest-apis/application/</guid>
       <description>
         
         
@@ -6185,10 +6185,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Applications</title>
-      <link>http://www.azkarrastreams.io/docs/reference/rest-apis/application/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/application/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/reference/rest-apis/application/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/application/</guid>
       <description>
         
         
@@ -6342,10 +6342,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Environment</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/reference/rest-apis/environment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/rest-apis/environment/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/reference/rest-apis/environment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/rest-apis/environment/</guid>
       <description>
         
         
@@ -6358,10 +6358,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Environment</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/environment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/environment/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/environment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/environment/</guid>
       <description>
         
         
@@ -6374,10 +6374,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Environment</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/environment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/rest-apis/environment/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/environment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/rest-apis/environment/</guid>
       <description>
         
         
@@ -6390,10 +6390,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Environment</title>
-      <link>http://www.azkarrastreams.io/docs/reference/rest-apis/environment/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/environment/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/reference/rest-apis/environment/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/reference/rest-apis/environment/</guid>
       <description>
         
         
@@ -6406,10 +6406,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Health</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.6/reference/rest-apis/health/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/rest-apis/health/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.6/reference/rest-apis/health/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.6/reference/rest-apis/health/</guid>
       <description>
         
         
@@ -6444,10 +6444,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Health</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/health/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/health/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.7/reference/rest-apis/health/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.7/reference/rest-apis/health/</guid>
       <description>
         
         
@@ -6482,10 +6482,10 @@ Host: localhost:8080
     
     <item>
       <title>Docs: Health</title>
-      <link>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/health/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/rest-apis/health/</link>
       <pubDate>Fri, 29 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/docs/archives/v0.8/reference/rest-apis/health/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/docs/archives/v0.8/reference/rest-apis/health/</guid>
       <description>
         
         

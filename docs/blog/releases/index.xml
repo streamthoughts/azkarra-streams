@@ -1,11 +1,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Azkarra Streams – New Releases</title>
-    <link>http://www.azkarrastreams.io/blog/releases/</link>
+    <link>https://streamthoughts.github.io/azkarra-streams/blog/releases/</link>
     <description>Recent content in New Releases on Azkarra Streams</description>
     <generator>Hugo -- gohugo.io</generator>
     
-	  <atom:link href="http://www.azkarrastreams.io/blog/releases/index.xml" rel="self" type="application/rss+xml" />
+	  <atom:link href="https://streamthoughts.github.io/azkarra-streams/blog/releases/index.xml" rel="self" type="application/rss+xml" />
     
     
       
@@ -15,10 +15,10 @@
     
     <item>
       <title>Blog: Release v0.9.0</title>
-      <link>http://www.azkarrastreams.io/blog/2021/03/03/release-v0.9.0/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/blog/2021/03/03/release-v0.9.0/</link>
       <pubDate>Wed, 03 Mar 2021 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/blog/2021/03/03/release-v0.9.0/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2021/03/03/release-v0.9.0/</guid>
       <description>
         
         
@@ -75,10 +75,10 @@
     
     <item>
       <title>Blog: Release v0.8.0</title>
-      <link>http://www.azkarrastreams.io/blog/2020/09/24/release-v0.8.0/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/blog/2020/09/24/release-v0.8.0/</link>
       <pubDate>Thu, 24 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/blog/2020/09/24/release-v0.8.0/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2020/09/24/release-v0.8.0/</guid>
       <description>
         
         
@@ -122,10 +122,10 @@
     
     <item>
       <title>Blog: Release v0.7.0</title>
-      <link>http://www.azkarrastreams.io/blog/2020/05/11/release-v0.7.0/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/blog/2020/05/11/release-v0.7.0/</link>
       <pubDate>Mon, 11 May 2020 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/blog/2020/05/11/release-v0.7.0/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2020/05/11/release-v0.7.0/</guid>
       <description>
         
         
@@ -166,10 +166,10 @@
     
     <item>
       <title>Blog: Release v0.4</title>
-      <link>http://www.azkarrastreams.io/blog/2019/12/02/release-v0.4/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/blog/2019/12/02/release-v0.4/</link>
       <pubDate>Mon, 02 Dec 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/blog/2019/12/02/release-v0.4/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2019/12/02/release-v0.4/</guid>
       <description>
         
         
@@ -213,10 +213,10 @@
     
     <item>
       <title>Blog: Release v0.3</title>
-      <link>http://www.azkarrastreams.io/blog/2019/11/21/release-v0.3/</link>
+      <link>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/21/release-v0.3/</link>
       <pubDate>Thu, 21 Nov 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://www.azkarrastreams.io/blog/2019/11/21/release-v0.3/</guid>
+      <guid>https://streamthoughts.github.io/azkarra-streams/blog/2019/11/21/release-v0.3/</guid>
       <description>
         
         
